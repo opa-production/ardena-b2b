@@ -1,0 +1,65 @@
+/* ---- Auth pages: bordered card centered on both axes ---- */
+
+.auth {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 96px clamp(20px, 5vw, 48px) 48px;
+  position: relative;
+}
+
+.auth-nav {
+  position: absolute;
+  top: 32px;
+  left: clamp(24px, 6vw, 96px);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg);
+  box-shadow: var(--neo-out);
+  padding: clamp(32px, 5vw, 48px);
+  text-align: center;
+  animation: rise 0.5s var(--ease) both;
+}
+
+.auth-card h1 {
+  font-size: 26px;
+  margin-bottom: 8px;
+}
+
+.auth-card > p {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  margin-bottom: 32px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form .btn {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.auth-switch {
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.auth-switch a {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom: 1px solid var(--ink);
+}
+
+.auth-switch a:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+}

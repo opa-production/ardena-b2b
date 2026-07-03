@@ -1,0 +1,376 @@
+/* ---- Overview: cards, charts, table, side widgets ---- */
+
+.stat-delta {
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.stat-delta.up {
+  color: #0b7a37;
+}
+
+.stat-delta.down {
+  color: var(--danger);
+}
+
+/* ---- Card chrome ---- */
+
+.chart-card,
+.panel-card {
+  background: var(--bg);
+  box-shadow: var(--neo-out);
+  padding: 24px;
+  position: relative;
+}
+
+.card-head {
+  margin-bottom: 20px;
+}
+
+.card-head h2 {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.card-head p {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.overview-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .chart-row,
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Shared chart tooltip ---- */
+
+.chart-tip {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: var(--ink);
+  color: #fff;
+  padding: 7px 11px;
+  font-size: 12px;
+  line-height: 1.4;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.chart-tip strong {
+  display: block;
+  font-size: 13px;
+}
+
+.chart-tip span {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---- Booking heatmap ---- */
+
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: 42px repeat(8, 1fr);
+  gap: 3px;
+}
+
+.heatmap-row {
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  gap: 3px;
+}
+
+.heatmap-axis {
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-align: center;
+  align-self: center;
+}
+
+.heatmap-day {
+  text-align: left;
+}
+
+.heatmap-cell {
+  height: 27px;
+  outline: none;
+  transition: transform 0.12s var(--ease);
+}
+
+.heatmap-cell:hover,
+.heatmap-cell:focus-visible {
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ink-mute);
+}
+
+.heatmap-scale {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.heatmap-scale i {
+  width: 22px;
+  height: 8px;
+}
+
+.heatmap-scale span:first-child {
+  margin-right: 4px;
+}
+
+.heatmap-scale span:last-child {
+  margin-left: 4px;
+}
+
+/* ---- Revenue dumbbell ---- */
+
+.dumbbell svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.db-legend text {
+  font-size: 11px;
+  fill: var(--ink-soft);
+  font-family: var(--font-ui);
+}
+
+.db-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.db-tick {
+  font-size: 10.5px;
+  fill: var(--ink-mute);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.db-label {
+  font-size: 12px;
+  fill: var(--ink-soft);
+  font-family: var(--font-ui);
+}
+
+.db-track {
+  stroke: #b4bdc9;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.db-dot {
+  stroke: var(--bg); /* 2px surface ring */
+  stroke-width: 2;
+}
+
+.db-dot.prev {
+  fill: #8fbdf7;
+}
+
+.db-dot.curr {
+  fill: var(--brand);
+}
+
+.db-value {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.db-delta {
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+.db-delta.up {
+  fill: #0b7a37;
+}
+
+.db-delta.down {
+  fill: var(--ink-mute);
+}
+
+/* ---- Bookings table ---- */
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.data-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table td {
+  padding: 13px 12px 13px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table .strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+}
+
+.chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.chip.active {
+  color: #0b7a37;
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.chip.pending {
+  color: #9a6700;
+  background: rgba(217, 119, 6, 0.12);
+}
+
+.chip.completed {
+  color: var(--ink-soft);
+  background: var(--surface);
+}
+
+/* ---- Fleet status ---- */
+
+.fleet-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fleet-row {
+  display: grid;
+  grid-template-columns: 104px 1fr 24px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.fleet-label {
+  color: var(--ink-soft);
+}
+
+.fleet-bar {
+  height: 8px;
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  overflow: hidden;
+}
+
+.fleet-bar i {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.fleet-count {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Needs attention ---- */
+
+.attention-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.attention-list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.attention-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.attention-icon.warning {
+  color: #9a6700;
+  background: rgba(217, 119, 6, 0.12);
+}
+
+.attention-icon.critical {
+  color: var(--danger);
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.attention-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.attention-meta {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}

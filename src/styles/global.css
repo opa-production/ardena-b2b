@@ -1,0 +1,279 @@
+/* ---------------------------------------------
+   Ardena for Business — global design tokens
+   Brand: #007FFA on clean white. Minimal, premium.
+---------------------------------------------- */
+
+:root {
+  /* Brand */
+  --brand: #007ffa;
+  --brand-dark: #0066c9;
+  --brand-soft: rgba(0, 127, 250, 0.08);
+  --brand-glow: rgba(0, 127, 250, 0.25);
+
+  /* Secondary accent: warm amber. Used in very few places
+     (hero highlight, plan tag, demo dot) to lift the black/white. */
+  --accent: #ffb43a;
+
+  /* Neutrals. --bg is a soft near-white so neumorphic shadows read. */
+  --bg: #eef1f6;
+  --surface: #e7ebf2;
+  --line: #dde2ea;
+  --ink: #0a0d12;
+  --ink-soft: #545c68;
+  --ink-mute: #8b929d;
+
+  /* Neumorphic shadows: raised (out) and carved (in), light + dark themes */
+  --neo-out: 7px 7px 14px rgba(163, 174, 192, 0.45),
+    -7px -7px 14px rgba(255, 255, 255, 0.95);
+  --neo-out-sm: 4px 4px 8px rgba(163, 174, 192, 0.4),
+    -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --neo-in: inset 3px 3px 7px rgba(163, 174, 192, 0.45),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.95);
+  --neo-dark-out: 7px 7px 14px rgba(0, 0, 0, 0.45),
+    -7px -7px 14px rgba(255, 255, 255, 0.04);
+  --neo-dark-in: inset 3px 3px 7px rgba(0, 0, 0, 0.5),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.04);
+
+  /* Status */
+  --ok: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+
+  /* Shape & type — sharp corners everywhere, per brand */
+  --radius: 0;
+  --radius-sm: 0;
+  --font-ui: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* ---- Brand lockup ---- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--ink); /* logo inherits this via currentColor */
+}
+
+.brand svg {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+.brand-badge {
+  background: var(--brand);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1;
+  padding: 3px 6px;
+  align-self: flex-start;
+}
+
+/* ---- Shared buttons ---- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: all 0.18s var(--ease);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--ink);
+  color: #fff;
+  box-shadow: var(--neo-out-sm);
+}
+
+.btn-primary:hover {
+  background: #000;
+  transform: translateY(-1px);
+  box-shadow: var(--neo-out);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--neo-out-sm);
+}
+
+.btn-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--neo-out);
+}
+
+.btn-ghost:active {
+  transform: translateY(0);
+  box-shadow: var(--neo-in);
+}
+
+/* Inverted variants for black sections */
+.btn-primary.inverse {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: var(--neo-dark-out);
+}
+
+.btn-ghost.inverse {
+  background: transparent;
+  color: #fff;
+  box-shadow: var(--neo-dark-out);
+}
+
+.btn-link {
+  color: var(--ink-soft);
+  font-weight: 500;
+  padding: 12px 16px;
+}
+
+.btn-link:hover {
+  color: var(--ink);
+}
+
+/* ---- Shared form fields ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.field input {
+  padding: 13px 15px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  outline: none;
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.field input::placeholder {
+  color: var(--ink-mute);
+}
+
+.field input:focus {
+  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+}
+
+/* ---- Motion ---- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scroll-reveal groups: children fade up with a stagger once visible */
+.reveal-group > * {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+.reveal-group.visible > * {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal-group.visible > *:nth-child(2) { transition-delay: 0.07s; }
+.reveal-group.visible > *:nth-child(3) { transition-delay: 0.14s; }
+.reveal-group.visible > *:nth-child(4) { transition-delay: 0.21s; }
+.reveal-group.visible > *:nth-child(5) { transition-delay: 0.28s; }
+.reveal-group.visible > *:nth-child(6) { transition-delay: 0.35s; }
+.reveal-group.visible > *:nth-child(7) { transition-delay: 0.42s; }
+.reveal-group.visible > *:nth-child(8) { transition-delay: 0.49s; }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .reveal-group > * {
+    opacity: 1;
+    transform: none;
+  }
+}

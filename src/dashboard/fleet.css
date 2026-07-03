@@ -1,0 +1,149 @@
+/* ---- Fleet page ---- */
+
+.page-head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-head-row .btn {
+  margin-top: 4px;
+}
+
+.fleet-stats {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+/* ---- Toolbar ---- */
+
+.fleet-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  padding: 10px 14px;
+  color: var(--ink-mute);
+  flex: 1;
+  max-width: 340px;
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.search:focus-within {
+  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+}
+
+.search input {
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 14px;
+  color: var(--ink);
+  width: 100%;
+}
+
+.search input::placeholder {
+  color: var(--ink-mute);
+}
+
+.seg {
+  display: flex;
+  gap: 6px;
+}
+
+.seg button {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: box-shadow 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.seg button:hover {
+  color: var(--ink);
+  box-shadow: var(--neo-out-sm);
+}
+
+.seg button.active {
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--neo-in);
+}
+
+/* ---- Table extras ---- */
+
+.data-table tbody tr {
+  transition: background 0.12s var(--ease);
+}
+
+.data-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.cell-sub {
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 1px;
+}
+
+.util-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.util-bar {
+  width: 64px;
+  height: 7px;
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  overflow: hidden;
+}
+
+.util-bar i {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+}
+
+.ins-soon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #9a6700;
+  font-weight: 500;
+}
+
+/* ---- Status chips ---- */
+
+.chip.available {
+  color: #0b7a37;
+  background: rgba(22, 163, 74, 0.1);
+}
+
+.chip.booked {
+  color: var(--brand-dark);
+  background: var(--brand-soft);
+}
+
+.chip.maintenance {
+  color: #9a6700;
+  background: rgba(217, 119, 6, 0.12);
+}
+
+.fleet-empty {
+  margin-top: 20px;
+  padding: 40px 24px;
+}

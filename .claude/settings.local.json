@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --ts --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --turbopack)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(break)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/dashboard)",
+      "Bash(curl -s http://localhost:5173/src/App.jsx)",
+      "WebFetch(domain:ardena.co.ke)",
+      "Bash(npm view *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"http://localhost:5174/src/pages/Landing.jsx\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5174/)",
+      "Bash(curl *)",
+      "Bash(grep -viE \"\\\\.\\(js|jsx|css|html|json|md\\)$\")",
+      "Read(//c/Users/User/Desktop/**)",
+      "Bash(npm init *)",
+      "Bash(node trace.js)",
+      "Skill(dataviz)",
+      "Bash(node scripts/validate_palette.js \"#0060c4,#1a80ec,#539df4,#8fbdf7,#c2dbfa\" --ordinal --surface \"#eef1f6\" --mode light)",
+      "Bash(node scripts/validate_palette.js \"#007ffa\" --surface \"#eef1f6\" --mode light)"
+    ]
+  }
+}

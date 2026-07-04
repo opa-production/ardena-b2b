@@ -1,5 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import DashboardLayout from "./dashboard/DashboardLayout";
@@ -27,6 +29,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<DashboardLayout />}>

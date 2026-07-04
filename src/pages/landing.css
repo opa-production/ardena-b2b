@@ -31,6 +31,254 @@
   height: 28px;
 }
 
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 36px);
+}
+
+.nav-links a {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  transition: color 0.15s var(--ease);
+}
+
+.nav-links a:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 820px) {
+  .nav-links {
+    display: none;
+  }
+}
+
+/* ---- Marketing subpages (About, Contact) ---- */
+
+.site-page {
+  scroll-snap-type: none;
+}
+
+.site-page .panel {
+  min-height: auto;
+  scroll-snap-align: none;
+  padding-bottom: clamp(48px, 8vh, 96px);
+}
+
+.page-body {
+  max-width: 1080px;
+  padding-top: clamp(24px, 6vh, 64px);
+}
+
+.page-intro h1 {
+  font-size: clamp(34px, 4.6vw, 54px);
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+
+.page-intro p {
+  font-size: clamp(15.5px, 1.5vw, 18px);
+  color: var(--ink-soft);
+  max-width: 560px;
+}
+
+/* Contact */
+
+.contact-form {
+  background: var(--panel);
+  box-shadow: var(--neo-out);
+  padding: clamp(24px, 3vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+@media (max-width: 640px) {
+  .contact-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contact-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sent-note {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #0b7a37;
+}
+
+/* ---- Sticky marketing nav (nav as direct child of the scroll container) ---- */
+
+.landing > .nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 18px clamp(24px, 6vw, 96px);
+  background: rgba(238, 241, 246, 0.9);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+/* ---- Contact page: full-viewport sections ---- */
+
+/* full-viewport panel; the translucent sticky nav floats over its top */
+.contact-page .contact-hero {
+  justify-content: center;
+}
+
+.contact-hero-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 720px;
+}
+
+.contact-hero-body h1 {
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.contact-hero-body p {
+  font-size: clamp(16px, 1.6vw, 19px);
+  color: var(--ink-soft);
+  max-width: 560px;
+}
+
+/* ---- Email section (black): intro left, form right ---- */
+
+.form-split {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: clamp(40px, 6vw, 96px);
+  align-items: center;
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+@media (max-width: 940px) {
+  .form-split {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+.form-intro h2 {
+  font-size: clamp(30px, 3.6vw, 46px);
+  margin-bottom: 18px;
+}
+
+.form-intro p {
+  font-size: clamp(15px, 1.4vw, 17px);
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.65;
+  max-width: 400px;
+}
+
+.form-elevated {
+  width: 100%;
+  /* neumorphic highlight reads as a white halo on black — use a dark drop */
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+/* ---- Socials section (white, large icon cards) ---- */
+
+.contact-page .social-panel {
+  justify-content: center;
+  align-items: center;
+}
+
+.social-row {
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 2vw, 24px);
+  flex-wrap: wrap;
+}
+
+.social-row a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(110px, 13vw, 150px);
+  height: clamp(110px, 13vw, 150px);
+  background: var(--ink);
+  color: #fff;
+  transition: transform 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.social-row a svg {
+  width: 38px;
+  height: 38px;
+}
+
+.social-row a:hover {
+  transform: translateY(-4px);
+  background: #11161d;
+  box-shadow: var(--neo-out);
+}
+
+/* About */
+
+.prose p {
+  font-size: clamp(15.5px, 1.5vw, 17.5px);
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 720px;
+  margin-bottom: 18px;
+}
+
+.about-stats {
+  display: flex;
+  gap: clamp(32px, 6vw, 80px);
+  flex-wrap: wrap;
+  margin-top: 44px;
+}
+
+.about-stat strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 3.4vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.about-stat span {
+  font-size: 13.5px;
+  color: var(--ink-mute);
+}
+
+.site-page .about-values,
+.site-page .about-closing {
+  justify-content: center;
+  padding-top: clamp(48px, 8vh, 96px);
+  padding-bottom: clamp(48px, 8vh, 96px);
+}
+
+.values-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .values-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Hero (white) ---- */
 
 .hero-body {

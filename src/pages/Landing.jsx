@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useReveal from "../hooks/useReveal";
-import Logo from "../components/Logo";
+import SiteNav from "../components/SiteNav";
+import SiteFooter from "../components/SiteFooter";
 import "./landing.css";
 
 function Reveal({ as: Tag = "div", className = "", children }) {
@@ -105,17 +106,10 @@ export default function Landing() {
 
   return (
     <div className="landing">
+      <SiteNav />
+
       {/* ---- Hero (white) ---- */}
       <section className="panel hero">
-        <header className="nav">
-          <Logo />
-          <nav className="nav-actions">
-            <Link to="/login" className="btn btn-primary">
-              Sign in
-            </Link>
-          </nav>
-        </header>
-
         <div className="hero-body">
           <h1>
             Run your entire rental
@@ -243,43 +237,7 @@ export default function Landing() {
         </Reveal>
       </section>
 
-      {/* ---- Footer (black) ---- */}
-      <footer className="footer">
-        <div className="footer-grid">
-          <div className="footer-brand">
-            <Logo />
-            <p>
-              The operating system for car rental and fleet businesses in
-              Kenya.
-            </p>
-          </div>
-          <div className="footer-col">
-            <p className="footer-head">Product</p>
-            <a href="#modules">Fleet management</a>
-            <a href="#modules">Bookings</a>
-            <a href="#modules">Verification</a>
-            <a href="#modules">Payments</a>
-          </div>
-          <div className="footer-col">
-            <p className="footer-head">Company</p>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
-            <a href="https://ardena.co.ke" target="_blank" rel="noreferrer">
-              ardena.co.ke
-            </a>
-          </div>
-          <div className="footer-col">
-            <p className="footer-head">Get started</p>
-            <Link to="/signup">Create an account</Link>
-            <Link to="/login">Sign in</Link>
-            <Link to="/dashboard">View live demo</Link>
-          </div>
-        </div>
-        <div className="footer-bar">
-          <span>© {new Date().getFullYear()} Ardena. All rights reserved.</span>
-          <span>Nairobi, Kenya</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

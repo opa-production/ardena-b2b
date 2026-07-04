@@ -29,7 +29,8 @@
       "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1300 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments-all.png http://localhost:5174/dashboard/payments/all)",
       "PowerShell($pids = \\(Get-NetTCPConnection -LocalPort 5174 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($p in $pids\\) { Stop-Process -Id $p -Force -Confirm:$false }; \"stopped: $pids\")",
       "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1100 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/booking-details.png http://localhost:5174/dashboard/bookings/BK-2434)",
-      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1300 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments-all2.png http://localhost:5174/dashboard/payments/all)"
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1300 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments-all2.png http://localhost:5174/dashboard/payments/all)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1100 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/tenant-menu.png http://localhost:5174/dashboard)"
     ]
   }
 }

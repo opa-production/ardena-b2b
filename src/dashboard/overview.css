@@ -220,6 +220,58 @@
   fill: var(--ink-mute);
 }
 
+/* ---- Fleet utilisation trend ---- */
+
+.ut-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ut-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.ut-tick {
+  font-size: 10.5px;
+  fill: var(--ink-mute);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.ut-area {
+  fill: var(--brand-soft);
+}
+
+.ut-line {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ut-dot {
+  fill: var(--brand);
+  stroke: var(--bg); /* 2px surface ring */
+  stroke-width: 2;
+}
+
+.ut-cross {
+  stroke: var(--ink-mute);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.ut-value {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- Bookings table ---- */
 
 .data-table {

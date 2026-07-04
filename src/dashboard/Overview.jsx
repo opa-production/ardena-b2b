@@ -1,5 +1,6 @@
 import BookingHeatmap from "./charts/BookingHeatmap";
 import RevenueDumbbell from "./charts/RevenueDumbbell";
+import UtilisationTrend from "./charts/UtilisationTrend";
 import "./overview.css";
 
 const KPIS = [
@@ -31,15 +32,6 @@ const KPIS = [
     neutral: true,
     vs: "this month",
   },
-];
-
-const BOOKINGS = [
-  { customer: "Wanjiku Kamau", vehicle: "Toyota Prado · KDL 482A", dates: "Jul 2 – Jul 6", amount: "48,000", status: "Active" },
-  { customer: "Brian Odhiambo", vehicle: "Mazda CX-5 · KDQ 118F", dates: "Jul 3 – Jul 4", amount: "13,500", status: "Active" },
-  { customer: "Amina Hassan", vehicle: "Toyota Axio · KDJ 903C", dates: "Jul 4 – Jul 8", amount: "18,000", status: "Pending" },
-  { customer: "Peter Njoroge", vehicle: "Nissan NV350 · KCZ 771B", dates: "Jul 5 – Jul 5", amount: "9,000", status: "Pending" },
-  { customer: "Grace Achieng", vehicle: "Subaru Forester · KDN 226E", dates: "Jun 28 – Jul 1", amount: "26,000", status: "Completed" },
-  { customer: "David Mwangi", vehicle: "Toyota Hilux · KDA 554D", dates: "Jun 25 – Jun 30", amount: "42,500", status: "Completed" },
 ];
 
 const FLEET = [
@@ -124,39 +116,14 @@ export default function Overview() {
         </section>
       </div>
 
-      {/* ---- Bookings table + side widgets ---- */}
+      {/* ---- Utilisation trend + side widgets ---- */}
       <div className="overview-grid">
-        <section className="panel-card">
+        <section className="chart-card">
           <header className="card-head">
-            <h2>Recent bookings</h2>
-            <p>Latest reservations across the fleet</p>
+            <h2>Fleet utilisation</h2>
+            <p>% of vehicles out on booking, weekly, last 12 weeks</p>
           </header>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Customer</th>
-                <th>Vehicle</th>
-                <th>Dates</th>
-                <th className="num">KES</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {BOOKINGS.map((b) => (
-                <tr key={b.customer + b.dates}>
-                  <td className="strong">{b.customer}</td>
-                  <td>{b.vehicle}</td>
-                  <td>{b.dates}</td>
-                  <td className="num">{b.amount}</td>
-                  <td>
-                    <span className={`chip ${b.status.toLowerCase()}`}>
-                      {b.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <UtilisationTrend />
         </section>
 
         <div className="overview-side">

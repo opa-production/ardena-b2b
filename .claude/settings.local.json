@@ -21,7 +21,13 @@
       "Skill(dataviz)",
       "Bash(node scripts/validate_palette.js \"#0060c4,#1a80ec,#539df4,#8fbdf7,#c2dbfa\" --ordinal --surface \"#eef1f6\" --mode light)",
       "Bash(node scripts/validate_palette.js \"#007ffa\" --surface \"#eef1f6\" --mode light)",
-      "PowerShell(npm run *)"
+      "PowerShell(npm run *)",
+      "Bash(node \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\bundled-skills\\\\2.1.201\\\\9e5ad58fa3bba8138dbca82d64ddb78e\\\\dataviz\\\\scripts\\\\validate_palette.js\" \"#007ffa,#8fbdf7\" --mode light --surface \"#eef1f6\")",
+      "Bash(npx vite *)",
+      "Skill(run)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1400 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments.png http://localhost:5174/dashboard/payments)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1300 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments-all.png http://localhost:5174/dashboard/payments/all)",
+      "PowerShell($pids = \\(Get-NetTCPConnection -LocalPort 5174 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($p in $pids\\) { Stop-Process -Id $p -Force -Confirm:$false }; \"stopped: $pids\")"
     ]
   }
 }

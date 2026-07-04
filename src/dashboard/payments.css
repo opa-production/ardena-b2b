@@ -1,0 +1,154 @@
+/* ---- Payments page: chart + prompt panel + mini receipts card ---- */
+
+.payments-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.payments-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .payments-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Collections bar chart ---- */
+
+.collections-chart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ct-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.ct-tick {
+  font-size: 10.5px;
+  fill: var(--ink-mute);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.ct-bar {
+  fill: var(--brand);
+}
+
+.ct-value {
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink);
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Send prompt panel ---- */
+
+.prompt-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 20px;
+  margin: 18px 0 20px;
+}
+
+.prompt-meta dt {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-mute);
+  margin-bottom: 3px;
+}
+
+.prompt-meta dd {
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.prompt-amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* M-Pesa green — the one loud color on this page */
+.btn.prompt-send {
+  width: 100%;
+  padding: 11px 18px;
+  font-size: 14px;
+  background: #0b7a37;
+  color: #fff;
+  box-shadow: var(--neo-out-sm);
+}
+
+.btn.prompt-send:hover {
+  background: #096530;
+  transform: translateY(-1px);
+  box-shadow: var(--neo-out);
+}
+
+.btn.prompt-send:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.prompt-sent-note {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0b7a37;
+}
+
+.prompt-empty {
+  font-size: 13.5px;
+  color: var(--ink-mute);
+}
+
+/* green table action on the full list */
+.icon-btn.prompt-green {
+  color: #0b7a37;
+}
+
+/* ---- Mini payments card ---- */
+
+.mini-payments-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  background: var(--bg);
+  box-shadow: var(--neo-out-sm);
+  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.card-arrow:hover {
+  color: var(--ink);
+}
+
+.card-arrow:active {
+  box-shadow: var(--neo-in);
+}
+
+.mini-pay-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

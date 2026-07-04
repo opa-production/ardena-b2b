@@ -14,6 +14,7 @@ import Clients from "./dashboard/Clients";
 import ClientDetails from "./dashboard/ClientDetails";
 import Verification from "./dashboard/Verification";
 import Payments from "./dashboard/Payments";
+import PaymentsList from "./dashboard/PaymentsList";
 import Staff from "./dashboard/Staff";
 import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="clients/:id" element={<ClientDetails />} />
         <Route path="verification" element={<Verification />} />
         <Route path="payments" element={<Payments />} />
+        <Route path="payments/all" element={<PaymentsList />} />
         <Route path="staff" element={<Staff />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />

@@ -8,34 +8,23 @@ import {
   rentalDays,
 } from "./bookingsStore";
 import { PAY_CHIP } from "./Bookings";
+import CollectionsTrend from "./charts/CollectionsTrend";
 import "./fleet.css";
 import "./bookings.css";
+import "./payments.css";
 
-const FILTERS = ["All", "Paid", "Prompt sent", "Unpaid", "Refunded"];
-
-const fmtAmount = (n) => n.toLocaleString("en-KE");
+export const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 // mock M-Pesa receipt code, deterministic per booking, until Daraja is wired in
-const receiptFor = (ref) => `TG${ref.slice(-4)}${"KQXWLM"[Number(ref.slice(-1)) % 6]}J`;
+export const receiptFor = (ref) =>
+  `TG${ref.slice(-4)}${"KQXWLM"[Number(ref.slice(-1)) % 6]}J`;
+
+const bookingAmount = (b) => rentalDays(b.pickup, b.dropoff) * b.rate;
 
 export default function Payments() {
   const bookings = useSyncExternalStore(subscribe, getBookings);
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("All");
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return bookings.filter((b) => {
-      if (filter !== "All" && b.payment !== filter) return false;
-      if (!q) return true;
-      return (
-        b.customer.toLowerCase().includes(q) ||
-        b.ref.toLowerCase().includes(q) ||
-        b.vehicle.toLowerCase().includes(q) ||
-        b.plate.toLowerCase().includes(q)
-      );
-    });
-  }, [bookings, query, filter]);
+  const [selectedRef, setSelectedRef] = useState("");
+  const [sentTo, setSentTo] = useState(null);
 
   const stats = useMemo(() => {
     let collected = 0;
@@ -43,7 +32,7 @@ export default function Payments() {
     let refunded = 0;
     let prompts = 0;
     bookings.forEach((b) => {
-      const amount = rentalDays(b.pickup, b.dropoff) * b.rate;
+      const amount = bookingAmount(b);
       if (b.payment === "Paid") collected += amount;
       if (b.payment === "Refunded") refunded += amount;
       if (b.payment === "Prompt sent") prompts += 1;
@@ -56,6 +45,31 @@ export default function Payments() {
     });
     return { collected, outstanding, refunded, prompts };
   }, [bookings]);
+
+  // bookings you can still prompt: money owed on a live booking
+  const promptable = useMemo(
+    () =>
+      bookings.filter(
+        (b) =>
+          (b.payment === "Unpaid" || b.payment === "Prompt sent") &&
+          b.status !== "Cancelled" &&
+          b.status !== "Completed"
+      ),
+    [bookings]
+  );
+
+  const selected =
+    promptable.find((b) => b.ref === selectedRef) ?? promptable[0] ?? null;
+
+  function sendPrompt() {
+    if (!selected) return;
+    setPayment(selected.ref, "Prompt sent");
+    setSentTo({ customer: selected.customer, phone: selected.phone });
+  }
+
+  const settled = bookings
+    .filter((b) => b.payment === "Paid" || b.payment === "Refunded")
+    .slice(0, 4);
 
   return (
     <>
@@ -87,104 +101,118 @@ export default function Payments() {
         </article>
       </div>
 
-      <section className="panel-card">
-        <div className="fleet-toolbar">
-          <div className="search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search customer, ref, vehicle or plate"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search payments"
-            />
-          </div>
-          <div className="seg" role="group" aria-label="Filter by payment status">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={f === filter ? "active" : ""}
-                onClick={() => setFilter(f)}
+      <div className="payments-grid">
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>Collections</h2>
+            <p>KES '000 per week, last 8 weeks</p>
+          </header>
+          <CollectionsTrend />
+        </section>
+
+        <div className="payments-side">
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Send payment prompt</h2>
+              <p>Push an M-Pesa STK prompt to the customer's phone</p>
+            </header>
+
+            {promptable.length === 0 ? (
+              <p className="prompt-empty">
+                Nothing outstanding — every live booking is paid up.
+              </p>
+            ) : (
+              <>
+                <div className="field">
+                  <label htmlFor="prompt-booking">Booking</label>
+                  <select
+                    id="prompt-booking"
+                    value={selected.ref}
+                    onChange={(e) => {
+                      setSelectedRef(e.target.value);
+                      setSentTo(null);
+                    }}
+                  >
+                    {promptable.map((b) => (
+                      <option key={b.ref} value={b.ref}>
+                        {b.customer} · {b.ref} — KES {fmtAmount(bookingAmount(b))}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <dl className="prompt-meta">
+                  <div>
+                    <dt>Phone</dt>
+                    <dd>{selected.phone}</dd>
+                  </div>
+                  <div>
+                    <dt>Vehicle</dt>
+                    <dd>
+                      {selected.vehicle} · {selected.plate}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Dates</dt>
+                    <dd>{fmtRange(selected.pickup, selected.dropoff)}</dd>
+                  </div>
+                  <div>
+                    <dt>Amount due</dt>
+                    <dd className="prompt-amount">
+                      KES {fmtAmount(bookingAmount(selected))}
+                    </dd>
+                  </div>
+                </dl>
+
+                <button type="button" className="btn prompt-send" onClick={sendPrompt}>
+                  {selected.payment === "Prompt sent" ? "Resend prompt" : "Send prompt"}
+                </button>
+
+                {sentTo && (
+                  <p className="prompt-sent-note" role="status">
+                    STK push sent to {sentTo.customer} ({sentTo.phone}).
+                  </p>
+                )}
+              </>
+            )}
+          </section>
+
+          <section className="panel-card">
+            <header className="card-head mini-payments-head">
+              <div>
+                <h2>Payments</h2>
+                <p>Latest receipts</p>
+              </div>
+              <Link
+                className="card-arrow"
+                to="/dashboard/payments/all"
+                aria-label="View all payments"
               >
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </Link>
+            </header>
 
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Vehicle</th>
-              <th>Booking dates</th>
-              <th className="num">Amount</th>
-              <th>Receipt</th>
-              <th>Status</th>
-              <th className="actions-col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((b) => {
-              const amount = rentalDays(b.pickup, b.dropoff) * b.rate;
-              const canPrompt =
-                b.payment !== "Paid" &&
-                b.payment !== "Refunded" &&
-                b.status !== "Cancelled" &&
-                b.status !== "Completed";
-              return (
-                <tr key={b.ref}>
-                  <td>
+            <ul className="mini-list">
+              {settled.map((b) => (
+                <li key={b.ref}>
+                  <div>
                     <p className="strong">{b.customer}</p>
-                    <p className="cell-sub">{b.ref}</p>
-                  </td>
-                  <td>
-                    <p>{b.vehicle}</p>
-                    <p className="cell-sub">{b.plate}</p>
-                  </td>
-                  <td>{fmtRange(b.pickup, b.dropoff)}</td>
-                  <td className="num">{fmtAmount(amount)}</td>
-                  <td>
-                    {b.payment === "Paid" || b.payment === "Refunded"
-                      ? receiptFor(b.ref)
-                      : "—"}
-                  </td>
-                  <td>
+                    <p className="cell-sub">{receiptFor(b.ref)}</p>
+                  </div>
+                  <div className="mini-pay-right">
+                    <span className="mini-amount">
+                      KES {fmtAmount(bookingAmount(b))}
+                    </span>
                     <span className={`chip ${PAY_CHIP[b.payment]}`}>{b.payment}</span>
-                  </td>
-                  <td className="actions-cell">
-                    {canPrompt && (
-                      <button
-                        type="button"
-                        className="icon-btn"
-                        onClick={() => setPayment(b.ref, "Prompt sent")}
-                      >
-                        {b.payment === "Prompt sent" ? "Resend prompt" : "Send prompt"}
-                      </button>
-                    )}
-                    <Link
-                      className="icon-btn"
-                      to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-
-        {filtered.length === 0 && (
-          <div className="empty-block fleet-empty">
-            <p>No payments match your search.</p>
-          </div>
-        )}
-      </section>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
+      </div>
     </>
   );
 }

@@ -44,7 +44,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Outcome bars — Dojah session statuses */
+/* Outcome bars, Dojah session statuses */
 
 .outcome-rows {
   display: flex;

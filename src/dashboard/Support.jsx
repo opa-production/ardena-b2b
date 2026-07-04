@@ -25,7 +25,7 @@ const CHANNELS = [
 const FAQS = [
   {
     q: "A customer paid but the booking still shows unpaid",
-    a: "M-Pesa confirmations can lag a minute or two. If it's still unpaid after 5 minutes, resend the prompt from the Payments page — duplicate payments are auto-reversed.",
+    a: "M-Pesa confirmations can lag a minute or two. If it's still unpaid after 5 minutes, resend the prompt from the Payments page. Duplicate payments are auto-reversed.",
   },
   {
     q: "How do I add more staff seats?",
@@ -80,7 +80,7 @@ export default function Support() {
         <form className="chat-composer" onSubmit={handleSend}>
           <input
             type="text"
-            placeholder="Describe the issue — include a booking ref if you have one"
+            placeholder="Describe the issue, include a booking ref if you have one"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             aria-label="Message support"
@@ -106,7 +106,7 @@ export default function Support() {
             </div>
           ))}
           <p className="side-hint">
-            Outside business hours, leave a message here — it's first in the
+            Outside business hours, leave a message here. It's first in the
             queue the next morning.
           </p>
         </section>

@@ -78,7 +78,7 @@
   cursor: not-allowed;
 }
 
-/* ---- Quick answers (.qa — .faq is taken by the landing page) ---- */
+/* ---- Quick answers (.qa, .faq is taken by the landing page) ---- */
 
 .qa {
   border-bottom: 1px solid var(--line);

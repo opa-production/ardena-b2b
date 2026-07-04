@@ -88,7 +88,7 @@ export default function NewBooking() {
               </option>
               {bookable.map((v) => (
                 <option key={v.plate} value={v.plate}>
-                  {v.name} · {v.plate} — KES {fmtAmount(v.rate)}/day
+                  {v.name} · {v.plate}, KES {fmtAmount(v.rate)}/day
                 </option>
               ))}
             </select>

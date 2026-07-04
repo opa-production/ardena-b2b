@@ -6,7 +6,7 @@ import "./landing.css";
 const VALUES = [
   {
     title: "Operators first",
-    desc: "We build for the person handing over the keys — every screen earns its place on a busy pickup morning.",
+    desc: "We build for the person handing over the keys. Every screen earns its place on a busy pickup morning.",
   },
   {
     title: "Trust built in",
@@ -32,13 +32,13 @@ export default function About() {
       {/* ---- Hero: small header + description alone (white, full viewport) ---- */}
       <section className="panel about-hero">
         <div className="about-hero-body">
-          <h1>About Ardena.</h1>
+          <h1>About Ardena for Business.</h1>
           <p>
-            This dashboard is the business side of{" "}
+            Ardena for Business is the business side of{" "}
             <a href="https://ardena.co.ke" target="_blank" rel="noreferrer">
               ardena.co.ke
-            </a>{" "}
-            — built by Ardena Platforms Africa Ltd, incorporated on 17 March
+            </a>
+            , built by Ardena Platforms Africa Ltd, incorporated on 17 March
             2026 and started in Nakuru, Kenya.
           </p>
         </div>
@@ -57,11 +57,11 @@ export default function About() {
             </p>
             <p>
               Ardena began at ardena.co.ke, where renters find quality cars.
-              Ardena Platforms Africa Ltd — incorporated on 17 March 2026 and
-              born in Nakuru — built this dashboard as the business extension
-              of that platform: fleet, bookings, verified customers, M-Pesa
-              payments, staff and reporting in one system, billed per vehicle
-              with no heavy setup.
+              Ardena Platforms Africa Ltd, incorporated on 17 March 2026 and
+              born in Nakuru, built Ardena for Business as the business
+              extension of that platform: fleet, bookings, verified customers,
+              M-Pesa payments, staff and reporting in one system, billed per
+              vehicle with no heavy setup.
             </p>
             <p>
               Today we're building for owners who take rentals seriously: the

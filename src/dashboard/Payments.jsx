@@ -114,7 +114,7 @@ export default function Payments() {
 
             {promptable.length === 0 ? (
               <p className="prompt-empty">
-                Nothing outstanding — every live booking is paid up.
+                Nothing outstanding, every live booking is paid up.
               </p>
             ) : (
               <>
@@ -130,7 +130,7 @@ export default function Payments() {
                   >
                     {promptable.map((b) => (
                       <option key={b.ref} value={b.ref}>
-                        {b.customer} · {b.ref} — KES {fmtAmount(bookingAmount(b))}
+                        {b.customer} · {b.ref}, KES {fmtAmount(bookingAmount(b))}
                       </option>
                     ))}
                   </select>

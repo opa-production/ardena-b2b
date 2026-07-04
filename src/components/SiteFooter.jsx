@@ -8,7 +8,8 @@ export default function SiteFooter() {
         <div className="footer-brand">
           <Logo />
           <p>
-            The operating system for car rental and fleet businesses in Kenya.
+            Ardena for Business. The operating system for car rental and fleet
+            businesses in Kenya.
           </p>
         </div>
         <div className="footer-col">

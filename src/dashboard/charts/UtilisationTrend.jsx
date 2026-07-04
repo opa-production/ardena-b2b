@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-/* Fleet utilisation, % of vehicles out on booking — weekly, last 12 weeks.
+/* Fleet utilisation, % of vehicles out on booking, weekly, last 12 weeks.
    Single-series line in the brand hue. Static mock until booking data drives it. */
 
 const DATA = [

@@ -75,7 +75,7 @@ export default function Contact() {
           <div className="form-intro">
             <h2>Drop us an email.</h2>
             <p>
-              Fill in the form and it lands straight in our inbox — no ticket
+              Fill in the form and it lands straight in our inbox, no ticket
               numbers, no bots. A real person replies within one business day.
             </p>
           </div>
@@ -125,7 +125,7 @@ export default function Contact() {
               </button>
               {sent && (
                 <p className="sent-note" role="status">
-                  Thanks — we've got it. Expect a reply within one business day.
+                  Thanks, we've got it. Expect a reply within one business day.
                 </p>
               )}
             </div>

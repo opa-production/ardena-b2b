@@ -123,7 +123,7 @@ export default function Notifications() {
 
         {filtered.length === 0 && (
           <div className="empty-block fleet-empty">
-            <p>Nothing here — you're all caught up.</p>
+            <p>Nothing here, you're all caught up.</p>
           </div>
         )}
       </section>

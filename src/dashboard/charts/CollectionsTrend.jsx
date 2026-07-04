@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-/* Collections per week, last 8 weeks — single-series bar chart in the
+/* Collections per week, last 8 weeks, single-series bar chart in the
    brand hue. KES '000. Static mock until Daraja settlement data lands. */
 
 const DATA = [

@@ -13,7 +13,7 @@ const PAYSTACK = {
   updateCard: "https://paystack.com/pay/ardena-update-card",
 };
 
-// Per-vehicle pricing (mock — real numbers come with the billing engine)
+// Per-vehicle pricing (mock, real numbers come with the billing engine)
 const PLAN = {
   rate: 400, // KES / vehicle / month, standard
   launchRate: 200, // first 3 months
@@ -88,7 +88,7 @@ export default function Billing() {
             {usage.map((u) => (
               <div className="pay-row" key={u.label}>
                 <span>
-                  {u.label} — <strong>{u.value}</strong>
+                  {u.label} · <strong>{u.value}</strong>
                 </span>
                 <span className="mini-amount">{u.amount}</span>
               </div>
@@ -196,7 +196,7 @@ export default function Billing() {
               Top up wallet
             </a>
             <p className="paystack-note">
-              Top up like airtime — via M-Pesa or card. Credits never expire,
+              Top up like airtime, via M-Pesa or card. Credits never expire,
               and every check (ID + selfie + licence) draws KES {CHECK_PRICE}.
             </p>
           </section>
@@ -224,9 +224,9 @@ export default function Billing() {
               </a>
             </div>
             <p className="side-hint">
-              Your launch price of KES {PLAN.launchRate}/vehicle ends 1 Sep 2026
-              — from then it's KES {PLAN.rate}/vehicle (KES {fmtAmount(standardMonthly)}
-              /month at your current fleet size).
+              Your launch price of KES {PLAN.launchRate}/vehicle ends 1 Sep
+              2026. From then it's KES {PLAN.rate}/vehicle (KES{" "}
+              {fmtAmount(standardMonthly)}/month at your current fleet size).
             </p>
           </section>
         </div>

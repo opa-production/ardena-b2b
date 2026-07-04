@@ -1,5 +1,5 @@
 /* ---------------------------------------------
-   Ardena for Business — global design tokens
+   Ardena for Business, global design tokens
    Brand: #007FFA on clean white. Minimal, premium.
 ---------------------------------------------- */
 
@@ -40,7 +40,7 @@
   --warn: #d97706;
   --danger: #dc2626;
 
-  /* Shape & type — sharp corners everywhere, per brand */
+  /* Shape & type, sharp corners everywhere, per brand */
   --radius: 0;
   --radius-sm: 0;
   --font-ui: "Inter", system-ui, -apple-system, sans-serif;

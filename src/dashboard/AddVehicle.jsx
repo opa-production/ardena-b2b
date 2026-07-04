@@ -107,7 +107,7 @@ export default function AddVehicle() {
               <circle cx="8.5" cy="8.5" r="1.5" />
               <path d="M21 15l-5-5L5 21" />
             </svg>
-            Vehicle photos — coming soon
+            Vehicle photos coming soon
           </div>
 
           {error && <p className="form-error">{error}</p>}

@@ -1,5 +1,5 @@
 // In-memory support chat (mock backend), same pattern as the other stores.
-// Replies are canned until the real support desk is wired in — the thread
+// Replies are canned until the real support desk is wired in, the thread
 // survives navigation within a session.
 
 const timeNow = () =>
@@ -20,7 +20,7 @@ let state = {
 let nextId = 2;
 
 const REPLIES = [
-  "Thanks — we've got your message. An agent typically replies in under 5 minutes.",
+  "Thanks, we've got your message. An agent typically replies in under 5 minutes.",
   "Noted. We're looking into it and will get back to you right here.",
   "Got it. If it's urgent, you can also call us on 0700 000 111 while we check.",
 ];

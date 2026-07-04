@@ -117,7 +117,7 @@ export default function ClientDetails() {
               {c.verification === "Verified"
                 ? "ID and driver's licence matched. Safe to hand over keys."
                 : c.verification === "Failed"
-                  ? "Last check failed — ask the customer to resubmit their documents."
+                  ? "Last check failed, ask the customer to resubmit their documents."
                   : "The customer hasn't completed the ID check yet."}
             </p>
           </section>
@@ -167,7 +167,7 @@ export default function ClientDetails() {
             </tbody>
           </table>
         ) : (
-          <p className="mini-empty">No bookings yet — create their first one.</p>
+          <p className="mini-empty">No bookings yet, create their first one.</p>
         )}
       </section>
     </>

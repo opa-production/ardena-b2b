@@ -1,4 +1,4 @@
-// Sidebar navigation — placeholder links for modules we'll build next.
+// Sidebar navigation, placeholder links for modules we'll build next.
 export const NAV_SECTIONS = [
   {
     label: "Operations",

@@ -62,11 +62,11 @@ const fmtKES = (n) => n.toLocaleString("en-KE");
 const FAQS = [
   {
     q: "How does billing work?",
-    a: "You pay per vehicle on the platform — KES 400 a month each, and just KES 200 during your first 3 months, with every module included. Pay by card or M-Pesa, cancel anytime, and every account starts with a 14 day free trial.",
+    a: "You pay per vehicle on the platform, KES 400 a month each, and just KES 200 during your first 3 months, with every module included. Pay by card or M-Pesa, cancel anytime, and every account starts with a 14 day free trial.",
   },
   {
     q: "Do I need my own identity verification account?",
-    a: "No. Verification is built into the platform and pay as you go — a flat KES 100 per renter check, paid from a prepaid wallet you top up like airtime. No monthly commitment.",
+    a: "No. Verification is built into the platform and pay as you go, a flat KES 100 per renter check, paid from a prepaid wallet you top up like airtime. No monthly commitment.",
   },
   {
     q: "How do customers pay?",

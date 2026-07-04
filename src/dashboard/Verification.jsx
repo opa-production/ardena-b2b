@@ -119,7 +119,7 @@ export default function Verification() {
                   </li>
                 ))}
                 <li>
-                  <span>Top drop-off step — selfie &amp; liveness</span>
+                  <span>Top drop-off step, selfie &amp; liveness</span>
                   <span className="mini-amount">{stats.counts.Abandoned}</span>
                 </li>
               </ul>
@@ -213,7 +213,7 @@ export default function Verification() {
             </a>
 
             <p className="side-hint">
-              The widget is configured from your Dojah dashboard — checks,
+              The widget is configured from your Dojah dashboard. Checks,
               branding and retry rules update here automatically. You can also
               text the link to a renter before pickup.
             </p>

@@ -6,7 +6,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
 
-// Per-vehicle pricing (mock — real numbers come with the billing engine)
+// Per-vehicle pricing (mock, real numbers come with the billing engine)
 const PLAN = { launchRate: 200, minimum: 2000 };
 
 const PREFS = [
@@ -64,9 +64,9 @@ export default function Settings() {
                 </div>
                 <div className="field">
                   <label htmlFor="set-currency">Currency</label>
-                  <select id="set-currency" defaultValue="KES — Kenyan shilling">
-                    <option>KES — Kenyan shilling</option>
-                    <option>USD — US dollar</option>
+                  <select id="set-currency" defaultValue="KES, Kenyan shilling">
+                    <option>KES, Kenyan shilling</option>
+                    <option>USD, US dollar</option>
                   </select>
                 </div>
               </div>

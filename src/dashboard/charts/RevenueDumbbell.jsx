@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-/* Revenue by vehicle class, last month → this month — dumbbell chart:
+/* Revenue by vehicle class, last month → this month, dumbbell chart:
    one hue, two shades (light = last month, solid = this month). KES '000. */
 
 const DATA = [

@@ -1,4 +1,4 @@
-// Mock Dojah EasyOnboard sessions — read-only until the webhook is wired in.
+// Mock Dojah EasyOnboard sessions, read-only until the webhook is wired in.
 // One session = a renter walking through the widget: national ID lookup,
 // selfie + liveness, then driver's licence. Statuses mirror the Dojah
 // dashboard: Verified (successful), Failed, In progress, Abandoned.

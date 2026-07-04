@@ -1,87 +1,71 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { QRCodeSVG } from "qrcode.react";
 import { fmtDate } from "./bookingsStore";
+import { SESSIONS, STATUS_CHIP, QUOTA, WIDGET_URL } from "./verificationsStore";
 import "./fleet.css";
 import "./bookings.css";
+import "./verification.css";
 
-// Mock Dojah check log — read-only until the verification API is wired in.
-// Growth plan includes 50 checks per month.
-const QUOTA = 50;
-
-const CHECKS = [
-  { id: 1, customer: "Kevin Omondi", ref: "BK-2438", type: "ID lookup", result: "Pending", conf: null, date: "2026-07-03" },
-  { id: 2, customer: "Esther Nyambura", ref: null, type: "ID lookup", result: "Failed", conf: 34, date: "2026-07-03" },
-  { id: 3, customer: "Mercy Wambui", ref: "BK-2437", type: "ID lookup", result: "Pending", conf: null, date: "2026-07-02" },
-  { id: 4, customer: "Dennis Mutua", ref: "BK-2436", type: "Selfie match", result: "Pending", conf: null, date: "2026-07-02" },
-  { id: 5, customer: "Dennis Mutua", ref: "BK-2436", type: "ID lookup", result: "Passed", conf: 98, date: "2026-07-01" },
-  { id: 6, customer: "Grace Achieng", ref: "BK-2435", type: "Selfie match", result: "Passed", conf: 96, date: "2026-06-30" },
-  { id: 7, customer: "Grace Achieng", ref: "BK-2435", type: "ID lookup", result: "Passed", conf: 99, date: "2026-06-30" },
-  { id: 8, customer: "James Otieno", ref: "BK-2434", type: "Licence check", result: "Passed", conf: 97, date: "2026-06-28" },
-  { id: 9, customer: "James Otieno", ref: "BK-2434", type: "ID lookup", result: "Passed", conf: 99, date: "2026-06-28" },
-  { id: 10, customer: "Wanjiku Kamau", ref: "BK-2431", type: "Selfie match", result: "Passed", conf: 95, date: "2026-06-25" },
-  { id: 11, customer: "Wanjiku Kamau", ref: "BK-2431", type: "ID lookup", result: "Passed", conf: 98, date: "2026-06-25" },
-  { id: 12, customer: "Brian Mwangi", ref: "BK-2429", type: "Licence check", result: "Passed", conf: 97, date: "2026-06-22" },
-  { id: 13, customer: "Faith Njeri", ref: "BK-2426", type: "ID lookup", result: "Passed", conf: 98, date: "2026-06-20" },
-  { id: 14, customer: "Samuel Kiptoo", ref: "BK-2424", type: "Selfie match", result: "Passed", conf: 95, date: "2026-06-19" },
-  { id: 15, customer: "Samuel Kiptoo", ref: "BK-2424", type: "Selfie match", result: "Failed", conf: 41, date: "2026-06-18" },
-  { id: 16, customer: "Samuel Kiptoo", ref: "BK-2424", type: "ID lookup", result: "Passed", conf: 99, date: "2026-06-18" },
+const OUTCOMES = [
+  { key: "Verified", cls: "verified" },
+  { key: "Failed", cls: "failed" },
+  { key: "In progress", cls: "progress" },
+  { key: "Abandoned", cls: "abandoned" },
 ];
 
-const RESULTS = ["All", "Passed", "Failed", "Pending"];
-
-const RESULT_CHIP = {
-  Passed: "active",
-  Failed: "cancelled",
-  Pending: "pending",
-};
-
 export default function Verification() {
-  const [query, setQuery] = useState("");
-  const [result, setResult] = useState("All");
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return CHECKS.filter((c) => {
-      if (result !== "All" && c.result !== result) return false;
-      if (!q) return true;
-      return (
-        c.customer.toLowerCase().includes(q) ||
-        (c.ref && c.ref.toLowerCase().includes(q)) ||
-        c.type.toLowerCase().includes(q)
-      );
-    });
-  }, [query, result]);
+  const [copied, setCopied] = useState(false);
 
   const stats = useMemo(() => {
-    const thisMonth = CHECKS.filter((c) => c.date.startsWith("2026-07")).length;
-    const passed = CHECKS.filter((c) => c.result === "Passed").length;
-    const failed = CHECKS.filter((c) => c.result === "Failed").length;
-    const pending = CHECKS.filter((c) => c.result === "Pending").length;
+    const thisMonth = SESSIONS.filter((s) => s.date.startsWith("2026-07")).length;
+    const verified = SESSIONS.filter((s) => s.status === "Verified").length;
+    const inProgress = SESSIONS.filter((s) => s.status === "In progress").length;
+    const counts = Object.fromEntries(
+      OUTCOMES.map((o) => [o.key, SESSIONS.filter((s) => s.status === o.key).length])
+    );
+    const reasons = {};
+    SESSIONS.forEach((s) => {
+      if (s.status === "Failed" && s.reason) {
+        reasons[s.reason] = (reasons[s.reason] || 0) + 1;
+      }
+    });
     return {
       thisMonth,
-      pending,
-      passRate: Math.round((passed / (passed + failed)) * 100),
+      inProgress,
+      conversion: Math.round((verified / SESSIONS.length) * 100),
       remaining: QUOTA - thisMonth,
+      counts,
+      reasons: Object.entries(reasons).sort((a, b) => b[1] - a[1]),
     };
   }, []);
+
+  function copyLink() {
+    navigator.clipboard.writeText(WIDGET_URL).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  const recent = SESSIONS.slice(0, 6);
 
   return (
     <>
       <div className="stat-grid fleet-stats">
         <article className="stat-card">
-          <p className="stat-label">Checks this month</p>
+          <p className="stat-label">Sessions this month</p>
           <p className="stat-value">{stats.thisMonth}</p>
           <p className="stat-note">of {QUOTA} on the Growth plan</p>
         </article>
         <article className="stat-card">
-          <p className="stat-label">Pass rate</p>
-          <p className="stat-value">{stats.passRate}%</p>
-          <p className="stat-note">of completed checks</p>
+          <p className="stat-label">Conversion</p>
+          <p className="stat-value">{stats.conversion}%</p>
+          <p className="stat-note">of sessions end verified</p>
         </article>
         <article className="stat-card">
-          <p className="stat-label">Awaiting result</p>
-          <p className="stat-value">{stats.pending}</p>
-          <p className="stat-note">customer action needed</p>
+          <p className="stat-label">In progress</p>
+          <p className="stat-value">{stats.inProgress}</p>
+          <p className="stat-note">renters mid-verification</p>
         </article>
         <article className="stat-card">
           <p className="stat-label">Quota remaining</p>
@@ -90,77 +74,147 @@ export default function Verification() {
         </article>
       </div>
 
-      <section className="panel-card">
-        <div className="fleet-toolbar">
-          <div className="search">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-3.5-3.5" />
-            </svg>
-            <input
-              type="search"
-              placeholder="Search customer, booking or check type"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search verification checks"
-            />
-          </div>
-          <div className="seg" role="group" aria-label="Filter by result">
-            {RESULTS.map((r) => (
-              <button
-                key={r}
-                type="button"
-                className={r === result ? "active" : ""}
-                onClick={() => setResult(r)}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+      <div className="details-grid">
+        <div className="settings-main">
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Session outcomes</h2>
+              <p>How renters fare in your Dojah verification flow</p>
+            </header>
+
+            <div className="outcome-rows">
+              {OUTCOMES.map((o) => (
+                <div className="outcome-row" key={o.key}>
+                  <span className="outcome-label">{o.key}</span>
+                  <span className="outcome-bar">
+                    <i
+                      className={`bar-${o.cls}`}
+                      style={{ width: `${(stats.counts[o.key] / SESSIONS.length) * 100}%` }}
+                    />
+                  </span>
+                  <span className="outcome-count">{stats.counts[o.key]}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="reason-block">
+              <p className="reason-title">Top failure reasons</p>
+              <ul className="reason-list">
+                {stats.reasons.map(([reason, count]) => (
+                  <li key={reason}>
+                    <span>{reason}</span>
+                    <span className="mini-amount">{count}</span>
+                  </li>
+                ))}
+                <li>
+                  <span>Top drop-off step — selfie &amp; liveness</span>
+                  <span className="mini-amount">{stats.counts.Abandoned}</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section className="panel-card">
+            <div className="fleet-toolbar">
+              <header className="card-head no-gap">
+                <h2>Recent sessions</h2>
+                <p>Latest renters through the widget</p>
+              </header>
+              <Link to="/dashboard/verification/all" className="btn btn-ghost toolbar-btn">
+                All verifications
+              </Link>
+            </div>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Customer</th>
+                  <th>ID</th>
+                  <th>Selfie</th>
+                  <th>Licence</th>
+                  <th>Status</th>
+                  <th>Started</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((s) => (
+                  <tr key={s.id}>
+                    <td>
+                      <p className="strong">{s.customer}</p>
+                      <p className="cell-sub">
+                        {s.ref ? (
+                          <Link className="spec-link" to={`/dashboard/bookings/${encodeURIComponent(s.ref)}`}>
+                            {s.ref}
+                          </Link>
+                        ) : (
+                          "Walk-in"
+                        )}
+                      </p>
+                    </td>
+                    {["id", "selfie", "licence"].map((step) => (
+                      <td key={step}>
+                        <StepMark value={s.steps[step]} />
+                      </td>
+                    ))}
+                    <td>
+                      <span className={`chip ${STATUS_CHIP[s.status]}`}>{s.status}</span>
+                    </td>
+                    <td>{fmtDate(s.date)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
         </div>
 
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Check</th>
-              <th>Result</th>
-              <th className="num">Confidence</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((c) => (
-              <tr key={c.id}>
-                <td>
-                  <p className="strong">{c.customer}</p>
-                  <p className="cell-sub">
-                    {c.ref ? (
-                      <Link className="spec-link" to={`/dashboard/bookings/${encodeURIComponent(c.ref)}`}>
-                        {c.ref}
-                      </Link>
-                    ) : (
-                      "No booking yet"
-                    )}
-                  </p>
-                </td>
-                <td>{c.type}</td>
-                <td>
-                  <span className={`chip ${RESULT_CHIP[c.result]}`}>{c.result}</span>
-                </td>
-                <td className="num">{c.conf !== null ? `${c.conf}%` : "—"}</td>
-                <td>{fmtDate(c.date)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="details-side">
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Verify a renter</h2>
+              <p>Scan with the renter's phone to start the check</p>
+            </header>
 
-        {filtered.length === 0 && (
-          <div className="empty-block fleet-empty">
-            <p>No checks match your search.</p>
-          </div>
-        )}
-      </section>
+            <div className="qr-wrap">
+              <div className="qr-box">
+                <QRCodeSVG value={WIDGET_URL} size={164} fgColor="#0a0d12" bgColor="#ffffff" />
+              </div>
+            </div>
+
+            <p className="qr-steps">
+              National ID lookup → selfie &amp; liveness → driver's licence.
+              Results land on this page in seconds.
+            </p>
+
+            <div className="widget-link">
+              <span title={WIDGET_URL}>{WIDGET_URL.replace("https://", "")}</span>
+              <button type="button" className="icon-btn" onClick={copyLink}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
+
+            <a
+              className="btn btn-primary pay-btn"
+              href={WIDGET_URL}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open verification widget
+            </a>
+
+            <p className="side-hint">
+              The widget is configured from your Dojah dashboard — checks,
+              branding and retry rules update here automatically. You can also
+              text the link to a renter before pickup.
+            </p>
+          </section>
+        </div>
+      </div>
     </>
   );
+}
+
+export function StepMark({ value }) {
+  if (value === "Passed") return <span className="step-mark pass">✓ Pass</span>;
+  if (value === "Failed") return <span className="step-mark fail">✕ Fail</span>;
+  if (value === "Pending") return <span className="step-mark wait">… Waiting</span>;
+  return <span className="step-mark skip">—</span>;
 }

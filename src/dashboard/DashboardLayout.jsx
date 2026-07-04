@@ -67,14 +67,14 @@ export default function DashboardLayout() {
                 </svg>
                 Usage &amp; billing
               </button>
-              <a href="mailto:support@ardena.co.ke" role="menuitem" onClick={() => setMenuOpen(false)}>
+              <button type="button" role="menuitem" onClick={() => go("/dashboard/support")}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="9" />
                   <path d="M9.1 9a3 3 0 015.8 1c0 2-3 2.5-3 4" />
                   <path d="M12 17.5h.01" />
                 </svg>
                 Support
-              </a>
+              </button>
               <button type="button" role="menuitem" onClick={() => go("/")}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3" />

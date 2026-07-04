@@ -32,7 +32,13 @@
       "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1300 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/payments-all2.png http://localhost:5174/dashboard/payments/all)",
       "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1100 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/tenant-menu.png http://localhost:5174/dashboard)",
       "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1000 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/fleet-notitle.png http://localhost:5174/dashboard/fleet)",
-      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1250 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/billing.png http://localhost:5174/dashboard/billing)"
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1250 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/billing.png http://localhost:5174/dashboard/billing)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1000 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/support.png http://localhost:5174/dashboard/support)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1000 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/support2.png http://localhost:5174/dashboard/support)",
+      "WebSearch",
+      "WebFetch(domain:api-docs.dojah.io)",
+      "WebFetch(domain:docs.dojah.io)",
+      "Bash('C:/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --window-size=1440,1250 --virtual-time-budget=8000 --screenshot=C:/Users/User/AppData/Local/Temp/claude/C--Users-User-Desktop-b2b/af838ce4-1ac3-4bce-94ff-b752094efd42/scratchpad/verification.png http://localhost:5174/dashboard/verification)"
     ]
   }
 }

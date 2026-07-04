@@ -1,0 +1,164 @@
+/* ---- Verification page: Dojah widget QR + outcome analysis ---- */
+
+/* QR card */
+
+.qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+/* white tile so the code scans reliably on any screen */
+.qr-box {
+  background: #fff;
+  padding: 14px;
+  display: inline-flex;
+  box-shadow: var(--neo-out-sm);
+}
+
+.qr-steps {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.widget-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  padding: 9px 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.widget-link span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Outcome bars — Dojah session statuses */
+
+.outcome-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.outcome-row {
+  display: grid;
+  grid-template-columns: 104px 1fr 28px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.outcome-label {
+  color: var(--ink-soft);
+}
+
+.outcome-bar {
+  height: 8px;
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  overflow: hidden;
+}
+
+.outcome-bar i {
+  display: block;
+  height: 100%;
+}
+
+.bar-verified {
+  background: #0b7a37;
+}
+
+.bar-failed {
+  background: var(--danger);
+}
+
+.bar-progress {
+  background: #d97706;
+}
+
+.bar-abandoned {
+  background: #8b929d;
+}
+
+.outcome-count {
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.reason-block {
+  border-top: 1px solid var(--line);
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+.reason-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-mute);
+  margin-bottom: 12px;
+}
+
+.reason-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reason-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* Step marks in session tables */
+
+.step-mark {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.step-mark.pass {
+  color: #0b7a37;
+}
+
+.step-mark.fail {
+  color: var(--danger);
+}
+
+.step-mark.wait {
+  color: #9a6700;
+}
+
+.step-mark.skip {
+  color: var(--ink-mute);
+}
+
+.session-note {
+  font-size: 12.5px;
+  max-width: 220px;
+}
+
+/* card-head used inside a toolbar row shouldn't add bottom margin */
+.card-head.no-gap {
+  margin-bottom: 0;
+}

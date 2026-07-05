@@ -67,6 +67,8 @@ export default function BookingDetails() {
   const canPrompt = b.payment !== "Paid" && b.payment !== "Refunded" && b.status !== "Cancelled" && b.status !== "Completed";
   const ho = b.handover;
   const penalty = ho.in ? ho.in.penalty : 0;
+  // per-booking deposit wins over the policy default
+  const depositAmt = b.depositAmount ?? policy.deposit;
 
   function handleCheckOut(e) {
     e.preventDefault();
@@ -97,19 +99,20 @@ export default function BookingDetails() {
 
   return (
     <>
-      <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
       <header className="head-card">
-        <div className="head-titles">
-          <h1>{b.customer}</h1>
-          <p>
-            {b.ref} · {b.vehicle} ({b.plate}) ·{" "}
-            <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
-          </p>
+        <div className="head-left">
+          <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>{b.customer}</h1>
+            <p>
+              {b.ref} · {b.vehicle} ({b.plate}) ·{" "}
+              <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
+            </p>
+          </div>
         </div>
         <div className="details-actions">
           {next && (
@@ -340,7 +343,7 @@ export default function BookingDetails() {
             <div className="pay-row">
               <span>Security deposit</span>
               <span className="mini-amount">
-                KES {fmtAmount(policy.deposit)} · {b.depositStatus}
+                KES {fmtAmount(depositAmt)} · {b.depositStatus}
               </span>
             </div>
             {penalty > 0 && (
@@ -396,7 +399,7 @@ export default function BookingDetails() {
             <button
               type="button"
               className="btn btn-primary pay-btn"
-              onClick={() => downloadAgreement(b, policy)}
+              onClick={() => downloadAgreement(b, { ...policy, deposit: depositAmt })}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
@@ -405,7 +408,7 @@ export default function BookingDetails() {
               Download agreement
             </button>
             <p className="side-hint">
-              Pre-filled with the booking, your KES {fmtAmount(policy.deposit)}{" "}
+              Pre-filled with the booking, the KES {fmtAmount(depositAmt)}{" "}
               deposit and the KES {fmtAmount(policy.lateFeePerHour)}/hour late
               clause from your rental policy.
             </p>

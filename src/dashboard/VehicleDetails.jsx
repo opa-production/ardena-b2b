@@ -57,19 +57,20 @@ export default function VehicleDetails() {
 
   return (
     <>
-      <Link to="/dashboard/fleet" className="back-link" aria-label="Back to fleet">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
       <header className="head-card">
-        <div className="head-titles">
-          <h1>{v.name}</h1>
-          <p>
-            {v.plate} · {v.cat} ·{" "}
-            <span className={`chip ${CHIP_CLASS[v.status]}`}>{v.status}</span>
-          </p>
+        <div className="head-left">
+          <Link to="/dashboard/fleet" className="back-link" aria-label="Back to fleet">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>{v.name}</h1>
+            <p>
+              {v.plate} · {v.cat} ·{" "}
+              <span className={`chip ${CHIP_CLASS[v.status]}`}>{v.status}</span>
+            </p>
+          </div>
         </div>
         <div className="details-actions">
           <button type="button" className="btn btn-ghost" disabled title="Editing is coming soon">

@@ -259,6 +259,26 @@ a.icon-btn + .icon-btn {
   font-size: 14px;
 }
 
+/* back arrow lives inside the header card so content starts at the top */
+.head-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.head-card .back-link {
+  margin-bottom: 0;
+  flex-shrink: 0;
+  background: var(--bg);
+}
+
+.head-card .back-link:hover {
+  background: var(--surface);
+  box-shadow: none;
+  color: var(--ink);
+}
+
 /* ---- Add vehicle form ---- */
 
 .form-card {

@@ -29,11 +29,19 @@ export default function VerificationsList() {
 
   return (
     <>
-      <Link className="back-link" to="/dashboard/verification" aria-label="Back to verification">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
+      <header className="head-card">
+        <div className="head-left">
+          <Link className="back-link" to="/dashboard/verification" aria-label="Back to verification">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>All verifications</h1>
+            <p>Everyone who has been verified or attempted.</p>
+          </div>
+        </div>
+      </header>
 
       <section className="panel-card">
         <div className="fleet-toolbar">

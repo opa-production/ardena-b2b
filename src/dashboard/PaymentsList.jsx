@@ -36,16 +36,19 @@ export default function PaymentsList() {
 
   return (
     <>
-      <Link className="back-link" to="/dashboard/payments" aria-label="Back to payments">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
-      <div className="page-head">
-        <h1>All payments</h1>
-        <p>Every transaction across your bookings.</p>
-      </div>
+      <header className="head-card">
+        <div className="head-left">
+          <Link className="back-link" to="/dashboard/payments" aria-label="Back to payments">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>All payments</h1>
+            <p>Every transaction across your bookings.</p>
+          </div>
+        </div>
+      </header>
 
       <section className="panel-card">
         <div className="fleet-toolbar">

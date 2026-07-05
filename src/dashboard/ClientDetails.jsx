@@ -44,19 +44,20 @@ export default function ClientDetails() {
 
   return (
     <>
-      <Link to="/dashboard/clients" className="back-link" aria-label="Back to clients">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
       <header className="head-card">
-        <div className="head-titles">
-          <h1>{c.name}</h1>
-          <p>
-            {c.id} · {c.phone} ·{" "}
-            <span className={`chip ${VERIF_CHIP[c.verification]}`}>{c.verification}</span>
-          </p>
+        <div className="head-left">
+          <Link to="/dashboard/clients" className="back-link" aria-label="Back to clients">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>{c.name}</h1>
+            <p>
+              {c.id} · {c.phone} ·{" "}
+              <span className={`chip ${VERIF_CHIP[c.verification]}`}>{c.verification}</span>
+            </p>
+          </div>
         </div>
         <Link to="/dashboard/bookings/new" className="btn btn-primary">
           New booking

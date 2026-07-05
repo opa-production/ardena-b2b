@@ -5,6 +5,7 @@ import {
   getVehicles,
 } from "./fleetStore";
 import { addBooking, rentalDays, todayISO } from "./bookingsStore";
+import { getPolicy } from "./policyStore";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -36,6 +37,7 @@ export default function NewBooking() {
       return;
     }
     const f = new FormData(e.currentTarget);
+    const deposit = f.get("deposit");
     const ref = addBooking({
       customer: f.get("customer").trim(),
       phone: f.get("phone").trim(),
@@ -47,22 +49,27 @@ export default function NewBooking() {
       rate: vehicle.rate,
       created: todayISO(),
       notes: f.get("notes").trim(),
+      // per-booking deposit is optional; blank falls back to the policy default
+      ...(deposit ? { depositAmount: Number(deposit) } : {}),
     });
     navigate(`/dashboard/bookings/${encodeURIComponent(ref)}`);
   }
 
   return (
     <>
-      <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
-
-      <div className="page-head">
-        <h1>New booking</h1>
-        <p>Reserve a vehicle for a customer. It starts as pending until you confirm.</p>
-      </div>
+      <header className="head-card">
+        <div className="head-left">
+          <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          <div className="head-titles">
+            <h1>New booking</h1>
+            <p>Reserve a vehicle for a customer. It starts as pending until you confirm.</p>
+          </div>
+        </div>
+      </header>
 
       <form className="panel-card form-card" onSubmit={handleSubmit}>
         <div className="form-grid">
@@ -115,9 +122,20 @@ export default function NewBooking() {
               onChange={(e) => setDropoff(e.target.value)}
             />
           </div>
-          <div className="field form-full">
+          <div className="field">
             <label htmlFor="b-location">Pickup location</label>
             <input id="b-location" name="location" type="text" placeholder="Westlands office" required />
+          </div>
+          <div className="field">
+            <label htmlFor="b-deposit">Security deposit (KES) · optional</label>
+            <input
+              id="b-deposit"
+              name="deposit"
+              type="number"
+              min="0"
+              step="500"
+              placeholder={`${getPolicy().deposit.toLocaleString("en-KE")} (policy default)`}
+            />
           </div>
           <div className="field form-full">
             <label htmlFor="b-notes">Notes</label>

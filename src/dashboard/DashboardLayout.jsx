@@ -1,17 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { NAV_SECTIONS } from "./nav";
 import { ICONS } from "./icons";
 import Logo from "../components/Logo";
 import VerifiedBadge from "../components/VerifiedBadge";
 import usePageTitle from "../hooks/usePageTitle";
+import PageSkeleton from "./PageSkeleton";
 import "./dashboard.css";
 
 export default function DashboardLayout() {
   usePageTitle("Dashboard");
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const footRef = useRef(null);
+
+  // brief skeleton on every route change, standing in for real data fetches
+  const [pageLoading, setPageLoading] = useState(true);
+  useEffect(() => {
+    setPageLoading(true);
+    const t = setTimeout(() => setPageLoading(false), 600);
+    return () => clearTimeout(t);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -109,7 +119,7 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="dash-content">
-        <Outlet />
+        {pageLoading ? <PageSkeleton path={location.pathname} /> : <Outlet />}
       </main>
     </div>
   );

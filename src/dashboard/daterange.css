@@ -1,0 +1,182 @@
+/* ---- Airbnb-style date range picker ---- */
+
+.drp {
+  position: relative;
+  background: var(--panel);
+  padding: 20px 22px 14px;
+}
+
+.drp-months {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+@media (max-width: 760px) {
+  .drp-months {
+    grid-template-columns: 1fr;
+  }
+
+  .drp-months .drp-month:last-child {
+    display: none;
+  }
+}
+
+.drp-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.drp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.drp-weekday {
+  text-align: center;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  padding-bottom: 8px;
+}
+
+.drp-day {
+  position: relative;
+  height: 42px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.drp-num {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: box-shadow 0.12s var(--ease);
+}
+
+.drp-day:not(.disabled):hover .drp-num {
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+/* selected endpoints: solid black circle */
+.drp-day.start .drp-num,
+.drp-day.end .drp-num {
+  background: var(--ink);
+  color: #fff;
+}
+
+/* shaded span between the endpoints */
+.drp-day.in-range {
+  background: var(--surface);
+}
+
+.drp-day.start.ranged {
+  background: linear-gradient(90deg, transparent 50%, var(--surface) 50%);
+}
+
+.drp-day.end {
+  background: linear-gradient(90deg, var(--surface) 50%, transparent 50%);
+}
+
+.drp-day.start.end {
+  background: transparent;
+}
+
+.drp-day.disabled {
+  color: var(--ink-mute);
+  text-decoration: line-through;
+  cursor: default;
+}
+
+/* month navigation arrows, pinned to the top corners */
+.drp-nav {
+  position: absolute;
+  top: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  transition: background 0.12s var(--ease), color 0.12s var(--ease);
+  z-index: 2;
+}
+
+.drp-nav:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.drp-nav.prev {
+  left: 14px;
+}
+
+.drp-nav.next {
+  right: 14px;
+}
+
+.drp-hint {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  margin-top: 12px;
+}
+
+/* ---- Trigger field + popover inside the booking form ---- */
+
+.drp-field {
+  position: relative;
+}
+
+.drp-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 13px 15px;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.drp-trigger:focus-visible,
+.drp-trigger.open {
+  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+}
+
+.drp-trigger .placeholder {
+  color: var(--ink-mute);
+}
+
+.drp-trigger svg {
+  flex-shrink: 0;
+  color: var(--ink-mute);
+}
+
+.drp-trigger .drp-arrow {
+  color: var(--ink-mute);
+  font-weight: 600;
+}
+
+.drp-pop {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  box-shadow: 0 18px 50px rgba(163, 174, 192, 0.55);
+  animation: rise 0.25s var(--ease) both;
+}

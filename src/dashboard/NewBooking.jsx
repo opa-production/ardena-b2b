@@ -1,15 +1,26 @@
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   subscribe as subscribeFleet,
   getVehicles,
 } from "./fleetStore";
-import { addBooking, rentalDays, todayISO } from "./bookingsStore";
+import {
+  addBooking,
+  getBookings,
+  rentalDays,
+  fmtDate,
+  todayISO,
+} from "./bookingsStore";
 import { getPolicy } from "./policyStore";
+import DateRangePicker from "./DateRangePicker";
 import "./fleet.css";
 import "./bookings.css";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
+
+// local-date ISO; toISOString() would shift a day in UTC+3
+const isoOf = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 export default function NewBooking() {
   const navigate = useNavigate();
@@ -18,12 +29,60 @@ export default function NewBooking() {
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [error, setError] = useState("");
+  const [datesOpen, setDatesOpen] = useState(false);
+  const datesRef = useRef(null);
 
   const bookable = useMemo(
     () => vehicles.filter((v) => v.status !== "In maintenance"),
     [vehicles]
   );
   const vehicle = bookable.find((v) => v.plate === plate);
+
+  // days already taken by live bookings for the chosen vehicle
+  const bookedDays = useMemo(() => {
+    const days = new Set();
+    if (!plate) return days;
+    getBookings()
+      .filter(
+        (b) =>
+          b.plate === plate &&
+          ["Pending", "Confirmed", "Active"].includes(b.status)
+      )
+      .forEach((b) => {
+        const cur = new Date(`${b.pickup}T00:00:00`);
+        const stop = new Date(`${b.dropoff}T00:00:00`);
+        while (cur <= stop) {
+          days.add(isoOf(cur));
+          cur.setDate(cur.getDate() + 1);
+        }
+      });
+    return days;
+  }, [plate, vehicles]);
+
+  // switching vehicles can invalidate an already-picked range
+  useEffect(() => {
+    if (!pickup || !dropoff) return;
+    const cur = new Date(`${pickup}T00:00:00`);
+    const stop = new Date(`${dropoff}T00:00:00`);
+    while (cur <= stop) {
+      if (bookedDays.has(isoOf(cur))) {
+        setPickup("");
+        setDropoff("");
+        return;
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+  }, [bookedDays]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // close the calendar on outside click
+  useEffect(() => {
+    if (!datesOpen) return;
+    function onDown(e) {
+      if (!datesRef.current?.contains(e.target)) setDatesOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [datesOpen]);
 
   const datesValid =
     pickup && dropoff && Date.parse(dropoff) > Date.parse(pickup);
@@ -33,7 +92,7 @@ export default function NewBooking() {
   function handleSubmit(e) {
     e.preventDefault();
     if (!datesValid) {
-      setError("The return date must be after the pickup date.");
+      setError("Pick the pickup and return dates.");
       return;
     }
     const f = new FormData(e.currentTarget);
@@ -100,27 +159,38 @@ export default function NewBooking() {
               ))}
             </select>
           </div>
-          <div className="field">
-            <label htmlFor="b-pickup">Pickup date</label>
-            <input
-              id="b-pickup"
-              name="pickup"
-              type="date"
-              required
-              value={pickup}
-              onChange={(e) => setPickup(e.target.value)}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="b-dropoff">Return date</label>
-            <input
-              id="b-dropoff"
-              name="dropoff"
-              type="date"
-              required
-              value={dropoff}
-              onChange={(e) => setDropoff(e.target.value)}
-            />
+          <div className="field form-full drp-field" ref={datesRef}>
+            <label htmlFor="b-dates">Dates</label>
+            <button
+              id="b-dates"
+              type="button"
+              className={"drp-trigger" + (datesOpen ? " open" : "")}
+              onClick={() => setDatesOpen((o) => !o)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="17" rx="2" />
+                <path d="M8 2v4M16 2v4M3 9h18" />
+              </svg>
+              {pickup ? fmtDate(pickup) : <span className="placeholder">Pickup date</span>}
+              <span className="drp-arrow">→</span>
+              {dropoff ? fmtDate(dropoff) : <span className="placeholder">Return date</span>}
+            </button>
+            {datesOpen && (
+              <div className="drp-pop">
+                <DateRangePicker
+                  start={pickup || null}
+                  end={dropoff || null}
+                  minDate={todayISO()}
+                  isDisabled={(iso) => bookedDays.has(iso)}
+                  onChange={({ start, end }) => {
+                    setPickup(start || "");
+                    setDropoff(end || "");
+                    setError("");
+                    if (start && end) setTimeout(() => setDatesOpen(false), 250);
+                  }}
+                />
+              </div>
+            )}
           </div>
           <div className="field">
             <label htmlFor="b-location">Pickup location</label>

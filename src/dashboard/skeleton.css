@@ -67,3 +67,67 @@
   flex-wrap: wrap;
   margin-bottom: 6px;
 }
+
+/* form skeleton: paired label + input blocks */
+.sk-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 18px;
+}
+
+@media (max-width: 700px) {
+  .sk-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* list skeleton: icon + two lines per row */
+.sk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.sk-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.sk-list-body {
+  flex: 1;
+}
+
+.sk-square {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+/* chat skeleton: alternating bubbles + composer */
+.sk-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.sk-bubble {
+  height: 44px;
+}
+
+.sk-bubble.right {
+  align-self: flex-end;
+  height: 38px;
+}
+
+.sk-composer {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.sk-composer .sk:first-child {
+  flex: 1;
+}

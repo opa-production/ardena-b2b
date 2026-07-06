@@ -33,6 +33,11 @@
   }
 }
 
+.sk-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .sk-gap {
   margin-top: 12px;
 }

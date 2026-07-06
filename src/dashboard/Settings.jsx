@@ -2,7 +2,6 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
-import { CHECK_PRICE } from "./verificationsStore";
 import {
   subscribe as subscribeBusiness,
   getBusiness,
@@ -101,9 +100,14 @@ export default function Settings() {
     toast("Business profile saved.");
   }
 
+  function saveLogo() {
+    setBusiness({ name: name.trim() || "Acme Car Hire", logo });
+    toast("Business logo saved.");
+  }
+
   return (
     <>
-      <div className="details-grid">
+      <div className="details-grid settings-grid">
         <div className="settings-main">
           <section className="panel-card">
             <header className="card-head">
@@ -111,45 +115,6 @@ export default function Settings() {
               <p>Shown on customer-facing prompts and receipts</p>
             </header>
             <form onSubmit={handleSave}>
-              <div className="logo-uploader">
-                <span className="logo-avatar">
-                  {logo ? (
-                    <img src={logo} alt="Business logo" />
-                  ) : (
-                    <span className="logo-initial">{businessInitial(name)}</span>
-                  )}
-                </span>
-                <div className="logo-actions">
-                  <p className="logo-label">Business logo</p>
-                  <p className="logo-hint">Shown on your dashboard and trust page. Square works best.</p>
-                  <div className="logo-buttons">
-                    <button
-                      type="button"
-                      className="btn btn-ghost logo-btn"
-                      onClick={() => fileRef.current?.click()}
-                    >
-                      {logo ? "Change" : "Upload"}
-                    </button>
-                    {logo && (
-                      <button
-                        type="button"
-                        className="btn btn-ghost logo-btn danger-btn"
-                        onClick={() => setLogo(null)}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    className="logo-input"
-                    onChange={handleLogoPick}
-                  />
-                </div>
-              </div>
-
               <div className="form-grid">
                 <div className="field">
                   <label htmlFor="set-name">Business name</label>
@@ -266,27 +231,60 @@ export default function Settings() {
         <div className="details-side">
           <section className="panel-card">
             <header className="card-head">
-              <h2>Plan &amp; billing</h2>
-              <p>Renews 1 Aug 2026 · billed via Paystack</p>
+              <h2>Business logo</h2>
+              <p>Shown on your dashboard and trust page</p>
             </header>
-            <p className="util-hero">Fleet plan</p>
-            <p className="plan-price">
-              KES {PLAN.launchRate} / vehicle / month · launch price
-            </p>
-            <div className="pay-row">
-              <span>Vehicles billed</span>
-              <span className="mini-amount">
-                {vehicles.length} · KES {monthly.toLocaleString("en-KE")}/mo
+            <div className="logo-uploader">
+              <span className="logo-avatar">
+                {logo ? (
+                  <img src={logo} alt="Business logo" />
+                ) : (
+                  <span className="logo-initial">{businessInitial(name)}</span>
+                )}
               </span>
+              <div className="logo-actions">
+                <p className="logo-hint">Square works best.</p>
+                <div className="logo-buttons">
+                  <button
+                    type="button"
+                    className="btn btn-ghost logo-btn"
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    {logo ? "Change" : "Upload"}
+                  </button>
+                  {logo && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost logo-btn danger-btn"
+                      onClick={() => setLogo(null)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className="logo-input"
+                  onChange={handleLogoPick}
+                />
+              </div>
             </div>
-            <div className="pay-row">
-              <span>Bookings, staff &amp; prompts</span>
-              <span className="mini-amount">Included</span>
-            </div>
-            <div className="pay-row">
-              <span>Renter checks</span>
-              <span className="mini-amount">KES {CHECK_PRICE} · pay as you go</span>
-            </div>
+            <button type="button" className="btn btn-ghost pay-btn" onClick={saveLogo}>
+              Save logo
+            </button>
+          </section>
+
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Plan &amp; billing</h2>
+              <p>Fleet plan · renews 1 Aug 2026</p>
+            </header>
+            <p className="util-hero">KES {monthly.toLocaleString("en-KE")}<span className="util-per">/mo</span></p>
+            <p className="plan-price">
+              {vehicles.length} vehicles · KES {PLAN.launchRate}/vehicle
+            </p>
             <Link to="/dashboard/billing" className="btn btn-ghost pay-btn">
               Manage plan &amp; billing
             </Link>

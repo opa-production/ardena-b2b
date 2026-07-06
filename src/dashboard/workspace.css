@@ -18,8 +18,8 @@
 }
 
 .logo-avatar {
-  width: 68px;
-  height: 68px;
+  width: 84px;
+  height: 84px;
   border-radius: 50%;
   flex-shrink: 0;
   overflow: hidden;
@@ -39,8 +39,25 @@
 
 .logo-initial {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 34px;
   font-weight: 600;
+}
+
+/* ---- Settings: keep all the buttons compact ---- */
+
+.settings-grid .btn {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.settings-grid .pay-btn {
+  padding: 9px 16px;
+  font-size: 13px;
+}
+
+.settings-grid .logo-btn {
+  padding: 7px 13px;
+  font-size: 12.5px;
 }
 
 .logo-label {
@@ -320,6 +337,15 @@ tr.unread-row {
   font-size: 13.5px;
   color: var(--ink-soft);
   margin: -8px 0 18px;
+}
+
+.util-per {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  letter-spacing: 0;
+  margin-left: 3px;
 }
 
 .usage-row {

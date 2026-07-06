@@ -316,8 +316,27 @@ export default function PageSkeleton({ path }) {
     );
   }
 
-  // ---- Verification / Billing: KPIs + card grid
-  if (["verification", "billing"].includes(section)) {
+  // ---- Billing: two graphs on top + invoice list
+  if (section === "billing") {
+    return (
+      <div aria-hidden="true">
+        <div className="chart-row">
+          {[0, 1].map((i) => (
+            <section className="chart-card" key={i}>
+              <CardHead />
+              <span className="sk sk-block" />
+            </section>
+          ))}
+        </div>
+        <section className="panel-card">
+          <CardLines rows={3} />
+        </section>
+      </div>
+    );
+  }
+
+  // ---- Verification: KPIs + card grid
+  if (["verification"].includes(section)) {
     return (
       <div aria-hidden="true">
         <StatRow />

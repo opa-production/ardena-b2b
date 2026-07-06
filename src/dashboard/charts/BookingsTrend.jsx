@@ -14,13 +14,13 @@ function weekStart(iso) {
   return d;
 }
 
-const W = 460;
+const W = 540;
 const H = 250;
 const TOP = 30;
 const BOTTOM = 34;
 const LEFT = 34;
 const RIGHT = 16;
-const BAR_W = 26;
+const BAR_W = 30;
 
 const plotW = W - LEFT - RIGHT;
 const plotH = H - TOP - BOTTOM;

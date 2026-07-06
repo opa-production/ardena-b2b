@@ -130,12 +130,6 @@ export default function Clients() {
               aria-label="Search clients"
             />
           </div>
-          <Link to="/dashboard/bookings/new" className="btn btn-primary toolbar-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            New booking
-          </Link>
         </div>
 
         <table className="data-table">

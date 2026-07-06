@@ -251,6 +251,15 @@ h3 {
   flex-shrink: 0;
 }
 
+.verified-badge.green {
+  color: #0b7a37;
+}
+
+.mini-amount.verified-ok {
+  color: #0b7a37;
+  font-weight: 600;
+}
+
 .verified-badge.compact {
   gap: 0;
 }

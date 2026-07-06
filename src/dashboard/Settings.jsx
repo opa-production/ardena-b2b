@@ -299,32 +299,20 @@ export default function Settings() {
             </header>
             <div className="pay-row">
               <span>Status</span>
-              <VerifiedBadge />
+              <VerifiedBadge green />
             </div>
             <div className="pay-row">
               <span>Registration</span>
-              <span className="mini-amount">Confirmed</span>
+              <span className="mini-amount verified-ok">Confirmed</span>
             </div>
             <div className="pay-row">
               <span>KRA PIN</span>
-              <span className="mini-amount">Matched</span>
+              <span className="mini-amount verified-ok">Matched</span>
             </div>
             <div className="pay-row">
               <span>Director ID</span>
-              <span className="mini-amount">Verified</span>
+              <span className="mini-amount verified-ok">Verified</span>
             </div>
-            <a
-              className="btn btn-ghost pay-btn"
-              href="/v/acme-car-hire"
-              target="_blank"
-              rel="noreferrer"
-            >
-              View public verification page
-            </a>
-            <p className="side-hint">
-              Share that page with customers on WhatsApp or socials. It proves
-              Acme Car Hire is a real, verified rental business.
-            </p>
           </section>
 
           <section className="panel-card">

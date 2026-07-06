@@ -8,11 +8,12 @@ import "./bookings.css";
 import "./workspace.css";
 import "./billing.css";
 
-// Swap these slugs for the live Paystack payment links
+// Live Paystack payment link (single storefront link for now; split into
+// per-purpose links when the billing engine lands)
 const PAYSTACK = {
-  payInvoice: "https://paystack.com/pay/ardena-fleet-monthly",
-  topUpWallet: "https://paystack.com/pay/ardena-check-topup",
-  updateCard: "https://paystack.com/pay/ardena-update-card",
+  payInvoice: "https://paystack.shop/pay/f31jnsoutz",
+  topUpWallet: "https://paystack.shop/pay/f31jnsoutz",
+  updateCard: "https://paystack.shop/pay/f31jnsoutz",
 };
 
 // Per-vehicle pricing (mock, real numbers come with the billing engine)

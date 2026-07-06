@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fmtDate } from "./bookingsStore";
-import { SESSIONS, STATUS_CHIP } from "./verificationsStore";
-import { StepMark } from "./Verification";
+import { LOOKUPS, STATUS_CHIP, maskNumber } from "./verificationsStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
 
-const FILTERS = ["All", "Verified", "Failed", "In progress", "Abandoned"];
+const FILTERS = ["All", "Verified", "Not found", "Mismatch"];
 
 export default function VerificationsList() {
   const [query, setQuery] = useState("");
@@ -15,14 +14,14 @@ export default function VerificationsList() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return SESSIONS.filter((s) => {
-      if (filter !== "All" && s.status !== filter) return false;
+    return LOOKUPS.filter((c) => {
+      if (filter !== "All" && c.status !== filter) return false;
       if (!q) return true;
       return (
-        s.customer.toLowerCase().includes(q) ||
-        s.phone.replace(/\s/g, "").includes(q.replace(/\s/g, "")) ||
-        (s.ref && s.ref.toLowerCase().includes(q)) ||
-        s.id.toLowerCase().includes(q)
+        c.customer.toLowerCase().includes(q) ||
+        c.idNumber.toLowerCase().includes(q) ||
+        (c.ref && c.ref.toLowerCase().includes(q)) ||
+        c.id.toLowerCase().includes(q)
       );
     });
   }, [query, filter]);
@@ -37,8 +36,8 @@ export default function VerificationsList() {
             </svg>
           </Link>
           <div className="head-titles">
-            <h1>All verifications</h1>
-            <p>Everyone who has been verified or attempted.</p>
+            <h1>All checks</h1>
+            <p>Every renter you've looked up.</p>
           </div>
         </div>
       </header>
@@ -52,13 +51,13 @@ export default function VerificationsList() {
             </svg>
             <input
               type="search"
-              placeholder="Search customer, phone, booking or session"
+              placeholder="Search renter, number or booking"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search verifications"
+              aria-label="Search checks"
             />
           </div>
-          <div className="seg" role="group" aria-label="Filter by outcome">
+          <div className="seg" role="group" aria-label="Filter by result">
             {FILTERS.map((f) => (
               <button
                 key={f}
@@ -75,45 +74,36 @@ export default function VerificationsList() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Customer</th>
-              <th>Session</th>
-              <th>ID</th>
-              <th>Selfie</th>
-              <th>Licence</th>
-              <th>Status</th>
-              <th>Notes</th>
-              <th>Started</th>
+              <th>Renter</th>
+              <th>Check</th>
+              <th>Type</th>
+              <th>Number</th>
+              <th>Result</th>
+              <th>Date</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((s) => (
-              <tr key={s.id}>
+            {filtered.map((c) => (
+              <tr key={c.id}>
                 <td>
-                  <p className="strong">{s.customer}</p>
-                  <p className="cell-sub">{s.phone}</p>
-                </td>
-                <td>
-                  <p>{s.id}</p>
+                  <p className="strong">{c.customer}</p>
                   <p className="cell-sub">
-                    {s.ref ? (
-                      <Link className="spec-link" to={`/dashboard/bookings/${encodeURIComponent(s.ref)}`}>
-                        {s.ref}
+                    {c.ref ? (
+                      <Link className="spec-link" to={`/dashboard/bookings/${encodeURIComponent(c.ref)}`}>
+                        {c.ref}
                       </Link>
                     ) : (
                       "Walk-in"
                     )}
                   </p>
                 </td>
-                {["id", "selfie", "licence"].map((step) => (
-                  <td key={step}>
-                    <StepMark value={s.steps[step]} />
-                  </td>
-                ))}
+                <td>{c.id}</td>
+                <td>{c.idType}</td>
+                <td className="mono">{maskNumber(c.idNumber)}</td>
                 <td>
-                  <span className={`chip ${STATUS_CHIP[s.status]}`}>{s.status}</span>
+                  <span className={`chip ${STATUS_CHIP[c.status]}`}>{c.status}</span>
                 </td>
-                <td className="session-note">{s.reason || "—"}</td>
-                <td>{fmtDate(s.date)}</td>
+                <td>{fmtDate(c.date)}</td>
               </tr>
             ))}
           </tbody>
@@ -121,7 +111,7 @@ export default function VerificationsList() {
 
         {filtered.length === 0 && (
           <div className="empty-block fleet-empty">
-            <p>No verification sessions match your search.</p>
+            <p>No checks match your search.</p>
           </div>
         )}
       </section>

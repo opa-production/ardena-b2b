@@ -1,164 +1,170 @@
-/* ---- Verification page: Dojah widget QR + outcome analysis ---- */
-
-/* QR card */
-
-.qr-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-/* white tile so the code scans reliably on any screen */
-.qr-box {
-  background: #fff;
-  padding: 14px;
-  display: inline-flex;
-  box-shadow: var(--neo-out-sm);
-}
-
-.qr-steps {
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  line-height: 1.5;
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.widget-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: var(--bg);
-  box-shadow: var(--neo-in);
-  padding: 9px 12px;
-  margin-bottom: 14px;
-  font-size: 12px;
-  color: var(--ink-soft);
-}
-
-.widget-link span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Outcome bars, Dojah session statuses */
-
-.outcome-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.outcome-row {
-  display: grid;
-  grid-template-columns: 104px 1fr 28px;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.outcome-label {
-  color: var(--ink-soft);
-}
-
-.outcome-bar {
-  height: 8px;
-  background: var(--surface);
-  box-shadow: var(--neo-in);
-  overflow: hidden;
-}
-
-.outcome-bar i {
-  display: block;
-  height: 100%;
-}
-
-.bar-verified {
-  background: #0b7a37;
-}
-
-.bar-failed {
-  background: var(--danger);
-}
-
-.bar-progress {
-  background: #d97706;
-}
-
-.bar-abandoned {
-  background: #8b929d;
-}
-
-.outcome-count {
-  text-align: right;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.reason-block {
-  border-top: 1px solid var(--line);
-  margin-top: 20px;
-  padding-top: 16px;
-}
-
-.reason-title {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--ink-mute);
-  margin-bottom: 12px;
-}
-
-.reason-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.reason-list li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 13px;
-  color: var(--ink-soft);
-}
-
-/* Step marks in session tables */
-
-.step-mark {
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.step-mark.pass {
-  color: #0b7a37;
-}
-
-.step-mark.fail {
-  color: var(--danger);
-}
-
-.step-mark.wait {
-  color: #9a6700;
-}
-
-.step-mark.skip {
-  color: var(--ink-mute);
-}
-
-.session-note {
-  font-size: 12.5px;
-  max-width: 220px;
-}
+/* ---- Verification page: walk-in registry lookup ---- */
 
 /* card-head used inside a toolbar row shouldn't add bottom margin */
 .card-head.no-gap {
   margin-bottom: 0;
 }
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* form + result live in one card; the list follows with an even gap */
+.lookup-card {
+  margin-bottom: 20px;
+}
+
+/* ---- Lookup form ---- */
+
+.lookup-form {
+  display: grid;
+  grid-template-columns: 190px 1fr auto;
+  gap: 12px;
+  align-items: stretch;
+}
+
+@media (max-width: 640px) {
+  .lookup-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lookup-input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  font-size: 14.5px;
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  border: none;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.lookup-input:focus {
+  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+}
+
+.lookup-input::placeholder {
+  color: var(--ink-mute);
+}
+
+.btn.lookup-btn {
+  padding: 11px 22px;
+}
+
+.btn.lookup-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lookup-cost {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  margin-top: 10px;
+}
+
+/* ---- Result card (right column) ---- */
+
+.lookup-result {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  animation: rise 0.3s var(--ease) both;
+}
+
+.lookup-result.is-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.lookup-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* checking state */
+.result-checking {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.result-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.lookup-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b7a37;
+}
+
+.lookup-failed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.lookup-new {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  transition: color 0.15s var(--ease);
+}
+
+.lookup-new:hover {
+  color: var(--brand);
+}
+
+.lookup-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px 28px;
+}
+
+.lookup-fields dt {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin-bottom: 4px;
+}
+
+.lookup-fields dd {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+}
+

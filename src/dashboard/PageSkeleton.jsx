@@ -335,21 +335,21 @@ export default function PageSkeleton({ path }) {
     );
   }
 
-  // ---- Verification: KPIs + card grid
-  if (["verification"].includes(section)) {
+  // ---- Verification: 3 KPIs + lookup card / recent table + side card
+  if (section === "verification") {
     return (
       <div aria-hidden="true">
-        <StatRow />
+        <StatRow count={3} />
         <div className="details-grid">
           <div className="settings-main">
             <section className="panel-card">
-              <CardLines rows={5} />
+              <CardLines rows={3} />
             </section>
             <section className="panel-card">
               <CardLines rows={4} />
             </section>
           </div>
-          <SideCards cards={[4, 3]} />
+          <SideCards cards={[4]} />
         </div>
       </div>
     );

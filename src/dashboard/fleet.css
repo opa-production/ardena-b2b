@@ -103,14 +103,16 @@
   margin-top: 1px;
 }
 
-/* client row: sequential number sitting inline with the name */
-.client-name {
+/* list row: sequential number sitting inline with the name */
+.client-name,
+.row-name {
   display: inline-flex;
   align-items: center;
   gap: 11px;
 }
 
-.client-no {
+.client-no,
+.row-no {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -128,6 +130,12 @@
 /* icon-only table action (e.g. delete): square, no label padding */
 .icon-btn.icon-only {
   padding: 7px 8px;
+}
+
+/* extra gap so a right-aligned numeric column doesn't crowd the next one */
+.data-table th.rate-col,
+.data-table td.rate-col {
+  padding-right: 44px;
 }
 
 .util-cell {
@@ -184,6 +192,12 @@
 .actions-cell {
   text-align: right;
   white-space: nowrap;
+}
+
+/* .data-table th sets text-align:left with higher specificity, so the
+   Actions header needs an equally specific rule to stay right-aligned */
+.data-table th.actions-col {
+  text-align: right;
 }
 
 .icon-btn {

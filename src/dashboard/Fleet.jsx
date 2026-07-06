@@ -1,11 +1,6 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import {
-  subscribe,
-  getVehicles,
-  removeVehicle,
-  expiringSoon,
-} from "./fleetStore";
+import { subscribe, getVehicles, removeVehicle } from "./fleetStore";
 import { toast } from "./toastStore";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
@@ -43,6 +38,13 @@ export default function Fleet() {
     const c = { Available: 0, "On booking": 0, "In maintenance": 0 };
     vehicles.forEach((v) => c[v.status]++);
     return c;
+  }, [vehicles]);
+
+  // stable display number per vehicle (1, 2, 3…) by list order
+  const vehicleNo = useMemo(() => {
+    const m = new Map();
+    vehicles.forEach((v, i) => m.set(v.plate, i + 1));
+    return m;
   }, [vehicles]);
 
   return (
@@ -93,7 +95,7 @@ export default function Fleet() {
             </svg>
             <input
               type="search"
-              placeholder="Search vehicle, plate or category"
+              placeholder="Search vehicle or plate"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search fleet"
@@ -123,46 +125,24 @@ export default function Fleet() {
           <thead>
             <tr>
               <th>Vehicle</th>
-              <th>Category</th>
-              <th className="num">Day rate</th>
-              <th>Utilisation</th>
-              <th>Insurance</th>
+              <th>Plate</th>
+              <th className="num rate-col">Day rate</th>
               <th>Status</th>
               <th className="actions-col">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((v) => {
-              const soon = expiringSoon(v.ins);
               return (
                 <tr key={v.plate}>
                   <td>
-                    <p className="strong">{v.name}</p>
-                    <p className="cell-sub">{v.plate}</p>
+                    <div className="row-name">
+                      <span className="row-no">{vehicleNo.get(v.plate)}</span>
+                      <span className="strong">{v.name}</span>
+                    </div>
                   </td>
-                  <td>{v.cat}</td>
-                  <td className="num">{fmtRate(v.rate)}</td>
-                  <td>
-                    <span className="util-cell">
-                      <span className="util-bar">
-                        <i style={{ width: `${v.util}%` }} />
-                      </span>
-                      {v.util}%
-                    </span>
-                  </td>
-                  <td>
-                    {soon !== null ? (
-                      <span className="ins-soon">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
-                          <path d="M12 9v4M12 17h.01" />
-                        </svg>
-                        in {soon} days
-                      </span>
-                    ) : (
-                      v.ins
-                    )}
-                  </td>
+                  <td>{v.plate}</td>
+                  <td className="num rate-col">{fmtRate(v.rate)}</td>
                   <td>
                     <span className={`chip ${CHIP_CLASS[v.status]}`}>{v.status}</span>
                   </td>

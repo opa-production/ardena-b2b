@@ -78,7 +78,6 @@ export default function Staff() {
                 <th>Member</th>
                 <th>Role</th>
                 <th>Status</th>
-                <th>Last active</th>
                 <th className="actions-col">Actions</th>
               </tr>
             </thead>
@@ -95,7 +94,6 @@ export default function Staff() {
                       {s.status}
                     </span>
                   </td>
-                  <td>{s.lastActive}</td>
                   <td className="actions-cell">
                     {s.role === "Owner" ? (
                       <span className="cell-sub">Workspace owner</span>

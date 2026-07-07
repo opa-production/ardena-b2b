@@ -217,7 +217,7 @@
   font-size: 14px;
 }
 
-/* M-Pesa action button: green with the M-Pesa logo on a white chip */
+/* M-Pesa action button */
 .btn.mpesa-btn {
   width: 100%;
   gap: 10px;
@@ -237,21 +237,6 @@
 .btn.mpesa-btn:active {
   transform: translateY(0);
   box-shadow: none;
-}
-
-.mpesa-badge {
-  display: inline-flex;
-  align-items: center;
-  height: 24px;
-  padding: 4px 6px;
-  background: #fff;
-  flex-shrink: 0;
-}
-
-.mpesa-badge img {
-  height: 100%;
-  width: auto;
-  display: block;
 }
 
 .side-hint {

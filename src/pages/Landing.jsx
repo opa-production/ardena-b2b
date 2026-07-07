@@ -115,15 +115,14 @@ export default function Landing() {
               no heavy setup.
             </p>
             <div className="hero-cta">
-              <Link to="/dashboard" className="btn btn-primary">
+              <Link to="/dashboard" className="btn btn-primary inverse">
                 View live demo
               </Link>
-              <Link to="/signup" className="btn btn-ghost">
+              <Link to="/signup" className="btn btn-brand">
                 Request access
               </Link>
             </div>
           </div>
-          {/* hero car visual parked for now — asset: assets/landing-car.png */}
         </div>
 
         <a href="#modules" className="scroll-cue" aria-label="Scroll to see more">

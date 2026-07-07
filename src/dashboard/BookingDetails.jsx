@@ -24,7 +24,6 @@ import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
-import mpesaLogo from "../assets/mpesa-logo.webp";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -439,9 +438,6 @@ export default function BookingDetails() {
                     toast(`M-Pesa prompt sent to ${b.phone}.`);
                   }}
                 >
-                  <span className="mpesa-badge">
-                    <img src={mpesaLogo} alt="M-Pesa" />
-                  </span>
                   {b.payment === "Prompt sent" ? "Resend prompt" : "Send prompt"}
                 </button>
                 <p className="side-hint">

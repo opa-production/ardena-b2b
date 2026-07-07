@@ -150,6 +150,23 @@ h3 {
   box-shadow: none;
 }
 
+.btn-brand {
+  background: var(--brand);
+  color: #fff;
+  box-shadow: var(--neo-out-sm);
+}
+
+.btn-brand:hover {
+  background: var(--brand-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--neo-out);
+}
+
+.btn-brand:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
 .btn-ghost {
   background: var(--bg);
   color: var(--ink);

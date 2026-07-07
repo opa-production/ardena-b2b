@@ -1,0 +1,61 @@
+/* ---- Confirmation modal ---- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(10, 13, 18, 0.5);
+  animation: modal-fade 0.15s var(--ease) both;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--panel);
+  box-shadow: 0 24px 60px rgba(10, 13, 18, 0.35);
+  padding: 28px;
+  animation: modal-rise 0.2s var(--ease) both;
+}
+
+.modal-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.modal-message {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn.modal-btn {
+  padding: 9px 18px;
+  font-size: 13.5px;
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}

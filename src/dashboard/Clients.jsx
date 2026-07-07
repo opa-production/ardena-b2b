@@ -7,6 +7,7 @@ import {
   rentalDays,
 } from "./bookingsStore";
 import { toast } from "./toastStore";
+import ConfirmDialog from "../components/ConfirmDialog";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
 import "./bookings.css";
@@ -24,6 +25,7 @@ export default function Clients() {
   const clients = useSyncExternalStore(subscribe, getClients);
   const bookings = useSyncExternalStore(subscribeBookings, getBookings);
   const [query, setQuery] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(clients[1] || null);
 
   // per-client booking count, spend (non-cancelled) and most recent pickup
   const byClient = useMemo(() => {
@@ -47,10 +49,11 @@ export default function Clients() {
     return m;
   }, [clients]);
 
-  function handleDelete(c) {
-    if (!window.confirm(`Remove ${c.name} from your clients?`)) return;
+  function confirmDelete() {
+    const c = pendingDelete;
     removeClient(c.id);
     toast(`${c.name} removed.`);
+    setPendingDelete(null);
   }
 
   const filtered = useMemo(() => {
@@ -174,7 +177,7 @@ export default function Clients() {
                     <button
                       type="button"
                       className="icon-btn danger icon-only"
-                      onClick={() => handleDelete(c)}
+                      onClick={() => setPendingDelete(c)}
                       aria-label={`Remove ${c.name}`}
                       title="Remove client"
                     >
@@ -197,6 +200,19 @@ export default function Clients() {
         )}
       </section>
       )}
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        title="Remove client?"
+        message={
+          pendingDelete
+            ? `${pendingDelete.name} will be removed from your clients. Their past bookings stay on record.`
+            : ""
+        }
+        confirmLabel="Remove"
+        onConfirm={confirmDelete}
+        onCancel={() => setPendingDelete(null)}
+      />
     </>
   );
 }

@@ -13,6 +13,10 @@
 /* form + result live in one card; the list follows with an even gap */
 .lookup-card {
   margin-bottom: 20px;
+  /* sit above the recent-checks card so the open type dropdown, which
+     extends past this card's bottom, is never covered by it */
+  position: relative;
+  z-index: 2;
 }
 
 /* ---- Lookup form ---- */

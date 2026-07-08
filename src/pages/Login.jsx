@@ -67,6 +67,9 @@ export default function Login() {
               required
             />
           </div>
+          <Link to="/forgot-password" className="auth-forgot">
+            Forgot password?
+          </Link>
 
           {error && (
             <p className="auth-error" role="alert">

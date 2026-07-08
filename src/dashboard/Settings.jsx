@@ -9,7 +9,14 @@ import {
   hydrateBusiness,
   businessInitial,
 } from "./businessStore";
-import { updateBusiness, updatePolicy, uploadBusinessLogo } from "../lib/api";
+import {
+  updateBusiness,
+  updatePolicy,
+  uploadBusinessLogo,
+  forgotPassword,
+  resetPassword,
+} from "../lib/api";
+import { getSession } from "../lib/authStore";
 import VerifiedBadge from "../components/VerifiedBadge";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -105,6 +112,54 @@ export default function Settings() {
 
   const monthly = Math.max(PLAN.minimum, vehicles.length * PLAN.launchRate);
 
+  /* ---- Change password: emailed one-time code confirms it's you ---- */
+  const accountEmail = getSession().user?.email || "";
+  const [pwStage, setPwStage] = useState("idle"); // idle → code
+  const [pwBusy, setPwBusy] = useState(false);
+  const [pwOtp, setPwOtp] = useState("");
+  const [pwNew, setPwNew] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+
+  async function sendPasswordCode() {
+    if (pwBusy) return;
+    if (!accountEmail) {
+      toast("Sign in again to change your password.", "danger");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      await forgotPassword(accountEmail);
+      setPwStage("code");
+      toast(`One-time code sent to ${accountEmail}.`);
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setPwBusy(false);
+    }
+  }
+
+  async function handlePasswordChange(e) {
+    e.preventDefault();
+    if (pwBusy) return;
+    if (pwNew !== pwConfirm) {
+      toast("Passwords don't match.", "danger");
+      return;
+    }
+    setPwBusy(true);
+    try {
+      await resetPassword({ email: accountEmail, otp: pwOtp.trim(), newPassword: pwNew });
+      setPwStage("idle");
+      setPwOtp("");
+      setPwNew("");
+      setPwConfirm("");
+      toast("Password changed.");
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setPwBusy(false);
+    }
+  }
+
   async function handleLogoPick(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -133,7 +188,10 @@ export default function Settings() {
     };
     try {
       const updated = await updateBusiness(patch);
-      hydrateBusiness(updated || patch);
+      // keep everything the user saved, even fields the API response
+      // doesn't echo back yet (phone/email aren't in GET /business)
+      setBusiness(patch);
+      if (updated) hydrateBusiness(updated);
       toast("Business profile saved.");
     } catch (err) {
       toast(err.message, "danger");
@@ -404,6 +462,89 @@ export default function Settings() {
               <span>Director ID</span>
               <span className="mini-amount verified-ok">Verified</span>
             </div>
+          </section>
+
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Password &amp; security</h2>
+              <p>Change the password for {accountEmail || "your account"}</p>
+            </header>
+            {pwStage === "idle" ? (
+              <>
+                <p className="side-hint">
+                  We'll email you a one-time code to confirm it's you, then you
+                  set the new password here.
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-ghost pay-btn"
+                  onClick={sendPasswordCode}
+                  disabled={pwBusy}
+                >
+                  {pwBusy ? "Sending…" : "Change password"}
+                </button>
+              </>
+            ) : (
+              <form onSubmit={handlePasswordChange}>
+                <div className="field">
+                  <label htmlFor="pw-otp">One-time code</label>
+                  <input
+                    id="pw-otp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    placeholder="123456"
+                    value={pwOtp}
+                    onChange={(e) => setPwOtp(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="pw-new">New password</label>
+                  <input
+                    id="pw-new"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="••••••••"
+                    minLength={8}
+                    value={pwNew}
+                    onChange={(e) => setPwNew(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="pw-confirm">Confirm new password</label>
+                  <input
+                    id="pw-confirm"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="••••••••"
+                    minLength={8}
+                    value={pwConfirm}
+                    onChange={(e) => setPwConfirm(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary" disabled={pwBusy}>
+                    {pwBusy ? "Saving…" : "Save password"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    onClick={() => setPwStage("idle")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <p className="side-hint">
+                  Didn't get the code?{" "}
+                  <button type="button" className="auth-linkish" onClick={sendPasswordCode} disabled={pwBusy}>
+                    Send another
+                  </button>
+                </p>
+              </form>
+            )}
           </section>
 
           <section className="panel-card">

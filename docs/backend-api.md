@@ -36,7 +36,8 @@ request, the backend verifies the business (KYB), then credentials go out.
 | 🌐 POST | `/auth/login` | `{ email, password }` → `{ token, refresh_token, user, business }`. |
 | POST | `/auth/refresh` | Refresh the session. |
 | POST | `/auth/logout` | Invalidate the session. |
-| 🌐 POST | `/auth/forgot-password` / `/auth/reset-password` | Standard reset flow. |
+| 🌐 POST | `/auth/forgot-password` / `/auth/reset-password` | OTP flow (live): forgot takes `{ email }` and emails a code; reset takes `{ email, otp, new_password }`. |
+| POST | `/auth/change-password` | **Not built yet.** Authenticated change: `{ current_password, new_password }`. The dashboard currently reuses the OTP reset flow for signed-in changes. |
 | GET | `/me` | Current user: `{ id, name, email, role, business_id }`. Drives role-gating in the UI. |
 | GET | `/onboarding` | Checklist state: `{ vehicle: bool, booking: bool, staff: bool, ... }` (mirrors `onboardingStore.markStep`). Steps flip automatically server-side when the first vehicle/booking/invite is created. |
 
@@ -46,8 +47,8 @@ Mock: `businessStore.js` (name + logo in localStorage), `policyStore.js`.
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/business` | `{ id, name, logo_url, location, verified_since, trust_slug }`. |
-| PATCH | `/business` | Update name and profile fields. Owner/Manager only. |
+| GET | `/business` | `{ id, name, phone, email, location, logo_url, verified_since, trust_slug }`. ⚠️ `phone`/`email` are missing from the live response — the Settings profile form sends them but they don't round-trip, so the dashboard holds them client-side until added. |
+| PATCH | `/business` | Update name and profile fields (incl. `phone`, `email`). Owner/Manager only. |
 | POST | `/business/logo` | Multipart upload, returns `logo_url`. |
 | GET | `/business/policy` | Rental policy: `{ deposit, late_fee_per_hour, return_hour }` (KES 10,000 / KES 500/h / 10:00 in the mocks). |
 | PATCH | `/business/policy` | Update policy. Used by Settings; feeds agreements and late-return penalty math. |

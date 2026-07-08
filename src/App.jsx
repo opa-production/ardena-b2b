@@ -7,6 +7,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
 import VerifyBusiness from "./pages/VerifyBusiness";
 import DashboardLayout from "./dashboard/DashboardLayout";
 import Overview from "./dashboard/Overview";
@@ -45,6 +46,8 @@ export default function App() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ForgotPassword startAtReset />} />
       <Route path="/v/:slug" element={<VerifyBusiness />} />
       <Route
         path="/dashboard"

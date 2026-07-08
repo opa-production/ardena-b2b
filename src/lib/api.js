@@ -124,6 +124,21 @@ export function requestAccess(payload) {
   return request("/auth/access-requests", { method: "POST", body: payload, auth: false });
 }
 
+// Emails a one-time code to the account's address
+export function forgotPassword(email) {
+  return request("/auth/forgot-password", { method: "POST", body: { email }, auth: false });
+}
+
+// Sets a new password using the emailed code. Also serves signed-in
+// password changes until a dedicated change-password endpoint ships.
+export function resetPassword({ email, otp, newPassword }) {
+  return request("/auth/reset-password", {
+    method: "POST",
+    body: { email, otp, new_password: newPassword },
+    auth: false,
+  });
+}
+
 export async function logout() {
   const { refreshToken } = getSession();
   try {

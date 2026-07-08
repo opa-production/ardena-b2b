@@ -48,6 +48,18 @@ export function getOnboarding() {
   return state;
 }
 
+// Wipe cached progress (called on login/logout so one account's checklist
+// never leaks into another's session).
+export function resetOnboarding() {
+  state = { ...DEFAULTS };
+  try {
+    localStorage.removeItem(KEY);
+  } catch {
+    /* ignore */
+  }
+  emit();
+}
+
 // Merge server state (GET /onboarding) into the checklist. Only known step
 // keys are taken; `dismissed` stays a local preference. The backend may call
 // the invite step "staff" — the UI calls it "team".

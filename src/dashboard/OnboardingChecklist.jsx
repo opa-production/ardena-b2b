@@ -7,6 +7,7 @@ import {
 } from "./onboardingStore";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribeBookings, getBookings } from "./bookingsStore";
+import { subscribe as subscribeBusiness, getBusiness } from "./businessStore";
 import "./onboarding.css";
 
 const STEPS = [
@@ -46,6 +47,7 @@ export default function OnboardingChecklist() {
   const state = useSyncExternalStore(subscribe, getOnboarding);
   const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
   const bookings = useSyncExternalStore(subscribeBookings, getBookings);
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   if (state.dismissed) return null;
 
   // fleet/booking steps track real data so the checklist is truthful in
@@ -65,8 +67,8 @@ export default function OnboardingChecklist() {
         <div>
           <h2>Get set up</h2>
           <p>
-            {done} of {STEPS.length} done · finish these and Acme Car Hire runs
-            end to end on Ardena
+            {done} of {STEPS.length} done · finish these and{" "}
+            {business.name || "your business"} runs end to end on Ardena
           </p>
         </div>
         <div className="onboard-right">

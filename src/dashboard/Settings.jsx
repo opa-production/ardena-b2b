@@ -1,4 +1,4 @@
-import { useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
@@ -6,8 +6,10 @@ import {
   subscribe as subscribeBusiness,
   getBusiness,
   setBusiness,
+  hydrateBusiness,
   businessInitial,
 } from "./businessStore";
+import { updateBusiness, updatePolicy, uploadBusinessLogo } from "../lib/api";
 import VerifiedBadge from "../components/VerifiedBadge";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -57,17 +59,41 @@ export default function Settings() {
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [currency, setCurrency] = useState("KES, Kenyan shilling");
   const [logo, setLogo] = useState(business.logo);
+  const [logoFile, setLogoFile] = useState(null); // picked file, awaiting upload
   const [name, setName] = useState(business.name);
+  const [phone, setPhone] = useState(business.phone);
+  const [email, setEmail] = useState(business.email);
+  const [location, setLocation] = useState(business.location);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPolicy, setSavingPolicy] = useState(false);
+  const [savingLogo, setSavingLogo] = useState(false);
   const fileRef = useRef(null);
 
-  function handlePolicySave(e) {
+  // refresh the form when the store hydrates from GET /business
+  useEffect(() => {
+    setName(business.name);
+    setPhone(business.phone);
+    setEmail(business.email);
+    setLocation(business.location);
+    setLogo((prev) => (logoFile ? prev : business.logo));
+  }, [business, logoFile]);
+
+  async function handlePolicySave(e) {
     e.preventDefault();
+    if (savingPolicy) return;
     const f = new FormData(e.currentTarget);
-    setPolicy({
-      deposit: Number(f.get("deposit")),
-      lateFeePerHour: Number(f.get("lateFee")),
-    });
-    toast("Rental policy saved.");
+    const deposit = Number(f.get("deposit"));
+    const lateFeePerHour = Number(f.get("lateFee"));
+    setSavingPolicy(true);
+    try {
+      await updatePolicy({ deposit, late_fee_per_hour: lateFeePerHour });
+      setPolicy({ deposit, lateFeePerHour });
+      toast("Rental policy saved.");
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setSavingPolicy(false);
+    }
   }
   const [prefs, setPrefs] = useState({
     bookings: true,
@@ -87,22 +113,67 @@ export default function Settings() {
       return;
     }
     try {
-      setLogo(await resizeImage(file));
+      setLogo(await resizeImage(file)); // instant preview
+      setLogoFile(file);
     } catch {
       toast("Couldn't read that image.", "danger");
     }
     e.target.value = ""; // allow re-picking the same file
   }
 
-  function handleSave(e) {
+  async function handleSave(e) {
     e.preventDefault();
-    setBusiness({ name: name.trim() || "Acme Car Hire", logo });
-    toast("Business profile saved.");
+    if (savingProfile) return;
+    setSavingProfile(true);
+    const patch = {
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      location: location.trim(),
+    };
+    try {
+      const updated = await updateBusiness(patch);
+      hydrateBusiness(updated || patch);
+      toast("Business profile saved.");
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setSavingProfile(false);
+    }
   }
 
-  function saveLogo() {
-    setBusiness({ name: name.trim() || "Acme Car Hire", logo });
-    toast("Business logo saved.");
+  async function saveLogo() {
+    if (savingLogo) return;
+    if (!logo) {
+      // logo was removed
+      setSavingLogo(true);
+      try {
+        await updateBusiness({ logo_url: null });
+        setBusiness({ logo: null });
+        setLogoFile(null);
+        toast("Business logo removed.");
+      } catch (err) {
+        toast(err.message, "danger");
+      } finally {
+        setSavingLogo(false);
+      }
+      return;
+    }
+    if (!logoFile) {
+      toast("Business logo is up to date.");
+      return;
+    }
+    setSavingLogo(true);
+    try {
+      const res = await uploadBusinessLogo(logoFile);
+      setBusiness({ logo: res?.logo_url || logo });
+      setLogoFile(null);
+      toast("Business logo saved.");
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setSavingLogo(false);
+    }
   }
 
   return (
@@ -128,15 +199,33 @@ export default function Settings() {
                 </div>
                 <div className="field">
                   <label htmlFor="set-phone">Business phone</label>
-                  <input id="set-phone" type="tel" defaultValue="0700 123 456" required />
+                  <input
+                    id="set-phone"
+                    type="tel"
+                    placeholder="0700 000 000"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="set-email">Contact email</label>
-                  <input id="set-email" type="email" defaultValue="hello@acmecarhire.co.ke" required />
+                  <input
+                    id="set-email"
+                    type="email"
+                    placeholder="hello@yourbusiness.co.ke"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="set-city">Location</label>
-                  <input id="set-city" type="text" defaultValue="Nairobi, Kenya" />
+                  <input
+                    id="set-city"
+                    type="text"
+                    placeholder="Nairobi, Kenya"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
                 </div>
                 <div className="field">
                   <label htmlFor="set-currency">Currency</label>
@@ -149,8 +238,8 @@ export default function Settings() {
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
-                  Save changes
+                <button type="submit" className="btn btn-primary" disabled={savingProfile}>
+                  {savingProfile ? "Saving…" : "Save changes"}
                 </button>
               </div>
             </form>
@@ -161,7 +250,8 @@ export default function Settings() {
               <h2>Rental policy</h2>
               <p>Applied to agreements, deposits and late returns</p>
             </header>
-            <form onSubmit={handlePolicySave}>
+            {/* keyed so the inputs refresh once the policy hydrates from the API */}
+            <form onSubmit={handlePolicySave} key={`${policy.deposit}-${policy.lateFeePerHour}`}>
               <div className="form-grid">
                 <div className="field">
                   <label htmlFor="pol-deposit">Security deposit (KES)</label>
@@ -189,8 +279,8 @@ export default function Settings() {
                 </div>
               </div>
               <div className="form-actions">
-                <button type="submit" className="btn btn-primary">
-                  Save policy
+                <button type="submit" className="btn btn-primary" disabled={savingPolicy}>
+                  {savingPolicy ? "Saving…" : "Save policy"}
                 </button>
               </div>
             </form>
@@ -256,7 +346,10 @@ export default function Settings() {
                     <button
                       type="button"
                       className="btn btn-ghost logo-btn danger-btn"
-                      onClick={() => setLogo(null)}
+                      onClick={() => {
+                        setLogo(null);
+                        setLogoFile(null);
+                      }}
                     >
                       Remove
                     </button>
@@ -271,15 +364,15 @@ export default function Settings() {
                 />
               </div>
             </div>
-            <button type="button" className="btn btn-ghost pay-btn" onClick={saveLogo}>
-              Save logo
+            <button type="button" className="btn btn-ghost pay-btn" onClick={saveLogo} disabled={savingLogo}>
+              {savingLogo ? "Saving…" : "Save logo"}
             </button>
           </section>
 
           <section className="panel-card">
             <header className="card-head">
               <h2>Plan &amp; billing</h2>
-              <p>Fleet plan · renews 1 Aug 2026</p>
+              <p>Fleet plan · billed monthly</p>
             </header>
             <p className="util-hero">KES {monthly.toLocaleString("en-KE")}<span className="util-per">/mo</span></p>
             <p className="plan-price">
@@ -320,15 +413,15 @@ export default function Settings() {
             </header>
             <div className="pay-row">
               <span>Tenant ID</span>
-              <span className="mini-amount">ACM-0042</span>
+              <span className="mini-amount">{business.id ?? "—"}</span>
             </div>
             <div className="pay-row">
               <span>Region</span>
-              <span className="mini-amount">Kenya (Nairobi)</span>
+              <span className="mini-amount">{business.location || "Kenya"}</span>
             </div>
             <div className="pay-row">
-              <span>Created</span>
-              <span className="mini-amount">12 Jan 2026</span>
+              <span>Verified since</span>
+              <span className="mini-amount">{business.verifiedSince || "—"}</span>
             </div>
             <p className="side-hint">
               Data export and workspace transfer arrive with the platform admin console.

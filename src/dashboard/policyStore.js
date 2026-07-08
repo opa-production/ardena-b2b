@@ -1,5 +1,6 @@
-// Rental policy (mock backend): security deposit and late-return penalty.
-// Used by agreements, check-in penalty math and the Settings page.
+// Rental policy: security deposit and late-return penalty. Hydrated from
+// GET /business/policy; used by agreements, check-in penalty math and the
+// Settings page.
 
 let policy = {
   deposit: 10000, // KES held per booking
@@ -23,6 +24,16 @@ export function getPolicy() {
 
 export function setPolicy(next) {
   policy = { ...policy, ...next };
+  emit();
+}
+
+// Merge the GET /business/policy response (snake_case) into the store.
+export function hydratePolicy(server) {
+  if (!server || typeof server !== "object") return;
+  const next = { ...policy };
+  if (typeof server.deposit === "number") next.deposit = server.deposit;
+  if (typeof server.late_fee_per_hour === "number") next.lateFeePerHour = server.late_fee_per_hour;
+  policy = next;
   emit();
 }
 

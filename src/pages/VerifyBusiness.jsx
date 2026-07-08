@@ -1,30 +1,53 @@
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import usePageTitle from "../hooks/usePageTitle";
+import { fetchTrust } from "../lib/api";
 import "./auth.css";
 import "./trust.css";
 
-/* Public trust pages. One entry per verified tenant; the slug is what a
-   business shares with customers (mock until the KYB pipeline is live). */
-const VERIFIED = {
-  "acme-car-hire": {
-    name: "Acme Car Hire",
-    location: "Westlands, Nairobi",
-    since: "12 Jan 2026",
-    fleet: "12 vehicles on the platform",
-    checks: [
-      "Business registration confirmed against the official registry",
-      "KRA PIN matched to the registered business",
-      "Director identity verified with government ID",
-      "Premises confirmed in Westlands, Nairobi",
-    ],
-  },
-};
-
+/* Public trust pages, served by GET /trust/{slug}. The slug is what a
+   verified business shares with customers. */
 export default function VerifyBusiness() {
   const { slug } = useParams();
-  const biz = VERIFIED[slug];
+  const [loading, setLoading] = useState(true);
+  const [biz, setBiz] = useState(null);
+
+  useEffect(() => {
+    let alive = true;
+    setLoading(true);
+    fetchTrust(slug)
+      .then((data) => {
+        if (!alive || !data) return;
+        setBiz({
+          name: data.name,
+          location: data.location,
+          since: data.since || data.verified_since,
+          fleet: data.fleet_summary || data.fleet,
+          checks: Array.isArray(data.checks) ? data.checks : [],
+        });
+      })
+      .catch(() => {}) // unknown slug → "no verified business" card
+      .finally(() => alive && setLoading(false));
+    return () => {
+      alive = false;
+    };
+  }, [slug]);
+
   usePageTitle(biz ? `${biz.name} is verified` : "Verification");
+
+  if (loading) {
+    return (
+      <div className="trust">
+        <header className="trust-nav">
+          <Logo />
+        </header>
+        <main className="trust-card">
+          <h1>Checking this link…</h1>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="trust">
@@ -45,7 +68,9 @@ export default function VerifyBusiness() {
             {biz.name} is <span className="trust-hl">Ardena Verified</span>.
           </h1>
           <p className="trust-sub">
-            Verified rental business · {biz.location} · since {biz.since}
+            Verified rental business
+            {biz.location ? ` · ${biz.location}` : ""}
+            {biz.since ? ` · since ${biz.since}` : ""}
           </p>
 
           <ul className="trust-checks">
@@ -59,7 +84,7 @@ export default function VerifyBusiness() {
             ))}
           </ul>
 
-          <p className="trust-meta">{biz.fleet}</p>
+          {biz.fleet && <p className="trust-meta">{biz.fleet}</p>}
 
           <p className="trust-blurb">
             Ardena checked official registration records and director identity

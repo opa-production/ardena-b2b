@@ -14,10 +14,18 @@ import {
   subscribe as subscribeBusiness,
   getBusiness,
   setBusiness,
+  hydrateBusiness,
   businessInitial,
 } from "./businessStore";
 import { hydrateOnboarding } from "./onboardingStore";
-import { fetchMe, fetchOnboarding, logout } from "../lib/api";
+import { hydratePolicy } from "./policyStore";
+import {
+  fetchMe,
+  fetchBusiness,
+  fetchPolicy,
+  fetchOnboarding,
+  logout,
+} from "../lib/api";
 import Logo from "../components/Logo";
 import VerifiedBadge from "../components/VerifiedBadge";
 import usePageTitle from "../hooks/usePageTitle";
@@ -37,7 +45,7 @@ export default function DashboardLayout() {
   const supportUnread = useSyncExternalStore(subscribeSupport, getSupportState).unread;
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
 
-  // hydrate the session: profile + onboarding state from the live API
+  // hydrate the session: profile, business, policy + onboarding from the API
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -46,8 +54,16 @@ export default function DashboardLayout() {
         if (!alive) return;
         const name = biz?.name || biz?.business_name || user?.business_name;
         if (name) setBusiness({ name });
-        const onboarding = await fetchOnboarding();
-        if (alive && onboarding) hydrateOnboarding(onboarding);
+
+        const [businessData, policyData, onboarding] = await Promise.all([
+          fetchBusiness().catch(() => null),
+          fetchPolicy().catch(() => null),
+          fetchOnboarding().catch(() => null),
+        ]);
+        if (!alive) return;
+        if (businessData) hydrateBusiness(businessData);
+        if (policyData) hydratePolicy(policyData);
+        if (onboarding) hydrateOnboarding(onboarding);
       } catch {
         /* a dead session is cleared by the client; RequireAuth redirects */
       }

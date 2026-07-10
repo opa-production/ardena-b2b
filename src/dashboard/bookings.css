@@ -363,6 +363,30 @@
   line-height: 1.5;
 }
 
+/* ---- Payment polling indicator ---- */
+.pay-waiting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 12px;
+}
+
+.pay-waiting-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0b7a37;
+  animation: pay-pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pay-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(0.7); }
+}
+
 /* ---- Handover / deposits / penalties ---- */
 
 .ho-step {

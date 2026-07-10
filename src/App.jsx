@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import VerifyBusiness from "./pages/VerifyBusiness";
+import AcceptInvite from "./pages/AcceptInvite";
 import DashboardLayout from "./dashboard/DashboardLayout";
 import Overview from "./dashboard/Overview";
 import Fleet from "./dashboard/Fleet";
@@ -49,6 +50,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ForgotPassword startAtReset />} />
       <Route path="/v/:slug" element={<VerifyBusiness />} />
+      <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route
         path="/dashboard"
         element={

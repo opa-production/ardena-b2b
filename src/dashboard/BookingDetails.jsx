@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   fetchBooking,
@@ -61,6 +61,9 @@ export default function BookingDetails() {
   const [payPhone, setPayPhone] = useState("");
   const [payProvider, setPayProvider] = useState("mpesa");
   const [payBusy, setPayBusy] = useState(false);
+  const [payWaiting, setPayWaiting] = useState(false);
+  const pollRef = useRef(null);
+  const pollDeadlineRef = useRef(null);
 
   const decodedRef = decodeURIComponent(ref);
 
@@ -78,6 +81,46 @@ export default function BookingDetails() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  function stopPolling() {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+    setPayWaiting(false);
+  }
+
+  function startPolling() {
+    setPayWaiting(true);
+    pollDeadlineRef.current = Date.now() + 2 * 60 * 1000; // 2-minute timeout
+    pollRef.current = setInterval(async () => {
+      if (Date.now() > pollDeadlineRef.current) {
+        stopPolling();
+        toast("Payment not confirmed yet — ask the customer to check their phone.", "warn");
+        return;
+      }
+      try {
+        const updated = await fetchBooking(decodedRef);
+        if (updated.payment === "Paid") {
+          setB(updated);
+          stopPolling();
+          toast("Payment confirmed! Booking marked as Paid.");
+        } else if (updated.payment === "Failed") {
+          setB(updated);
+          stopPolling();
+          toast("Payment failed. You can try again.", "danger");
+        }
+      } catch {
+        // silent — will retry next tick
+      }
+    }, 4000);
+  }
 
   if (loading) {
     return (
@@ -209,7 +252,8 @@ export default function BookingDetails() {
       const updated = await fetchBooking(b.ref);
       setB(updated);
       setPayModal(false);
-      toast(result.message || "STK push sent.", result.success ? undefined : "warn");
+      toast(result.message || "STK push sent. Waiting for customer to pay…");
+      startPolling();
     } catch (err) {
       toast(err.message || "Failed to send STK push", "danger");
     } finally {
@@ -514,12 +558,19 @@ export default function BookingDetails() {
                 </button>
               </div>
             )}
+            {payWaiting && (
+              <div className="pay-waiting">
+                <span className="pay-waiting-dot" />
+                Waiting for customer to pay…
+                <button type="button" className="icon-btn" onClick={stopPolling}>Stop</button>
+              </div>
+            )}
             {canPrompt && (
               <>
                 <button
                   type="button"
                   className="btn mpesa-btn"
-                  disabled={busy}
+                  disabled={busy || payWaiting}
                   onClick={openPayModal}
                 >
                   {b.payment === "Prompt sent" ? "Resend payment request" : "Request payment"}

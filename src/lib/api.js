@@ -401,7 +401,7 @@ export function refundPayment(paymentId, payload = {}) {
 export function sendStkPush(ref, phone, provider) {
   return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, {
     method: "POST",
-    body: JSON.stringify({ phone, provider }),
+    body: { phone, provider },
   });
 }
 

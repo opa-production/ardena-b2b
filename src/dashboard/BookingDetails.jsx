@@ -6,7 +6,7 @@ import {
   recordHandoverOut,
   recordHandoverIn,
   bookingDepositAction,
-  sendPaymentLink,
+  sendStkPush,
 } from "../lib/api";
 import { useSyncExternalStore } from "react";
 import {
@@ -57,7 +57,10 @@ export default function BookingDetails() {
   const [retTime, setRetTime] = useState("10:00");
   const [outFuel, setOutFuel] = useState("Full");
   const [inFuel, setInFuel] = useState("Full");
-  const [payLink, setPayLink] = useState(null);
+  const [payModal, setPayModal] = useState(false);
+  const [payPhone, setPayPhone] = useState("");
+  const [payProvider, setPayProvider] = useState("mpesa");
+  const [payBusy, setPayBusy] = useState(false);
 
   const decodedRef = decodeURIComponent(ref);
 
@@ -191,29 +194,26 @@ export default function BookingDetails() {
     }
   }
 
-  async function handlePaymentLink() {
-    if (busy) return;
-    setBusy(true);
-    // Open a blank window now (synchronous, trusted user gesture) so the
-    // popup blocker doesn't kill it after the await below.
-    const win = window.open("", "_blank", "noopener,noreferrer");
+  function openPayModal() {
+    setPayPhone(b.phone || "");
+    setPayProvider("mpesa");
+    setPayModal(true);
+  }
+
+  async function handleStkPush(e) {
+    e.preventDefault();
+    if (payBusy) return;
+    setPayBusy(true);
     try {
-      const result = await sendPaymentLink(b.ref);
+      const result = await sendStkPush(b.ref, payPhone, payProvider);
       const updated = await fetchBooking(b.ref);
       setB(updated);
-      if (result.checkout_url) {
-        if (win && !win.closed) win.location.href = result.checkout_url;
-        setPayLink(result.checkout_url);
-        toast("Payment link ready — share it with the customer.");
-      } else {
-        if (win) win.close();
-        toast(result.message || "Payment link created.", result.success ? undefined : "danger");
-      }
+      setPayModal(false);
+      toast(result.message || "STK push sent.", result.success ? undefined : "warn");
     } catch (err) {
-      if (win) win.close();
-      toast(err.message || "Failed to create payment link", "danger");
+      toast(err.message || "Failed to send STK push", "danger");
     } finally {
-      setBusy(false);
+      setPayBusy(false);
     }
   }
 
@@ -520,26 +520,71 @@ export default function BookingDetails() {
                   type="button"
                   className="btn mpesa-btn"
                   disabled={busy}
-                  onClick={handlePaymentLink}
+                  onClick={openPayModal}
                 >
-                  {b.payment === "Prompt sent" ? "Resend payment link" : "Send payment link"}
+                  {b.payment === "Prompt sent" ? "Resend payment request" : "Request payment"}
                 </button>
                 <p className="side-hint">
-                  Generates a Paystack checkout page for KES {fmtAmount(total)}. Share the link with {b.customer} to collect payment online.
+                  Sends an STK push to the customer's phone for KES {fmtAmount(total)}.
                 </p>
-                {payLink && (
-                  <div className="pay-link-box">
-                    <a href={payLink} target="_blank" rel="noopener noreferrer" className="pay-link-url">{payLink}</a>
-                    <button
-                      type="button"
-                      className="btn btn-ghost"
-                      onClick={() => { navigator.clipboard.writeText(payLink); toast("Link copied!"); }}
-                    >
-                      Copy link
-                    </button>
-                  </div>
-                )}
               </>
+            )}
+
+            {payModal && (
+              <div className="modal-overlay" onClick={() => !payBusy && setPayModal(false)}>
+                <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                  <header className="modal-head">
+                    <h3>Request payment · KES {fmtAmount(total)}</h3>
+                    <button type="button" className="icon-btn" disabled={payBusy} onClick={() => setPayModal(false)}>✕</button>
+                  </header>
+                  <form onSubmit={handleStkPush} className="modal-body">
+                    <label className="field-label">
+                      Customer phone
+                      <input
+                        type="tel"
+                        className="field-input"
+                        value={payPhone}
+                        onChange={(e) => setPayPhone(e.target.value)}
+                        placeholder="07XXXXXXXX"
+                        required
+                        autoFocus
+                      />
+                    </label>
+                    <fieldset className="provider-group">
+                      <legend className="field-label">Payment method</legend>
+                      <label className="provider-option">
+                        <input
+                          type="radio"
+                          name="provider"
+                          value="mpesa"
+                          checked={payProvider === "mpesa"}
+                          onChange={() => setPayProvider("mpesa")}
+                        />
+                        <span className="provider-pill mpesa-pill">M-Pesa</span>
+                      </label>
+                      <label className="provider-option">
+                        <input
+                          type="radio"
+                          name="provider"
+                          value="airtel"
+                          checked={payProvider === "airtel"}
+                          onChange={() => setPayProvider("airtel")}
+                        />
+                        <span className="provider-pill airtel-pill">Airtel Money</span>
+                      </label>
+                    </fieldset>
+                    <p className="side-hint">
+                      An STK push will be sent to the customer's phone. They'll enter their PIN to complete the payment.
+                    </p>
+                    <div className="modal-actions">
+                      <button type="button" className="btn btn-ghost" disabled={payBusy} onClick={() => setPayModal(false)}>Cancel</button>
+                      <button type="submit" className="btn mpesa-btn" disabled={payBusy}>
+                        {payBusy ? "Sending…" : "Send STK push"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             )}
           </section>
 

@@ -239,25 +239,121 @@
   box-shadow: none;
 }
 
-.pay-link-box {
+/* ── Payment modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+}
+
+.modal-card {
+  background: var(--surface, #fff);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border, #ebebeb);
+}
+
+.modal-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-secondary, #555);
+}
+
+.field-input {
+  padding: 9px 12px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.field-input:focus {
+  border-color: var(--accent, #2563eb);
+}
+
+.provider-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.provider-group legend {
+  margin-bottom: 8px;
+}
+
+.provider-option {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
-  padding: 10px 12px;
-  background: var(--surface-2, #f5f5f5);
-  border: 1px solid var(--border, #e0e0e0);
-  border-radius: 8px;
+  cursor: pointer;
 }
 
-.pay-link-url {
-  flex: 1;
-  font-size: 12.5px;
-  color: var(--accent, #2563eb);
-  word-break: break-all;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.provider-option input[type="radio"] {
+  accent-color: var(--accent, #2563eb);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.provider-pill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid transparent;
+}
+
+.mpesa-pill {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+.airtel-pill {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffcc80;
 }
 
 .side-hint {

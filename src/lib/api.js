@@ -401,10 +401,10 @@ export function refundPayment(paymentId, payload = {}) {
 }
 
 // overrides bookings version — now returns { checkout_url, paystack_reference, payment_status }
-export function sendPaymentLink(ref, idempotencyKey) {
+export function sendStkPush(ref, phone, provider) {
   return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, {
     method: "POST",
-    headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+    body: JSON.stringify({ phone, provider }),
   });
 }
 

@@ -288,3 +288,264 @@ export function fetchWalletTransactions(params = {}) {
   ).toString();
   return request(`/verification/wallet/transactions${qs ? `?${qs}` : ""}`);
 }
+
+/* ---- Bookings (§4) ---- */
+
+// params: { status, payment, from, to, plate, client_id, page, per_page }
+export function fetchBookings(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/bookings${qs ? `?${qs}` : ""}`);
+}
+
+// { customer, phone, plate, pickup, dropoff, location, notes?, deposit_amount?, client_id? }
+export function createBooking(payload) {
+  return request("/bookings", { method: "POST", body: payload });
+}
+
+export function fetchBooking(ref) {
+  return request(`/bookings/${encodeURIComponent(ref)}`);
+}
+
+// { pickup?, dropoff?, location?, notes? }
+export function updateBooking(ref, patch) {
+  return request(`/bookings/${encodeURIComponent(ref)}`, { method: "PATCH", body: patch });
+}
+
+// { status }
+export function setBookingStatus(ref, bookingStatus) {
+  return request(`/bookings/${encodeURIComponent(ref)}/status`, {
+    method: "POST",
+    body: { status: bookingStatus },
+  });
+}
+
+// { odometer, fuel, notes? }
+export function recordHandoverOut(ref, payload) {
+  return request(`/bookings/${encodeURIComponent(ref)}/handover/out`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+// { odometer, fuel, notes?, return_date?, return_time? }
+export function recordHandoverIn(ref, payload) {
+  return request(`/bookings/${encodeURIComponent(ref)}/handover/in`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+// { action: "refund" | "forfeit" }
+export function bookingDepositAction(ref, action) {
+  return request(`/bookings/${encodeURIComponent(ref)}/deposit`, {
+    method: "POST",
+    body: { action },
+  });
+}
+
+export function sendPaymentPrompt(ref) {
+  return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, { method: "POST" });
+}
+
+export function fetchBookingAgreement(ref) {
+  return request(`/bookings/${encodeURIComponent(ref)}/agreement`);
+}
+
+/* ---- Clients (§5) ---- */
+
+// params: { search, verification, page, per_page }
+export function fetchClients(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/clients${qs ? `?${qs}` : ""}`);
+}
+
+// { name, phone, email?, id_type?, notes? }
+export function createClient(payload) {
+  return request("/clients", { method: "POST", body: payload });
+}
+
+export function fetchClient(id) {
+  return request(`/clients/${id}`);
+}
+
+// { name?, phone?, email?, id_type?, notes? }
+export function updateClient(id, patch) {
+  return request(`/clients/${id}`, { method: "PATCH", body: patch });
+}
+
+export function deleteClient(id) {
+  return request(`/clients/${id}`, { method: "DELETE" });
+}
+
+/* ---- Payments (§7) ---- */
+
+// params: { type, page, per_page }
+export function fetchPayments(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/payments${qs ? `?${qs}` : ""}`);
+}
+
+export function fetchPaymentsSummary() {
+  return request("/payments/summary");
+}
+
+// { reason? }
+export function refundPayment(paymentId, payload = {}) {
+  return request(`/payments/${paymentId}/refund`, { method: "POST", body: payload });
+}
+
+// overrides bookings version — now returns { checkout_url, paystack_reference, payment_status }
+export function sendPaymentLink(ref, idempotencyKey) {
+  return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, {
+    method: "POST",
+    headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+  });
+}
+
+/* ---- Staff & roles (§8) ---- */
+
+// Returns { members, invites, active_count, pending_count }
+export function fetchStaff() {
+  return request("/staff");
+}
+
+// { name, email, role } → { message, email, role }
+export function inviteStaff(payload) {
+  return request("/staff/invites", { method: "POST", body: payload });
+}
+
+export function resendInvite(inviteId) {
+  return request(`/staff/invites/${inviteId}/resend`, { method: "POST" });
+}
+
+export function deleteInvite(inviteId) {
+  return request(`/staff/invites/${inviteId}`, { method: "DELETE" });
+}
+
+// 🌐 Public — { token, password } → { message, email }
+export function acceptInvite(payload) {
+  return request("/staff/invites/accept", { method: "POST", body: payload, auth: false });
+}
+
+// { role }
+export function changeStaffRole(memberId, role) {
+  return request(`/staff/${memberId}`, { method: "PATCH", body: { role } });
+}
+
+export function removeStaffMember(memberId) {
+  return request(`/staff/${memberId}`, { method: "DELETE" });
+}
+
+// params: { page, per_page }
+export function fetchActivityLog(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/activity-log${qs ? `?${qs}` : ""}`);
+}
+
+/* ---- Notifications (§9) ---- */
+
+// params: { unread, page, per_page } → { data, total, page, per_page, unread_count }
+export function fetchNotifications(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/notifications${qs ? `?${qs}` : ""}`);
+}
+
+// Lightweight badge poll → { unread_count }
+export function fetchUnreadCount() {
+  return request("/notifications/unread-count");
+}
+
+export function markNotificationRead(id) {
+  return request(`/notifications/${id}/read`, { method: "POST" });
+}
+
+export function markAllNotificationsRead() {
+  return request("/notifications/read-all", { method: "POST" });
+}
+
+/* ---- Billing (§10) ---- */
+
+// { plan, vehicle_count, rate, launch_rate_until, monthly_total, trial_ends, status }
+export function fetchSubscription() {
+  return request("/billing/subscription");
+}
+
+// { data: [{ ref, title, detail, amount, status, due_date, paid_at, checkout_url }], has_due }
+export function fetchInvoices() {
+  return request("/billing/invoices");
+}
+
+// → { checkout_url, reference }
+export function payInvoice(ref) {
+  return request(`/billing/invoices/${encodeURIComponent(ref)}/pay`, { method: "POST" });
+}
+
+// { items, total, checks_used, wallet_balance, check_price }
+export function fetchBillingUsage() {
+  return request("/billing/usage");
+}
+
+/* ---- Support (§12) ---- */
+
+// { messages: [{ id, from, text, read, sender_name, at }], unread_count }
+export function fetchSupportThread() {
+  return request("/support/messages");
+}
+
+// { text } → the new message item
+export function sendSupportMessage(text) {
+  return request("/support/messages", { method: "POST", body: { text } });
+}
+
+// Mark all support replies as read
+export function markSupportRead() {
+  return request("/support/messages/read", { method: "POST" });
+}
+
+// Lightweight badge poll → { unread_count }
+export function fetchSupportUnread() {
+  return request("/support/messages/unread-count");
+}
+
+/* ---- Overview & reports (§11) ---- */
+
+// period: "30d" (default) | "90d"
+export function fetchOverview(period = "30d") {
+  return request(`/dashboard/overview?period=${period}`);
+}
+
+// Fetches CSV as a Blob and triggers browser download.
+// type: "bookings" | "payments" | "clients"
+export async function exportReport({ type, from, to } = {}) {
+  const params = new URLSearchParams({ type });
+  if (from) params.set("from", from);
+  if (to) params.set("to", to);
+
+  const { token } = getSession();
+  const res = await fetch(
+    `${import.meta.env.VITE_API_BASE_URL || "https://api.ardena.xyz/api/v1/b2b"}/reports/export?${params}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new Error(data?.detail || "Export failed");
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = res.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1]
+    || `${type}-export.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}

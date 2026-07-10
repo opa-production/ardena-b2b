@@ -110,6 +110,39 @@
   border-bottom: 1px solid var(--ink);
 }
 
+/* ---- Password field with show/hide toggle ---- */
+
+.password-field {
+  position: relative;
+  display: flex;
+}
+
+.password-field input {
+  width: 100%;
+  /* leave room for the toggle so long passwords don't run under it */
+  padding-right: 46px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-mute);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s var(--ease);
+}
+
+.password-toggle:hover {
+  color: var(--ink);
+}
+
 .auth-forgot {
   display: block;
   font-size: 13px;

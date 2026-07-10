@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../components/Logo";
+import PasswordField from "../components/PasswordField";
 import { login } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
 import "./auth.css";
@@ -55,18 +56,15 @@ export default function Login() {
               required
             />
           </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <PasswordField
+            id="password"
+            label="Password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
           <Link to="/forgot-password" className="auth-forgot">
             Forgot password?
           </Link>

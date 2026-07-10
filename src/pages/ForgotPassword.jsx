@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../components/Logo";
+import PasswordField from "../components/PasswordField";
 import usePageTitle from "../hooks/usePageTitle";
 import { forgotPassword, resetPassword } from "../lib/api";
 import "./auth.css";
@@ -149,32 +150,26 @@ export default function ForgotPassword({ startAtReset = false }) {
                 required
               />
             </div>
-            <div className="field">
-              <label htmlFor="fp-pass">New password</label>
-              <input
-                id="fp-pass"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="fp-confirm">Confirm new password</label>
-              <input
-                id="fp-confirm"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                minLength={8}
-                value={confirm}
-                onChange={(e) => setConfirm(e.target.value)}
-                required
-              />
-            </div>
+            <PasswordField
+              id="fp-pass"
+              label="New password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <PasswordField
+              id="fp-confirm"
+              label="Confirm new password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              minLength={8}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              required
+            />
 
             {error && (
               <p className="auth-error" role="alert">

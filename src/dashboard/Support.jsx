@@ -1,60 +1,107 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { subscribe, getState, sendMessage, markSupportRead } from "./supportStore";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  fetchSupportThread,
+  sendSupportMessage,
+  markSupportRead,
+} from "../lib/api";
+import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./support.css";
 
 const CHANNELS = [
-  {
-    label: "Email",
-    value: "support@ardena.co.ke",
-    href: "mailto:support@ardena.co.ke",
-  },
-  {
-    label: "WhatsApp",
-    value: "+254 700 000 111",
-    href: "https://wa.me/254700000111",
-  },
-  {
-    label: "Phone",
-    value: "0700 000 111",
-    href: "tel:+254700000111",
-  },
+  { label: "Email", value: "support@ardena.co.ke", href: "mailto:support@ardena.co.ke" },
+  { label: "WhatsApp", value: "+254 700 000 111", href: "https://wa.me/254700000111" },
+  { label: "Phone", value: "0700 000 111", href: "tel:+254700000111" },
 ];
 
 const FAQS = [
   {
     q: "A customer paid but the booking still shows unpaid",
-    a: "M-Pesa confirmations can lag a minute or two. If it's still unpaid after 5 minutes, resend the prompt from the Payments page. Duplicate payments are auto-reversed.",
+    a: "Paystack confirmations can take a minute or two via webhook. If it's still unpaid after 5 minutes, resend the payment link from the Payments page.",
   },
   {
     q: "How do I add more staff seats?",
-    a: "Seats are tied to your plan. Upgrade from Usage & billing, or remove an inactive member under Staff & roles to free a seat.",
+    a: "Seats are unlimited on the Fleet plan. Invite teammates from the Staff & roles page — no limit applies.",
   },
   {
     q: "A verification failed but the ID looks valid",
-    a: "Ask the customer to retry in good lighting. If it fails twice, message us the booking ref here and we'll review the Dojah check manually.",
+    a: "Ask the customer to retry. If it fails twice, message us the booking ref here and we'll review the Dojah check manually.",
   },
 ];
 
+function fmtTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
+}
+
 export default function Support() {
-  const { messages, replying } = useSyncExternalStore(subscribe, getState);
+  const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const [loading, setLoading] = useState(true);
   const threadRef = useRef(null);
 
-  // keep the newest message in view, and mark everything as seen
+  const load = useCallback(async (markRead = false) => {
+    try {
+      const data = await fetchSupportThread();
+      setMessages(data.messages || []);
+      if (markRead && (data.unread_count ?? 0) > 0) {
+        await markSupportRead();
+      }
+    } catch {
+      // silent on background polls
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial load + mark read; then poll for new replies every 15 s
+  useEffect(() => {
+    load(true);
+    const id = setInterval(() => load(true), 15_000);
+    return () => clearInterval(id);
+  }, [load]);
+
+  // Keep newest message in view
   useEffect(() => {
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-    markSupportRead();
-  }, [messages, replying]);
+  }, [messages]);
 
-  function handleSend(e) {
+  async function handleSend(e) {
     e.preventDefault();
     const text = draft.trim();
-    if (!text) return;
-    sendMessage(text);
+    if (!text || sending) return;
+
+    setSending(true);
+    // Optimistic: add the message immediately so the UI feels instant
+    const optimistic = {
+      id: `opt-${Date.now()}`,
+      from: "user",
+      text,
+      read: true,
+      at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimistic]);
     setDraft("");
+
+    try {
+      const saved = await sendSupportMessage(text);
+      // Replace the optimistic entry with the real one
+      setMessages((prev) =>
+        prev.map((m) => (m.id === optimistic.id ? saved : m))
+      );
+    } catch (err) {
+      // Rollback the optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== optimistic.id));
+      setDraft(text);
+      toast(err.message || "Failed to send message", "danger");
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -66,16 +113,18 @@ export default function Support() {
         </header>
 
         <div className="chat-thread" ref={threadRef} aria-live="polite">
+          {loading && messages.length === 0 && (
+            <p className="typing">Loading messages…</p>
+          )}
           {messages.map((m) => (
             <div key={m.id} className={`msg ${m.from}`}>
               <p>{m.text}</p>
               <span className="msg-time">
                 {m.from === "support" ? "Ardena support · " : ""}
-                {m.at}
+                {fmtTime(m.at)}
               </span>
             </div>
           ))}
-          {replying && <p className="typing">Support is typing…</p>}
         </div>
 
         <form className="chat-composer" onSubmit={handleSend}>
@@ -85,9 +134,14 @@ export default function Support() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             aria-label="Message support"
+            disabled={sending}
           />
-          <button type="submit" className="btn btn-primary toolbar-btn" disabled={!draft.trim()}>
-            Send
+          <button
+            type="submit"
+            className="btn btn-primary toolbar-btn"
+            disabled={!draft.trim() || sending}
+          >
+            {sending ? "Sending…" : "Send"}
           </button>
         </form>
       </section>
@@ -101,7 +155,12 @@ export default function Support() {
           {CHANNELS.map((c) => (
             <div className="pay-row" key={c.label}>
               <span>{c.label}</span>
-              <a className="mini-amount spec-link" href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+              <a
+                className="mini-amount spec-link"
+                href={c.href}
+                target={c.href.startsWith("http") ? "_blank" : undefined}
+                rel="noreferrer"
+              >
                 {c.value}
               </a>
             </div>

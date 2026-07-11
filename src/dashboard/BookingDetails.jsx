@@ -99,22 +99,26 @@ export default function BookingDetails() {
   function startPolling() {
     setPayWaiting(true);
     pollDeadlineRef.current = Date.now() + 3 * 60 * 1000; // 3-minute timeout
+    let inFlight = false;
     pollRef.current = setInterval(async () => {
-      if (Date.now() > pollDeadlineRef.current) {
-        // Timed out on our end — fetch one last time to get the real state
-        try {
-          const updated = await fetchBooking(decodedRef);
-          setB(updated);
-          if (updated.payment === "Paid") {
-            toast("Payment confirmed! Booking marked as Paid.");
-          } else {
-            toast("Payment not confirmed — the customer may not have responded. You can resend the request.", "warn");
-          }
-        } catch { /* ignore */ }
-        stopPolling();
-        return;
-      }
+      if (inFlight) return;
+      inFlight = true;
       try {
+        if (Date.now() > pollDeadlineRef.current) {
+          // Timed out — fetch one last time to get the real state
+          try {
+            const updated = await fetchBooking(decodedRef);
+            setB(updated);
+            toast(
+              updated.payment === "Paid"
+                ? "Payment confirmed! Booking marked as Paid."
+                : "Payment not confirmed — the customer may not have responded. You can resend the request.",
+              updated.payment === "Paid" ? undefined : "warn",
+            );
+          } catch { /* ignore */ }
+          stopPolling();
+          return;
+        }
         const updated = await fetchBooking(decodedRef);
         if (updated.payment === "Paid") {
           setB(updated);
@@ -127,6 +131,8 @@ export default function BookingDetails() {
         }
       } catch {
         // silent — will retry next tick
+      } finally {
+        inFlight = false;
       }
     }, 4000);
   }

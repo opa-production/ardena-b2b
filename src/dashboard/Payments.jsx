@@ -24,7 +24,7 @@ export default function Payments() {
   const load = useCallback(async () => {
     try {
       const [payData, sumData] = await Promise.all([
-        fetchPayments({ per_page: 8 }),
+        fetchPayments({ per_page: 100 }),
         fetchPaymentsSummary(),
       ]);
       setPayments(payData.data || []);
@@ -42,13 +42,42 @@ export default function Payments() {
 
   const stats = summary || { collected: 0, outstanding: 0, refunded: 0, net: 0, paid_count: 0 };
 
+  // Build last-10-weeks buckets from completed payment records only
+  const weeklyCollections = (() => {
+    const now = new Date();
+    // Align to Monday of the current week
+    const todayDay = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Mon
+    const thisMonday = new Date(now);
+    thisMonday.setDate(now.getDate() - todayDay);
+    thisMonday.setHours(0, 0, 0, 0);
+
+    const weeks = Array.from({ length: 10 }, (_, i) => {
+      const start = new Date(thisMonday);
+      start.setDate(thisMonday.getDate() - (9 - i) * 7);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 7);
+      const label = start.toLocaleDateString("en-KE", { day: "numeric", month: "short" });
+      return { start, end, label, total: 0 };
+    });
+
+    for (const p of payments) {
+      if (p.status !== "completed" || p.type !== "payment") continue;
+      const d = new Date(p.date);
+      for (const w of weeks) {
+        if (d >= w.start && d < w.end) { w.total += p.amount; break; }
+      }
+    }
+
+    return weeks.map((w) => ({ week: w.label, value: w.total }));
+  })();
+
   const donutSegments = [
     { label: "Collected", value: stats.collected, color: "#0b7a37" },
     { label: "Outstanding", value: stats.outstanding, color: "#d97706" },
     { label: "Refunded", value: stats.refunded, color: "#94a3b8" },
   ];
 
-  const processed = payments.filter((p) => p.status === "completed");
+  const processed = payments.filter((p) => p.status === "completed").slice(0, 8);
 
   if (loading) {
     return <div className="empty-block fleet-empty"><p>Loading payments…</p></div>;
@@ -83,7 +112,7 @@ export default function Payments() {
         <section className="chart-card">
           <header className="card-head">
             <h2>Collections over time</h2>
-            <p>KES '000 settled per week, last 10 weeks</p>
+            <p>Settled payments per week, last 10 weeks</p>
           </header>
           {payments.length === 0 ? (
             <EmptyState
@@ -92,7 +121,7 @@ export default function Payments() {
               message="Once customers pay via Paystack, your weekly collections build up here."
             />
           ) : (
-            <CollectionsArea />
+            <CollectionsArea data={weeklyCollections} />
           )}
         </section>
 

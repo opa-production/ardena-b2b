@@ -98,14 +98,27 @@ export default function BookingDetails() {
 
   function startPolling() {
     setPayWaiting(true);
-    pollDeadlineRef.current = Date.now() + 2 * 60 * 1000; // 2-minute timeout
+    pollDeadlineRef.current = Date.now() + 3 * 60 * 1000; // 3-minute timeout
+    let inFlight = false;
     pollRef.current = setInterval(async () => {
-      if (Date.now() > pollDeadlineRef.current) {
-        stopPolling();
-        toast("Payment not confirmed yet — ask the customer to check their phone.", "warn");
-        return;
-      }
+      if (inFlight) return;
+      inFlight = true;
       try {
+        if (Date.now() > pollDeadlineRef.current) {
+          // Timed out — fetch one last time to get the real state
+          try {
+            const updated = await fetchBooking(decodedRef);
+            setB(updated);
+            toast(
+              updated.payment === "Paid"
+                ? "Payment confirmed! Booking marked as Paid."
+                : "Payment not confirmed — the customer may not have responded. You can resend the request.",
+              updated.payment === "Paid" ? undefined : "warn",
+            );
+          } catch { /* ignore */ }
+          stopPolling();
+          return;
+        }
         const updated = await fetchBooking(decodedRef);
         if (updated.payment === "Paid") {
           setB(updated);
@@ -114,10 +127,12 @@ export default function BookingDetails() {
         } else if (updated.payment === "Failed") {
           setB(updated);
           stopPolling();
-          toast("Payment failed. You can try again.", "danger");
+          toast("Payment was declined or timed out. You can resend the request.", "danger");
         }
       } catch {
         // silent — will retry next tick
+      } finally {
+        inFlight = false;
       }
     }, 4000);
   }
@@ -252,8 +267,8 @@ export default function BookingDetails() {
       const updated = await fetchBooking(b.ref);
       setB(updated);
       setPayModal(false);
-      toast(result.message || "STK push sent. Waiting for customer to pay…");
-      startPolling();
+      toast(result.message || "STK push sent.", result.success ? undefined : "danger");
+      if (result.success) startPolling();
     } catch (err) {
       toast(err.message || "Failed to send STK push", "danger");
     } finally {
@@ -573,7 +588,7 @@ export default function BookingDetails() {
                   disabled={busy || payWaiting}
                   onClick={openPayModal}
                 >
-                  {b.payment === "Prompt sent" ? "Resend payment request" : "Request payment"}
+                  {b.payment === "Prompt sent" ? "Resend payment request" : b.payment === "Failed" ? "Retry payment request" : "Request payment"}
                 </button>
                 <p className="side-hint">
                   Sends an STK push to the customer's phone for KES {fmtAmount(total)}.

@@ -30,6 +30,7 @@ export const PAY_CHIP = {
   "Prompt sent": "pending",
   Unpaid: "completed",
   Refunded: "cancelled",
+  Failed: "cancelled",
 };
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");

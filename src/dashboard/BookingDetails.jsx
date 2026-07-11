@@ -7,6 +7,7 @@ import {
   recordHandoverIn,
   bookingDepositAction,
   sendStkPush,
+  checkChargeStatus,
 } from "../lib/api";
 import { useSyncExternalStore } from "react";
 import {
@@ -64,6 +65,7 @@ export default function BookingDetails() {
   const [payWaiting, setPayWaiting] = useState(false);
   const pollRef = useRef(null);
   const pollDeadlineRef = useRef(null);
+  const pollPsRef = useRef(null); // Paystack reference being polled
 
   const decodedRef = decodeURIComponent(ref);
 
@@ -93,48 +95,67 @@ export default function BookingDetails() {
       clearInterval(pollRef.current);
       pollRef.current = null;
     }
+    pollPsRef.current = null;
     setPayWaiting(false);
   }
 
-  function startPolling() {
+  function startPolling(paystackRef) {
+    pollPsRef.current = paystackRef;
     setPayWaiting(true);
-    pollDeadlineRef.current = Date.now() + 3 * 60 * 1000; // 3-minute timeout
+    // Paystack docs: wait at least 10 s before first check, then poll every 10 s.
+    // 3-minute hard cap (18 ticks) — Paystack STK pushes expire after ~2 min on-device.
+    pollDeadlineRef.current = Date.now() + 3 * 60 * 1000;
     let inFlight = false;
-    pollRef.current = setInterval(async () => {
+
+    async function tick() {
       if (inFlight) return;
       inFlight = true;
       try {
+        const psRef = pollPsRef.current;
+        if (!psRef) { stopPolling(); return; }
+
         if (Date.now() > pollDeadlineRef.current) {
-          // Timed out — fetch one last time to get the real state
+          // Hard timeout — do one final check then give up
           try {
-            const updated = await fetchBooking(decodedRef);
-            setB(updated);
-            toast(
-              updated.payment === "Paid"
-                ? "Payment confirmed! Booking marked as Paid."
-                : "Payment not confirmed — the customer may not have responded. You can resend the request.",
-              updated.payment === "Paid" ? undefined : "warn",
-            );
+            const res = await checkChargeStatus(psRef);
+            if (res.charge_status === "success") {
+              const updated = await fetchBooking(decodedRef);
+              setB(updated);
+              toast("Payment confirmed! Booking marked as Paid.");
+            } else {
+              // Refresh booking so the chip reflects the current DB state
+              const updated = await fetchBooking(decodedRef);
+              setB(updated);
+              toast("Payment not confirmed — the STK push may have expired. You can resend the request.", "warn");
+            }
           } catch { /* ignore */ }
           stopPolling();
           return;
         }
-        const updated = await fetchBooking(decodedRef);
-        if (updated.payment === "Paid") {
+
+        const res = await checkChargeStatus(psRef);
+
+        if (res.charge_status === "success") {
+          const updated = await fetchBooking(decodedRef);
           setB(updated);
           stopPolling();
           toast("Payment confirmed! Booking marked as Paid.");
-        } else if (updated.payment === "Failed") {
+        } else if (res.charge_status === "failed" || res.charge_status === "timeout") {
+          const updated = await fetchBooking(decodedRef);
           setB(updated);
           stopPolling();
-          toast("Payment was declined or timed out. You can resend the request.", "danger");
+          toast(res.message || "Payment was declined or timed out. You can resend the request.", "danger");
         }
+        // "pending" or "error" — silent, will retry next tick
       } catch {
-        // silent — will retry next tick
+        // network hiccup — retry next tick
       } finally {
         inFlight = false;
       }
-    }, 4000);
+    }
+
+    // First tick after 10 s (per Paystack recommendation — don't call too early)
+    pollRef.current = setInterval(tick, 10000);
   }
 
   if (loading) {
@@ -268,7 +289,9 @@ export default function BookingDetails() {
       setB(updated);
       setPayModal(false);
       toast(result.message || "STK push sent.", result.success ? undefined : "danger");
-      if (result.success) startPolling();
+      if (result.success && result.paystack_reference) {
+        startPolling(result.paystack_reference);
+      }
     } catch (err) {
       toast(err.message || "Failed to send STK push", "danger");
     } finally {

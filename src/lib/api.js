@@ -405,6 +405,12 @@ export function sendStkPush(ref, phone, provider) {
   });
 }
 
+// Poll Paystack directly for a pending charge status.
+// Returns { charge_status: "pending"|"success"|"failed"|"timeout", booking_payment_status, message }
+export function checkChargeStatus(paystackRef) {
+  return request(`/payments/check/${encodeURIComponent(paystackRef)}`);
+}
+
 /* ---- Staff & roles (§8) ---- */
 
 // Returns { members, invites, active_count, pending_count }

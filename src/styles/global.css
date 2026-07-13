@@ -40,6 +40,20 @@
   --warn: #d97706;
   --danger: #dc2626;
 
+  /* Inverted surface: a dark chip/button with light text in the light theme,
+     flipped to a light chip with dark text in the dark theme. Lets the shared
+     "ink" chips (primary button, avatar, tooltip, selected date) invert cleanly
+     without hardcoding #fff everywhere. */
+  --ink-inv: #0a0d12;
+  --ink-inv-hover: #000000;
+  --on-ink: #ffffff;
+
+  /* Directional shadow the left sidebar / top bar cast onto content. */
+  --shell-shadow: rgba(163, 174, 192, 0.3);
+
+  /* Drop shadow for floating popovers (dropdowns, date picker, toasts). */
+  --pop-shadow: 0 14px 40px rgba(163, 174, 192, 0.5);
+
   /* Shape & type, sharp corners everywhere, per brand */
   --radius: 0;
   --radius-sm: 0;
@@ -48,6 +62,78 @@
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------
+   Dark theme — graphite surfaces, sky-mint accent.
+   Only the token values change; every component reads these, so the whole
+   dashboard re-skins from here. Applied via data-theme="dark" on <html>.
+---------------------------------------------- */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Accent shifts from brand blue (light) to sky mint (dark) */
+  --brand: #b8f7e4;
+  --brand-dark: #8fe9cf;
+  --brand-soft: rgba(184, 247, 228, 0.12);
+  --brand-glow: rgba(184, 247, 228, 0.28);
+  --accent: #ffb43a;
+
+  /* Graphite neutrals; --panel sits a touch above --bg so cards lift */
+  --bg: #25272c;
+  --panel: #2d3037;
+  --surface: #212228;
+  --line: #383b42;
+  --ink: #e9ecf1;
+  --ink-soft: #a8afba;
+  --ink-mute: #767d89;
+
+  /* Neumorphic shadows recomputed for a dark base (deep black + faint light) */
+  --neo-out: 7px 7px 14px rgba(0, 0, 0, 0.5),
+    -7px -7px 14px rgba(255, 255, 255, 0.03);
+  --neo-out-sm: 4px 4px 8px rgba(0, 0, 0, 0.5),
+    -4px -4px 8px rgba(255, 255, 255, 0.03);
+  --neo-in: inset 3px 3px 7px rgba(0, 0, 0, 0.55),
+    inset -3px -3px 7px rgba(255, 255, 255, 0.03);
+
+  --shell-shadow: rgba(0, 0, 0, 0.45);
+  --pop-shadow: 0 16px 42px rgba(0, 0, 0, 0.55);
+
+  /* Inverted chips become light-on-graphite */
+  --ink-inv: #e9ecf1;
+  --ink-inv-hover: #ffffff;
+  --on-ink: #23252b;
+
+  /* Status colours brightened for contrast against graphite */
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --danger: #f05252;
+}
+
+/* Brighten the hardcoded status greens/ambers used across the dashboard so
+   they stay legible on graphite (light theme keeps its deeper tones). */
+[data-theme="dark"] .chip.active,
+[data-theme="dark"] .chip.available,
+[data-theme="dark"] .icon-btn.prompt-green,
+[data-theme="dark"] .verified-badge.green,
+[data-theme="dark"] .mini-amount.verified-ok {
+  color: #34d399;
+}
+
+[data-theme="dark"] .chip.pending,
+[data-theme="dark"] .chip.maintenance {
+  color: #fbbf24;
+}
+
+/* amber unread counters read fine but nudge them lighter for the dark bar */
+[data-theme="dark"] .nav-badge,
+[data-theme="dark"] .topbar-badge {
+  color: #fbbf24;
+}
+
+/* translucent-white circle → faint light on graphite instead of a grey disc */
+[data-theme="dark"] .back-link {
+  background: rgba(255, 255, 255, 0.06);
 }
 
 * {
@@ -99,7 +185,7 @@ h3 {
 
 ::selection {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-ink);
 }
 
 /* ---- Brand lockup ---- */
@@ -134,13 +220,13 @@ h3 {
 }
 
 .btn-primary {
-  background: var(--ink);
-  color: #fff;
+  background: var(--ink-inv);
+  color: var(--on-ink);
   box-shadow: var(--neo-out-sm);
 }
 
 .btn-primary:hover {
-  background: #000;
+  background: var(--ink-inv-hover);
   transform: translateY(-1px);
   box-shadow: var(--neo-out);
 }
@@ -152,7 +238,7 @@ h3 {
 
 .btn-brand {
   background: var(--brand);
-  color: #fff;
+  color: var(--on-ink);
   box-shadow: var(--neo-out-sm);
 }
 

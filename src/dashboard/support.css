@@ -26,8 +26,8 @@
 
 .msg.user {
   align-self: flex-end;
-  background: var(--ink);
-  color: #fff;
+  background: var(--ink-inv);
+  color: var(--on-ink);
   box-shadow: var(--neo-out-sm);
 }
 

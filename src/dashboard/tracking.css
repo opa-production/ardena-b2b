@@ -1,0 +1,118 @@
+/* ---- GPS tracking ---- */
+
+/* shared helpers this page relies on (defined here too so they load without
+   pulling in workspace/verification stylesheets) */
+.settings-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Schematic map surface (carved, so it reads as a distinct panel) */
+.map-face {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 100 / 62;
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  overflow: hidden;
+}
+
+.map-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--ink-mute);
+}
+
+.map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.map-grid {
+  stroke: var(--line);
+  stroke-width: 0.4;
+}
+
+.map-trail {
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+
+.map-dot {
+  fill: var(--brand);
+}
+
+.map-ping {
+  fill: var(--brand);
+  opacity: 0.35;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: map-pulse 1.8s ease-out infinite;
+}
+
+@keyframes map-pulse {
+  0% { transform: scale(0.6); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.map-readout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ---- Recent movement / ping list ---- */
+.ping-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ping-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ping-row:last-child {
+  border-bottom: none;
+}
+
+.ping-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  flex-shrink: 0;
+}
+
+.ping-coord {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.ping-meta {
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-top: 1px;
+}

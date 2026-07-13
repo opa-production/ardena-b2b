@@ -20,6 +20,11 @@ import NewBooking from "./dashboard/NewBooking";
 import BookingDetails from "./dashboard/BookingDetails";
 import Clients from "./dashboard/Clients";
 import ClientDetails from "./dashboard/ClientDetails";
+import Chauffeurs from "./dashboard/Chauffeurs";
+import AddChauffeur from "./dashboard/AddChauffeur";
+import ChauffeurDetails from "./dashboard/ChauffeurDetails";
+import Tracking from "./dashboard/Tracking";
+import TrackingDetails from "./dashboard/TrackingDetails";
 import Verification from "./dashboard/Verification";
 import VerificationsList from "./dashboard/VerificationsList";
 import Payments from "./dashboard/Payments";
@@ -68,6 +73,11 @@ export default function App() {
         <Route path="bookings/:ref" element={<BookingDetails />} />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id" element={<ClientDetails />} />
+        <Route path="chauffeurs" element={<Chauffeurs />} />
+        <Route path="chauffeurs/new" element={<AddChauffeur />} />
+        <Route path="chauffeurs/:id" element={<ChauffeurDetails />} />
+        <Route path="tracking" element={<Tracking />} />
+        <Route path="tracking/:plate" element={<TrackingDetails />} />
         <Route path="verification" element={<Verification />} />
         <Route path="verification/all" element={<VerificationsList />} />
         <Route path="payments" element={<Payments />} />

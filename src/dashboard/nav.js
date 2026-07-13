@@ -7,6 +7,8 @@ export const NAV_SECTIONS = [
       { to: "/dashboard/fleet", key: "fleet", name: "Fleet" },
       { to: "/dashboard/bookings", key: "bookings", name: "Bookings" },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
+      { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
+      { to: "/dashboard/tracking", key: "tracking", name: "Tracking" },
     ],
   },
   {
@@ -30,6 +32,8 @@ export const SECTION_TITLES = {
   fleet: "Fleet",
   bookings: "Bookings",
   clients: "Clients",
+  chauffeurs: "Chauffeurs",
+  tracking: "Tracking",
   verification: "Verification",
   payments: "Finances",
   staff: "Staff & roles",

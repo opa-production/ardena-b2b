@@ -410,6 +410,131 @@
   margin-bottom: 14px;
 }
 
+/* ---- Handover condition photos ---- */
+.ho-photos-hint {
+  font-weight: 400;
+  color: var(--ink-mute);
+}
+
+.photo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.photo-thumb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: var(--neo-out-sm);
+  cursor: zoom-in;
+}
+
+.photo-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+}
+
+.photo-del {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  line-height: 1;
+  color: #fff;
+  background: rgba(10, 13, 18, 0.72);
+  border-radius: 50%;
+}
+
+.photo-del:hover {
+  background: var(--danger);
+}
+
+/* the "add photo" tile wraps a hidden file input */
+.photo-add {
+  width: 84px;
+  height: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--bg);
+  box-shadow: var(--neo-in);
+  cursor: pointer;
+  transition: color 0.15s var(--ease);
+}
+
+.photo-add:hover {
+  color: var(--ink);
+}
+
+.photo-add.busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.photo-add input {
+  display: none;
+}
+
+.photo-grid-view {
+  margin-top: 12px;
+}
+
+.photo-grid-view .photo-thumb {
+  width: 72px;
+  height: 72px;
+}
+
+/* fullscreen enlarge */
+.photo-lightbox {
+  cursor: zoom-out;
+  padding: 24px;
+}
+
+.photo-lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+
+.photo-lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+}
+
+.photo-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
 .ho-form.ho-return {
   border-top: 1px solid var(--line);
   margin-top: 16px;

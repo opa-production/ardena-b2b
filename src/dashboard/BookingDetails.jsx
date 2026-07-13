@@ -21,6 +21,12 @@ import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
+import {
+  subscribe as subscribePhotos,
+  getPhotos,
+  addPhotos,
+  compressImage,
+} from "./handoverPhotosStore";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -77,11 +83,16 @@ export default function BookingDetails() {
   const [payProvider, setPayProvider] = useState("mpesa");
   const [payBusy, setPayBusy] = useState(false);
   const [payWaiting, setPayWaiting] = useState(false);
+  const [outPending, setOutPending] = useState([]); // photos staged before check-out
+  const [inPending, setInPending] = useState([]); // photos staged before check-in
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [lightbox, setLightbox] = useState(null); // enlarged photo URL
   const pollRef = useRef(null);
   const pollDeadlineRef = useRef(null);
   const pollPsRef = useRef(null); // Paystack reference being polled
 
   const decodedRef = decodeURIComponent(ref);
+  const photos = useSyncExternalStore(subscribePhotos, () => getPhotos(decodedRef));
 
   const load = useCallback(async () => {
     try {
@@ -225,6 +236,24 @@ export default function BookingDetails() {
     }
   }
 
+  // Compress picked images and stage them for the handover being recorded.
+  async function handlePhotoPick(e, setPending) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ""; // let the same file be re-picked after removal
+    if (!files.length) return;
+    setPhotoBusy(true);
+    try {
+      const urls = await Promise.all(files.map((file) => compressImage(file)));
+      setPending((prev) =>
+        [...prev, ...urls.map((url) => ({ id: `${Date.now()}-${Math.random()}`, url }))].slice(0, 8)
+      );
+    } catch (err) {
+      toast(err.message || "Couldn't add that photo", "danger");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
+
   async function handleCheckOut(e) {
     e.preventDefault();
     if (busy) return;
@@ -236,6 +265,11 @@ export default function BookingDetails() {
         fuel: outFuel,
         notes: f.get("notes").trim() || null,
       });
+      if (outPending.length) {
+        const ok = addPhotos(b.ref, "out", outPending.map((p) => p.url));
+        if (!ok) toast("Check-out saved, but photos couldn't be stored on this device (storage full).", "warn");
+        setOutPending([]);
+      }
       setB(updated);
       toast("Check-out recorded, keys can go out.");
     } catch (err) {
@@ -258,6 +292,11 @@ export default function BookingDetails() {
         return_date: retDate || b.dropoff,
         return_time: retTime,
       });
+      if (inPending.length) {
+        const ok = addPhotos(b.ref, "inn", inPending.map((p) => p.url));
+        if (!ok) toast("Check-in saved, but photos couldn't be stored on this device (storage full).", "warn");
+        setInPending([]);
+      }
       setB(updated);
       const late = updated.handover?.inn?.late_hours || 0;
       const pen = updated.handover?.inn?.penalty || 0;
@@ -311,6 +350,56 @@ export default function BookingDetails() {
     } finally {
       setPayBusy(false);
     }
+  }
+
+  // Capture grid shown inside a handover form: staged thumbnails + an add tile.
+  function renderCapture(pending, setPending) {
+    return (
+      <div className="field form-full">
+        <label>
+          Condition photos <span className="ho-photos-hint">· timestamped evidence for damage disputes</span>
+        </label>
+        <div className="photo-grid">
+          {pending.map((p) => (
+            <div className="photo-thumb" key={p.id}>
+              <img src={p.url} alt="" onClick={() => setLightbox(p.url)} />
+              <button
+                type="button"
+                className="photo-del"
+                onClick={() => setPending((prev) => prev.filter((x) => x.id !== p.id))}
+                aria-label="Remove photo"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          {pending.length < 8 && (
+            <label className={"photo-add" + (photoBusy ? " busy" : "")}>
+              <input type="file" accept="image/*" capture="environment" multiple onChange={(e) => handlePhotoPick(e, setPending)} />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.5 4h-5L8 6H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1h-4l-1.5-2z" />
+                <circle cx="12" cy="12.5" r="3.2" />
+              </svg>
+              <span>{photoBusy ? "Adding…" : "Add photo"}</span>
+            </label>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Read-only gallery shown once a handover is recorded.
+  function renderGallery(list) {
+    if (!list.length) return null;
+    return (
+      <div className="photo-grid photo-grid-view">
+        {list.map((p) => (
+          <button type="button" className="photo-thumb" key={p.id} onClick={() => setLightbox(p.url)}>
+            <img src={p.url} alt="Handover condition" />
+          </button>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -462,6 +551,7 @@ export default function BookingDetails() {
                     <label htmlFor="ho-notes">Condition notes</label>
                     <textarea id="ho-notes" name="notes" rows="2" placeholder="Scratches, dents, anything the renter should not be charged for" />
                   </div>
+                  {renderCapture(outPending, setOutPending)}
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary" disabled={busy}>
@@ -480,6 +570,7 @@ export default function BookingDetails() {
                   </span>
                 </div>
                 {hoOut.notes && <p className="ho-note">Out: {hoOut.notes}</p>}
+                {renderGallery(photos.out)}
               </>
             )}
 
@@ -526,6 +617,7 @@ export default function BookingDetails() {
                     <label htmlFor="hi-notes">Return notes</label>
                     <input id="hi-notes" name="notes" type="text" placeholder="New damage, missing items" />
                   </div>
+                  {renderCapture(inPending, setInPending)}
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary" disabled={busy}>
@@ -556,6 +648,7 @@ export default function BookingDetails() {
                   </span>
                 </div>
                 {hoIn.notes && <p className="ho-note">In: {hoIn.notes}</p>}
+                {renderGallery(photos.inn)}
               </>
             )}
 
@@ -736,6 +829,13 @@ export default function BookingDetails() {
           </section>
         </div>
       </div>
+
+      {lightbox && (
+        <div className="modal-overlay photo-lightbox" onClick={() => setLightbox(null)}>
+          <img src={lightbox} alt="Handover photo enlarged" onClick={(e) => e.stopPropagation()} />
+          <button type="button" className="photo-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">✕</button>
+        </div>
+      )}
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   fetchMarketplaceListing,
   saveMarketplaceListing,
@@ -9,6 +9,9 @@ import {
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./marketplace.css";
+
+// Module-level cache: plate → listing data. Avoids re-fetching on back-navigation.
+const _cache = new Map();
 
 const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric"];
 const TRANSMISSIONS = ["Automatic", "Manual"];
@@ -54,7 +57,6 @@ function CommissionModal({ onAccept, onClose }) {
 
 export default function MarketplaceListing() {
   const { plate } = useParams();
-  const navigate = useNavigate();
   const decodedPlate = decodeURIComponent(plate);
 
   const [loading, setLoading] = useState(true);
@@ -85,41 +87,53 @@ export default function MarketplaceListing() {
   const [depositAmount, setDepositAmount] = useState("");
   const [commissionAcknowledged, setCommissionAcknowledged] = useState(false);
 
+  function _applyData(data) {
+    setListing(data);
+    setDescription(data.description || "");
+    setSeats(data.seats ?? "");
+    setFuelType(data.fuel_type || "");
+    setTransmission(data.transmission || "");
+    setColor(data.color || "");
+    setMileage(data.mileage ?? "");
+    setFeatures((data.features || []).join(", "));
+    setDailyRate(data.daily_rate ?? "");
+    setWeeklyRate(data.weekly_rate ?? "");
+    setMonthlyRate(data.monthly_rate ?? "");
+    setMinDays(data.min_rental_days ?? "");
+    setMaxDays(data.max_rental_days ?? "");
+    setMinAge(data.min_age_requirement ?? "");
+    setRules(data.rules || "");
+    setLocationName(data.location_name || "");
+    setCoverImage(data.cover_image || "");
+    setDriveSetting(data.drive_setting || "self_only");
+    setDepositRequired(data.deposit_required || false);
+    setDepositAmount(data.deposit_amount ?? "");
+    setCommissionAcknowledged(data.commission_acknowledged || false);
+  }
+
   useEffect(() => {
+    const cached = _cache.get(decodedPlate);
+    if (cached !== undefined) {
+      // Serve from cache immediately — no spinner
+      if (cached !== null) _applyData(cached);
+      setLoading(false);
+      return;
+    }
     fetchMarketplaceListing(decodedPlate)
       .then((data) => {
-        setListing(data);
-        // populate form
-        setDescription(data.description || "");
-        setSeats(data.seats ?? "");
-        setFuelType(data.fuel_type || "");
-        setTransmission(data.transmission || "");
-        setColor(data.color || "");
-        setMileage(data.mileage ?? "");
-        setFeatures((data.features || []).join(", "));
-        setDailyRate(data.daily_rate ?? "");
-        setWeeklyRate(data.weekly_rate ?? "");
-        setMonthlyRate(data.monthly_rate ?? "");
-        setMinDays(data.min_rental_days ?? "");
-        setMaxDays(data.max_rental_days ?? "");
-        setMinAge(data.min_age_requirement ?? "");
-        setRules(data.rules || "");
-        setLocationName(data.location_name || "");
-        setCoverImage(data.cover_image || "");
-        setDriveSetting(data.drive_setting || "self_only");
-        setDepositRequired(data.deposit_required || false);
-        setDepositAmount(data.deposit_amount ?? "");
-        setCommissionAcknowledged(data.commission_acknowledged || false);
+        _cache.set(decodedPlate, data);
+        _applyData(data);
       })
       .catch((err) => {
         if (err.message?.includes("404") || err.status === 404) {
-          // no listing yet — blank form
+          _cache.set(decodedPlate, null); // no listing — cache the absence too
           setListing(null);
         } else {
           setError(err.message);
         }
       })
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decodedPlate]);
 
   function buildPayload() {
@@ -149,13 +163,18 @@ export default function MarketplaceListing() {
     };
   }
 
+  function _updateCache(data) {
+    _cache.set(decodedPlate, data);
+    setListing(data);
+  }
+
   async function handleSave(e) {
     e.preventDefault();
     setSaving(true);
     setError("");
     try {
       const updated = await saveMarketplaceListing(decodedPlate, buildPayload());
-      setListing(updated);
+      _updateCache(updated);
       toast("Marketplace listing saved.");
     } catch (err) {
       setError(err.message);
@@ -175,29 +194,22 @@ export default function MarketplaceListing() {
   async function handleCommissionAccepted() {
     setCommissionAcknowledged(true);
     setShowCommission(false);
-    // Save commission_acknowledged first, then publish
-    setSaving(true);
-    setError("");
-    try {
-      await saveMarketplaceListing(decodedPlate, {
-        ...buildPayload(),
-        commission_acknowledged: true,
-      });
-      await doPublish();
-    } catch (err) {
-      setError(err.message);
-      setSaving(false);
-    }
+    // doPublish saves all fields (including commission_acknowledged=true, which
+    // we just set in state above) then calls /publish in one go.
+    await doPublish();
   }
 
   async function doPublish() {
     setSaving(true);
     setError("");
     try {
-      // Save latest field values first, then publish
-      await saveMarketplaceListing(decodedPlate, buildPayload());
+      // Save current field values then publish in one sequence.
+      // handleCommissionAccepted already saved before calling here, but we
+      // save again to pick up any unsaved edits when publishing directly.
+      const saved = await saveMarketplaceListing(decodedPlate, buildPayload());
+      _updateCache(saved);
       const updated = await publishMarketplaceListing(decodedPlate);
-      setListing(updated);
+      _updateCache(updated);
       toast(`${decodedPlate} is now visible on the Ardena Marketplace.`);
     } catch (err) {
       setError(err.message);
@@ -211,7 +223,7 @@ export default function MarketplaceListing() {
     setError("");
     try {
       const updated = await hideMarketplaceListing(decodedPlate);
-      setListing(updated);
+      _updateCache(updated);
       toast(`${decodedPlate} hidden from the Ardena Marketplace.`);
     } catch (err) {
       setError(err.message);

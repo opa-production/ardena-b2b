@@ -120,12 +120,14 @@ export default function DashboardLayout() {
     navigate("/login");
   }
 
-  // brief skeleton on every route change, standing in for real data fetches
+  // Brief skeleton flash on every route change — just long enough to give
+  // instant visual feedback before the page component mounts and fetches its
+  // own data. Keep this as short as possible; pages manage their own loading.
   const [pageLoading, setPageLoading] = useState(true);
   useEffect(() => {
     setPageLoading(true);
     setNavOpen(false); // close the mobile drawer whenever we navigate
-    const t = setTimeout(() => setPageLoading(false), 600);
+    const t = setTimeout(() => setPageLoading(false), 80);
     return () => clearTimeout(t);
   }, [location.pathname]);
 

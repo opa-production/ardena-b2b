@@ -30,6 +30,7 @@ import {
   assignChauffeur,
   unassignChauffeur,
 } from "./chauffeursStore";
+import PageSkeleton from "./PageSkeleton";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -190,18 +191,7 @@ export default function BookingDetails() {
     pollRef.current = setInterval(tick, 10000);
   }
 
-  if (loading) {
-    return (
-      <>
-        <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </Link>
-        <div className="empty-block fleet-empty"><p>Loading…</p></div>
-      </>
-    );
-  }
+  if (loading) return <PageSkeleton path={`/dashboard/bookings/${ref}`} />;
 
   if (!b) {
     return (

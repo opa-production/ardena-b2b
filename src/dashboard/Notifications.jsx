@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import {
   fetchNotifications,
   markNotificationRead,
@@ -58,6 +59,7 @@ function fmtTime(iso) {
 }
 
 export default function Notifications() {
+  const { pathname } = useLocation();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -124,9 +126,7 @@ export default function Notifications() {
     }
   }
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading notifications…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

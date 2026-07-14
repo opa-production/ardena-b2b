@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import {
   fetchSubscription,
   fetchInvoices,
@@ -51,6 +53,7 @@ function normalizeTxn(t) {
 }
 
 export default function Billing() {
+  const { pathname } = useLocation();
   const [sub, setSub] = useState(null);
   const [invoices, setInvoices] = useState([]);
   const [usage, setUsage] = useState(null);
@@ -203,9 +206,7 @@ export default function Billing() {
     }
   }
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading billing…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   const totalSpend = usage ? usage.total : 0;
   const paidInvoices = invoices.filter((i) => i.status === "Paid");

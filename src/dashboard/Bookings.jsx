@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { fetchBookings } from "../lib/api";
+import PageSkeleton from "./PageSkeleton";
 import { fmtRange, rentalDays } from "./bookingsStore";
 import BookingsTrend from "./charts/BookingsTrend";
 import BookingCalendar from "./BookingCalendar";
@@ -36,6 +37,7 @@ export const PAY_CHIP = {
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 export default function Bookings() {
+  const { pathname } = useLocation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -91,9 +93,7 @@ export default function Bookings() {
     };
   }, [bookings]);
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading bookings…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

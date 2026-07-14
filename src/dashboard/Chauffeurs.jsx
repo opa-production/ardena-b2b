@@ -1,13 +1,15 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   subscribe,
   getChauffeurs,
+  isChauffeursLoaded,
   removeChauffeur,
   CH_CHIP,
   fmtDay,
   licenceState,
 } from "./chauffeursStore";
+import PageSkeleton from "./PageSkeleton";
 import ConfirmDialog from "../components/ConfirmDialog";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
@@ -34,7 +36,9 @@ function Stars({ value }) {
 
 export default function Chauffeurs() {
   usePageTitle("Chauffeurs");
+  const { pathname } = useLocation();
   const chauffeurs = useSyncExternalStore(subscribe, getChauffeurs);
+  const loaded = useSyncExternalStore(subscribe, isChauffeursLoaded);
   const [query, setQuery] = useState("");
   const [pendingDelete, setPendingDelete] = useState(null);
 
@@ -103,7 +107,9 @@ export default function Chauffeurs() {
         </article>
       </div>
 
-      {chauffeurs.length === 0 ? (
+      {!loaded && chauffeurs.length === 0 ? (
+        <PageSkeleton path={pathname} />
+      ) : chauffeurs.length === 0 ? (
         <section className="panel-card">
           <EmptyState
             icon={EMPTY_ICONS.clients}

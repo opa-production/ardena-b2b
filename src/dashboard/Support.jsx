@@ -114,7 +114,11 @@ export default function Support() {
 
         <div className="chat-thread" ref={threadRef} aria-live="polite">
           {loading && messages.length === 0 && (
-            <p className="typing">Loading messages…</p>
+            <div className="sk-chat" style={{ padding: "16px 0" }}>
+              {[{ w: "52%" }, { w: "40%", r: true }, { w: "58%" }, { w: "34%", r: true }].map((b, i) => (
+                <span key={i} className={`sk sk-bubble${b.r ? " right" : ""}`} style={{ width: b.w }} />
+              ))}
+            </div>
           )}
           {messages.map((m) => (
             <div key={m.id} className={`msg ${m.from}`}>

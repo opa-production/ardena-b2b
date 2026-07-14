@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import {
   fetchStaff,
   inviteStaff,
@@ -46,6 +48,7 @@ function fmtAt(iso) {
 }
 
 export default function Staff() {
+  const { pathname } = useLocation();
   const [members, setMembers] = useState([]);
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,9 +182,7 @@ export default function Staff() {
     }
   }
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading team…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   const logPages = Math.ceil(logTotal / 20);
 

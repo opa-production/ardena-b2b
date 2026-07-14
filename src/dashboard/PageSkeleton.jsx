@@ -209,7 +209,7 @@ export default function PageSkeleton({ path }) {
   }
 
   // ---- Detail pages: header card + info card stack + side cards
-  if (sub && ["fleet", "bookings", "clients"].includes(section)) {
+  if (sub && ["fleet", "bookings", "clients", "chauffeurs"].includes(section)) {
     return (
       <div aria-hidden="true">
         <HeadCard />

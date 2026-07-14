@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import { fetchPayments, fetchPaymentsSummary } from "../lib/api";
 import CollectionsArea from "./charts/CollectionsArea";
 import PaymentDonut from "./charts/PaymentDonut";
@@ -17,6 +18,7 @@ const TYPE_CHIP = {
 };
 
 export default function Payments() {
+  const { pathname } = useLocation();
   const [payments, setPayments] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,9 +81,7 @@ export default function Payments() {
 
   const processed = payments.filter((p) => p.status === "completed").slice(0, 8);
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading payments…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import BookingHeatmap from "./charts/BookingHeatmap";
 import RevenueDumbbell from "./charts/RevenueDumbbell";
 import UtilisationTrend from "./charts/UtilisationTrend";
@@ -34,6 +36,7 @@ const EXPORT_TYPES = [
 ];
 
 export default function Overview() {
+  const { pathname } = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(null);
@@ -92,9 +95,7 @@ export default function Overview() {
       ]
     : [];
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading overview…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

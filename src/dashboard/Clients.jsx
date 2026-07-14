@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import PageSkeleton from "./PageSkeleton";
 import { fetchClients, deleteClient } from "../lib/api";
 import { toast } from "./toastStore";
 import ConfirmDialog from "../components/ConfirmDialog";
@@ -18,6 +19,7 @@ export const VERIF_CHIP = {
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 export default function Clients() {
+  const { pathname } = useLocation();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -75,9 +77,7 @@ export default function Clients() {
     }
   }
 
-  if (loading) {
-    return <div className="empty-block fleet-empty"><p>Loading clients…</p></div>;
-  }
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

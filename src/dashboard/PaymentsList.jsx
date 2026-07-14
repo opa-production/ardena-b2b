@@ -128,7 +128,11 @@ export default function PaymentsList() {
         </div>
 
         {loading ? (
-          <div className="empty-block fleet-empty"><p>Loading…</p></div>
+          <div className="sk-rows" style={{ marginTop: 20 }}>
+            {Array.from({ length: 6 }, (_, i) => (
+              <span key={i} className="sk" style={{ height: 15, width: "100%" }} />
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             compact

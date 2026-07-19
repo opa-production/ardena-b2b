@@ -4,7 +4,8 @@ import PageSkeleton from "./PageSkeleton";
 import {
   fetchSubscription,
   fetchInvoices,
-  payInvoice,
+  payInvoiceMpesa,
+  checkInvoiceCharge,
   fetchBillingUsage,
   fetchWalletTransactions,
 } from "../lib/api";
@@ -60,7 +61,15 @@ export default function Billing() {
   const [usage, setUsage] = useState(null);
   const [txns, setTxns] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [payingRef, setPayingRef] = useState(null);
+  // invoice STK push modal
+  const [invModal, setInvModal] = useState(null); // the invoice being paid, or null
+  const [invPhone, setInvPhone] = useState("");
+  const [invProvider, setInvProvider] = useState("mpesa");
+  const [invBusy, setInvBusy] = useState(false);
+  const [invWaiting, setInvWaiting] = useState(false);
+  const invPollRef = useRef(null);
+  const invPollDeadlineRef = useRef(null);
+  const invPsRefRef = useRef(null);
 
   // top-up modal + polling
   const [topupModal, setTopupModal] = useState(false);
@@ -96,10 +105,11 @@ export default function Billing() {
     load();
   }, [load]);
 
-  // stop polling if the user leaves the page mid-top-up
+  // stop all polling if the user leaves the page mid-payment
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
+      if (invPollRef.current) clearInterval(invPollRef.current);
     };
   }, []);
 
@@ -185,25 +195,74 @@ export default function Billing() {
     }
   }
 
-  async function handlePayInvoice(inv) {
-    if (payingRef) return;
-    setPayingRef(inv.ref);
-    try {
-      // Use existing checkout_url if available, otherwise initiate via API
-      let checkout = inv.checkout_url;
-      if (!checkout) {
-        const result = await payInvoice(inv.ref);
-        checkout = result.checkout_url;
-        // Refresh to get updated checkout_url stored on invoice
-        const updated = await fetchInvoices();
-        setInvoices(updated.data || []);
+  function stopInvPolling() {
+    if (invPollRef.current) { clearInterval(invPollRef.current); invPollRef.current = null; }
+    invPsRefRef.current = null;
+    setInvWaiting(false);
+  }
+
+  function startInvPolling(psRef) {
+    invPsRefRef.current = psRef;
+    setInvWaiting(true);
+    invPollDeadlineRef.current = Date.now() + 3 * 60 * 1000;
+    let inFlight = false;
+
+    async function tick() {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const ref = invPsRefRef.current;
+        if (!ref) { stopInvPolling(); return; }
+
+        if (Date.now() > invPollDeadlineRef.current) {
+          stopInvPolling();
+          toast("STK push expired — please try again.", "warn");
+          await load();
+          return;
+        }
+
+        const res = await checkInvoiceCharge(ref);
+        if (res.charge_status === "success") {
+          stopInvPolling();
+          await load();
+          toast("Payment confirmed! Your subscription is active.");
+        } else if (res.charge_status === "failed" || res.charge_status === "timeout") {
+          stopInvPolling();
+          await load();
+          toast(res.message || "Payment was not completed. You can try again.", "danger");
+        }
+        // pending / error → retry next tick silently
+      } catch {
+        // network hiccup — retry
+      } finally {
+        inFlight = false;
       }
-      window.open(checkout, "_blank", "noopener,noreferrer");
-      toast("Paystack checkout opened — complete your payment there.");
+    }
+
+    invPollRef.current = setInterval(tick, 10000);
+  }
+
+  function openInvModal(inv) {
+    setInvModal(inv);
+    setInvPhone("");
+    setInvProvider("mpesa");
+  }
+
+  async function handleInvMpesa(e) {
+    e.preventDefault();
+    if (invBusy || !invModal) return;
+    const phone = invPhone.trim();
+    if (!phone) { toast("Enter your M-Pesa phone number.", "danger"); return; }
+    setInvBusy(true);
+    try {
+      const res = await payInvoiceMpesa(invModal.ref, { phone, provider: invProvider });
+      setInvModal(null);
+      toast(res.message || "STK push sent — enter your PIN.");
+      if (res.paystack_reference) startInvPolling(res.paystack_reference);
     } catch (err) {
-      toast(err.message || "Failed to initiate payment", "danger");
+      toast(err.message || "Failed to send payment request.", "danger");
     } finally {
-      setPayingRef(null);
+      setInvBusy(false);
     }
   }
 
@@ -386,10 +445,10 @@ export default function Billing() {
                     <button
                       type="button"
                       className="btn btn-primary invoice-pay"
-                      disabled={payingRef === inv.ref}
-                      onClick={() => handlePayInvoice(inv)}
+                      disabled={invWaiting}
+                      onClick={() => openInvModal(inv)}
                     >
-                      {payingRef === inv.ref ? "Opening…" : "Pay now"}
+                      {invWaiting ? "Waiting…" : "Pay now"}
                     </button>
                   ) : (
                     <span className="invoice-status">
@@ -475,6 +534,66 @@ export default function Billing() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* ---- Invoice STK push modal ---- */}
+      {invModal && (
+        <div className="modal-overlay" onClick={() => !invBusy && setInvModal(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Pay subscription</h3>
+              <button type="button" className="icon-btn" disabled={invBusy} onClick={() => setInvModal(null)}>✕</button>
+            </header>
+            <form onSubmit={handleInvMpesa} className="modal-body">
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                {invModal.title} — <strong>KES {fmtAmount(invModal.amount)}</strong>
+              </p>
+              <fieldset className="provider-group">
+                <legend className="field-label">Payment method</legend>
+                <label className="provider-option">
+                  <input type="radio" name="inv-provider" value="mpesa" checked={invProvider === "mpesa"} onChange={() => setInvProvider("mpesa")} />
+                  <span className="provider-pill mpesa-pill">M-Pesa</span>
+                </label>
+                <label className="provider-option">
+                  <input type="radio" name="inv-provider" value="airtel" checked={invProvider === "airtel"} onChange={() => setInvProvider("airtel")} />
+                  <span className="provider-pill airtel-pill">Airtel Money</span>
+                </label>
+              </fieldset>
+              <label className="field-label">
+                Phone number
+                <input
+                  type="tel"
+                  className="field-input"
+                  value={invPhone}
+                  onChange={(e) => setInvPhone(e.target.value)}
+                  placeholder="07XXXXXXXX"
+                  required
+                  autoFocus
+                />
+              </label>
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                An STK push will be sent to this number — enter your PIN to confirm.
+              </p>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-ghost" disabled={invBusy} onClick={() => setInvModal(null)}>Cancel</button>
+                <button type="submit" className="btn mpesa-btn" disabled={invBusy}>
+                  {invBusy ? "Sending…" : "Send payment request"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ---- Invoice payment waiting indicator ---- */}
+      {invWaiting && (
+        <div style={{ position: "fixed", bottom: "80px", left: "50%", transform: "translateX(-50%)", zIndex: 200 }}>
+          <span className="pay-waiting">
+            <span className="pay-waiting-dot" />
+            Waiting for payment…
+            <button type="button" className="icon-btn" onClick={stopInvPolling}>Stop</button>
+          </span>
         </div>
       )}
     </>

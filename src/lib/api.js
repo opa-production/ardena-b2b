@@ -530,9 +530,17 @@ export function fetchInvoices() {
   return request("/billing/invoices");
 }
 
-// → { checkout_url, reference }
-export function payInvoice(ref) {
-  return request(`/billing/invoices/${encodeURIComponent(ref)}/pay`, { method: "POST" });
+// → { success, paystack_reference, message }
+export function payInvoiceMpesa(ref, { phone, provider = "mpesa" }) {
+  return request(`/billing/invoices/${encodeURIComponent(ref)}/pay/mpesa`, {
+    method: "POST",
+    body: JSON.stringify({ phone, provider }),
+  });
+}
+
+// → { charge_status, invoice_status, message }
+export function checkInvoiceCharge(paystackRef) {
+  return request(`/billing/invoices/check/${encodeURIComponent(paystackRef)}`);
 }
 
 // { items, total, checks_used, wallet_balance, check_price }

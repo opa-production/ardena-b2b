@@ -68,6 +68,12 @@ export const ICONS = {
       <path d="M7 15h4" />
     </svg>
   ),
+  assistant: (
+    <svg {...base}>
+      <path d="M20.5 12.5a7.5 7.5 0 01-7.5 7.5H4.5l2-2.6A7.5 7.5 0 1120.5 12.5z" />
+      <path d="M9 11.5h6M9 14.5h3.5" />
+    </svg>
+  ),
   staff: (
     <svg {...base}>
       <circle cx="12" cy="7.5" r="3.2" />

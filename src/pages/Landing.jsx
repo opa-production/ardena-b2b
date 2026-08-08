@@ -5,8 +5,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import SiteNav from "../components/SiteNav";
 import SiteFooter from "../components/SiteFooter";
 import PricingPlans from "../components/PricingPlans";
-import HeroOrbit from "../components/HeroOrbit";
-import { MODULES, RATE, LAUNCH_RATE } from "./pricingData";
+import { PILLARS, RATE, LAUNCH_RATE } from "./pricingData";
 import "./landing.css";
 
 function Reveal({ as: Tag = "div", className = "", children }) {
@@ -57,9 +56,8 @@ export default function Landing() {
     <div className="landing">
       <SiteNav />
 
-      {/* ---- Hero (clean, animated flow field) ---- */}
+      {/* ---- Hero (clean page, copy only) ---- */}
       <section className="panel hero">
-        <HeroOrbit />
         <div className="hero-body">
           <div className="hero-copy">
             <h1>
@@ -97,19 +95,23 @@ export default function Landing() {
         </a>
       </section>
 
-      {/* ---- Modules (black) ---- */}
-      <section className="panel modules" id="modules">
+      {/* ---- Pillars (white) ---- */}
+      <section className="panel pillars" id="modules">
         <Reveal className="section-head">
           <h2>One subscription. The whole operation.</h2>
         </Reveal>
-        <Reveal className="module-grid">
-          {MODULES.map((m) => (
-            <article className="module-card" key={m.title}>
-              <span className="module-dot" />
-              <h3>{m.title}</h3>
-              <p>{m.desc}</p>
-            </article>
+        <Reveal className="pillar-list">
+          {PILLARS.map((p, i) => (
+            <div className="pillar" key={p.title}>
+              <span className="pillar-no">{String(i + 1).padStart(2, "0")}</span>
+              <h3>{p.title}</h3>
+              <p>{p.desc}</p>
+            </div>
           ))}
+          <p className="pillar-note">
+            Client profiles, staff roles, notifications and reports come with
+            all of it. <Link to="/pricing">See everything included</Link>.
+          </p>
         </Reveal>
       </section>
 

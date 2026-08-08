@@ -21,6 +21,7 @@ export const NAV_SECTIONS = [
   {
     label: "Workspace",
     items: [
+      { to: "/dashboard/assistant", key: "assistant", name: "Assistant" },
       { to: "/dashboard/staff", key: "staff", name: "Staff & roles" },
       { to: "/dashboard/notifications", key: "notifications", name: "Notifications" },
       { to: "/dashboard/settings", key: "settings", name: "Settings" },
@@ -29,6 +30,7 @@ export const NAV_SECTIONS = [
 ];
 
 export const SECTION_TITLES = {
+  assistant: "Assistant",
   fleet: "Fleet",
   bookings: "Bookings",
   clients: "Clients",

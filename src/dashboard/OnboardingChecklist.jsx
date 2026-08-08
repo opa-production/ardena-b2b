@@ -72,8 +72,16 @@ export default function OnboardingChecklist() {
           </p>
         </div>
         <div className="onboard-right">
-          <span className="onboard-bar">
-            <i style={{ width: `${(done / STEPS.length) * 100}%` }} />
+          {/* progress as one dot per step — reads at a glance and sits flush
+              with the dismiss button instead of a bar stretching the header */}
+          <span
+            className="onboard-pips"
+            role="img"
+            aria-label={`${done} of ${STEPS.length} steps done`}
+          >
+            {STEPS.map((s, i) => (
+              <i key={s.key} className={i < done ? "on" : ""} />
+            ))}
           </span>
           <button
             type="button"

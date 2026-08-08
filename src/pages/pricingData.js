@@ -36,6 +36,27 @@ export const MODULES = [
   },
 ];
 
+/* The landing page leads with four pillars rather than all eight modules —
+   the full list still appears on /pricing, where people are comparing. */
+export const PILLARS = [
+  {
+    title: "Fleet",
+    desc: "Every vehicle, document and rate in one registry, with availability at a glance.",
+  },
+  {
+    title: "Bookings",
+    desc: "Create, confirm and track reservations, with double-bookings caught automatically.",
+  },
+  {
+    title: "Verification",
+    desc: "Check a renter's ID, licence and liveness in seconds, before they drive off.",
+  },
+  {
+    title: "Payments",
+    desc: "Prompt any customer to pay from their booking. M-Pesa first, tracked end to end.",
+  },
+];
+
 /* Per-vehicle pricing: launch rate for the first 3 months, standard after.
    Verification is pay as you go. */
 export const RATE = 400;

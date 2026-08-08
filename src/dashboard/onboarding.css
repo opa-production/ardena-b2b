@@ -28,19 +28,22 @@
   gap: 12px;
 }
 
-.onboard-bar {
-  width: 140px;
-  height: 8px;
-  background: var(--surface);
-  box-shadow: var(--neo-in);
-  overflow: hidden;
+.onboard-pips {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.onboard-bar i {
-  display: block;
-  height: 100%;
+.onboard-pips i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  transition: background 0.3s var(--ease);
+}
+
+.onboard-pips i.on {
   background: #0b7a37;
-  transition: width 0.3s var(--ease);
 }
 
 .onboard-dismiss {

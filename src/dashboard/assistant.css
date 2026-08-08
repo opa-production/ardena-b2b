@@ -1,0 +1,156 @@
+/* ---- Assistant: full-height chat page ----
+   Builds on the Support chat primitives (.chat-thread, .msg, .chat-composer)
+   in support.css; this file only adds what's specific to the agent. */
+
+.assist-card {
+  display: flex;
+  flex-direction: column;
+  /* fill the content area so the composer sits at the bottom of the page
+     rather than floating mid-screen on a short thread */
+  min-height: calc(100vh - 96px);
+}
+
+.assist-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* honest about what this is until the backend agent is wired in */
+.assist-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  background: var(--brand-soft);
+  color: var(--brand-dark);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  vertical-align: 1px;
+}
+
+.assist-clear {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  box-shadow: var(--neo-out-sm);
+  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.assist-clear:hover {
+  color: var(--ink);
+}
+
+.assist-clear:active {
+  box-shadow: var(--neo-in);
+}
+
+.assist-thread {
+  flex: 1;
+  height: auto;
+  min-height: 260px;
+}
+
+/* the agent's replies run longer than support's, so give them more room */
+.assist-thread .msg.support {
+  max-width: 84%;
+}
+
+/* jump link under an answer, straight to the screen it describes */
+.assist-jump {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--brand-dark);
+  transition: gap 0.15s var(--ease);
+}
+
+.assist-jump:hover {
+  gap: 9px;
+}
+
+/* three-dot typing indicator */
+.assist-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  width: fit-content;
+}
+
+.assist-typing i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink-mute);
+  animation: assist-blink 1.2s var(--ease) infinite;
+}
+
+.assist-typing i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.assist-typing i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes assist-blink {
+  0%,
+  60%,
+  100% {
+    opacity: 0.28;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assist-typing i {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* starter prompts, shown only on an untouched thread */
+.assist-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.assist-suggestions button {
+  padding: 8px 13px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: var(--bg);
+  box-shadow: var(--neo-out-sm);
+  text-align: left;
+  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.assist-suggestions button:hover {
+  color: var(--ink);
+}
+
+.assist-suggestions button:active {
+  box-shadow: var(--neo-in);
+}
+
+.assist-note {
+  margin-top: 12px;
+  font-size: 11.5px;
+  color: var(--ink-mute);
+  line-height: 1.5;
+}

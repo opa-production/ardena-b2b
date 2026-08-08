@@ -29,6 +29,7 @@ import Verification from "./dashboard/Verification";
 import VerificationsList from "./dashboard/VerificationsList";
 import Payments from "./dashboard/Payments";
 import PaymentsList from "./dashboard/PaymentsList";
+import Assistant from "./dashboard/Assistant";
 import Staff from "./dashboard/Staff";
 import Billing from "./dashboard/Billing";
 import Support from "./dashboard/Support";
@@ -84,6 +85,7 @@ export default function App() {
         <Route path="verification/all" element={<VerificationsList />} />
         <Route path="payments" element={<Payments />} />
         <Route path="payments/all" element={<PaymentsList />} />
+        <Route path="assistant" element={<Assistant />} />
         <Route path="staff" element={<Staff />} />
         <Route path="billing" element={<Billing />} />
         <Route path="support" element={<Support />} />

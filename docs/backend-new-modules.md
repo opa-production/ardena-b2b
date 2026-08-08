@@ -251,3 +251,73 @@ reads the token from `/config`.
 | Tracking | `trackingStore.js` (localStorage + simulator) | D |
 | Wallet top-ups card | `fetchWalletTransactions()` | E |
 | Paid → Confirmed | `confirmIfPaid()` in `BookingDetails.jsx` | F |
+| Assistant chat | `assistantStore.js` + `assistantKnowledge.js` (local agent) | G |
+
+---
+
+## G. Assistant (AI agent for the B2B dashboard)
+
+A conversational agent inside the host dashboard that answers questions about
+how Ardena works **and** about the caller's own workspace. The frontend page
+(`Assistant.jsx`) is built and shipping against a local stand-in agent; these
+endpoints replace that stand-in with no UI rework.
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/assistant/messages` | Current conversation for the caller. |
+| POST | `/assistant/messages` | Send a user turn, get the agent's reply. |
+| DELETE | `/assistant/messages` | Start a fresh conversation ("New chat"). |
+
+Message object:
+
+```json
+{
+  "id": 12,
+  "role": "agent",
+  "text": "Renter verification is pay as you go — KES 100 per check…",
+  "action": { "label": "Open verification", "path": "/dashboard/verification" },
+  "at": "2026-08-07T09:31:04Z"
+}
+```
+
+- `role` ∈ `user` | `agent`.
+- `action` is optional (`null` when there's nowhere useful to send them). When
+  present, the frontend renders it as a jump link under the reply — `path` must
+  be an **in-app route**, never an external URL.
+- `GET` returns `{ "messages": [...] }`. `POST` takes `{ "text": "…" }` and
+  returns the single new agent message; the frontend already appended the
+  user's turn optimistically.
+
+### Grounding — making it B2B-knowledgeable
+
+Two sources, both required:
+
+1. **Product knowledge.** `src/dashboard/assistantKnowledge.js` holds the
+   canonical corpus the stand-in uses today: pricing, verification, payments,
+   fleet, bookings, clients, chauffeurs, tracking, staff/roles, marketplace,
+   notifications, reports, data isolation. Lift it into the system prompt or a
+   retrieval index so answers don't drift when the agent takes over. Pricing
+   numbers must stay in step with `src/pages/pricingData.js`.
+2. **Workspace data.** Questions like "what's in my fleet" or "how many
+   bookings do I have" must be answered from the caller's real rows. Give the
+   agent read-only tools scoped to the authenticated business —
+   `list_vehicles`, `list_bookings`, `list_clients`, `wallet_balance` — rather
+   than pasting data into the prompt.
+
+### Hard constraints
+
+- **Tenant isolation.** Every tool call is scoped to the caller's `business_id`.
+  The agent must never be able to read another business's rows, and prompt text
+  must never be able to widen that scope.
+- **Read-only.** No booking creation, status change, payment prompt, refund or
+  wallet spend from the agent. It answers and links; the user acts. Anything
+  money-moving stays behind the normal UI with its `Idempotency-Key`.
+- **Prompt injection.** Vehicle names, client notes and booking references are
+  user-supplied and reach the agent through tool results — treat them as data,
+  never as instructions.
+- **Rate limiting.** Per-business cap on turns; return `429` with
+  `{ "detail": "…" }` and the frontend surfaces it as a normal error.
+
+A shared agent is planned for the client-facing app too. Keep the tool layer
+generic but the **grounding corpus and tool scopes separate** — a renter must
+never reach host-side fleet or revenue data.

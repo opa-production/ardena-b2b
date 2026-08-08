@@ -551,6 +551,26 @@ export function fetchSupportUnread() {
   return request("/support/messages/unread-count");
 }
 
+/* ---- Assistant (docs/backend-new-modules.md §G) ----
+   Not live yet. The Assistant page answers from assistantStore.js's local
+   agent; when this endpoint ships, swap the body of that store's reply() for
+   a call to sendAssistantMessage and the page is unchanged. */
+
+// { messages: [{ id, role, text, action, at }] }
+export function fetchAssistantThread() {
+  return request("/assistant/messages");
+}
+
+// { text } → { id, role: "agent", text, action: { label, path } | null, at }
+export function sendAssistantMessage(text) {
+  return request("/assistant/messages", { method: "POST", body: { text } });
+}
+
+// Start a fresh conversation; the old transcript stays retrievable server-side
+export function resetAssistantThread() {
+  return request("/assistant/messages", { method: "DELETE" });
+}
+
 /* ---- Overview & reports (§11) ---- */
 
 // period: "30d" (default) | "90d"

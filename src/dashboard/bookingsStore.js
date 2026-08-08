@@ -21,6 +21,13 @@ export function subscribe(fn) {
   return () => listeners.delete(fn);
 }
 
+/* Replace the whole list (demo seeding today; the Bookings page should call
+   this after its fetch so the onboarding checklist reflects real rows). */
+export function hydrateBookings(list) {
+  bookings = Array.isArray(list) ? list : [];
+  emit();
+}
+
 export function getBookings() {
   return bookings;
 }

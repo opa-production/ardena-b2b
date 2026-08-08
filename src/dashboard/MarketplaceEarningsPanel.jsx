@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
@@ -82,10 +82,17 @@ export default function MarketplaceEarningsPanel({
   const canWithdraw = can("manageWithdrawals");
 
   const [amount, setAmount] = useState("");
-  const [methodId, setMethodId] = useState(() =>
-    methods.length ? String(methods[0].id) : ""
-  );
+  const [methodId, setMethodId] = useState("");
   const [busy, setBusy] = useState(false);
+
+  // `methods` is loaded by the parent and arrives after mount, so default the
+  // selection once it does — and clear it if the chosen destination is deleted.
+  useEffect(() => {
+    setMethodId((current) => {
+      if (current && methods.some((m) => String(m.id) === current)) return current;
+      return methods.length ? String(methods[0].id) : "";
+    });
+  }, [methods]);
 
   async function handleWithdraw(e) {
     e.preventDefault();

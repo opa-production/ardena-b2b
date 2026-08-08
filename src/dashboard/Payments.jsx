@@ -57,8 +57,13 @@ export default function Payments() {
 
   // /dashboard/payments/marketplace still works — it just opens this page on
   // the app tab, so old links and bookmarks land somewhere sensible.
-  const wantsApp = pathname.endsWith("/marketplace");
-  const [tab, setTab] = useState(wantsApp && canSeeApp ? "app" : "direct");
+  //
+  // Derived from the URL rather than held in state: `canSeeApp` depends on
+  // business.appLinked, which arrives a moment after mount via fetchBusiness.
+  // A useState initialiser would snapshot it while still false and strand a
+  // deep link to /marketplace on the direct tab. Deriving lets it correct
+  // itself the instant the profile hydrates, and keeps back/forward honest.
+  const tab = pathname.endsWith("/marketplace") && canSeeApp ? "app" : "direct";
 
   const [payments, setPayments] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -104,8 +109,9 @@ export default function Payments() {
 
   // Keep the tab and the URL in step, so a refresh or a back-button press
   // returns to the side the user was actually looking at.
+  // The URL is the single source of truth for which tab is showing, so
+  // switching is just a navigation.
   function switchTab(next) {
-    setTab(next);
     navigate(
       next === "app" ? "/dashboard/payments/marketplace" : "/dashboard/payments",
       { replace: true }

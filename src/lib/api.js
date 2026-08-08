@@ -5,6 +5,7 @@
 // The backend is FastAPI: errors come back as { detail: string } or
 // { detail: [{ loc, msg }, ...] } for validation failures.
 import { getSession, setSession, clearSession } from "./authStore";
+import { isDemo, demoRequest, demoExport } from "./demoMode";
 import { resetBusiness } from "../dashboard/businessStore";
 import { resetOnboarding } from "../dashboard/onboardingStore";
 import { resetFleet } from "../dashboard/fleetStore";
@@ -80,6 +81,10 @@ function refreshSession() {
 }
 
 async function request(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false) {
+  // Demo mode short-circuits the network entirely — one seam, so every
+  // endpoint below is covered without each function knowing about it.
+  if (isDemo()) return demoRequest(path, { method, body });
+
   const headers = { ...extra };
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -600,6 +605,10 @@ export function fetchOverview(period = "30d") {
 // Fetches CSV as a Blob and triggers browser download.
 // type: "bookings" | "payments" | "clients"
 export async function exportReport({ type, from, to } = {}) {
+  // This one bypasses request() because it streams a file, so demo mode has
+  // to be handled here too — it downloads a real CSV built from demo rows.
+  if (isDemo()) return demoExport(type);
+
   const params = new URLSearchParams({ type });
   if (from) params.set("from", from);
   if (to) params.set("to", to);

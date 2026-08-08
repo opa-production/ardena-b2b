@@ -87,3 +87,9 @@
   color: var(--on-ink);
   background: var(--brand);
 }
+
+/* In the narrow Support side rail the unread badge sits over the preview
+   text, so reserve room for it on the line it shares. */
+.details-side .inbox-preview {
+  padding-right: 26px;
+}

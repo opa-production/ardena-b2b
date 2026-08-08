@@ -1,14 +1,7 @@
 // PDF documents (rental agreement, vehicle statements) built with jsPDF.
 // jsPDF is imported lazily so it only loads when a download is clicked.
-// Mock business identity until tenant settings drive it.
 import { rentalDays, fmtDate } from "./bookingsStore.js";
-
-const BUSINESS = {
-  name: "Acme Car Hire",
-  location: "Westlands, Nairobi, Kenya",
-  phone: "0700 123 456",
-  email: "hello@acmecarhire.co.ke",
-};
+import { getBusiness } from "./businessStore.js";
 
 const INK = "#0a0d12";
 const SOFT = "#545c68";
@@ -84,13 +77,18 @@ export async function downloadAgreement(b, policy) {
   const days = rentalDays(b.pickup, b.dropoff);
   const total = days * b.rate;
 
+  const biz = getBusiness();
+  const bizName = biz.name || "Car Hire";
+  const bizLocation = biz.location || "";
+  const bizContact = [biz.phone, biz.email].filter(Boolean).join(" · ");
+
   let y = header(doc, "RENTAL AGREEMENT", `${b.ref} · ${fmtDate(b.created)}`);
 
   y = sectionTitle(doc, "Parties", y);
-  y = row(doc, "Owner / operator", `${BUSINESS.name}, ${BUSINESS.location}`, y);
-  y = row(doc, "Owner contact", `${BUSINESS.phone} · ${BUSINESS.email}`, y);
+  y = row(doc, "Owner / operator", bizLocation ? `${bizName}, ${bizLocation}` : bizName, y);
+  if (bizContact) y = row(doc, "Owner contact", bizContact, y);
   y = row(doc, "Renter", b.customer, y);
-  y = row(doc, "Renter phone", b.phone, y);
+  if (b.phone) y = row(doc, "Renter phone", b.phone, y);
   y = row(doc, "Identity verification", b.verification, y);
   y += 4;
 
@@ -115,7 +113,7 @@ export async function downloadAgreement(b, policy) {
     `3. A refundable security deposit of ${kes(policy.deposit)} is held for the rental and returned after check-in, less any penalties or damage costs.`,
     `4. The renter's identity was verified through the Ardena platform before handover.`,
     `5. The vehicle may only be driven by the named renter within Kenya unless agreed in writing.`,
-    `6. Payments are made through the official ${BUSINESS.name} M-Pesa line. Any other payment request should be treated as fraud.`,
+    `6. Payments are made through the official ${bizName} M-Pesa line. Any other payment request should be treated as fraud.`,
   ];
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8.8);
@@ -132,7 +130,7 @@ export async function downloadAgreement(b, policy) {
   doc.line(124, y, 194, y);
   doc.setFontSize(8.5);
   doc.setTextColor(MUTE);
-  doc.text(`${BUSINESS.name} (owner)`, 16, y + 5);
+  doc.text(`${bizName} (owner)`, 16, y + 5);
   doc.text(`${b.customer} (renter)`, 124, y + 5);
   doc.text("Date:", 16, y + 12);
   doc.text("Date:", 124, y + 12);

@@ -284,7 +284,13 @@ export function topupWallet(payload, idempotencyKey) {
   });
 }
 
-// Poll a top-up's status after returning from checkout / an STK prompt
+// Poll a top-up's status after returning from checkout / an STK prompt.
+// Works for both M-Pesa (Paystack charge) and card (Paystack checkout).
+export function checkTopupStatus(reference) {
+  return request(`/verification/wallet/topup/check/${encodeURIComponent(reference)}`);
+}
+
+// Legacy card-only verify (Paystack redirect flow). Keep for direct use.
 export function verifyTopup(reference) {
   return request("/verification/wallet/topup/verify", {
     method: "POST",
@@ -514,14 +520,27 @@ export function fetchSubscription() {
   return request("/billing/subscription");
 }
 
+// { gated, status, vehicle_count, due_amount, fleet_cap }
+export function fetchBillingGate() {
+  return request("/billing/gate");
+}
+
 // { data: [{ ref, title, detail, amount, status, due_date, paid_at, checkout_url }], has_due }
 export function fetchInvoices() {
   return request("/billing/invoices");
 }
 
-// → { checkout_url, reference }
-export function payInvoice(ref) {
-  return request(`/billing/invoices/${encodeURIComponent(ref)}/pay`, { method: "POST" });
+// → { success, paystack_reference, message }
+export function payInvoiceMpesa(ref, { phone, provider = "mpesa" }) {
+  return request(`/billing/invoices/${encodeURIComponent(ref)}/pay/mpesa`, {
+    method: "POST",
+    body: JSON.stringify({ phone, provider }),
+  });
+}
+
+// → { charge_status, invoice_status, message }
+export function checkInvoiceCharge(paystackRef) {
+  return request(`/billing/invoices/check/${encodeURIComponent(paystackRef)}`);
 }
 
 // { items, total, checks_used, wallet_balance, check_price }

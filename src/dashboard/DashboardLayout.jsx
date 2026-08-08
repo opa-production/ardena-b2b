@@ -29,6 +29,7 @@ import {
   fetchOnboarding,
   fetchUnreadCount,
   fetchSupportUnread,
+  fetchBillingGate,
   logout,
 } from "../lib/api";
 import Logo from "../components/Logo";
@@ -36,6 +37,38 @@ import usePageTitle from "../hooks/usePageTitle";
 import PageSkeleton from "./PageSkeleton";
 import Toasts from "./Toasts";
 import "./dashboard.css";
+
+function PaymentWall({ gate }) {
+  const navigate = useNavigate();
+  const fmtAmt = (n) => Number(n).toLocaleString("en-KE");
+  return (
+    <div className="pay-wall">
+      <div className="pay-wall-card">
+        <div className="pay-wall-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </div>
+        <h2>Subscription past due</h2>
+        <p>Your dashboard is paused. Settle your outstanding balance to continue.</p>
+        <div className="pay-wall-amount">
+          <span className="pay-wall-detail">
+            {gate.vehicle_count} vehicle{gate.vehicle_count !== 1 ? "s" : ""} × KES 200 / month
+          </span>
+          <span className="pay-wall-total">KES {fmtAmt(gate.due_amount)}</span>
+        </div>
+        <button type="button" className="btn btn-primary" onClick={() => navigate("/dashboard/billing")}>
+          Go to Billing
+        </button>
+        <button type="button" className="btn btn-ghost" style={{ width: "100%", marginTop: "8px" }} onClick={() => navigate("/dashboard/support")}>
+          Contact support
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardLayout() {
   usePageTitle("Dashboard");
@@ -47,6 +80,7 @@ export default function DashboardLayout() {
 
   const [unread, setUnread] = useState(0);
   const [supportUnread, setSupportUnread] = useState(0);
+  const [gate, setGate] = useState(null);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const theme = useSyncExternalStore(subscribeTheme, getTheme);
 
@@ -118,6 +152,11 @@ export default function DashboardLayout() {
     await logout();
     navigate("/login");
   }
+
+  // Re-check subscription gate on every route change (clears after paying on /billing).
+  useEffect(() => {
+    fetchBillingGate().then(setGate).catch(() => {});
+  }, [location.pathname]);
 
   // Brief skeleton flash on every route change — just long enough to give
   // instant visual feedback before the page component mounts and fetches its
@@ -290,7 +329,13 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="dash-content">
-        {pageLoading ? <PageSkeleton path={location.pathname} /> : <Outlet />}
+        {gate?.gated && location.pathname !== "/dashboard/billing" ? (
+          <PaymentWall gate={gate} />
+        ) : pageLoading ? (
+          <PageSkeleton path={location.pathname} />
+        ) : (
+          <Outlet />
+        )}
       </main>
 
       <Toasts />

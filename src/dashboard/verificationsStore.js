@@ -10,7 +10,7 @@ import {
   fetchLookups,
   fetchWallet,
   topupWallet,
-  verifyTopup as apiVerifyTopup,
+  checkTopupStatus,
 } from "../lib/api";
 import { markStep } from "./onboardingStore";
 
@@ -176,7 +176,7 @@ export function startTopup(payload) {
 }
 
 export async function verifyTopup(reference) {
-  const res = await apiVerifyTopup(reference);
+  const res = await checkTopupStatus(reference);
   if (res?.status && /success|paid|complete/i.test(res.status)) {
     await hydrateWallet().catch(() => {});
   }

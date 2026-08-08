@@ -120,12 +120,18 @@ export default function Fleet() {
               </button>
             ))}
           </div>
-          <Link to="/dashboard/fleet/new" className="btn btn-primary toolbar-btn">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Add vehicle
-          </Link>
+          {vehicles.length >= 100 ? (
+            <Link to="/dashboard/support" className="btn toolbar-btn" style={{ background: "var(--warning-bg,#fef3c7)", color: "#92400e", border: "1px solid #fcd34d" }}>
+              Fleet at capacity — contact sales
+            </Link>
+          ) : (
+            <Link to="/dashboard/fleet/new" className="btn btn-primary toolbar-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Add vehicle
+            </Link>
+          )}
         </div>
 
         <table className="data-table">

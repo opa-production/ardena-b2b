@@ -55,7 +55,7 @@ let hydrating = null;
 export function hydrateFleet() {
   if (!hydrating) {
     hydrating = (async () => {
-      const data = await fetchVehicles();
+      const data = await fetchVehicles({ per_page: 100 });
       const list = Array.isArray(data) ? data : data?.data || [];
       vehicles = list.map(normalize);
       loaded = true;

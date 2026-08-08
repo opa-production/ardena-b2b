@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { addVehicle, getVehicle } from "./fleetStore";
+import { addVehicle, getVehicle, getVehicles, isFleetLoaded, subscribe } from "./fleetStore";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "./DatePicker";
 import { todayISO } from "./bookingsStore";
@@ -17,6 +17,9 @@ export default function AddVehicle() {
   const [vStatus, setVStatus] = useState("Available");
   const [ins, setIns] = useState("");
   const [inspection, setInspection] = useState("");
+  const vehicles = useSyncExternalStore(subscribe, getVehicles);
+  const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
+  const atCap = loaded && vehicles.length >= 100;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -83,7 +86,22 @@ export default function AddVehicle() {
         </div>
       </header>
 
-      <div className="details-grid">
+      {atCap && (
+        <div className="panel-card fleet-cap-notice">
+          <div className="fleet-cap-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <h3>Fleet capacity reached</h3>
+          <p>Your fleet is at the 100-vehicle limit. Contact Ardena sales to discuss an enterprise plan that fits your fleet.</p>
+          <Link to="/dashboard/support" className="btn btn-primary" style={{ marginTop: "16px" }}>
+            Contact support
+          </Link>
+        </div>
+      )}
+
+      {!atCap && <div className="details-grid">
         <form id="add-vehicle-form" className="panel-card" onSubmit={handleSubmit}>
           <div className="form-grid">
             <div className="field">
@@ -181,7 +199,7 @@ export default function AddVehicle() {
             </p>
           </section>
         </aside>
-      </div>
+      </div>}
     </>
   );
 }

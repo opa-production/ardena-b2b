@@ -29,6 +29,7 @@ import Verification from "./dashboard/Verification";
 import VerificationsList from "./dashboard/VerificationsList";
 import Payments from "./dashboard/Payments";
 import PaymentsList from "./dashboard/PaymentsList";
+import Assistant from "./dashboard/Assistant";
 import Staff from "./dashboard/Staff";
 import Billing from "./dashboard/Billing";
 import Support from "./dashboard/Support";
@@ -121,6 +122,7 @@ export default function App() {
           path="payments/marketplace"
           element={<RequireRole capability="viewMoney"><Payments /></RequireRole>}
         />
+        <Route path="assistant" element={<Assistant />} />
         <Route
           path="staff"
           element={<RequireRole capability="manageStaff"><Staff /></RequireRole>}

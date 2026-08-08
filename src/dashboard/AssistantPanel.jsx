@@ -10,10 +10,10 @@ function fmtTime(iso) {
     : d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 }
 
-/* The assistant conversation, without any page chrome of its own — it lives
-   inside the Support card as a tab rather than owning a route.
-   `onEscalate` hands the user to the human thread beside it. */
-export default function AssistantPanel({ onEscalate }) {
+/* The assistant conversation, without page chrome of its own, so it can sit
+   inside whatever card hosts it. Anything it can't answer hands off to
+   Support, where the humans are. */
+export default function AssistantPanel() {
   const { messages, thinking } = useSyncExternalStore(subscribe, getState);
   const [draft, setDraft] = useState("");
   const threadRef = useRef(null);
@@ -115,11 +115,9 @@ export default function AssistantPanel({ onEscalate }) {
       <p className="assist-note">
         Answers come from Ardena&apos;s product documentation and your own
         workspace data — double-check anything money-related.{" "}
-        {onEscalate && (
-          <button type="button" className="assist-escalate" onClick={onEscalate}>
-            Talk to a person instead
-          </button>
-        )}
+        <Link className="assist-escalate" to="/dashboard/support">
+          Talk to a person instead
+        </Link>
       </p>
     </>
   );

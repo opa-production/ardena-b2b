@@ -2,6 +2,32 @@
    Builds on the Support chat primitives (.chat-thread, .msg, .chat-composer)
    in support.css; this file only adds what's specific to the agent. */
 
+/* the assistant owns a full page again, so the card fills the content area
+   and the composer sits at its foot rather than mid-screen */
+.assist-card {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 96px);
+}
+
+.assist-card .chat-thread {
+  flex: 1;
+  height: auto;
+  min-height: 260px;
+}
+
+/* hand-off link to Support at the foot of the panel */
+.assist-escalate {
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: inset 0 -1px 0 var(--line);
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.assist-escalate:hover {
+  box-shadow: inset 0 -1px 0 var(--ink);
+}
+
 .assist-head {
   display: flex;
   align-items: flex-start;

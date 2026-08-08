@@ -115,8 +115,8 @@ export const TOPICS = [
     id: "support",
     keywords: ["support", "human", "agent", "contact", "help me", "talk to someone", "phone", "whatsapp"],
     answer:
-      "I can handle product questions here. For anything account-specific — a stuck payment, a verification you want reviewed manually — switch to the \"Message a person\" tab above and a human picks it up, Mon–Sat 8am–8pm EAT.",
-    to: null,
+      "I can handle product questions here. For anything account-specific — a stuck payment, a verification you want reviewed manually — Support puts you through to a person, Mon–Sat 8am–8pm EAT. Renter messages live there too.",
+    to: { label: "Go to Support", path: "/dashboard/support" },
   },
 ];
 

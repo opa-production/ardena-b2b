@@ -87,3 +87,30 @@
   flex-shrink: 0;
   color: var(--brand-dark);
 }
+
+/* Two-line option: a saved payout destination is only identifiable by its
+   method and number, not by the label someone typed. */
+.dd-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+.dd-stack-main {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dd-stack-sub {
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.dd-option.selected .dd-stack-sub,
+.dd-trigger .dd-stack-sub {
+  color: var(--ink-mute);
+}

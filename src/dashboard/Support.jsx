@@ -1,36 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   fetchSupportThread,
   sendSupportMessage,
   markSupportRead,
+  fetchRenterConversations,
 } from "../lib/api";
-import AssistantPanel from "./AssistantPanel";
+import useRole from "../hooks/useRole";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./support.css";
-import "./assistant.css";
-
-const CHANNELS = [
-  { label: "Email", value: "support@ardena.co.ke", href: "mailto:support@ardena.co.ke" },
-  { label: "WhatsApp", value: "+254 700 000 111", href: "https://wa.me/254700000111" },
-  { label: "Phone", value: "0700 000 111", href: "tel:+254700000111" },
-];
-
-const FAQS = [
-  {
-    q: "A customer paid but the booking still shows unpaid",
-    a: "Paystack confirmations can take a minute or two via webhook. If it's still unpaid after 5 minutes, resend the payment link from the Payments page.",
-  },
-  {
-    q: "How do I add more staff seats?",
-    a: "Seats are unlimited on the Fleet plan. Invite teammates from the Staff & roles page — no limit applies.",
-  },
-  {
-    q: "A verification failed but the ID looks valid",
-    a: "Ask the customer to retry. If it fails twice, message us the booking ref here and we'll review the Dojah check manually.",
-  },
-];
+import "./inbox.css";
 
 function fmtTime(iso) {
   if (!iso) return "";
@@ -39,10 +20,13 @@ function fmtTime(iso) {
   return d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 }
 
+/* Every conversation with a person, in one place: the Ardena support thread,
+   and the renter conversations that used to have their own sidebar entry.
+   Product questions go to the Assistant, which has its own page. */
 export default function Support() {
-  // The assistant answers instantly and handles most product questions, so it
-  // leads; the human thread is one click away for anything account-specific.
-  const [tab, setTab] = useState("assistant");
+  const { can } = useRole();
+  const showRenters = can("renterInbox");
+  const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -69,6 +53,15 @@ export default function Support() {
     const id = setInterval(() => load(true), 15_000);
     return () => clearInterval(id);
   }, [load]);
+
+  // Renter conversations feed the side rail; roles without inbox access
+  // simply don't get the card.
+  useEffect(() => {
+    if (!showRenters) return;
+    fetchRenterConversations({ limit: 8 })
+      .then((d) => setConversations(d?.conversations || []))
+      .catch(() => {});
+  }, [showRenters]);
 
   // Keep newest message in view
   useEffect(() => {
@@ -112,31 +105,6 @@ export default function Support() {
   return (
     <div className="details-grid">
       <section className="panel-card chat-card">
-        <div className="support-tabs" role="tablist" aria-label="Support">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "assistant"}
-            className={tab === "assistant" ? "active" : ""}
-            onClick={() => setTab("assistant")}
-          >
-            Ardena assistant
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === "human"}
-            className={tab === "human" ? "active" : ""}
-            onClick={() => setTab("human")}
-          >
-            Message a person
-          </button>
-        </div>
-
-        {tab === "assistant" ? (
-          <AssistantPanel onEscalate={() => setTab("human")} />
-        ) : (
-          <>
           <header className="card-head">
             <h2>Message support</h2>
             <p>Real people, Mon – Sat, 8am – 8pm EAT · usually reply in minutes</p>
@@ -178,47 +146,51 @@ export default function Support() {
               {sending ? "Sending…" : "Send"}
             </button>
           </form>
-          </>
-        )}
       </section>
 
       <div className="details-side">
-        <section className="panel-card">
-          <header className="card-head">
-            <h2>Other channels</h2>
-            <p>Prefer not to chat? Reach us here</p>
-          </header>
-          {CHANNELS.map((c) => (
-            <div className="pay-row" key={c.label}>
-              <span>{c.label}</span>
-              <a
-                className="mini-amount spec-link"
-                href={c.href}
-                target={c.href.startsWith("http") ? "_blank" : undefined}
-                rel="noreferrer"
-              >
-                {c.value}
-              </a>
-            </div>
-          ))}
-          <p className="side-hint">
-            Outside business hours, leave a message here. It's first in the
-            queue the next morning.
-          </p>
-        </section>
+        {showRenters && (
+          <section className="panel-card">
+            <header className="card-head mini-payments-head">
+              <div>
+                <h2>Renter messages</h2>
+                <p>Questions from renters on the Ardena app</p>
+              </div>
+              {conversations.length > 0 && (
+                <Link className="head-link" to="/dashboard/renter-messages">
+                  Open inbox
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                  </svg>
+                </Link>
+              )}
+            </header>
 
-        <section className="panel-card">
-          <header className="card-head">
-            <h2>Quick answers</h2>
-            <p>The three things people ask most</p>
-          </header>
-          {FAQS.map((f) => (
-            <details className="qa" key={f.q}>
-              <summary>{f.q}</summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
-        </section>
+            {conversations.length === 0 ? (
+              <p className="side-hint">
+                When a renter asks about one of your listed vehicles, the
+                conversation shows up here.
+              </p>
+            ) : (
+              conversations.map((c) => (
+                <Link
+                  className="inbox-item"
+                  key={c.id}
+                  to="/dashboard/renter-messages"
+                >
+                  <div className="inbox-item-head">
+                    <strong>{c.client_name || "Renter"}</strong>
+                    <span className="inbox-time">{fmtTime(c.last_message_at)}</span>
+                  </div>
+                  <p className="inbox-preview">{c.last_message || "No messages yet"}</p>
+                  {c.unread_count > 0 && (
+                    <span className="inbox-badge">{c.unread_count}</span>
+                  )}
+                </Link>
+              ))
+            )}
+          </section>
+        )}
       </div>
     </div>
   );

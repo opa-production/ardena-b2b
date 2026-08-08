@@ -5,6 +5,9 @@ import {
   fetchPayments,
   fetchPaymentsSummary,
   fetchMarketplaceEarnings,
+  fetchMarketplaceTransactions,
+  fetchMarketplaceWithdrawals,
+  fetchPayoutMethods,
 } from "../lib/api";
 import CollectionsArea from "./charts/CollectionsArea";
 import PaymentDonut from "./charts/PaymentDonut";
@@ -50,20 +53,35 @@ export default function Payments() {
 
   const [payments, setPayments] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [earnings, setEarnings] = useState(null);
+  const [app, setApp] = useState({});
   const [loading, setLoading] = useState(true);
 
+  // Everything both tabs need, in one pass. The app-side detail used to be
+  // fetched by the panel itself, which made the KPI row pop in first and the
+  // charts and tables fill in a beat later — one gate means one paint.
   const load = useCallback(async () => {
     try {
-      const [payData, sumData, earnData] = await Promise.all([
+      const [payData, sumData, earn, tx, wd, pm] = await Promise.all([
         fetchPayments({ per_page: 100 }),
         fetchPaymentsSummary(),
         // Only Owner/Finance may see app money; don't even ask otherwise.
-        canSeeApp ? fetchMarketplaceEarnings().catch(() => null) : null,
+        ...(canSeeApp
+          ? [
+              fetchMarketplaceEarnings().catch(() => null),
+              fetchMarketplaceTransactions({ limit: 50 }).catch(() => null),
+              fetchMarketplaceWithdrawals({ limit: 20 }).catch(() => null),
+              fetchPayoutMethods().catch(() => null),
+            ]
+          : [null, null, null, null]),
       ]);
       setPayments(payData.data || []);
       setSummary(sumData);
-      setEarnings(earnData);
+      setApp({
+        summary: earn,
+        transactions: tx?.transactions || [],
+        withdrawals: wd?.withdrawals || [],
+        methods: pm || [],
+      });
     } catch (err) {
       toast(err.message || "Failed to load payments", "danger");
     } finally {
@@ -92,7 +110,7 @@ export default function Payments() {
     net: 0,
     paid_count: 0,
   };
-  const app = earnings || {};
+  const earn = app.summary || {};
 
   // Build last-10-weeks buckets from completed payment records only
   const weeklyCollections = (() => {
@@ -133,7 +151,7 @@ export default function Payments() {
 
   if (loading) return <PageSkeleton path={pathname} />;
 
-  const totalIn = stats.net + Number(app.net_earnings || 0);
+  const totalIn = stats.net + Number(earn.net_earnings || 0);
 
   return (
     <>
@@ -181,23 +199,23 @@ export default function Payments() {
           </article>
           <article className="stat-card is-clickable" onClick={() => switchTab("app")}>
             <p className="stat-label">From the Ardena app</p>
-            <p className="stat-value">KES {fmtAmount(app.net_earnings)}</p>
+            <p className="stat-value">KES {fmtAmount(earn.net_earnings)}</p>
             <p className="stat-note">
-              {app.paid_bookings_count || 0} app bookings, after commission
+              {earn.paid_bookings_count || 0} app bookings, after commission
             </p>
           </article>
           <article className="stat-card stat-card-action">
             <p className="stat-label">Available to withdraw</p>
-            <p className="stat-value">KES {fmtAmount(app.withdrawable)}</p>
+            <p className="stat-value">KES {fmtAmount(earn.withdrawable)}</p>
             <p className="stat-note">
-              {app.pending_withdrawals_total
-                ? `KES ${fmtAmount(app.pending_withdrawals_total)} pending payout`
+              {earn.pending_withdrawals_total
+                ? `KES ${fmtAmount(earn.pending_withdrawals_total)} pending payout`
                 : "nothing pending"}
             </p>
             {/* Only on the app tab: offering a payout while someone is
                 reading direct-booking figures is the wrong context, and the
                 form it jumps to isn't on screen there anyway. */}
-            {tab === "app" && Number(app.withdrawable) > 0 && (
+            {tab === "app" && Number(earn.withdrawable) > 0 && (
               <button
                 type="button"
                 className="btn btn-primary stat-action"
@@ -238,7 +256,13 @@ export default function Payments() {
       )}
 
       {tab === "app" && canSeeApp ? (
-        <MarketplaceEarningsPanel summary={earnings} onChanged={load} />
+        <MarketplaceEarningsPanel
+          summary={app.summary}
+          transactions={app.transactions}
+          withdrawals={app.withdrawals}
+          methods={app.methods}
+          onChanged={load}
+        />
       ) : (
         <>
           <div className="payments-grid">

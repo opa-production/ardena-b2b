@@ -21,6 +21,7 @@ import VerifiedBadge from "../components/VerifiedBadge";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
 import HostLinkPanel from "./HostLinkPanel";
+import PayoutMethods from "./PayoutMethods";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -376,6 +377,12 @@ export default function Settings() {
                 </label>
               </div>
             ))}
+          </section>
+
+          {/* Account details for app-earnings payouts live with the rest of
+              the business profile; withdrawing itself stays on Finances. */}
+          <section className="panel-card">
+            <PayoutMethods />
           </section>
         </div>
 

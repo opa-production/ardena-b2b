@@ -1,18 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
-import ConfirmDialog from "../components/ConfirmDialog";
+import CollectionsArea from "./charts/CollectionsArea";
+import PaymentDonut from "./charts/PaymentDonut";
+import { methodDetail } from "./PayoutMethods";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
-import {
-  fetchMarketplaceTransactions,
-  fetchMarketplaceWithdrawals,
-  createMarketplaceWithdrawal,
-  fetchPayoutMethods,
-  createPayoutMethod,
-  deletePayoutMethod,
-} from "../lib/api";
+import { createMarketplaceWithdrawal } from "../lib/api";
 import "./fleet.css";
 import "./bookings.css";
 import "./payments.css";
@@ -28,33 +23,6 @@ const WITHDRAWAL_CHIP = {
   failed: "cancelled",
 };
 
-// Each destination needs different details, and the backend rejects a method
-// that's missing any of them — so the form only asks for what applies.
-const METHODS = {
-  "M-Pesa": { value: "mpesa", fields: ["mpesa_number"] },
-  Paybill: { value: "paybill", fields: ["paybill_number", "account_number"] },
-  Till: { value: "till", fields: ["till_number"] },
-  Bank: { value: "bank", fields: ["bank_name", "account_number", "account_name"] },
-};
-
-const FIELD_LABELS = {
-  mpesa_number: "M-Pesa number",
-  paybill_number: "Paybill number",
-  till_number: "Till number",
-  bank_name: "Bank name",
-  account_number: "Account number",
-  account_name: "Account name (optional)",
-};
-
-const FIELD_PLACEHOLDERS = {
-  mpesa_number: "254712345678",
-  paybill_number: "522522",
-  till_number: "8765432",
-  bank_name: "Equity Bank",
-  account_number: "0123456789",
-  account_name: "Acme Car Hire Ltd",
-};
-
 function fmtDay(value) {
   if (!value) return "";
   return new Date(value).toLocaleDateString("en-KE", {
@@ -64,52 +32,60 @@ function fmtDay(value) {
   });
 }
 
-/* The Ardena-app side of the money page: what each app booking earned, plus
-   withdrawals and payout destinations. `summary` is owned by Payments.jsx so
-   the KPI row and this panel never disagree; `onChanged` asks it to refetch
-   after a withdrawal moves the balance. */
-export default function MarketplaceEarningsPanel({ summary, onChanged }) {
+/* Net earnings per week from app bookings, same 10-week window and shape the
+   direct-bookings chart uses so the two tabs read identically. */
+function weeklyNet(transactions) {
+  const now = new Date();
+  const todayDay = now.getDay() === 0 ? 6 : now.getDay() - 1; // 0=Mon
+  const thisMonday = new Date(now);
+  thisMonday.setDate(now.getDate() - todayDay);
+  thisMonday.setHours(0, 0, 0, 0);
+
+  const weeks = Array.from({ length: 10 }, (_, i) => {
+    const start = new Date(thisMonday);
+    start.setDate(thisMonday.getDate() - (9 - i) * 7);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 7);
+    return {
+      start,
+      end,
+      label: start.toLocaleDateString("en-KE", { day: "numeric", month: "short" }),
+      total: 0,
+    };
+  });
+
+  for (const t of transactions) {
+    const d = new Date(t.paid_at);
+    if (isNaN(d)) continue;
+    for (const w of weeks) {
+      if (d >= w.start && d < w.end) {
+        w.total += Number(t.net_amount) || 0;
+        break;
+      }
+    }
+  }
+
+  return weeks.map((w) => ({ week: w.label, value: w.total }));
+}
+
+/* The Ardena-app side of the money page. All of its data is loaded by
+   Payments.jsx and handed down, so the KPI row and this panel appear together
+   rather than the numbers landing first and the rest filling in after. */
+export default function MarketplaceEarningsPanel({
+  summary,
+  transactions = [],
+  withdrawals = [],
+  methods = [],
+  onChanged,
+}) {
   const { can } = useRole();
   const canWithdraw = can("manageWithdrawals");
-  const [transactions, setTransactions] = useState([]);
-  const [withdrawals, setWithdrawals] = useState([]);
-  const [methods, setMethods] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
 
-  // withdrawal form
   const [amount, setAmount] = useState("");
-  const [methodId, setMethodId] = useState("");
-
-  // add-destination form
-  const [adding, setAdding] = useState(false);
-  const [methodLabel, setMethodLabel] = useState("M-Pesa");
-  const [methodName, setMethodName] = useState("");
-  const [methodFields, setMethodFields] = useState({});
-  const [removing, setRemoving] = useState(null);
-
-  const load = useCallback(async () => {
-    try {
-      const [tx, wd, pm] = await Promise.all([
-        fetchMarketplaceTransactions({ limit: 50 }),
-        fetchMarketplaceWithdrawals({ limit: 20 }),
-        fetchPayoutMethods(),
-      ]);
-      setTransactions(tx?.transactions || []);
-      setWithdrawals(wd?.withdrawals || []);
-      setMethods(pm || []);
-      if (!methodId && pm?.length) setMethodId(String(pm[0].id));
-    } catch (err) {
-      toast(err.message || "Failed to load earnings", "danger");
-    } finally {
-      setLoading(false);
-    }
-  }, [methodId]);
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [methodId, setMethodId] = useState(() =>
+    methods.length ? String(methods[0].id) : ""
+  );
+  const [busy, setBusy] = useState(false);
 
   async function handleWithdraw(e) {
     e.preventDefault();
@@ -120,7 +96,7 @@ export default function MarketplaceEarningsPanel({ summary, onChanged }) {
       return;
     }
     if (!methodId) {
-      toast("Add a payout destination first", "warn");
+      toast("Add a payout destination in Settings first", "warn");
       return;
     }
     setBusy(true);
@@ -134,8 +110,7 @@ export default function MarketplaceEarningsPanel({ summary, onChanged }) {
       });
       toast("Withdrawal requested. Ardena processes payouts within 2 working days.");
       setAmount("");
-      await load();
-      onChanged?.(); // the balance moved — let the KPI row catch up
+      onChanged?.();
     } catch (err) {
       toast(err.message || "Couldn't request that withdrawal", "danger");
     } finally {
@@ -143,110 +118,86 @@ export default function MarketplaceEarningsPanel({ summary, onChanged }) {
     }
   }
 
-  async function handleAddMethod(e) {
-    e.preventDefault();
-    if (busy) return;
-    const spec = METHODS[methodLabel];
-    setBusy(true);
-    try {
-      await createPayoutMethod({
-        name: methodName.trim() || methodLabel,
-        method_type: spec.value,
-        ...Object.fromEntries(
-          spec.fields.map((f) => [f, (methodFields[f] || "").trim() || null])
-        ),
-      });
-      toast("Payout destination saved.");
-      setAdding(false);
-      setMethodName("");
-      setMethodFields({});
-      await load();
-    } catch (err) {
-      toast(err.message || "Couldn't save that destination", "danger");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleRemoveMethod() {
-    if (!removing) return;
-    try {
-      await deletePayoutMethod(removing.id);
-      toast("Destination removed.");
-      if (String(removing.id) === String(methodId)) setMethodId("");
-      await load();
-    } catch (err) {
-      toast(err.message || "Couldn't remove that destination", "danger");
-    } finally {
-      setRemoving(null);
-    }
-  }
-
-  if (loading) return null;
-
-  // Nothing published yet isn't an error — it just means there's nothing to earn
-  // on. Point at the fleet rather than showing zeroes and a payout form.
+  // Nothing published yet isn't an error — it just means there's nothing to
+  // earn on. Point at the fleet rather than showing zeroes and a payout form.
   if (summary && !summary.marketplace_active) {
     return (
-      <>
-        <EmptyState
-          icon={EMPTY_ICONS.payments}
-          title="No marketplace listings yet"
-          message="List a vehicle on the Ardena app and its bookings, earnings and payouts will show up here."
-          action={
-            <Link className="btn btn-primary" to="/dashboard/fleet">
-              Go to fleet
-            </Link>
-          }
-        />
-      </>
+      <EmptyState
+        icon={EMPTY_ICONS.payments}
+        title="No marketplace listings yet"
+        message="List a vehicle on the Ardena app and its bookings, earnings and payouts will show up here."
+        action={
+          <Link className="btn btn-primary" to="/dashboard/fleet">
+            Go to fleet
+          </Link>
+        }
+      />
     );
   }
 
   const s = summary || {};
   const ratePct = Math.round((s.commission_rate || 0) * 1000) / 10;
 
+  // Two-line labels so a saved destination is identifiable by more than a name.
+  const methodOptions = methods.map((m) => ({
+    value: String(m.id),
+    label: (
+      <span className="dd-stack">
+        <span className="dd-stack-main">{m.name}</span>
+        <span className="dd-stack-sub">{methodDetail(m)}</span>
+      </span>
+    ),
+  }));
+
+  const splitSegments = [
+    { label: "Your net earnings", value: Number(s.net_earnings) || 0, color: "#0b7a37" },
+    { label: `Ardena commission (${ratePct}%)`, value: Number(s.commission_amount) || 0, color: "#94a3b8" },
+  ];
+
   return (
     <>
-      <ConfirmDialog
-        open={Boolean(removing)}
-        title="Remove payout destination"
-        message={`${removing?.name || "This destination"} will no longer be available for withdrawals.`}
-        confirmLabel="Remove"
-        onConfirm={handleRemoveMethod}
-        onCancel={() => setRemoving(null)}
-      />
+      <div className="payments-grid">
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>App earnings over time</h2>
+            <p>Your net per week, last 10 weeks</p>
+          </header>
+          {transactions.length === 0 ? (
+            <EmptyState
+              icon={EMPTY_ICONS.chart}
+              title="No app earnings yet"
+              message="Once renters book your listed vehicles, your weekly earnings build up here."
+            />
+          ) : (
+            <CollectionsArea data={weeklyNet(transactions)} />
+          )}
+        </section>
 
-      {/* gross -> commission -> net, spelled out once so the KPI row above
-          doesn't have to carry the arithmetic */}
-      <section className="panel-card earnings-breakdown">
-        <div>
-          <p className="stat-label">Gross from app bookings</p>
-          <p className="breakdown-value">KES {fmtAmount(s.total_gross)}</p>
-          <p className="stat-note">{s.paid_bookings_count || 0} paid app bookings</p>
-        </div>
-        <span className="breakdown-op" aria-hidden="true">&minus;</span>
-        <div>
-          <p className="stat-label">Ardena commission</p>
-          <p className="breakdown-value">KES {fmtAmount(s.commission_amount)}</p>
-          <p className="stat-note">{ratePct}% of gross</p>
-        </div>
-        <span className="breakdown-op" aria-hidden="true">=</span>
-        <div>
-          <p className="stat-label">Your net earnings</p>
-          <p className="breakdown-value strong">KES {fmtAmount(s.net_earnings)}</p>
-          <p className="stat-note">before withdrawals</p>
-        </div>
-      </section>
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>Where the money went</h2>
+            <p>KES {fmtAmount(s.total_gross)} gross, split</p>
+          </header>
+          {!Number(s.total_gross) ? (
+            <EmptyState
+              compact
+              icon={EMPTY_ICONS.payments}
+              title="Nothing earned yet"
+              message="Your commission split appears here after your first app booking."
+            />
+          ) : (
+            <PaymentDonut segments={splitSegments} />
+          )}
+        </section>
+      </div>
 
       <div className="earnings-grid">
-        {/* id is the scroll target for the Withdraw button on the KPI card */}
         <section className="panel-card" id="withdraw">
           <header className="card-head">
             <h2>Withdraw</h2>
             <p>
               {canWithdraw
-                ? "Paid out to a destination you've saved"
+                ? `KES ${fmtAmount(s.withdrawable)} available`
                 : "Your role can view earnings but not request payouts"}
             </p>
           </header>
@@ -257,7 +208,11 @@ export default function MarketplaceEarningsPanel({ summary, onChanged }) {
             </p>
           ) : methods.length === 0 ? (
             <p className="field-note earnings-empty-note">
-              Add a payout destination below before requesting a withdrawal.
+              Save a payout destination in{" "}
+              <Link className="spec-link" to="/dashboard/settings">
+                Settings
+              </Link>{" "}
+              before requesting a withdrawal.
             </p>
           ) : (
             <form className="withdraw-form" onSubmit={handleWithdraw}>
@@ -279,110 +234,22 @@ export default function MarketplaceEarningsPanel({ summary, onChanged }) {
                 <Dropdown
                   id="wd-dest"
                   name="payout_method_id"
-                  value={
-                    methods.find((m) => String(m.id) === String(methodId))?.name ||
-                    methods[0]?.name ||
-                    ""
-                  }
-                  onChange={(label) => {
-                    const found = methods.find((m) => m.name === label);
-                    if (found) setMethodId(String(found.id));
-                  }}
-                  options={methods.map((m) => m.name)}
+                  value={methodId}
+                  onChange={setMethodId}
+                  options={methodOptions}
+                  placeholder="Choose a destination"
                 />
               </div>
               <button type="submit" className="btn btn-primary" disabled={busy}>
                 Request withdrawal
               </button>
-            </form>
-          )}
-
-          <header className="card-head payout-head">
-            <h2>Payout destinations</h2>
-            {!adding && canWithdraw && (
-              <button
-                type="button"
-                className="head-link"
-                onClick={() => setAdding(true)}
-              >
-                Add destination
-              </button>
-            )}
-          </header>
-
-          {methods.map((m) => (
-            <div className="payout-row" key={m.id}>
-              <div>
-                <strong>{m.name}</strong>
-                <p className="cell-sub">
-                  {m.method_type} ·{" "}
-                  {m.mpesa_number ||
-                    m.till_number ||
-                    [m.paybill_number, m.account_number].filter(Boolean).join(" · ") ||
-                    [m.bank_name, m.account_number].filter(Boolean).join(" · ")}
-                </p>
-              </div>
-              {canWithdraw && (
-                <button
-                  type="button"
-                  className="icon-btn danger"
-                  onClick={() => setRemoving(m)}
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))}
-
-          {adding && (
-            <form className="payout-form" onSubmit={handleAddMethod}>
-              <div className="field">
-                <label htmlFor="pm-type">Type</label>
-                <Dropdown
-                  id="pm-type"
-                  name="method_type"
-                  value={methodLabel}
-                  onChange={(v) => {
-                    setMethodLabel(v);
-                    setMethodFields({});
-                  }}
-                  options={Object.keys(METHODS)}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="pm-name">Label</label>
-                <input
-                  id="pm-name"
-                  value={methodName}
-                  onChange={(e) => setMethodName(e.target.value)}
-                  placeholder="Main M-Pesa"
-                />
-              </div>
-              {METHODS[methodLabel].fields.map((f) => (
-                <div className="field" key={f}>
-                  <label htmlFor={`pm-${f}`}>{FIELD_LABELS[f]}</label>
-                  <input
-                    id={`pm-${f}`}
-                    value={methodFields[f] || ""}
-                    onChange={(e) =>
-                      setMethodFields((s2) => ({ ...s2, [f]: e.target.value }))
-                    }
-                    placeholder={FIELD_PLACEHOLDERS[f]}
-                  />
-                </div>
-              ))}
-              <div className="payout-form-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => setAdding(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={busy}>
-                  Save destination
-                </button>
-              </div>
+              <p className="field-note">
+                Manage destinations in{" "}
+                <Link className="spec-link" to="/dashboard/settings">
+                  Settings
+                </Link>
+                .
+              </p>
             </form>
           )}
         </section>

@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import PageSkeleton from "./PageSkeleton";
+import { Link } from "react-router-dom";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { toast } from "./toastStore";
-import usePageTitle from "../hooks/usePageTitle";
+import useRole from "../hooks/useRole";
 import {
-  fetchMarketplaceEarnings,
   fetchMarketplaceTransactions,
   fetchMarketplaceWithdrawals,
   createMarketplaceWithdrawal,
@@ -66,11 +64,13 @@ function fmtDay(value) {
   });
 }
 
-export default function MarketplaceEarnings() {
-  usePageTitle("Marketplace earnings");
-  const { pathname } = useLocation();
-
-  const [summary, setSummary] = useState(null);
+/* The Ardena-app side of the money page: what each app booking earned, plus
+   withdrawals and payout destinations. `summary` is owned by Payments.jsx so
+   the KPI row and this panel never disagree; `onChanged` asks it to refetch
+   after a withdrawal moves the balance. */
+export default function MarketplaceEarningsPanel({ summary, onChanged }) {
+  const { can } = useRole();
+  const canWithdraw = can("manageWithdrawals");
   const [transactions, setTransactions] = useState([]);
   const [withdrawals, setWithdrawals] = useState([]);
   const [methods, setMethods] = useState([]);
@@ -90,13 +90,11 @@ export default function MarketplaceEarnings() {
 
   const load = useCallback(async () => {
     try {
-      const [sum, tx, wd, pm] = await Promise.all([
-        fetchMarketplaceEarnings(),
+      const [tx, wd, pm] = await Promise.all([
         fetchMarketplaceTransactions({ limit: 50 }),
         fetchMarketplaceWithdrawals({ limit: 20 }),
         fetchPayoutMethods(),
       ]);
-      setSummary(sum);
       setTransactions(tx?.transactions || []);
       setWithdrawals(wd?.withdrawals || []);
       setMethods(pm || []);
@@ -137,6 +135,7 @@ export default function MarketplaceEarnings() {
       toast("Withdrawal requested. Ardena processes payouts within 2 working days.");
       setAmount("");
       await load();
+      onChanged?.(); // the balance moved — let the KPI row catch up
     } catch (err) {
       toast(err.message || "Couldn't request that withdrawal", "danger");
     } finally {
@@ -183,19 +182,13 @@ export default function MarketplaceEarnings() {
     }
   }
 
-  if (loading) return <PageSkeleton path={pathname} />;
+  if (loading) return null;
 
   // Nothing published yet isn't an error — it just means there's nothing to earn
-  // on. Point at the fleet rather than showing four zeroes and a payout form.
+  // on. Point at the fleet rather than showing zeroes and a payout form.
   if (summary && !summary.marketplace_active) {
     return (
       <>
-        <header className="head-card">
-          <div className="head-titles">
-            <h1>Marketplace earnings</h1>
-            <p>What you&apos;ve earned from Ardena app bookings</p>
-          </div>
-        </header>
         <EmptyState
           icon={EMPTY_ICONS.payments}
           title="No marketplace listings yet"
@@ -224,48 +217,45 @@ export default function MarketplaceEarnings() {
         onCancel={() => setRemoving(null)}
       />
 
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Marketplace earnings</h1>
-          <p>What you&apos;ve earned from Ardena app bookings</p>
-        </div>
-      </header>
-
-      <div className="stat-grid finance-stats">
-        <article className="stat-card">
-          <p className="stat-label">Gross</p>
-          <p className="stat-value">KES {fmtAmount(s.total_gross)}</p>
+      {/* gross -> commission -> net, spelled out once so the KPI row above
+          doesn't have to carry the arithmetic */}
+      <section className="panel-card earnings-breakdown">
+        <div>
+          <p className="stat-label">Gross from app bookings</p>
+          <p className="breakdown-value">KES {fmtAmount(s.total_gross)}</p>
           <p className="stat-note">{s.paid_bookings_count || 0} paid app bookings</p>
-        </article>
-        <article className="stat-card">
+        </div>
+        <span className="breakdown-op" aria-hidden="true">&minus;</span>
+        <div>
           <p className="stat-label">Ardena commission</p>
-          <p className="stat-value">KES {fmtAmount(s.commission_amount)}</p>
+          <p className="breakdown-value">KES {fmtAmount(s.commission_amount)}</p>
           <p className="stat-note">{ratePct}% of gross</p>
-        </article>
-        <article className="stat-card">
-          <p className="stat-label">Net earnings</p>
-          <p className="stat-value">KES {fmtAmount(s.net_earnings)}</p>
-          <p className="stat-note">after commission</p>
-        </article>
-        <article className="stat-card">
-          <p className="stat-label">Available to withdraw</p>
-          <p className="stat-value">KES {fmtAmount(s.withdrawable)}</p>
-          <p className="stat-note">
-            {s.pending_withdrawals_total
-              ? `KES ${fmtAmount(s.pending_withdrawals_total)} already requested`
-              : "nothing pending"}
-          </p>
-        </article>
-      </div>
+        </div>
+        <span className="breakdown-op" aria-hidden="true">=</span>
+        <div>
+          <p className="stat-label">Your net earnings</p>
+          <p className="breakdown-value strong">KES {fmtAmount(s.net_earnings)}</p>
+          <p className="stat-note">before withdrawals</p>
+        </div>
+      </section>
 
       <div className="earnings-grid">
-        <section className="panel-card">
+        {/* id is the scroll target for the Withdraw button on the KPI card */}
+        <section className="panel-card" id="withdraw">
           <header className="card-head">
             <h2>Withdraw</h2>
-            <p>Paid out to a destination you&apos;ve saved</p>
+            <p>
+              {canWithdraw
+                ? "Paid out to a destination you've saved"
+                : "Your role can view earnings but not request payouts"}
+            </p>
           </header>
 
-          {methods.length === 0 ? (
+          {!canWithdraw ? (
+            <p className="field-note earnings-empty-note">
+              An Owner or Finance user can request withdrawals from here.
+            </p>
+          ) : methods.length === 0 ? (
             <p className="field-note earnings-empty-note">
               Add a payout destination below before requesting a withdrawal.
             </p>
@@ -309,7 +299,7 @@ export default function MarketplaceEarnings() {
 
           <header className="card-head payout-head">
             <h2>Payout destinations</h2>
-            {!adding && (
+            {!adding && canWithdraw && (
               <button
                 type="button"
                 className="head-link"
@@ -332,13 +322,15 @@ export default function MarketplaceEarnings() {
                     [m.bank_name, m.account_number].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              <button
-                type="button"
-                className="icon-btn danger"
-                onClick={() => setRemoving(m)}
-              >
-                Remove
-              </button>
+              {canWithdraw && (
+                <button
+                  type="button"
+                  className="icon-btn danger"
+                  onClick={() => setRemoving(m)}
+                >
+                  Remove
+                </button>
+              )}
             </div>
           ))}
 

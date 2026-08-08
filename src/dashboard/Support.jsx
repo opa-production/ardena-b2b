@@ -4,10 +4,12 @@ import {
   sendSupportMessage,
   markSupportRead,
 } from "../lib/api";
+import AssistantPanel from "./AssistantPanel";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./support.css";
+import "./assistant.css";
 
 const CHANNELS = [
   { label: "Email", value: "support@ardena.co.ke", href: "mailto:support@ardena.co.ke" },
@@ -38,6 +40,9 @@ function fmtTime(iso) {
 }
 
 export default function Support() {
+  // The assistant answers instantly and handles most product questions, so it
+  // leads; the human thread is one click away for anything account-specific.
+  const [tab, setTab] = useState("assistant");
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
@@ -107,47 +112,74 @@ export default function Support() {
   return (
     <div className="details-grid">
       <section className="panel-card chat-card">
-        <header className="card-head">
-          <h2>Message support</h2>
-          <p>Real people, Mon – Sat, 8am – 8pm EAT · usually reply in minutes</p>
-        </header>
-
-        <div className="chat-thread" ref={threadRef} aria-live="polite">
-          {loading && messages.length === 0 && (
-            <div className="sk-chat" style={{ padding: "16px 0" }}>
-              {[{ w: "52%" }, { w: "40%", r: true }, { w: "58%" }, { w: "34%", r: true }].map((b, i) => (
-                <span key={i} className={`sk sk-bubble${b.r ? " right" : ""}`} style={{ width: b.w }} />
-              ))}
-            </div>
-          )}
-          {messages.map((m) => (
-            <div key={m.id} className={`msg ${m.from}`}>
-              <p>{m.text}</p>
-              <span className="msg-time">
-                {m.from === "support" ? "Ardena support · " : ""}
-                {fmtTime(m.at)}
-              </span>
-            </div>
-          ))}
+        <div className="support-tabs" role="tablist" aria-label="Support">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "assistant"}
+            className={tab === "assistant" ? "active" : ""}
+            onClick={() => setTab("assistant")}
+          >
+            Ardena assistant
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "human"}
+            className={tab === "human" ? "active" : ""}
+            onClick={() => setTab("human")}
+          >
+            Message a person
+          </button>
         </div>
 
-        <form className="chat-composer" onSubmit={handleSend}>
-          <input
-            type="text"
-            placeholder="Describe the issue, include a booking ref if you have one"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            aria-label="Message support"
-            disabled={sending}
-          />
-          <button
-            type="submit"
-            className="btn btn-primary toolbar-btn"
-            disabled={!draft.trim() || sending}
-          >
-            {sending ? "Sending…" : "Send"}
-          </button>
-        </form>
+        {tab === "assistant" ? (
+          <AssistantPanel onEscalate={() => setTab("human")} />
+        ) : (
+          <>
+          <header className="card-head">
+            <h2>Message support</h2>
+            <p>Real people, Mon – Sat, 8am – 8pm EAT · usually reply in minutes</p>
+          </header>
+
+          <div className="chat-thread" ref={threadRef} aria-live="polite">
+            {loading && messages.length === 0 && (
+              <div className="sk-chat" style={{ padding: "16px 0" }}>
+                {[{ w: "52%" }, { w: "40%", r: true }, { w: "58%" }, { w: "34%", r: true }].map((b, i) => (
+                  <span key={i} className={`sk sk-bubble${b.r ? " right" : ""}`} style={{ width: b.w }} />
+                ))}
+              </div>
+            )}
+            {messages.map((m) => (
+              <div key={m.id} className={`msg ${m.from}`}>
+                <p>{m.text}</p>
+                <span className="msg-time">
+                  {m.from === "support" ? "Ardena support · " : ""}
+                  {fmtTime(m.at)}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <form className="chat-composer" onSubmit={handleSend}>
+            <input
+              type="text"
+              placeholder="Describe the issue, include a booking ref if you have one"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              aria-label="Message support"
+              disabled={sending}
+            />
+            <button
+              type="submit"
+              className="btn btn-primary toolbar-btn"
+              disabled={!draft.trim() || sending}
+            >
+              {sending ? "Sending…" : "Send"}
+            </button>
+          </form>
+          </>
+        )}
       </section>
 
       <div className="details-side">

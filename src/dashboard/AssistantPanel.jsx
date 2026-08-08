@@ -2,9 +2,6 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getState, sendMessage, clearThread } from "./assistantStore";
 import { SUGGESTIONS } from "./assistantKnowledge";
-import "./overview.css";
-import "./support.css";
-import "./assistant.css";
 
 function fmtTime(iso) {
   const d = new Date(iso);
@@ -13,13 +10,15 @@ function fmtTime(iso) {
     : d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function Assistant() {
+/* The assistant conversation, without any page chrome of its own — it lives
+   inside the Support card as a tab rather than owning a route.
+   `onEscalate` hands the user to the human thread beside it. */
+export default function AssistantPanel({ onEscalate }) {
   const { messages, thinking } = useSyncExternalStore(subscribe, getState);
   const [draft, setDraft] = useState("");
   const threadRef = useRef(null);
   const inputRef = useRef(null);
 
-  // keep the newest message in view as the thread grows
   useEffect(() => {
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -32,27 +31,26 @@ export default function Assistant() {
     inputRef.current?.focus();
   }
 
-  // only the opening greeting is on screen — still worth suggesting a start
   const isFresh = messages.length === 1;
 
   return (
-    <section className="panel-card assist-card">
+    <>
       <header className="card-head assist-head">
         <div>
-          <h2>Assistant</h2>
+          <h2>Ardena assistant</h2>
           <p>
-            Ask how Ardena works, or about what&apos;s in your workspace
+            Instant answers about the platform and your workspace
             <span className="assist-tag">Preview</span>
           </p>
         </div>
-        {messages.length > 1 && (
+        {!isFresh && (
           <button type="button" className="assist-clear" onClick={clearThread}>
             New chat
           </button>
         )}
       </header>
 
-      <div className="chat-thread assist-thread" ref={threadRef} aria-live="polite">
+      <div className="chat-thread" ref={threadRef} aria-live="polite">
         {messages.map((m) => (
           <div key={m.id} className={`msg ${m.from === "user" ? "user" : "support"}`}>
             <p>{m.text}</p>
@@ -116,8 +114,13 @@ export default function Assistant() {
 
       <p className="assist-note">
         Answers come from Ardena&apos;s product documentation and your own
-        workspace data. Double-check anything money-related before acting on it.
+        workspace data — double-check anything money-related.{" "}
+        {onEscalate && (
+          <button type="button" className="assist-escalate" onClick={onEscalate}>
+            Talk to a person instead
+          </button>
+        )}
       </p>
-    </section>
+    </>
   );
 }

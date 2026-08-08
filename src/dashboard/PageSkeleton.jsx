@@ -231,6 +231,19 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
+  // ---- Finances on the app tab: source switch, KPIs, then the panel
+  if (section === "payments" && sub === "marketplace") {
+    return (
+      <div aria-hidden="true">
+        <div className="finance-bar">
+          <Line w={230} h={42} />
+        </div>
+        <StatRow />
+        <TableCard rows={6} />
+      </div>
+    );
+  }
+
   // ---- Full-list pages (payments/all, verification/all): header card + table
   if (sub) {
     return (
@@ -289,14 +302,6 @@ export default function PageSkeleton({ path = "" }) {
   }
 
   // ---- Assistant: one full-width chat card, no side rail
-  if (section === "assistant") {
-    return (
-      <div aria-hidden="true">
-        <ChatCard />
-      </div>
-    );
-  }
-
   // ---- Renter inbox: conversation list beside the open thread
   if (section === "renter-messages") {
     return (
@@ -322,17 +327,6 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Marketplace earnings: page head, KPIs, payouts table
-  if (section === "payments" && sub === "marketplace") {
-    return (
-      <div aria-hidden="true">
-        <HeadCard />
-        <StatRow count={3} />
-        <TableCard rows={6} />
-      </div>
-    );
-  }
-
   // ---- Staff: 3 KPIs + table with side cards
   if (section === "staff") {
     return (
@@ -346,10 +340,13 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Payments (finance): KPIs + trend chart + donut + processed table
+  // ---- Finances: source switch + KPIs, then the direct-bookings charts
   if (section === "payments") {
     return (
       <div aria-hidden="true">
+        <div className="finance-bar">
+          <Line w={230} h={42} />
+        </div>
         <StatRow />
         <div className="payments-grid">
           {[0, 1].map((i) => (

@@ -1,14 +1,6 @@
-/* ---- Assistant: full-height chat page ----
+/* ---- Assistant panel (a tab inside the Support card) ----
    Builds on the Support chat primitives (.chat-thread, .msg, .chat-composer)
    in support.css; this file only adds what's specific to the agent. */
-
-.assist-card {
-  display: flex;
-  flex-direction: column;
-  /* fill the content area so the composer sits at the bottom of the page
-     rather than floating mid-screen on a short thread */
-  min-height: calc(100vh - 96px);
-}
 
 .assist-head {
   display: flex;
@@ -49,14 +41,8 @@
   box-shadow: var(--neo-in);
 }
 
-.assist-thread {
-  flex: 1;
-  height: auto;
-  min-height: 260px;
-}
-
 /* the agent's replies run longer than support's, so give them more room */
-.assist-thread .msg.support {
+.chat-card .msg.support {
   max-width: 84%;
 }
 

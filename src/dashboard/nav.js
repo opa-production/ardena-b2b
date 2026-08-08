@@ -13,12 +13,18 @@ export const NAV_SECTIONS = [
       { to: "/dashboard/bookings", key: "bookings", name: "Bookings" },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
+      {
+        to: "/dashboard/renter-messages",
+        key: "inbox",
+        name: "Renter messages",
+        requires: "renterInbox",
+      },
       { to: "/dashboard/reviews", key: "reviews", name: "Reviews" },
       {
         to: "/dashboard/claims",
         key: "claims",
         name: "Claims & requests",
-        requires: "fileDepositClaim",
+        requires: "claimsOrExtensions",
       },
     ],
   },
@@ -39,7 +45,6 @@ export const NAV_SECTIONS = [
   {
     label: "Workspace",
     items: [
-      { to: "/dashboard/assistant", key: "assistant", name: "Assistant" },
       {
         to: "/dashboard/staff",
         key: "staff",
@@ -61,7 +66,6 @@ export function visibleSections(can) {
 }
 
 export const SECTION_TITLES = {
-  assistant: "Assistant",
   fleet: "Fleet",
   bookings: "Bookings",
   clients: "Clients",

@@ -11,9 +11,10 @@ function fmtTime(iso) {
 }
 
 /* The assistant conversation, without page chrome of its own, so it can sit
-   inside whatever card hosts it. Anything it can't answer hands off to
-   Support, where the humans are. */
-export default function AssistantPanel() {
+   inside whatever hosts it. Anything it can't answer hands off to Support,
+   where the humans are. `onNavigate` fires when the user follows a link out,
+   letting the host (the slide-over) close itself. */
+export default function AssistantPanel({ onNavigate }) {
   const { messages, thinking } = useSyncExternalStore(subscribe, getState);
   const [draft, setDraft] = useState("");
   const threadRef = useRef(null);
@@ -55,7 +56,7 @@ export default function AssistantPanel() {
           <div key={m.id} className={`msg ${m.from === "user" ? "user" : "support"}`}>
             <p>{m.text}</p>
             {m.to && (
-              <Link className="assist-jump" to={m.to.path}>
+              <Link className="assist-jump" to={m.to.path} onClick={onNavigate}>
                 {m.to.label}
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M13 6l6 6-6 6" />
@@ -115,7 +116,7 @@ export default function AssistantPanel() {
       <p className="assist-note">
         Answers come from Ardena&apos;s product documentation and your own
         workspace data — double-check anything money-related.{" "}
-        <Link className="assist-escalate" to="/dashboard/support">
+        <Link className="assist-escalate" to="/dashboard/support" onClick={onNavigate}>
           Talk to a person instead
         </Link>
       </p>

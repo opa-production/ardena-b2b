@@ -45,6 +45,9 @@ export default function Claims() {
   const { pathname } = useLocation();
   const { can } = useRole();
   const canDecide = can("decideExtensions");
+  // Both queues live on one page but have different audiences. Showing a
+  // permanently-empty card to someone whose role can't load it reads as a bug.
+  const canSeeClaims = can("fileDepositClaim");
 
   const [claims, setClaims] = useState([]);
   const [extensions, setExtensions] = useState([]);
@@ -174,7 +177,7 @@ export default function Claims() {
           )}
         </section>
 
-        <section className="panel-card">
+        {canSeeClaims && <section className="panel-card">
           <header className="card-head">
             <h2>Deposit claims</h2>
             <p>Filed against Ardena app bookings</p>
@@ -209,7 +212,7 @@ export default function Claims() {
               </div>
             ))
           )}
-        </section>
+        </section>}
       </div>
     </>
   );

@@ -45,6 +45,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import useRole from "../hooks/useRole";
 import HostLinkDialog from "./HostLinkDialog";
 import PageSkeleton from "./PageSkeleton";
+import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
 import "./dashboard.css";
 
@@ -399,6 +400,7 @@ export default function DashboardLayout() {
         )}
       </main>
 
+      <AssistantLauncher />
       <Toasts />
     </div>
   );

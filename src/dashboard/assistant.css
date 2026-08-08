@@ -2,18 +2,111 @@
    Builds on the Support chat primitives (.chat-thread, .msg, .chat-composer)
    in support.css; this file only adds what's specific to the agent. */
 
-/* the assistant owns a full page again, so the card fills the content area
-   and the composer sits at its foot rather than mid-screen */
-.assist-card {
+/* ---- Launcher: pinned button + slide-over ---- */
+
+.assist-fab {
+  position: fixed;
+  right: clamp(16px, 3vw, 32px);
+  bottom: clamp(16px, 3vw, 32px);
+  /* above page content, but under the mobile nav backdrop (30) and drawer (40)
+     so an open nav covers it rather than the button floating over the top */
+  z-index: 25;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 96px);
+  align-items: center;
+  justify-content: center;
+  background: var(--ink-inv);
+  color: var(--on-ink);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    opacity 0.15s var(--ease);
 }
 
-.assist-card .chat-thread {
+.assist-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+/* the drawer carries its own close control, so the button steps aside */
+.assist-fab.is-open {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.assist-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(8, 11, 15, 0.4);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: assist-fade 0.18s var(--ease) both;
+}
+
+.assist-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 46;
+  width: min(440px, 100vw);
+  display: flex;
+  flex-direction: column;
+  padding: 22px clamp(18px, 2vw, 26px);
+  background: var(--panel);
+  box-shadow: -14px 0 40px rgba(0, 0, 0, 0.28);
+  animation: assist-slide 0.22s var(--ease) both;
+}
+
+/* the thread takes the slack so the composer sits at the drawer's foot */
+.assist-drawer .chat-thread {
   flex: 1;
   height: auto;
-  min-height: 260px;
+  min-height: 0;
+}
+
+.assist-drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--ink-mute);
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.assist-drawer-close:hover {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+/* leave room for the close button beside the heading */
+.assist-drawer .assist-head {
+  padding-right: 34px;
+}
+
+@keyframes assist-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes assist-slide {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assist-scrim,
+  .assist-drawer {
+    animation: none;
+  }
 }
 
 /* hand-off link to Support at the foot of the panel */

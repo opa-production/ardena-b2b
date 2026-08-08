@@ -454,24 +454,47 @@ export default function Settings() {
           <section className="panel-card">
             <header className="card-head">
               <h2>Business verification</h2>
-              <p>Checked before this account was opened</p>
+              <p>
+                {business.verifiedSince
+                  ? "Confirmed by Ardena"
+                  : "Needed before you can list on the Ardena app"}
+              </p>
             </header>
+            {/* This panel was hardcoded to "Verified" for every workspace, so an
+                unverified business was told it was verified and then hit an
+                unexplained wall when it tried to publish a listing. */}
             <div className="pay-row">
               <span>Status</span>
-              <VerifiedBadge green />
+              {business.verifiedSince ? (
+                <VerifiedBadge green />
+              ) : (
+                <span className="mini-amount">Not yet verified</span>
+              )}
             </div>
-            <div className="pay-row">
-              <span>Registration</span>
-              <span className="mini-amount verified-ok">Confirmed</span>
-            </div>
-            <div className="pay-row">
-              <span>KRA PIN</span>
-              <span className="mini-amount verified-ok">Matched</span>
-            </div>
-            <div className="pay-row">
-              <span>Director ID</span>
-              <span className="mini-amount verified-ok">Verified</span>
-            </div>
+            {business.verifiedSince ? (
+              <>
+                <div className="pay-row">
+                  <span>Verified since</span>
+                  <span className="mini-amount verified-ok">
+                    {new Date(business.verifiedSince).toLocaleDateString("en-KE", {
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <p className="side-hint">
+                  Your public trust page is live, and your vehicles can be listed on
+                  the Ardena app.
+                </p>
+              </>
+            ) : (
+              <p className="side-hint">
+                Verification confirms your registration, KRA PIN and director ID.
+                Direct bookings work without it — it unlocks listing vehicles on the
+                Ardena app and your public trust page.{" "}
+                <Link to="/dashboard/support">Ask Ardena to verify your business</Link>.
+              </p>
+            )}
           </section>
 
           <section className="panel-card">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   fetchMarketplaceListing,
@@ -11,6 +11,10 @@ import {
 } from "../lib/api";
 import { toast } from "./toastStore";
 import { getVehicle } from "./fleetStore";
+import {
+  subscribe as subscribeBusiness,
+  getBusiness,
+} from "./businessStore";
 import Dropdown from "../components/Dropdown";
 import "./fleet.css";
 import "./marketplace.css";
@@ -75,6 +79,7 @@ function CommissionModal({ onAccept, onClose }) {
 
 export default function MarketplaceListing() {
   const { plate } = useParams();
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const decodedPlate = decodeURIComponent(plate);
 
   const [loading, setLoading] = useState(true);
@@ -416,6 +421,18 @@ export default function MarketplaceListing() {
           exactly as an individual host's car is approved. Without saying so, a
           business publishes, sees "Visible", waits for bookings that can't come,
           and concludes the marketplace is broken. */}
+      {/* Publishing is refused until Ardena has verified the business. Saying so
+          here means a business finds out before filling in the whole listing,
+          rather than from a 400 on the publish button. */}
+      {!business.verifiedSince && (
+        <div className="mkt-banner mkt-banner-review">
+          <strong>Your business isn&apos;t verified yet.</strong> You can fill this
+          in and save it now, but listings only go live on the Ardena app once
+          Ardena has confirmed your registration and director ID. Direct bookings
+          are unaffected. <Link to="/dashboard/support">Request verification</Link>.
+        </div>
+      )}
+
       {review === "pending_review" && (
         <div className="mkt-banner mkt-banner-review">
           <strong>Waiting on Ardena review.</strong> Every new listing is checked

@@ -327,14 +327,6 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  if (section === "assistant") {
-    return (
-      <div aria-hidden="true">
-        <ChatCard />
-      </div>
-    );
-  }
-
   // ---- Staff: 3 KPIs + table with side cards
   if (section === "staff") {
     return (

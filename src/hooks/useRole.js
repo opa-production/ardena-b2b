@@ -23,6 +23,10 @@ export const PERMISSIONS = {
 
   // Deposit claims sit between operations and finance.
   fileDepositClaim: ["Owner", "Manager", "Finance"],
+  // The Claims & requests page carries both queues, and the two have different
+  // audiences — Finance files claims, Booking agents answer extensions. Gating
+  // the page on either alone locked one of them out of their own work.
+  claimsOrExtensions: ["Owner", "Manager", "Finance", "Booking agent"],
 
   // Fleet and listing writes.
   manageFleet: ["Owner", "Manager"],

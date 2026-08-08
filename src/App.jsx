@@ -37,6 +37,11 @@ import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
 import Placeholder from "./dashboard/Placeholder";
 import MarketplaceListing from "./dashboard/MarketplaceListing";
+import RequireRole from "./dashboard/RequireRole";
+import Claims from "./dashboard/Claims";
+import MarketplaceEarnings from "./dashboard/MarketplaceEarnings";
+import RenterInbox from "./dashboard/RenterInbox";
+import Ratings from "./dashboard/Ratings";
 
 // Gate the dashboard behind a session; reacts to the session being
 // cleared (e.g. an expired token) by bouncing back to sign-in.
@@ -68,26 +73,63 @@ export default function App() {
       >
         <Route index element={<Overview />} />
         <Route path="fleet" element={<Fleet />} />
-        <Route path="fleet/new" element={<AddVehicle />} />
+        <Route
+          path="fleet/new"
+          element={<RequireRole capability="manageFleet"><AddVehicle /></RequireRole>}
+        />
         <Route path="fleet/:plate" element={<VehicleDetails />} />
-        <Route path="fleet/:plate/marketplace" element={<MarketplaceListing />} />
+        <Route
+          path="fleet/:plate/marketplace"
+          element={<RequireRole capability="manageListing"><MarketplaceListing /></RequireRole>}
+        />
         <Route path="bookings" element={<Bookings />} />
-        <Route path="bookings/new" element={<NewBooking />} />
+        <Route
+          path="bookings/new"
+          element={<RequireRole capability="manageBookings"><NewBooking /></RequireRole>}
+        />
         <Route path="bookings/:ref" element={<BookingDetails />} />
+        <Route
+          path="claims"
+          element={<RequireRole capability="fileDepositClaim"><Claims /></RequireRole>}
+        />
+        <Route
+          path="renter-messages"
+          element={<RequireRole capability="renterInbox"><RenterInbox /></RequireRole>}
+        />
+        <Route path="reviews" element={<Ratings />} />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id" element={<ClientDetails />} />
         <Route path="chauffeurs" element={<Chauffeurs />} />
-        <Route path="chauffeurs/new" element={<AddChauffeur />} />
+        <Route
+          path="chauffeurs/new"
+          element={<RequireRole capability="manageFleet"><AddChauffeur /></RequireRole>}
+        />
         <Route path="chauffeurs/:id" element={<ChauffeurDetails />} />
         <Route path="tracking" element={<Tracking />} />
         <Route path="tracking/:plate" element={<TrackingDetails />} />
         <Route path="verification" element={<Verification />} />
         <Route path="verification/all" element={<VerificationsList />} />
-        <Route path="payments" element={<Payments />} />
-        <Route path="payments/all" element={<PaymentsList />} />
+        <Route
+          path="payments"
+          element={<RequireRole capability="manageBilling"><Payments /></RequireRole>}
+        />
+        <Route
+          path="payments/all"
+          element={<RequireRole capability="manageBilling"><PaymentsList /></RequireRole>}
+        />
+        <Route
+          path="payments/marketplace"
+          element={<RequireRole capability="viewMoney"><MarketplaceEarnings /></RequireRole>}
+        />
         <Route path="assistant" element={<Assistant />} />
-        <Route path="staff" element={<Staff />} />
-        <Route path="billing" element={<Billing />} />
+        <Route
+          path="staff"
+          element={<RequireRole capability="manageStaff"><Staff /></RequireRole>}
+        />
+        <Route
+          path="billing"
+          element={<RequireRole capability="manageBilling"><Billing /></RequireRole>}
+        />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />

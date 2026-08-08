@@ -750,3 +750,173 @@ export function uploadMarketplaceImages(plate, files) {
     body: form,
   });
 }
+
+/* ---------------- Marketplace earnings (Owner / Finance) ----------------
+   A business's marketplace cars are owned by a synthetic host account nobody
+   can log into, so these reach the same tables through B2B auth. Withdrawals
+   land in the same queue admins already process for individual hosts. */
+
+// { total_gross, commission_rate, commission_amount, net_earnings,
+//   pending_withdrawals_total, withdrawable, paid_bookings_count,
+//   marketplace_active }
+// marketplace_active=false means nothing has been published yet — show an
+// empty state pointing at Fleet rather than treating it as an error.
+export function fetchMarketplaceEarnings() {
+  return request("/marketplace/earnings");
+}
+
+export function fetchMarketplaceTransactions(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/marketplace/transactions${qs ? `?${qs}` : ""}`);
+}
+
+export function fetchMarketplaceWithdrawals(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/marketplace/withdrawals${qs ? `?${qs}` : ""}`);
+}
+
+// Amount is validated against the withdrawable balance; either name a saved
+// payout_method_id or spell the destination out.
+export function createMarketplaceWithdrawal(payload) {
+  return request("/marketplace/withdrawals", { method: "POST", body: payload });
+}
+
+export function fetchPayoutMethods() {
+  return request("/marketplace/payout-methods");
+}
+
+export function createPayoutMethod(payload) {
+  return request("/marketplace/payout-methods", { method: "POST", body: payload });
+}
+
+export function deletePayoutMethod(id) {
+  return request(`/marketplace/payout-methods/${id}`, { method: "DELETE" });
+}
+
+/* ---------------- Renter inbox (Owner / Manager / Booking agent) ---------- */
+
+export function fetchRenterConversations(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/marketplace/conversations${qs ? `?${qs}` : ""}`);
+}
+
+// Opening a thread marks the renter's messages as read server-side.
+export function fetchRenterThread(conversationId, params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(
+    `/marketplace/conversations/${conversationId}/messages${qs ? `?${qs}` : ""}`
+  );
+}
+
+// Replies go out under the business name; the backend logs which staff member
+// sent them to the activity log.
+export function sendRenterMessage(conversationId, message) {
+  return request(`/marketplace/conversations/${conversationId}/messages`, {
+    method: "POST",
+    body: { message },
+  });
+}
+
+/* ---------------- Ratings ---------------- */
+
+export function fetchMarketplaceRatings(limit = 20) {
+  return request(`/marketplace/ratings?limit=${limit}`);
+}
+
+export function fetchVehicleRatings() {
+  return request("/marketplace/ratings/vehicles");
+}
+
+// Only valid once the trip is Completed; 409 if already rated.
+export function rateRenter(ref, payload) {
+  return request(`/marketplace/bookings/${encodeURIComponent(ref)}/rate-renter`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+/* ---------------- Deposit claims & extensions ----------------
+   Ardena holds the deposit on an app booking, so the dashboard's own
+   refund/forfeit buttons are refused for those — this is the path instead. */
+
+export function fileDepositClaim(ref, payload) {
+  return request(`/marketplace/bookings/${encodeURIComponent(ref)}/deposit-claim`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function fetchDepositClaims() {
+  return request("/marketplace/deposit-claims");
+}
+
+export function fetchExtensionRequests(pendingOnly = true) {
+  return request(`/marketplace/extension-requests?pending_only=${pendingOnly}`);
+}
+
+// Approving re-checks availability — can still 409 if the vehicle was booked
+// for those dates in the meantime.
+export function decideExtension(id, payload) {
+  return request(`/marketplace/extension-requests/${id}/decide`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+/* ---------------- Host account linking (Owner) ----------------
+   Adopts an existing Ardena mobile host account: its cars land in the fleet,
+   and its conversations, ratings and earnings follow automatically. */
+
+export function fetchHostLink() {
+  return request("/host-link");
+}
+
+// Drives the "do you already list on the Ardena app?" prompt. Only checks the
+// signed-in user's own email, so it can't be used to probe other addresses.
+export function fetchHostLinkSuggestion() {
+  return request("/host-link/suggest");
+}
+
+// Sends one code to the host account's email AND its registered phone.
+export function requestHostLinkCode(email) {
+  return request("/host-link/request", { method: "POST", body: { email } });
+}
+
+export function verifyHostLink(email, otp) {
+  return request("/host-link/verify", { method: "POST", body: { email, otp } });
+}
+
+// 409 while a live app booking is running on the linked account.
+export function unlinkHostAccount() {
+  return request("/host-link/unlink", { method: "POST" });
+}
+
+/* ---------------- Vehicle documents & plate ---------------- */
+
+// kind: "logbook" | "insurance"
+export function uploadVehicleDocument(plate, kind, file) {
+  const form = new FormData();
+  form.append("file", file);
+  return request(`/vehicles/${encodeURIComponent(plate)}/documents/${kind}`, {
+    method: "POST",
+    body: form,
+  });
+}
+
+// Replaces the temporary LINK-* plate on a vehicle imported from a linked host
+// account. Refused on any plate that isn't a placeholder — a real plate is the
+// vehicle's identity and booking rows reference it by value.
+export function setVehiclePlate(plate, newPlate) {
+  return request(`/vehicles/${encodeURIComponent(plate)}/plate`, {
+    method: "POST",
+    body: { plate: newPlate },
+  });
+}

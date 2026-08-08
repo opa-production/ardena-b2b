@@ -10,6 +10,7 @@ import {
   checkChargeStatus,
   uploadHandoverPhotos,
   deleteHandoverPhoto,
+  rateRenter,
 } from "../lib/api";
 import { useSyncExternalStore } from "react";
 import {
@@ -31,6 +32,8 @@ import {
   unassignChauffeur,
 } from "./chauffeursStore";
 import PageSkeleton from "./PageSkeleton";
+import DepositClaimDialog from "./DepositClaimDialog";
+import useRole from "../hooks/useRole";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -75,6 +78,7 @@ const STATUS_TOAST = {
 
 export default function BookingDetails() {
   const policy = useSyncExternalStore(subscribePolicy, getPolicy);
+  const { can } = useRole();
   const { ref } = useParams();
   const [b, setB] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -92,6 +96,10 @@ export default function BookingDetails() {
   const [outPending, setOutPending] = useState([]); // photos staged before check-out
   const [inPending, setInPending] = useState([]); // photos staged before check-in
   const [photoBusy, setPhotoBusy] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
+  const [renterStars, setRenterStars] = useState(0);
+  const [renterNote, setRenterNote] = useState("");
+  const [rated, setRated] = useState(false);
   const [lightbox, setLightbox] = useState(null); // enlarged photo URL
   const [chauffeurPick, setChauffeurPick] = useState(""); // driver chosen in the assign picker
   const [assignBusy, setAssignBusy] = useState(false);
@@ -219,6 +227,14 @@ export default function BookingDetails() {
   const penalty = hoIn ? hoIn.penalty : 0;
   const depositAmt = b.deposit_amount ?? policy.deposit;
 
+  // Bookings that came from the Ardena app behave differently almost everywhere:
+  // the renter owns the dates, Ardena holds the deposit, and handover needs the
+  // 6-digit code they read off their phone.
+  const fromApp = b.source === "marketplace";
+  const needsCode = Boolean(b.requires_handover_code);
+  const depositWithArdena = Boolean(b.deposit_managed_by_ardena);
+  const canClaim = can("fileDepositClaim");
+
   // Chauffeur assignment (§C): a driver is linked to this booking when their
   // derived assignment points back at this ref.
   const assignedChauffeur = chauffeurs.find((c) => c.assignment?.booking_ref === b.ref) || null;
@@ -284,6 +300,27 @@ export default function BookingDetails() {
     }
   }
 
+  async function handleRateRenter(e) {
+    e.preventDefault();
+    if (busy || !renterStars) return;
+    setBusy(true);
+    try {
+      await rateRenter(b.ref, {
+        rating: renterStars,
+        review: renterNote.trim() || null,
+      });
+      setRated(true);
+      toast("Thanks — that helps other hosts decide who to rent to.");
+    } catch (err) {
+      // 409 means it was already rated, which is a success from the user's
+      // point of view: the form should go away either way.
+      if (err.status === 409) setRated(true);
+      toast(err.message || "Couldn't save that rating", "danger");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleCheckOut(e) {
     e.preventDefault();
     if (busy) return;
@@ -294,6 +331,9 @@ export default function BookingDetails() {
         odometer: Number(f.get("odometer")),
         fuel: outFuel,
         notes: f.get("notes").trim() || null,
+        // Bookings that came from the Ardena app can't be handed over without
+        // the renter's code — the request is rejected outright.
+        ...(needsCode ? { pickup_code: String(f.get("pickup_code") || "").trim() } : {}),
       });
       let finalBooking = updated;
       if (outPending.length) {
@@ -327,6 +367,7 @@ export default function BookingDetails() {
         notes: f.get("notes").trim() || null,
         return_date: retDate || b.dropoff,
         return_time: retTime,
+        ...(needsCode ? { return_code: String(f.get("return_code") || "").trim() } : {}),
       });
       let finalBooking = updated;
       if (inPending.length) {
@@ -465,6 +506,15 @@ export default function BookingDetails() {
 
   return (
     <>
+      {claimOpen && (
+        <DepositClaimDialog
+          booking={b}
+          depositAmount={depositAmt}
+          onClose={() => setClaimOpen(false)}
+          onFiled={() => fetchBooking(b.ref).then(setB).catch(() => {})}
+        />
+      )}
+
       <header className="head-card">
         <div className="head-left">
           <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
@@ -477,6 +527,14 @@ export default function BookingDetails() {
             <p>
               {b.ref} · {b.vehicle} ({b.plate}) ·{" "}
               <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
+              {fromApp && (
+                <>
+                  {" "}
+                  <span className="chip source-app" title="Booked by a renter on the Ardena app">
+                    Ardena app
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -494,7 +552,13 @@ export default function BookingDetails() {
           {canCancel &&
             (cancelling ? (
               <span className="confirm-inline">
-                Cancel this booking?
+                {/* Cancelling an app booking isn't just a dashboard state change:
+                    the renter's trip ends, they're refunded in full, and the
+                    business is charged a lead-time penalty. Say so before they
+                    click, not after. */}
+                {fromApp
+                  ? "This ends the renter's trip, refunds them in full and charges you a cancellation penalty. Continue?"
+                  : "Cancel this booking?"}
                 <button
                   type="button"
                   className="icon-btn danger"
@@ -593,6 +657,25 @@ export default function BookingDetails() {
             {!hoOut && b.status !== "Cancelled" && (
               <form className="ho-form" onSubmit={handleCheckOut}>
                 <p className="ho-step">Check-out · record before handing over keys</p>
+                {needsCode && (
+                  <div className="field ho-code-field">
+                    <label htmlFor="ho-code">Renter&apos;s pickup code</label>
+                    <input
+                      id="ho-code"
+                      name="pickup_code"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      autoComplete="off"
+                      placeholder="6 digits"
+                      required
+                    />
+                    <p className="field-note">
+                      Ask the renter to read the code from their Ardena app. Five wrong
+                      entries locks this booking for 15 minutes.
+                    </p>
+                  </div>
+                )}
                 <div className="form-grid">
                   <div className="field">
                     <label htmlFor="ho-odo">Odometer (km)</label>
@@ -641,6 +724,24 @@ export default function BookingDetails() {
                   Check-in · due {fmtDate(b.dropoff)} by {RETURN_HOUR}:00 AM, then KES{" "}
                   {fmtAmount(policy.lateFeePerHour)} per started hour
                 </p>
+                {needsCode && (
+                  <div className="field ho-code-field">
+                    <label htmlFor="hi-code">Renter&apos;s return code</label>
+                    <input
+                      id="hi-code"
+                      name="return_code"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      autoComplete="off"
+                      placeholder="6 digits"
+                      required
+                    />
+                    <p className="field-note">
+                      The renter&apos;s app shows this once the trip is under way.
+                    </p>
+                  </div>
+                )}
                 <div className="form-grid">
                   <div className="field">
                     <label htmlFor="hi-odo">Odometer (km)</label>
@@ -744,25 +845,87 @@ export default function BookingDetails() {
                 </span>
               </div>
             )}
-            {b.deposit_status === "Held" && hoIn && (
-              <div className="deposit-actions">
+            {/* Rating renters is how the marketplace builds a picture of who to
+                trust with a vehicle, and fleets hand over more cars than anyone. */}
+            {fromApp && b.status === "Completed" && can("rateRenter") && !rated && (
+              <form className="rate-renter" onSubmit={handleRateRenter}>
+                <p className="pay-row">
+                  <span>Rate {b.customer}</span>
+                </p>
+                <div className="rate-stars">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      type="button"
+                      key={n}
+                      className={"rate-star" + (n <= renterStars ? " on" : "")}
+                      onClick={() => setRenterStars(n)}
+                      aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                <input
+                  value={renterNote}
+                  onChange={(e) => setRenterNote(e.target.value)}
+                  placeholder="Anything other hosts should know? (optional)"
+                  maxLength={2000}
+                />
                 <button
-                  type="button"
+                  type="submit"
                   className="icon-btn"
-                  disabled={busy}
-                  onClick={() => handleDeposit("refund")}
+                  disabled={busy || !renterStars}
                 >
-                  Refund deposit
+                  Submit rating
                 </button>
-                <button
-                  type="button"
-                  className="icon-btn danger"
-                  disabled={busy}
-                  onClick={() => handleDeposit("forfeit")}
-                >
-                  Forfeit
-                </button>
-              </div>
+              </form>
+            )}
+
+            {/* Ardena collects and releases the deposit on an app booking — the
+                renter paid it at checkout, not to us. Settling it here would show
+                a deposit resolved while their money sat untouched, so the backend
+                refuses and we point at the claim process instead. */}
+            {depositWithArdena ? (
+              <>
+                <p className="pay-note">
+                  Ardena holds this deposit and releases it after the trip. If the
+                  vehicle came back damaged, late or unclean, raise a claim within the
+                  inspection window.
+                </p>
+                {hoIn && canClaim && (
+                  <div className="deposit-actions">
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      onClick={() => setClaimOpen(true)}
+                    >
+                      Claim against deposit
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              b.deposit_status === "Held" &&
+              hoIn && (
+                <div className="deposit-actions">
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    disabled={busy}
+                    onClick={() => handleDeposit("refund")}
+                  >
+                    Refund deposit
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn danger"
+                    disabled={busy}
+                    onClick={() => handleDeposit("forfeit")}
+                  >
+                    Forfeit
+                  </button>
+                </div>
+              )
             )}
             {payWaiting && (
               <div className="pay-waiting">

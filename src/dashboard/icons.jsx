@@ -55,6 +55,28 @@ export const ICONS = {
       <circle cx="12" cy="10" r="2.5" />
     </svg>
   ),
+  reviews: (
+    <svg {...base}>
+      <path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.2l5.9-.9L12 3z" />
+    </svg>
+  ),
+  inbox: (
+    <svg {...base}>
+      <path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.5 8.5 0 01-3.8-.9L3 21l1.9-5.1A8.4 8.4 0 013.6 11 8.5 8.5 0 0112 3a8.4 8.4 0 019 8.5z" />
+    </svg>
+  ),
+  earnings: (
+    <svg {...base}>
+      <path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+    </svg>
+  ),
+  claims: (
+    <svg {...base}>
+      <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
+      <path d="M14 3v5h5" />
+      <path d="M12 11v4M12 17.5v.5" />
+    </svg>
+  ),
   verification: (
     <svg {...base}>
       <path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" />

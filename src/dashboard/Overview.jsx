@@ -75,7 +75,14 @@ export default function Overview() {
         {
           label: "Collected this month",
           value: fmtKES(stats.monthly_revenue),
-          delta: stats.monthly_revenue ? "via Paystack" : "no payments yet",
+          // The total now spans both channels. Naming the split matters because
+          // the business keeps all of a dashboard booking but pays commission on
+          // an app one — a single number hid which half was growing.
+          delta: stats.monthly_revenue
+            ? stats.monthly_revenue_marketplace
+              ? `${fmtKES(stats.monthly_revenue_marketplace)} from the Ardena app`
+              : "all from dashboard bookings"
+            : "no payments yet",
         },
         {
           label: "Active bookings",

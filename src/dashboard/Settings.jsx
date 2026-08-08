@@ -20,6 +20,7 @@ import { getSession } from "../lib/authStore";
 import VerifiedBadge from "../components/VerifiedBadge";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
+import HostLinkPanel from "./HostLinkPanel";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -302,6 +303,8 @@ export default function Settings() {
               </div>
             </form>
           </section>
+
+          <HostLinkPanel />
 
           <section className="panel-card">
             <header className="card-head">

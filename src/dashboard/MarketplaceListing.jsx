@@ -7,8 +7,10 @@ import {
   hideMarketplaceListing,
   uploadMarketplaceCover,
   uploadMarketplaceImages,
+  updateVehicle,
 } from "../lib/api";
 import { toast } from "./toastStore";
+import { getVehicle } from "./fleetStore";
 import Dropdown from "../components/Dropdown";
 import "./fleet.css";
 import "./marketplace.css";
@@ -23,6 +25,19 @@ const DRIVE_SETTINGS = [
   { value: "chauffeur_only", label: "Chauffeur-driven only" },
   { value: "both", label: "Self-drive & chauffeur" },
 ];
+
+const CANCELLATION_TIERS = [
+  { value: "flexible", label: "Flexible" },
+  { value: "standard", label: "Standard" },
+  { value: "strict", label: "Strict" },
+];
+
+// Plain-language summary so the choice isn't three words with no consequence.
+const TIER_NOTES = {
+  flexible: "Most generous to the renter — full refund until close to pickup. Attracts more bookings.",
+  standard: "A balance between filling the vehicle and covering a late drop-out.",
+  strict: "Least refundable. Best for in-demand vehicles and peak season — the default for fleets.",
+};
 
 function CommissionModal({ onAccept, onClose }) {
   return (
@@ -75,6 +90,9 @@ export default function MarketplaceListing() {
 
   // form state
   const [description, setDescription] = useState("");
+  // Lives on the vehicle, not the listing — surfaced here because publishing
+  // needs it and there's nowhere else to enter it.
+  const [yearInput, setYearInput] = useState("");
   const [seats, setSeats] = useState("");
   const [fuelType, setFuelType] = useState("");
   const [transmission, setTransmission] = useState("");
@@ -92,6 +110,10 @@ export default function MarketplaceListing() {
   const [coverImage, setCoverImage] = useState("");
   const [carImages, setCarImages] = useState([]); // array of URLs
   const [driveSetting, setDriveSetting] = useState("self_only");
+  // Fleet listings default to strict: a business holding a vehicle off-market
+  // for a booking carries a real cost when it's cancelled late.
+  const [cancellationTier, setCancellationTier] = useState("strict");
+  const [carVideo, setCarVideo] = useState("");
   const [depositRequired, setDepositRequired] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
   const [commissionAcknowledged, setCommissionAcknowledged] = useState(false);
@@ -116,6 +138,8 @@ export default function MarketplaceListing() {
     setCoverImage(data.cover_image || "");
     setCarImages(data.car_images || []);
     setDriveSetting(data.drive_setting || "self_only");
+    setCancellationTier(data.cancellation_tier || "strict");
+    setCarVideo(data.car_video || "");
     setDepositRequired(data.deposit_required || false);
     setDepositAmount(data.deposit_amount ?? "");
     setCommissionAcknowledged(data.commission_acknowledged || false);
@@ -168,6 +192,8 @@ export default function MarketplaceListing() {
       cover_image: coverImage || null,
       car_images: carImages.length > 0 ? carImages : null,
       drive_setting: driveSetting,
+      cancellation_tier: cancellationTier,
+      car_video: carVideo.trim() || null,
       deposit_required: depositRequired,
       deposit_amount: depositAmount !== "" ? Number(depositAmount) : null,
       commission_acknowledged: commissionAcknowledged,
@@ -255,6 +281,19 @@ export default function MarketplaceListing() {
     setSaving(true);
     setError("");
     try {
+      // The Ardena listing needs a model year, which fleets added before that
+      // field existed don't have. There's no vehicle edit screen, so without
+      // patching it here those vehicles could never be published at all.
+      if (needsYear) {
+        const y = Number(yearInput);
+        if (!y || y < 1900 || y > new Date().getFullYear() + 1) {
+          setError("Enter the vehicle's model year before publishing.");
+          setSaving(false);
+          return;
+        }
+        await updateVehicle(decodedPlate, { year: y });
+      }
+
       // Save current field values then publish in one sequence.
       // handleCommissionAccepted already saved before calling here, but we
       // save again to pick up any unsaved edits when publishing directly.
@@ -262,7 +301,12 @@ export default function MarketplaceListing() {
       _updateCache(saved);
       const updated = await publishMarketplaceListing(decodedPlate);
       _updateCache(updated);
-      toast(`${decodedPlate} is now visible on the Ardena Marketplace.`);
+      // Deliberately not "now visible" — an admin still has to approve it.
+      toast(
+        updated?.live_on_marketplace
+          ? `${decodedPlate} is live on the Ardena Marketplace.`
+          : `${decodedPlate} submitted. Ardena reviews new listings before they reach renters.`
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -285,6 +329,27 @@ export default function MarketplaceListing() {
   }
 
   const status = listing?.status || "draft";
+  // Vehicles added before the fleet carried a model year can't be listed until
+  // one is set, and there is no vehicle edit screen to set it on.
+  const vehicle = getVehicle(decodedPlate);
+  const needsYear = Boolean(vehicle) && !vehicle.year;
+  // Publishing is the business's intent; Ardena's review is a separate gate.
+  // A vehicle is only actually bookable when both are open, which is what
+  // `live_on_marketplace` reports — showing "Visible" off `status` alone told
+  // businesses their car was on the app when it was still in the queue.
+  const review = listing?.review || "not_submitted";
+  const live = Boolean(listing?.live_on_marketplace);
+  const badge = live
+    ? { cls: "mkt-live", label: "Live on Ardena" }
+    : review === "pending_review"
+      ? { cls: "mkt-review", label: "In review" }
+      : review === "rejected"
+        ? { cls: "mkt-rejected", label: "Changes needed" }
+        : status === "visible"
+          ? { cls: "mkt-review", label: "Awaiting review" }
+          : status === "hidden"
+            ? { cls: "mkt-hidden", label: "Hidden" }
+            : { cls: "mkt-draft", label: "Draft" };
 
   if (loading) {
     return (
@@ -318,9 +383,7 @@ export default function MarketplaceListing() {
             <h1>Marketplace listing · {decodedPlate}</h1>
             <p>
               Control how this vehicle appears on the Ardena consumer marketplace ·{" "}
-              <span className={`chip mkt-${status}`}>
-                {status === "draft" ? "Draft" : status === "visible" ? "Visible" : "Hidden"}
-              </span>
+              <span className={`chip ${badge.cls}`}>{badge.label}</span>
             </p>
           </div>
         </div>
@@ -348,6 +411,38 @@ export default function MarketplaceListing() {
       </header>
 
       {error && <p className="form-error">{error}</p>}
+
+      {/* Publishing submits the vehicle; an Ardena admin still has to approve it,
+          exactly as an individual host's car is approved. Without saying so, a
+          business publishes, sees "Visible", waits for bookings that can't come,
+          and concludes the marketplace is broken. */}
+      {review === "pending_review" && (
+        <div className="mkt-banner mkt-banner-review">
+          <strong>Waiting on Ardena review.</strong> Every new listing is checked
+          before it reaches renters — usually within a day. You&apos;ll see
+          &ldquo;Live on Ardena&rdquo; here once it&apos;s approved. Edits you make
+          in the meantime are saved and reviewed together.
+        </div>
+      )}
+
+      {review === "rejected" && (
+        <div className="mkt-banner mkt-banner-rejected">
+          <strong>Changes needed before this can go live.</strong>
+          {listing?.rejection_reason ? (
+            <> {listing.rejection_reason}</>
+          ) : (
+            <> Contact Ardena support for the details.</>
+          )}{" "}
+          Update the listing and publish again to resubmit.
+        </div>
+      )}
+
+      {review === "approved" && status === "visible" && !live && (
+        <div className="mkt-banner mkt-banner-review">
+          <strong>Approved but not showing.</strong> This listing is approved and set
+          to visible, but isn&apos;t appearing on the app. Contact Ardena support.
+        </div>
+      )}
 
       <form onSubmit={handleSave} noValidate>
         <div className="details-grid mkt-grid">
@@ -396,6 +491,25 @@ export default function MarketplaceListing() {
                   />
                 </div>
               </div>
+
+              {needsYear && (
+                <div className="field mkt-year-field">
+                  <label htmlFor="mkt-year">Model year</label>
+                  <input
+                    id="mkt-year"
+                    type="number"
+                    min={1900}
+                    max={new Date().getFullYear() + 1}
+                    placeholder="2022"
+                    value={yearInput}
+                    onChange={(e) => setYearInput(e.target.value)}
+                  />
+                  <p className="field-note">
+                    Renters filter by year, so a listing can&apos;t go live without
+                    one. This is saved to the vehicle, not just this listing.
+                  </p>
+                </div>
+              )}
 
               <div className="form-row form-row-3">
                 <div className="field">
@@ -536,6 +650,22 @@ export default function MarketplaceListing() {
                   {uploading ? "Uploading…" : "Add images"}
                 </button>
               </div>
+
+              {/* A walkaround clip converts better than photos alone. Hosted
+                  elsewhere and linked, rather than uploaded — video storage
+                  isn't part of the listing upload endpoints. */}
+              <div className="field">
+                <label htmlFor="mkt-video">
+                  Video link <span className="hint-text">optional</span>
+                </label>
+                <input
+                  id="mkt-video"
+                  type="url"
+                  value={carVideo}
+                  onChange={(e) => setCarVideo(e.target.value)}
+                  placeholder="https://…"
+                />
+              </div>
             </section>
 
           </div>
@@ -636,6 +766,21 @@ export default function MarketplaceListing() {
                   options={DRIVE_SETTINGS}
                 />
               </div>
+              {/* What a renter gets back when they cancel. Fleet listings
+                  default to strict because a vehicle held off-market for a
+                  booking has a real cost when it's dropped late. */}
+              <div className="field">
+                <label htmlFor="mkt-tier">Cancellation policy</label>
+                <Dropdown
+                  id="mkt-tier"
+                  name="cancellation_tier"
+                  value={cancellationTier}
+                  onChange={setCancellationTier}
+                  options={CANCELLATION_TIERS}
+                />
+                <p className="field-note">{TIER_NOTES[cancellationTier]}</p>
+              </div>
+
               <label className="checkbox-row">
                 <input
                   type="checkbox"

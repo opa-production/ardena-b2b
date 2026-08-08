@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   subscribe as subscribeTheme,
@@ -7,7 +14,7 @@ import {
   clearTheme,
   toggleTheme,
 } from "./themeStore";
-import { NAV_SECTIONS } from "./nav";
+import { visibleSections } from "./nav";
 import { ICONS } from "./icons";
 import {
   subscribe as subscribeBusiness,
@@ -30,10 +37,13 @@ import {
   fetchUnreadCount,
   fetchSupportUnread,
   fetchBillingGate,
+  fetchHostLinkSuggestion,
   logout,
 } from "../lib/api";
 import Logo from "../components/Logo";
 import usePageTitle from "../hooks/usePageTitle";
+import useRole from "../hooks/useRole";
+import HostLinkDialog from "./HostLinkDialog";
 import PageSkeleton from "./PageSkeleton";
 import Toasts from "./Toasts";
 import "./dashboard.css";
@@ -70,6 +80,10 @@ function PaymentWall({ gate }) {
   );
 }
 
+// Session-scoped so "not now" stops the nagging for this visit but the offer
+// comes back next time they sign in.
+const HOST_LINK_DISMISSED = "ardena-hostlink-dismissed";
+
 export default function DashboardLayout() {
   usePageTitle("Dashboard");
   const navigate = useNavigate();
@@ -83,6 +97,11 @@ export default function DashboardLayout() {
   const [gate, setGate] = useState(null);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const theme = useSyncExternalStore(subscribeTheme, getTheme);
+  const { can } = useRole();
+  // Recomputed when the session changes — a role change mid-session (staff page)
+  // should reshape the sidebar without a reload.
+  const navSections = useMemo(() => visibleSections(can), [can]);
+  const [linkPrompt, setLinkPrompt] = useState(null);
 
   // Paint the saved theme onto <html> while inside the dashboard; drop it on the
   // way out so marketing/auth pages always render light.
@@ -90,6 +109,28 @@ export default function DashboardLayout() {
     applyTheme();
     return () => clearTheme();
   }, []);
+
+  // Offer to link an existing Ardena host account, once per session. Dismissing
+  // it shouldn't nag on every navigation, so the answer is remembered for the
+  // browser session rather than forever — a business that says "not now" while
+  // busy should still find it later.
+  useEffect(() => {
+    if (!can("linkHostAccount")) return;
+    try {
+      if (sessionStorage.getItem(HOST_LINK_DISMISSED) === "1") return;
+    } catch {
+      /* private mode — just show it */
+    }
+    let alive = true;
+    fetchHostLinkSuggestion()
+      .then((s) => {
+        if (alive && s?.should_prompt) setLinkPrompt(s);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [can]);
 
   // hydrate the session: profile, business, policy, onboarding + fleet
   useEffect(() => {
@@ -197,8 +238,21 @@ export default function DashboardLayout() {
     navigate(to);
   }
 
+  function dismissLinkPrompt() {
+    setLinkPrompt(null);
+    try {
+      sessionStorage.setItem(HOST_LINK_DISMISSED, "1");
+    } catch {
+      /* private mode — it'll just offer again next navigation */
+    }
+  }
+
   return (
     <div className={"dash" + (navOpen ? " nav-open" : "")}>
+      {linkPrompt && (
+        <HostLinkDialog suggestion={linkPrompt} onClose={dismissLinkPrompt} />
+      )}
+
       <header className="dash-topbar">
         <button
           type="button"
@@ -223,7 +277,7 @@ export default function DashboardLayout() {
         <Logo className="sidebar-logo" />
 
         <nav className="sidebar-nav">
-          {NAV_SECTIONS.map((section) => (
+          {navSections.map((section) => (
             <div className="nav-group" key={section.label}>
               <p className="nav-group-label">{section.label}</p>
               {section.items.map((item) => (

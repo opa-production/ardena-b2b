@@ -1,0 +1,116 @@
+/* ── Deposit claims & extension requests ────────────────────────────── */
+
+/* The claim dialog carries a form rather than a single confirm action, so it
+   needs more room than the shared confirm modal. */
+.claim-card {
+  max-width: 560px;
+  text-align: left;
+}
+
+.claim-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.claim-form textarea {
+  resize: vertical;
+  min-height: 96px;
+  font-family: inherit;
+}
+
+/* ---- Claims & extensions list ---- */
+
+.claims-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .claims-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.claim-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.claim-row:last-child {
+  border-bottom: none;
+}
+
+.claim-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.claim-row-head strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.claim-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.claim-outcome {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+}
+
+/* Claim status chips — colour only, matching fleet.css / bookings.css. */
+.chip.claim-pending  { color: var(--warn); }
+.chip.claim-approved { color: var(--ok); }
+.chip.claim-partial  { color: var(--warn); }
+.chip.claim-rejected { color: var(--danger); }
+
+/* ---- Extension requests ---- */
+
+.ext-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ext-row:last-child {
+  border-bottom: none;
+}
+
+.ext-dates {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.ext-dates strong {
+  color: var(--ink);
+}
+
+.ext-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.ext-note {
+  flex: 1;
+  min-width: 0;
+}

@@ -1,0 +1,117 @@
+/* ── Host account linking ───────────────────────────────────────────── */
+
+.hostlink-card {
+  max-width: 520px;
+  text-align: left;
+}
+
+.hostlink-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+/* Spaced like a code, not a word — makes a mistyped digit obvious. */
+.hostlink-otp {
+  max-width: 200px;
+  letter-spacing: 0.35em;
+  font-family: var(--font-display);
+  font-size: 19px;
+  text-align: center;
+}
+
+/* Imported vehicles arrive with placeholder plates; this is the only place the
+   business is told, so it shouldn't read as a footnote. */
+.hostlink-todo {
+  margin: 16px 0 4px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  border-left: 3px solid var(--warn);
+}
+
+.hostlink-todo strong {
+  color: var(--ink);
+}
+
+.hostlink-todo ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+}
+
+/* ---- Settings: link status ---- */
+
+.hostlink-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.hostlink-status p {
+  margin: 0;
+}
+
+.hostlink-plates {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--warn);
+}
+
+/* Imported vehicles land with a temporary LINK-* id. This banner is the only
+   route to a real plate, so it sits above the vehicle record rather than in a
+   settings corner. */
+.plate-fix {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  border-left: 3px solid var(--warn);
+}
+
+.plate-fix > div {
+  flex: 1;
+  min-width: 240px;
+}
+
+.plate-fix strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.plate-fix p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.plate-fix input {
+  width: 160px;
+  text-transform: uppercase;
+}
+
+/* Compliance document row on the vehicle record. */
+.doc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}

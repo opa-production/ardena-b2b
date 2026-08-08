@@ -10,19 +10,51 @@
   gap: var(--card-gap, 16px);
 }
 
-/* Status chips */
-.chip.mkt-draft   { background: var(--color-bg-alt, #f3f4f6); color: var(--color-text-muted, #6b7280); }
-.chip.mkt-visible { background: #d1fae5; color: #065f46; }
-.chip.mkt-hidden  { background: #fee2e2; color: #991b1b; }
+/* Status chips.
+   These previously used --color-bg-alt / --color-text-muted, which don't exist
+   in global.css, plus literal hex for the rest — so they always fell back to
+   light-theme colours and were unreadable in dark mode. Rewritten onto the real
+   tokens, matching how fleet.css and bookings.css style their chips (colour
+   only, no background). */
+.chip.mkt-draft    { color: var(--ink-mute); }
+.chip.mkt-hidden   { color: var(--ink-soft); }
+.chip.mkt-review   { color: var(--warn); }
+.chip.mkt-rejected { color: var(--danger); }
+.chip.mkt-live     { color: var(--ok); font-weight: 600; }
+
+/* Review-state banners. The listing page can't just say "Visible" any more —
+   an admin has to approve a new listing before renters see it. */
+.mkt-banner {
+  margin-bottom: 18px;
+  padding: 13px 16px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+  border-left: 3px solid var(--line);
+}
+
+.mkt-banner strong {
+  color: var(--ink);
+}
+
+.mkt-banner-review {
+  border-left-color: var(--warn);
+}
+
+.mkt-banner-rejected {
+  border-left-color: var(--danger);
+}
 
 /* Cover image preview */
 .mkt-cover-preview {
   width: 100%;
   max-height: 200px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   margin-top: 8px;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--line);
 }
 
 /* Save / cancel row */
@@ -45,8 +77,8 @@
 }
 
 .modal-box {
-  background: var(--color-surface, #fff);
-  border-radius: 10px;
+  background: var(--panel);
+  border-radius: var(--radius-sm);
   width: 100%;
   max-width: 480px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
@@ -55,7 +87,7 @@
 
 .modal-head {
   padding: 20px 24px 16px;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
+  border-bottom: 1px solid var(--line);
 }
 
 .modal-head h2 {
@@ -68,7 +100,7 @@
   padding: 20px 24px;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: var(--color-text, #111827);
+  color: var(--ink);
 }
 
 .modal-body p { margin: 0 0 12px; }
@@ -84,7 +116,7 @@
 
 .commission-note {
   font-size: 0.82rem;
-  color: var(--color-text-muted, #6b7280);
+  color: var(--ink-mute);
   margin-top: 14px;
 }
 
@@ -93,17 +125,18 @@
   justify-content: flex-end;
   gap: 10px;
   padding: 16px 24px;
-  border-top: 1px solid var(--color-border, #e5e7eb);
+  border-top: 1px solid var(--line);
 }
 
 /* Fleet list marketplace badge */
-.chip.mkt-badge-visible { background: #d1fae5; color: #065f46; font-size: 0.72rem; }
-.chip.mkt-badge-hidden  { background: #fee2e2; color: #991b1b; font-size: 0.72rem; }
+/* Same token fix as the chips above — these carried literal light-theme hex. */
+.chip.mkt-badge-visible { color: var(--ok); font-size: 0.72rem; }
+.chip.mkt-badge-hidden  { color: var(--ink-soft); font-size: 0.72rem; }
 
 /* Hint text in labels */
 .hint-text {
   font-weight: 400;
-  color: var(--color-text-muted, #6b7280);
+  color: var(--ink-mute);
   font-size: 0.82rem;
 }
 
@@ -133,9 +166,9 @@
 
 .mkt-gallery-item {
   position: relative;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
-  border: 1px solid var(--color-border, #e5e7eb);
+  border: 1px solid var(--line);
   aspect-ratio: 4/3;
 }
 
@@ -173,4 +206,14 @@
   .mkt-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Model year lives on the vehicle, but publishing needs it and there is no
+   vehicle edit screen — so it surfaces here for listings that lack one. */
+.mkt-year-field {
+  margin-bottom: 16px;
+}
+
+.mkt-year-field input {
+  max-width: 160px;
 }

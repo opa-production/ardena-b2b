@@ -1,4 +1,9 @@
-// Sidebar navigation, placeholder links for modules we'll build next.
+// Sidebar navigation.
+//
+// `requires` names a capability from src/hooks/useRole.js. Items the signed-in
+// role can't use are hidden rather than disabled — a greyed-out Finances tab
+// tells a Viewer money exists but they may not look at it, which is worse than
+// it simply not being there. Items with no `requires` are open to every role.
 export const NAV_SECTIONS = [
   {
     label: "Operations",
@@ -9,25 +14,63 @@ export const NAV_SECTIONS = [
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
       { to: "/dashboard/tracking", key: "tracking", name: "Tracking" },
+      {
+        to: "/dashboard/renter-messages",
+        key: "inbox",
+        name: "Renter messages",
+        requires: "renterInbox",
+      },
+      { to: "/dashboard/reviews", key: "reviews", name: "Reviews" },
+      {
+        to: "/dashboard/claims",
+        key: "claims",
+        name: "Claims & requests",
+        requires: "fileDepositClaim",
+      },
     ],
   },
   {
     label: "Trust & money",
     items: [
       { to: "/dashboard/verification", key: "verification", name: "Verification" },
-      { to: "/dashboard/payments", key: "payments", name: "Finances" },
+      {
+        to: "/dashboard/payments",
+        key: "payments",
+        name: "Finances",
+        requires: "manageBilling",
+      },
+      {
+        to: "/dashboard/payments/marketplace",
+        key: "earnings",
+        name: "App earnings",
+        requires: "viewMoney",
+      },
     ],
   },
   {
     label: "Workspace",
     items: [
       { to: "/dashboard/assistant", key: "assistant", name: "Assistant" },
-      { to: "/dashboard/staff", key: "staff", name: "Staff & roles" },
+      {
+        to: "/dashboard/staff",
+        key: "staff",
+        name: "Staff & roles",
+        requires: "manageStaff",
+      },
       { to: "/dashboard/notifications", key: "notifications", name: "Notifications" },
       { to: "/dashboard/settings", key: "settings", name: "Settings" },
     ],
   },
 ];
+
+/** NAV_SECTIONS with items the signed-in role can't reach removed, and any
+ *  section that empties out dropped with them. */
+export function visibleSections(can) {
+  return NAV_SECTIONS.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => !item.requires || can(item.requires)),
+  })).filter((section) => section.items.length > 0);
+}
 
 export const SECTION_TITLES = {
   assistant: "Assistant",
@@ -36,8 +79,12 @@ export const SECTION_TITLES = {
   clients: "Clients",
   chauffeurs: "Chauffeurs",
   tracking: "Tracking",
+  inbox: "Renter messages",
+  reviews: "Reviews",
+  claims: "Claims & requests",
   verification: "Verification",
   payments: "Finances",
+  earnings: "App earnings",
   staff: "Staff & roles",
   notifications: "Notifications",
   settings: "Settings",

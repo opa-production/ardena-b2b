@@ -1,0 +1,89 @@
+/* ── Renter inbox ───────────────────────────────────────────────────── */
+
+.inbox-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .inbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.inbox-list {
+  max-height: 620px;
+  overflow-y: auto;
+}
+
+/* A button rather than a div so the list is keyboard-navigable — the whole
+   row is the target, so it has to reset the browser's button styling. */
+.inbox-item {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: box-shadow 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.inbox-item:hover {
+  background: var(--surface);
+}
+
+.inbox-item.active {
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+}
+
+.inbox-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.inbox-item-head strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.inbox-time {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--ink-mute);
+}
+
+.inbox-preview {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  /* One line only — the thread is one click away. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-badge {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: var(--on-ink);
+  background: var(--brand);
+}

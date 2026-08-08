@@ -566,3 +566,77 @@
 .spec-link:hover {
   color: var(--brand-dark);
 }
+
+/* ---- Marketplace (Ardena app) bookings ---- */
+
+/* Distinguishes a renter's app booking from a walk-in the staff typed in.
+   They diverge on handover, dates, deposits and cancellation, so the badge
+   earns its place next to the status chip. */
+.chip.source-app {
+  color: var(--brand-dark);
+  font-weight: 600;
+}
+
+/* The renter's 6-digit handover code. Given its own row above the odometer
+   grid because it gates the whole submission: without it the request is
+   rejected, so it should read as a step rather than one field among several. */
+.ho-code-field {
+  margin-bottom: 16px;
+}
+
+.ho-code-field input {
+  max-width: 200px;
+  letter-spacing: 0.3em;
+  font-family: var(--font-display);
+  font-size: 17px;
+  text-align: center;
+}
+
+.field-note {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-mute);
+}
+
+/* Explains why the refund/forfeit buttons aren't there on an app booking. */
+.pay-note {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--neo-in);
+}
+
+/* Rating the renter after a completed app booking. */
+.rate-renter {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.rate-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.rate-star {
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--line);
+  transition: color 0.12s var(--ease);
+}
+
+.rate-star.on,
+.rate-star:hover {
+  color: var(--accent);
+}

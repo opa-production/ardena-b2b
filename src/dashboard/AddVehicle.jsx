@@ -40,11 +40,19 @@ export default function AddVehicle() {
     setSaving(true);
     try {
       // dates go to the API as ISO (the pickers hold ISO values)
+      const make = f.get("make").trim();
+      const model = f.get("model").trim();
       await addVehicle({
-        name: f.get("name").trim(),
+        // `name` stays the display label the dashboard shows everywhere; make
+        // and model travel alongside for the consumer listing.
+        name: [make, model].filter(Boolean).join(" "),
+        make,
+        model,
         plate,
         cat: f.get("cat"),
         rate: Number(f.get("rate")),
+        year: Number(f.get("year")) || null,
+        chassis_no: f.get("chassis_no")?.trim() || null,
         status: f.get("status"),
         ins: f.get("ins"),
         inspection: f.get("inspection") || null,
@@ -104,13 +112,34 @@ export default function AddVehicle() {
       {!atCap && <div className="details-grid">
         <form id="add-vehicle-form" className="panel-card" onSubmit={handleSubmit}>
           <div className="form-grid">
+            {/* Make and model are separate because the Ardena app renders them
+                as "{make} {model}". Sending one combined string made every fleet
+                car show up as "Toyota Prado Toyota Prado". */}
             <div className="field">
-              <label htmlFor="v-name">Make &amp; model</label>
-              <input id="v-name" name="name" type="text" placeholder="Toyota Prado" required />
+              <label htmlFor="v-make">Make</label>
+              <input id="v-make" name="make" type="text" placeholder="Toyota" required />
+            </div>
+            <div className="field">
+              <label htmlFor="v-model">Model</label>
+              <input id="v-model" name="model" type="text" placeholder="Prado" required />
             </div>
             <div className="field">
               <label htmlFor="v-plate">Number plate</label>
               <input id="v-plate" name="plate" type="text" placeholder="KDL 482A" required />
+            </div>
+            {/* Required before the vehicle can be listed on the Ardena app —
+                collected here so nobody hits that wall at publish time. */}
+            <div className="field">
+              <label htmlFor="v-year">Model year</label>
+              <input
+                id="v-year"
+                name="year"
+                type="number"
+                min="1900"
+                max={new Date().getFullYear() + 1}
+                placeholder="2022"
+                required
+              />
             </div>
             <div className="field">
               <label htmlFor="v-cat">Category</label>
@@ -125,6 +154,16 @@ export default function AddVehicle() {
             <div className="field">
               <label htmlFor="v-rate">Day rate (KES)</label>
               <input id="v-rate" name="rate" type="number" min="0" step="100" placeholder="9,500" required />
+            </div>
+            <div className="field">
+              <label htmlFor="v-chassis">Chassis / VIN</label>
+              <input
+                id="v-chassis"
+                name="chassis_no"
+                type="text"
+                maxLength={50}
+                placeholder="Optional"
+              />
             </div>
             <div className="field">
               <label htmlFor="v-ins">Insurance expiry</label>

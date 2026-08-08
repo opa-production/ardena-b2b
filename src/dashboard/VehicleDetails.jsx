@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   subscribe,
@@ -7,12 +7,15 @@ import {
   removeVehicle,
   expiringSoon,
   isFleetLoaded,
+  hydrateFleet,
 } from "./fleetStore";
 import { getBookings } from "./bookingsStore";
+import { setVehiclePlate, uploadVehicleDocument } from "../lib/api";
 import { downloadVehicleStatement } from "./pdf";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
 import "./fleet.css";
+import "./hostlink.css";
 
 const MONTHS = [
   { label: "July 2026", prefix: "2026-07" },
@@ -26,6 +29,12 @@ const CHIP_CLASS = {
   "In maintenance": "maintenance",
 };
 
+// The compliance documents behind the self-declared expiry dates.
+const DOC_KINDS = [
+  { kind: "logbook", label: "Logbook", urlKey: "logbook_url" },
+  { kind: "insurance", label: "Insurance certificate", urlKey: "insurance_doc_url" },
+];
+
 const UPCOMING = [
   { customer: "Wanjiku Kamau", dates: "Jul 2 – Jul 6", amount: "48,000" },
   { customer: "James Otieno", dates: "Jul 12 – Jul 15", amount: "36,000" },
@@ -38,6 +47,10 @@ export default function VehicleDetails() {
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   const [month, setMonth] = useState(MONTHS[1].prefix); // June has the history
+  const [newPlate, setNewPlate] = useState("");
+  const [plateBusy, setPlateBusy] = useState(false);
+  const [docBusy, setDocBusy] = useState(null);
+  const docInputs = useRef({});
 
   const v = getVehicle(decodeURIComponent(plate));
 
@@ -58,6 +71,43 @@ export default function VehicleDetails() {
 
   const insSoon = expiringSoon(v.ins);
   const inspSoon = expiringSoon(v.inspection);
+  // Imported vehicles carry a temporary LINK-* id until a real plate is set.
+  const isPlaceholderPlate = String(v.plate || "").toUpperCase().startsWith("LINK-");
+
+  async function handleDocUpload(kind, e) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // let the same file be picked again after a failure
+    if (!file || docBusy) return;
+    setDocBusy(kind);
+    try {
+      await uploadVehicleDocument(v.plate, kind, file);
+      await hydrateFleet();
+      toast(`${kind === "logbook" ? "Logbook" : "Insurance certificate"} uploaded.`);
+    } catch (err) {
+      toast(err.message || "Couldn't upload that document", "danger");
+    } finally {
+      setDocBusy(null);
+    }
+  }
+
+  async function handleSetPlate(e) {
+    e.preventDefault();
+    const value = newPlate.trim();
+    if (!value || plateBusy) return;
+    setPlateBusy(true);
+    try {
+      await setVehiclePlate(v.plate, value);
+      toast(`Plate set to ${value}.`);
+      // The plate is this vehicle's identity in the URL, so navigate rather
+      // than leaving the page pointing at an id that no longer exists.
+      await hydrateFleet();
+      navigate(`/dashboard/fleet/${encodeURIComponent(value)}`, { replace: true });
+    } catch (err) {
+      toast(err.message || "Couldn't set that plate", "danger");
+    } finally {
+      setPlateBusy(false);
+    }
+  }
 
   return (
     <>
@@ -117,6 +167,31 @@ export default function VehicleDetails() {
         </div>
       </header>
 
+      {/* Vehicles imported from a linked host account arrive without a number
+          plate — the Ardena app never stored one — so they carry a temporary ID
+          until someone sets the real thing. This is the only place to do it. */}
+      {isPlaceholderPlate && (
+        <form className="plate-fix" onSubmit={handleSetPlate}>
+          <div>
+            <strong>This vehicle needs its real number plate.</strong>
+            <p>
+              It came across from your Ardena host account, which doesn&apos;t store
+              plates. Bookings and trackers move with it automatically.
+            </p>
+          </div>
+          <input
+            value={newPlate}
+            onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
+            placeholder="KDL 482A"
+            maxLength={20}
+            aria-label="Real number plate"
+          />
+          <button type="submit" className="btn btn-primary" disabled={plateBusy}>
+            {plateBusy ? "Saving…" : "Set plate"}
+          </button>
+        </form>
+      )}
+
       <div className="details-grid">
         <section className="panel-card">
           <header className="card-head">
@@ -152,6 +227,51 @@ export default function VehicleDetails() {
               <dd>
                 {v.inspection || "—"}
                 {inspSoon !== null && <span className="ins-soon"> · in {inspSoon} days</span>}
+              </dd>
+            </div>
+            {v.year && (
+              <div className="spec">
+                <dt>Model year</dt>
+                <dd>{v.year}</dd>
+              </div>
+            )}
+            {v.chassis_no && (
+              <div className="spec">
+                <dt>Chassis / VIN</dt>
+                <dd>{v.chassis_no}</dd>
+              </div>
+            )}
+            {/* The expiry dates above are self-declared; these are the documents
+                behind them, and what marketplace review checks. */}
+            <div className="spec spec-full">
+              <dt>Documents</dt>
+              <dd className="doc-row">
+                {DOC_KINDS.map(({ kind, label, urlKey }) => (
+                  <span className="doc-item" key={kind}>
+                    {v[urlKey] ? (
+                      <a href={v[urlKey]} target="_blank" rel="noreferrer">
+                        {label}
+                      </a>
+                    ) : (
+                      <span className="cell-sub">{label} not uploaded</span>
+                    )}
+                    <button
+                      type="button"
+                      className="icon-btn"
+                      disabled={docBusy === kind}
+                      onClick={() => docInputs.current[kind]?.click()}
+                    >
+                      {docBusy === kind ? "Uploading…" : v[urlKey] ? "Replace" : "Upload"}
+                    </button>
+                    <input
+                      ref={(el) => (docInputs.current[kind] = el)}
+                      type="file"
+                      accept="image/*,application/pdf"
+                      style={{ display: "none" }}
+                      onChange={(e) => handleDocUpload(kind, e)}
+                    />
+                  </span>
+                ))}
               </dd>
             </div>
             {v.notes && (

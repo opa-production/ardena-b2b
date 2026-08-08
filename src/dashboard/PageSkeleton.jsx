@@ -154,7 +154,10 @@ function SideCards({ cards = [3, 2] }) {
   );
 }
 
-export default function PageSkeleton({ path }) {
+/* `path` decides which skeleton shape to draw. It defaults to "" so a caller
+   that forgets it falls through to the generic list skeleton — a missing prop
+   should never throw and take the whole dashboard down with it. */
+export default function PageSkeleton({ path = "" }) {
   const parts = path.split("/").filter(Boolean); // ["dashboard", ...]
   const section = parts[1] || "";
   const sub = parts[2];
@@ -290,6 +293,42 @@ export default function PageSkeleton({ path }) {
     return (
       <div aria-hidden="true">
         <ChatCard />
+      </div>
+    );
+  }
+
+  // ---- Renter inbox: conversation list beside the open thread
+  if (section === "renter-messages") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <div className="inbox-grid">
+          <section className="panel-card">
+            <CardLines rows={5} />
+          </section>
+          <ChatCard />
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Claims / Reviews: page head over a list of rows
+  if (section === "claims" || section === "reviews") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <TableCard rows={5} />
+      </div>
+    );
+  }
+
+  // ---- Marketplace earnings: page head, KPIs, payouts table
+  if (section === "payments" && sub === "marketplace") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <StatRow count={3} />
+        <TableCard rows={6} />
       </div>
     );
   }

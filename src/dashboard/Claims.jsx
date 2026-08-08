@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
@@ -41,6 +42,7 @@ function fmtDay(value) {
 
 export default function Claims() {
   usePageTitle("Claims & requests");
+  const { pathname } = useLocation();
   const { can } = useRole();
   const canDecide = can("decideExtensions");
 
@@ -97,7 +99,7 @@ export default function Claims() {
     }
   }
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <PageSkeleton path={pathname} />;
 
   return (
     <>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
@@ -32,6 +33,7 @@ function fmtDay(value) {
 
 export default function Ratings() {
   usePageTitle("Reviews");
+  const { pathname } = useLocation();
 
   const [summary, setSummary] = useState(null);
   const [vehicles, setVehicles] = useState([]);
@@ -56,7 +58,7 @@ export default function Ratings() {
     load();
   }, [load]);
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <PageSkeleton path={pathname} />;
 
   const s = summary || {};
   const hasAny = (s.business_rating_count || 0) + (s.car_rating_count || 0) > 0;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
@@ -68,6 +68,7 @@ function fmtDay(value) {
 
 export default function MarketplaceEarnings() {
   usePageTitle("Marketplace earnings");
+  const { pathname } = useLocation();
 
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
@@ -182,7 +183,7 @@ export default function MarketplaceEarnings() {
     }
   }
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <PageSkeleton path={pathname} />;
 
   // Nothing published yet isn't an error — it just means there's nothing to earn
   // on. Point at the fleet rather than showing four zeroes and a payout form.

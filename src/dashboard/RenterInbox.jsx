@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
@@ -24,6 +25,7 @@ function fmtTime(value) {
 
 export default function RenterInbox() {
   usePageTitle("Renter messages");
+  const { pathname } = useLocation();
 
   const [conversations, setConversations] = useState([]);
   const [activeId, setActiveId] = useState(null);
@@ -95,7 +97,7 @@ export default function RenterInbox() {
     }
   }
 
-  if (loading) return <PageSkeleton />;
+  if (loading) return <PageSkeleton path={pathname} />;
 
   const unreadTotal = conversations.reduce((n, c) => n + (c.unread_count || 0), 0);
 

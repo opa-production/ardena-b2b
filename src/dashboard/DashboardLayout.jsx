@@ -101,7 +101,10 @@ export default function DashboardLayout() {
   const { can } = useRole();
   // Recomputed when the session changes — a role change mid-session (staff page)
   // should reshape the sidebar without a reload.
-  const navSections = useMemo(() => visibleSections(can), [can]);
+  const navSections = useMemo(
+    () => visibleSections(can, business.appLinked),
+    [can, business.appLinked]
+  );
   const [linkPrompt, setLinkPrompt] = useState(null);
 
   // Paint the saved theme onto <html> while inside the dashboard; drop it on the

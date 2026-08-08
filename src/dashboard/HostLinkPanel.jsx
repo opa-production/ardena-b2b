@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import ConfirmDialog from "../components/ConfirmDialog";
 import HostLinkDialog from "./HostLinkDialog";
-import { fetchHostLink, unlinkHostAccount } from "../lib/api";
+import { fetchBusiness, fetchHostLink, unlinkHostAccount } from "../lib/api";
 import { hydrateFleet } from "./fleetStore";
+import {
+  hydrateBusiness,
+  subscribe as subscribeBusiness,
+  getBusiness,
+} from "./businessStore";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
 import "./hostlink.css";
@@ -19,6 +24,7 @@ import "./hostlink.css";
 export default function HostLinkPanel() {
   const { can } = useRole();
   const allowed = can("linkHostAccount");
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
 
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -46,6 +52,9 @@ export default function HostLinkPanel() {
       const res = await unlinkHostAccount();
       toast(res?.message || "Host account released.");
       await hydrateFleet();
+      // appLinked drives every app-dependent surface — refresh it now so they
+      // disappear immediately rather than on the next full page load.
+      await fetchBusiness().then(hydrateBusiness).catch(() => {});
       await load();
     } catch (err) {
       // 409 while a live app booking is running — unlinking mid-trip would
@@ -63,8 +72,9 @@ export default function HostLinkPanel() {
       {linking && (
         <HostLinkDialog
           suggestion={null}
-          onClose={() => {
+          onClose={async () => {
             setLinking(false);
+            await fetchBusiness().then(hydrateBusiness).catch(() => {});
             load();
           }}
         />
@@ -112,18 +122,43 @@ export default function HostLinkPanel() {
         ) : (
           <>
             <div>
-              <p className="strong">No account linked</p>
-              <p className="cell-sub">
-                Already list cars on the Ardena app? Link that account and your
-                vehicles come across with their reviews and booking history.
+              {/* There are two ways onto the app and this panel covers only one.
+                  A workspace that got there by publishing is already live —
+                  telling it "not connected" would contradict the app earnings
+                  and reviews it can see everywhere else in the dashboard. */}
+              <p className="strong">
+                {business.appLinked
+                  ? "Your listings are managed by this workspace"
+                  : "Not connected to the Ardena app"}
               </p>
+              {business.appLinked ? (
+                <p className="cell-sub">
+                  Your vehicles are on the Ardena app under this workspace. If you
+                  also have a personal Ardena host account with vehicles on it, you
+                  can connect it here to bring those across too.
+                </p>
+              ) : (
+                <>
+                  <p className="cell-sub">
+                    Already list cars on the Ardena app? Connect that account and
+                    your vehicles come across with their reviews, messages and
+                    booking history — nothing is re-listed and no bookings are
+                    interrupted.
+                  </p>
+                  <p className="cell-sub hostlink-unlocks">
+                    Connecting adds: app earnings and payouts, renter messages,
+                    reviews, deposit claims, and marketplace listing for your
+                    fleet. Direct bookings work exactly as they do now, either way.
+                  </p>
+                </>
+              )}
             </div>
             <button
               type="button"
               className="btn btn-primary"
               onClick={() => setLinking(true)}
             >
-              Link account
+              {business.appLinked ? "Connect another account" : "Connect account"}
             </button>
           </>
         )}

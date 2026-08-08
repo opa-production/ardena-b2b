@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import {
@@ -14,6 +14,10 @@ import PaymentDonut from "./charts/PaymentDonut";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import MarketplaceEarningsPanel from "./MarketplaceEarningsPanel";
 import useRole from "../hooks/useRole";
+import {
+  subscribe as subscribeBusiness,
+  getBusiness,
+} from "./businessStore";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
@@ -44,7 +48,12 @@ export default function Payments() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { can } = useRole();
-  const canSeeApp = can("viewMoney");
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
+  // Two conditions, and both must hold: the role is allowed to see money, AND
+  // this workspace is actually on the Ardena app. Without the second, a
+  // direct-bookings business got a source toggle, a "From the Ardena app" card
+  // reading zero, and a tab leading nowhere — all for a channel it isn't on.
+  const canSeeApp = can("viewMoney") && business.appLinked;
 
   // /dashboard/payments/marketplace still works — it just opens this page on
   // the app tab, so old links and bookmarks land somewhere sensible.

@@ -37,8 +37,9 @@ import Settings from "./dashboard/Settings";
 import Placeholder from "./dashboard/Placeholder";
 import MarketplaceListing from "./dashboard/MarketplaceListing";
 import RequireRole from "./dashboard/RequireRole";
-import Claims from "./dashboard/Claims";
+import RequireAppLink from "./dashboard/RequireAppLink";
 import RenterInbox from "./dashboard/RenterInbox";
+import Claims from "./dashboard/Claims";
 import Ratings from "./dashboard/Ratings";
 
 // Gate the dashboard behind a session; reacts to the session being
@@ -78,7 +79,7 @@ export default function App() {
         <Route path="fleet/:plate" element={<VehicleDetails />} />
         <Route
           path="fleet/:plate/marketplace"
-          element={<RequireRole capability="manageListing"><MarketplaceListing /></RequireRole>}
+          element={<RequireAppLink><RequireRole capability="manageListing"><MarketplaceListing /></RequireRole></RequireAppLink>}
         />
         <Route path="bookings" element={<Bookings />} />
         <Route
@@ -88,13 +89,16 @@ export default function App() {
         <Route path="bookings/:ref" element={<BookingDetails />} />
         <Route
           path="claims"
-          element={<RequireRole capability="claimsOrExtensions"><Claims /></RequireRole>}
+          element={<RequireAppLink><RequireRole capability="claimsOrExtensions"><Claims /></RequireRole></RequireAppLink>}
         />
+        {/* No longer in the sidebar — Support lists renter conversations and
+            links here for the full thread. The page itself is still the place
+            you read and reply, so it keeps its route and its guards. */}
         <Route
           path="renter-messages"
-          element={<RequireRole capability="renterInbox"><RenterInbox /></RequireRole>}
+          element={<RequireAppLink><RequireRole capability="renterInbox"><RenterInbox /></RequireRole></RequireAppLink>}
         />
-        <Route path="reviews" element={<Ratings />} />
+        <Route path="reviews" element={<RequireAppLink><Ratings /></RequireAppLink>} />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id" element={<ClientDetails />} />
         <Route path="chauffeurs" element={<Chauffeurs />} />
@@ -121,10 +125,7 @@ export default function App() {
           path="payments/marketplace"
           element={<RequireRole capability="viewMoney"><Payments /></RequireRole>}
         />
-        <Route
-          path="staff"
-          element={<RequireRole capability="manageStaff"><Staff /></RequireRole>}
-        />
+        <Route path="staff" element={<Staff />} />
         <Route
           path="billing"
           element={<RequireRole capability="manageBilling"><Billing /></RequireRole>}

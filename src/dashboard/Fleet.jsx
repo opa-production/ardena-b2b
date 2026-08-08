@@ -2,6 +2,10 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getVehicles, removeVehicle, isFleetLoaded } from "./fleetStore";
 import { toast } from "./toastStore";
+import {
+  subscribe as subscribeBusiness,
+  getBusiness,
+} from "./businessStore";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
 
@@ -18,6 +22,9 @@ const fmtRate = (r) => r.toLocaleString("en-KE");
 export default function Fleet() {
   const vehicles = useSyncExternalStore(subscribe, getVehicles);
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
+  // No Ardena app account linked means no marketplace, so the per-vehicle
+  // listing shortcut would lead to a page that refuses to do anything.
+  const { appLinked } = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [confirming, setConfirming] = useState(null);
@@ -194,13 +201,15 @@ export default function Fleet() {
                         >
                           View
                         </Link>
-                        <Link
-                          className="icon-btn"
-                          to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
-                          title="Manage marketplace listing"
-                        >
-                          Marketplace
-                        </Link>
+                        {appLinked && (
+                          <Link
+                            className="icon-btn"
+                            to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
+                            title="Manage marketplace listing"
+                          >
+                            Marketplace
+                          </Link>
+                        )}
                         <button
                           type="button"
                           className="icon-btn danger"

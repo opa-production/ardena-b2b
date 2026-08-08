@@ -11,6 +11,7 @@ import {
   fetchActivityLog,
 } from "../lib/api";
 import Dropdown from "../components/Dropdown";
+import useRole from "../hooks/useRole";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
@@ -50,6 +51,10 @@ function fmtAt(iso) {
 export default function Staff() {
   const { pathname } = useLocation();
   const [members, setMembers] = useState([]);
+  // GET /staff and /activity-log are open to every role server-side, so the
+  // page stays readable for all of them — only the write controls are gated.
+  const { can } = useRole();
+  const canManage = can("manageStaff");
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [log, setLog] = useState([]);
@@ -247,7 +252,9 @@ export default function Staff() {
                     <span className="chip active">Active</span>
                   </td>
                   <td className="actions-cell">
-                    {m.role === "Owner" ? (
+                    {!canManage ? (
+                      <span className="cell-sub">View only</span>
+                    ) : m.role === "Owner" ? (
                       <span className="cell-sub">Workspace owner</span>
                     ) : roleEditing === m.id ? (
                       <>

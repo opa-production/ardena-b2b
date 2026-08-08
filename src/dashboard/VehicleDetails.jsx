@@ -10,6 +10,10 @@ import {
   hydrateFleet,
 } from "./fleetStore";
 import { getBookings } from "./bookingsStore";
+import {
+  subscribe as subscribeBusiness,
+  getBusiness,
+} from "./businessStore";
 import { setVehiclePlate, uploadVehicleDocument } from "../lib/api";
 import { downloadVehicleStatement } from "./pdf";
 import Dropdown from "../components/Dropdown";
@@ -45,6 +49,7 @@ export default function VehicleDetails() {
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
   const { plate } = useParams();
   const navigate = useNavigate();
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [confirming, setConfirming] = useState(false);
   const [month, setMonth] = useState(MONTHS[1].prefix); // June has the history
   const [newPlate, setNewPlate] = useState("");
@@ -127,12 +132,14 @@ export default function VehicleDetails() {
           </div>
         </div>
         <div className="details-actions">
-          <Link
-            to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
-            className="btn btn-ghost"
-          >
-            Marketplace
-          </Link>
+          {business.appLinked && (
+            <Link
+              to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
+              className="btn btn-ghost"
+            >
+              Marketplace
+            </Link>
+          )}
           <button type="button" className="btn btn-ghost" disabled title="Editing is coming soon">
             Edit
           </button>

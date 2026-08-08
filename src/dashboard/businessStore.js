@@ -12,6 +12,19 @@ const DEFAULTS = {
   logo: null,
   trustSlug: null,
   verifiedSince: null,
+  // Is this workspace on the Ardena consumer app at all? Everything that only
+  // exists because of that channel — app earnings, renter messages, reviews,
+  // claims, marketplace listing — stays hidden until it's true. A workspace
+  // doing direct bookings only should never see a control for a channel it
+  // isn't on, or numbers that can only ever read zero.
+  //
+  // True via EITHER route onto the app: adopting a mobile host account, or
+  // simply publishing a listing (which creates one for you). Gating on the
+  // link flow alone hid the app UI from businesses already selling there.
+  appLinked: false,
+  // Narrower: a real mobile host account was adopted. Only the Settings
+  // connect/release panel cares about this distinction.
+  hostAccountLinked: false,
 };
 
 function load() {
@@ -79,6 +92,9 @@ export function hydrateBusiness(server) {
   if (server.logo_url) next.logo = server.logo_url;
   if (server.trust_slug != null) next.trustSlug = server.trust_slug;
   if (server.verified_since != null) next.verifiedSince = server.verified_since;
+  if (server.app_linked != null) next.appLinked = Boolean(server.app_linked);
+  if (server.host_account_linked != null)
+    next.hostAccountLinked = Boolean(server.host_account_linked);
   state = next;
   persist();
   emit();

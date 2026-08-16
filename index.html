@@ -68,5 +68,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- Cloudflare Web Analytics. The token is public by design — it ships in
+         the HTML of every page and identifies the site, not the account. -->
+    <script
+      type="module"
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "6cabefb7163d4923922ed64463690f4a"}'
+    ></script>
+    <!-- End Cloudflare Web Analytics -->
   </body>
 </html>

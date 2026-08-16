@@ -41,6 +41,7 @@ import {
   logout,
 } from "../lib/api";
 import Logo from "../components/Logo";
+import { HOST_ACCOUNT_LINKING } from "../lib/features";
 import usePageTitle from "../hooks/usePageTitle";
 import useRole from "../hooks/useRole";
 import HostLinkDialog from "./HostLinkDialog";
@@ -119,6 +120,7 @@ export default function DashboardLayout() {
   // browser session rather than forever — a business that says "not now" while
   // busy should still find it later.
   useEffect(() => {
+    if (!HOST_ACCOUNT_LINKING) return; // deferred phase — never offer it
     if (!can("linkHostAccount")) return;
     try {
       if (sessionStorage.getItem(HOST_LINK_DISMISSED) === "1") return;

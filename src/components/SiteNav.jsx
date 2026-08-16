@@ -22,7 +22,6 @@ export default function SiteNav() {
         <a href="/#faq" className={faqActive ? "active" : ""}>
           FAQ
         </a>
-        <NavLink to="/about">About</NavLink>
         <NavLink to="/contact">Contact</NavLink>
       </nav>
       <div className="nav-actions">

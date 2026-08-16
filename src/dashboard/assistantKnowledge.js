@@ -13,7 +13,7 @@ export const PRODUCT_FACTS = {
   launchMonths: 3,
   minimum: 2000,
   checkPrice: 100,
-  trialDays: 14,
+  trialDays: 30,
 };
 
 /* Each topic: keywords that route to it, a short answer, and where in the

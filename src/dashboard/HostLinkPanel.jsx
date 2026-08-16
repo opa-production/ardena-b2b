@@ -11,6 +11,7 @@ import {
 } from "./businessStore";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
+import { HOST_ACCOUNT_LINKING } from "../lib/features";
 import "./hostlink.css";
 
 /**
@@ -64,6 +65,12 @@ export default function HostLinkPanel() {
   }
 
   if (!allowed || loading) return null;
+
+  // Connecting is deferred (see lib/features.js). A workspace that never
+  // linked has nothing to manage here, so the whole panel goes rather than
+  // leaving a card whose only action is one we're not offering yet. Already
+  // linked workspaces still need their status and the Release button.
+  if (!HOST_ACCOUNT_LINKING && !status?.linked) return null;
 
   const needsPlates = status?.vehicles_needing_plate?.length || 0;
 

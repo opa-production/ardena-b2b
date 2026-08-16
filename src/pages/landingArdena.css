@@ -1,0 +1,1121 @@
+/* =========================================================================
+   Marketing pages — ardena.co.ke design language
+   -------------------------------------------------------------------------
+   Shared by the landing page, /pricing and /contact. Everything is scoped
+   under `.ard`, which those pages wrap themselves in.
+
+   Ported from the live ardena.co.ke stylesheet:
+     · Space Grotesk throughout; hero title at weight 300, headings at 700
+     · slate ink #1e293b, secondary #475569, bands white / #f8fafc / cream
+     · brand blue #007FFA in exactly one place — the nav CTA
+     · eyebrow label → heading → description, then a sticky-intro split with
+       a numbered list beside it, sides alternating section to section
+
+   Departs from the parent site on one point: buttons and cards are near-sharp
+   (3px) rather than pills, keeping this site's square language.
+   ========================================================================= */
+
+.ard {
+  --ard-ink: #1e293b;
+  --ard-ink-dark: #0f172a;
+  --ard-text: #475569;
+  --ard-light: #94a3b8;
+  --ard-line: #e2e8f0;
+  --ard-white: #ffffff;
+  --ard-bg-light: #f8fafc;
+  --ard-cream: #f5f0e8;
+  --ard-cream-dark: #e8e2d8;
+  --ard-blue: #007ffa;
+  --ard-font: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  --ard-t: all 0.3s ease;
+
+  font-family: var(--ard-font);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ard-ink);
+  background: var(--ard-white);
+  overflow-x: hidden;
+}
+
+/* global.css sets h1–h3 to the display font at 600/-0.02em; the ardena scale
+   is its own thing, so reset the inherited bits once here.
+   :where() keeps this at .ard's specificity (0,1,0) rather than (0,1,1), so
+   the single-class rules below — .ard-hero-title at 300, .ard-heading at 700 —
+   still win on source order instead of being clobbered by the reset. */
+.ard :where(h1, h2, h3) {
+  font-family: var(--ard-font);
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.3;
+}
+
+.ard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .ard-container {
+    padding: 0 2rem;
+  }
+}
+
+/* ---- Shared section furniture ------------------------------------------ */
+
+.ard-section {
+  padding: 5rem 0;
+}
+
+@media (min-width: 900px) {
+  .ard-section {
+    padding: 6rem 0;
+  }
+}
+
+.ard-section--light {
+  background: var(--ard-bg-light);
+}
+
+.ard-section--cream {
+  background: var(--ard-cream);
+}
+
+.ard-section--white {
+  background: var(--ard-white);
+}
+
+/* ▪ WHY ARDENA — the small tracked label above every heading */
+.ard-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--ard-text);
+  margin-bottom: 0.5rem;
+}
+
+.ard-section--cream .ard-label {
+  color: var(--ard-ink);
+  opacity: 0.9;
+}
+
+.ard-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ard-ink);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.ard-desc {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--ard-text);
+}
+
+.ard-section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: var(--ard-ink);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .ard-heading,
+  .ard-section-title {
+    font-size: 1.9rem;
+  }
+}
+
+/* ---- Buttons ------------------------------------------------------------
+   Near-sharp (3px) rather than the parent site's pills, matching the pricing
+   cards and the brand's square language. */
+
+.ard-btn {
+  display: inline-block;
+  padding: 0.75rem 2rem;
+  border-radius: 3px;
+  font-family: var(--ard-font);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--ard-t);
+}
+
+/* solid white — the primary CTA on the photo hero */
+.ard-btn--solid {
+  background: #fff;
+  color: #000;
+  border: 2px solid #fff;
+}
+
+.ard-btn--solid:hover {
+  transform: translateY(-1px);
+}
+
+/* frosted outline — the secondary CTA, readable over any part of the photo */
+.ard-btn--glass {
+  color: rgba(255, 255, 255, 0.98);
+  border: 2px solid rgba(255, 255, 255, 0.82);
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.ard-btn--glass:hover {
+  background: rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.95);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+/* ink pill — used on light bands */
+.ard-btn--ink {
+  background: var(--ard-ink);
+  color: #fff;
+  border-radius: 3px;
+  font-size: 0.95rem;
+  padding: 0.72rem 1.45rem;
+}
+
+.ard-btn--ink:hover {
+  background: var(--ard-ink-dark);
+  transform: translateY(-1px);
+}
+
+.ard-btn--outline {
+  background: transparent;
+  color: var(--ard-ink);
+  border: 1px solid var(--ard-ink);
+  border-radius: 3px;
+  font-size: 0.95rem;
+  padding: 0.72rem 1.45rem;
+}
+
+.ard-btn--outline:hover {
+  background: rgba(30, 41, 59, 0.06);
+}
+
+/* ---- Header / nav ------------------------------------------------------- */
+
+.ard-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.ard-nav {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.5rem;
+  background: rgba(255, 255, 255, 0.97);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 4px 24px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ard-nav .brand {
+  color: var(--ard-ink);
+  flex-shrink: 0;
+}
+
+.ard-nav .brand svg {
+  height: 26px;
+}
+
+.ard-nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.ard-nav-link {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  color: rgba(30, 41, 59, 0.9);
+  font-weight: 500;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  position: relative;
+  transition: var(--ard-t);
+}
+
+.ard-nav-link:hover,
+.ard-nav-link.is-active {
+  color: rgba(30, 41, 59, 1);
+}
+
+/* current page marker: the small dot under the link, as on ardena.co.ke */
+.ard-nav-link.is-active::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ard-ink);
+}
+
+.ard-nav-end {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+/* the single spot of brand blue on the whole page */
+.ard-nav-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.25rem;
+  background: var(--ard-blue);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 1px solid var(--ard-blue);
+  border-radius: 0;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.ard-nav-cta:hover {
+  background: #0a0a0a;
+  border-color: #0a0a0a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.ard-nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 0 8px;
+}
+
+.ard-nav-toggle span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: var(--ard-ink);
+  transition: var(--ard-t);
+}
+
+.ard-nav-toggle.is-open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.ard-nav-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.ard-nav-toggle.is-open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 900px) {
+  .ard-nav-toggle {
+    display: flex;
+  }
+
+  .ard-nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 0.5rem 1.5rem 1rem;
+    display: none;
+  }
+
+  .ard-nav-menu.is-open {
+    display: flex;
+  }
+
+  .ard-nav-link {
+    padding: 0.85rem 0;
+  }
+
+  .ard-nav-link.is-active::after {
+    left: auto;
+    right: 0;
+    bottom: 50%;
+    transform: translateY(50%);
+  }
+
+  .ard-nav-cta {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* ---- Hero --------------------------------------------------------------- */
+
+.ard-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  color: #fff;
+}
+
+.ard-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 65% center; /* keeps the fleet in frame as it narrows */
+  z-index: 0;
+}
+
+/* dark on the left where the copy sits, clear on the right over the cars */
+.ard-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.45) 45%,
+    rgba(0, 0, 0, 0.1) 70%,
+    transparent 100%
+  );
+}
+
+.ard-hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding-left: 5%;
+  padding-right: 5%;
+  display: flex;
+  align-items: center;
+}
+
+.ard-hero-content {
+  max-width: 640px;
+  padding: 7rem 0 2rem;
+}
+
+.ard-hero-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.ard-hero-sub {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  font-weight: 400;
+  opacity: 0.95;
+  max-width: 34em;
+}
+
+.ard-hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+@media (max-width: 1024px) {
+  .ard-hero-title {
+    font-size: 2.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .ard-hero-inner {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .ard-hero-content {
+    padding-top: 6.5rem;
+  }
+
+  .ard-hero-title {
+    font-size: 2.1rem;
+  }
+
+  .ard-hero-sub {
+    font-size: 1.05rem;
+  }
+
+  .ard-hero-buttons {
+    margin-top: 2rem;
+  }
+
+  .ard-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* ---- Split section: sticky intro beside a numbered list ----------------- */
+
+.ard-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.ard-intro {
+  position: sticky;
+  top: 120px;
+}
+
+/* reversed sections put the list first in the source so it reads correctly
+   when the grid collapses to one column on mobile */
+.ard-split--reverse .ard-intro {
+  order: 2;
+}
+
+.ard-split--reverse .ard-list {
+  order: 1;
+}
+
+@media (max-width: 900px) {
+  .ard-split {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .ard-intro {
+    position: static;
+  }
+
+  /* stacked, the heading has to lead again — the source order is list-first
+     purely so the desktop grid can flip sides */
+  .ard-split--reverse .ard-intro {
+    order: 1;
+  }
+
+  .ard-split--reverse .ard-list {
+    order: 2;
+  }
+}
+
+.ard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.ard-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* the big ghost numeral */
+.ard-item-num {
+  font-size: 4rem;
+  font-weight: 600;
+  color: var(--ard-line);
+  line-height: 1;
+}
+
+.ard-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ard-item-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--ard-ink);
+  line-height: 1.3;
+}
+
+.ard-item-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ard-text);
+}
+
+@media (max-width: 768px) {
+  .ard-item {
+    gap: 1rem;
+  }
+
+  .ard-item-num {
+    font-size: 2.5rem;
+  }
+}
+
+/* ---- Trust list (cream band): small markers, hairline rules ------------- */
+
+.ard-trust-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.ard-trust-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  padding-bottom: 2.25rem;
+  border-bottom: 1px solid var(--ard-cream-dark);
+}
+
+.ard-trust-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.ard-trust-marker {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ard-ink);
+  opacity: 0.35;
+  line-height: 1;
+  padding-top: 0.35rem;
+}
+
+.ard-trust-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ard-ink);
+  line-height: 1.35;
+  margin-bottom: 0.5rem;
+}
+
+.ard-trust-desc {
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--ard-text);
+}
+
+/* ---- FAQ ---------------------------------------------------------------- */
+
+.ard-faq-list {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ard-faq-item {
+  border-bottom: 1px solid var(--ard-line);
+}
+
+.ard-faq-item:last-child {
+  border-bottom: none;
+}
+
+.ard-faq-q {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  text-align: left;
+  font-family: var(--ard-font);
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--ard-ink);
+  transition: var(--ard-t);
+}
+
+.ard-faq-q:hover {
+  color: var(--ard-text);
+}
+
+.ard-faq-icon {
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.ard-faq-item.is-open .ard-faq-icon {
+  transform: rotate(45deg);
+}
+
+.ard-faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+
+.ard-faq-item.is-open .ard-faq-a {
+  max-height: 600px;
+  padding-bottom: 1.5rem;
+}
+
+.ard-faq-a p {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ard-text);
+  max-width: 68ch;
+}
+
+@media (max-width: 768px) {
+  .ard-faq-q {
+    font-size: 1rem;
+  }
+}
+
+/* ---- Closing CTA card --------------------------------------------------- */
+
+.ard-cta-card {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.ard-cta-content {
+  max-width: 620px;
+}
+
+.ard-cta-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--ard-ink);
+  margin-bottom: 0.3rem;
+}
+
+.ard-cta-text {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--ard-text);
+}
+
+@media (max-width: 700px) {
+  .ard-cta-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================================
+   Pricing page
+   ========================================================================= */
+
+/* The hero owns the viewport: nothing else is visible until you scroll, and
+   the copy sits on the same 5% left inset as the home page hero rather than
+   inside the centred container. */
+.pr-hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7rem 5% 6rem;
+  overflow: hidden;
+
+  /* not a white page — soft violet / blue / teal washes in the corners pick up
+     the three card gradients, so the hero reads as coloured from across the
+     room while the type stays on near-white */
+  background:
+    radial-gradient(58% 62% at 88% 12%, rgba(99, 102, 241, 0.24), transparent 70%),
+    radial-gradient(52% 58% at 6% 88%, rgba(167, 82, 245, 0.2), transparent 72%),
+    radial-gradient(46% 52% at 78% 96%, rgba(20, 184, 166, 0.22), transparent 70%),
+    linear-gradient(180deg, #fdfdff 0%, #f6f7fb 100%);
+}
+
+.pr-hero-inner {
+  position: relative;
+  max-width: 760px;
+}
+
+.pr-title {
+  font-size: 3.25rem;
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: var(--ard-ink-dark);
+  margin-bottom: 1.15rem;
+}
+
+/* the second line drops back to grey, as on the reference */
+.pr-title-soft {
+  color: #94a3b8;
+}
+
+.pr-sub {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--ard-text);
+  max-width: 34em;
+}
+
+@media (max-width: 900px) {
+  .pr-hero {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .pr-title {
+    font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .pr-title {
+    font-size: 1.9rem;
+  }
+}
+
+.pr-cards {
+  padding: 3.5rem 0 4.5rem;
+  background: var(--ard-white);
+}
+
+/* =========================================================================
+   Contact page
+   ========================================================================= */
+
+/* Copy and picture side by side. The image is a saturated yellow graphic, so
+   it keeps its own half rather than sitting under the type — any overlay dark
+   enough to carry white text would flatten it. */
+.ct-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 4.5rem);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 7rem 5% 4rem;
+  background: var(--ard-white);
+}
+
+.ct-hero-copy {
+  max-width: 34em;
+}
+
+.ct-title {
+  font-size: clamp(2.4rem, 5vw, 3.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+  color: var(--ard-ink-dark);
+  margin-bottom: 1.15rem;
+}
+
+.ct-sub {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--ard-text);
+}
+
+.ct-hero-media {
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.ct-hero-media img {
+  display: block;
+  width: 100%;
+  height: clamp(320px, 58vh, 560px);
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .ct-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 6.5rem 1.5rem 3rem;
+  }
+
+  .ct-hero-media img {
+    height: clamp(220px, 38vh, 320px);
+  }
+}
+
+/* ---- Form ---- */
+
+.ct-split {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .ct-split {
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+  }
+}
+
+.ct-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  background: var(--ard-white);
+  border: 1px solid var(--ard-line);
+  border-radius: 3px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.ct-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+
+@media (max-width: 600px) {
+  .ct-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* the shared .field inputs carry dashboard neumorphism; flatten them here */
+.ct-form .field input,
+.ct-form .field textarea,
+.ct-form .field select {
+  box-shadow: none;
+  border: 1px solid var(--ard-line);
+  border-radius: 3px;
+  font-family: var(--ard-font);
+}
+
+.ct-form .field input:focus,
+.ct-form .field textarea:focus,
+.ct-form .field select:focus {
+  box-shadow: none;
+  border-color: var(--ard-ink);
+}
+
+.ct-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.ct-sent {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #0b7a37;
+}
+
+/* ---- Socials ---- */
+
+.ct-socials {
+  display: flex;
+  justify-content: center;
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  flex-wrap: wrap;
+}
+
+.ct-socials a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(84px, 11vw, 118px);
+  height: clamp(84px, 11vw, 118px);
+  border-radius: 3px;
+  background: var(--ard-ink);
+  color: #fff;
+  transition: transform 0.18s ease, background 0.18s ease;
+}
+
+.ct-socials a svg {
+  width: 30px;
+  height: 30px;
+}
+
+.ct-socials a:hover {
+  transform: translateY(-4px);
+  background: var(--ard-ink-dark);
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+
+.ard-footer {
+  background: linear-gradient(180deg, #f9f9f9 0%, #f0f0f0 100%);
+}
+
+.ard-footer-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .ard-footer-wrap {
+    padding: 4rem 2rem 3rem;
+  }
+}
+
+.ard-footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.ard-footer-top .brand {
+  color: var(--ard-ink);
+}
+
+.ard-footer-top .brand svg {
+  height: 34px;
+}
+
+.ard-footer-tagline {
+  font-size: 0.95rem;
+  color: #666;
+  max-width: 400px;
+}
+
+.ard-footer-divider {
+  border: none;
+  border-top: 1px solid #e8e8e8;
+  margin: 2rem 0;
+}
+
+.ard-footer-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 1100px) {
+  .ard-footer-main {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ard-footer-social-block {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .ard-footer-main {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.ard-footer-col-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ard-ink);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ard-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ard-footer-links a {
+  font-size: 0.95rem;
+  color: var(--ard-text);
+  transition: var(--ard-t);
+}
+
+.ard-footer-links a:hover {
+  color: var(--ard-ink);
+}
+
+.ard-footer-social {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.ard-footer-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 3px;
+  border: 1px solid var(--ard-line);
+  color: var(--ard-text);
+  background: rgba(255, 255, 255, 0.6);
+  transition: var(--ard-t);
+}
+
+.ard-footer-social a svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ard-footer-social a:hover {
+  color: #fff;
+  background: var(--ard-ink);
+  border-color: var(--ard-ink);
+}
+
+.ard-footer-bar {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e8e8e8;
+  font-size: 0.85rem;
+  color: var(--ard-light);
+}

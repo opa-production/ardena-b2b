@@ -2,7 +2,6 @@ import { useSyncExternalStore } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { subscribe as subscribeAuth, isAuthed } from "./lib/authStore";
 import Landing from "./pages/Landing";
-import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
@@ -53,7 +52,6 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
-      <Route path="/about" element={<About />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />

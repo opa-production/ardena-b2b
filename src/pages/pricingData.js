@@ -57,12 +57,80 @@ export const PILLARS = [
   },
 ];
 
-/* Per-vehicle pricing: launch rate for the first 3 months, standard after.
-   Verification is pay as you go. */
-export const RATE = 400;
-export const LAUNCH_RATE = 200;
-export const MINIMUM = 2000;
+/* ---------------------------------------------------------------------------
+   Banded pricing — MOCK DATA, front end only.
+   ---------------------------------------------------------------------------
+   Replaces the old per-vehicle rate (KES 400/vehicle, KES 2,000 minimum) with
+   one fixed price per fleet band, so a business always knows its bill before
+   it adds a car. The backend still bills per vehicle; wiring these tiers to it
+   is a later phase, so treat every number here as display copy for now.
+
+   Monthly billing only for now. Annual prepay is a later phase, so there is
+   deliberately no yearly rate here to quote.
+
+   Renter verification stays outside the tiers at CHECK_PRICE per check. It is
+   a genuine pass-through cost with unpredictable volume, so folding it into a
+   fixed price would mean eating the variance on the heaviest users. */
+
 export const CHECK_PRICE = 100;
 
-export const monthlyFor = (vehicles, rate) => Math.max(MINIMUM, vehicles * rate);
+/** Free trial length, in days. Quoted in one place so it can't drift. */
+export const TRIAL_DAYS = 30;
+
+export const TIERS = [
+  {
+    key: "starter",
+    name: "Starter",
+    range: "1 – 25 vehicles",
+    monthly: 1200,
+    accent: "violet",
+    cta: { label: "Start free trial", to: "/signup" },
+    features: [
+      "Up to 25 vehicles",
+      "All modules included",
+      "Unlimited bookings and staff seats",
+      "M-Pesa payment prompting",
+      "Vehicle tracking",
+      "Reports and exports",
+      "Email support",
+    ],
+    muted: ["Assisted onboarding", "Priority support"],
+  },
+  {
+    key: "growth",
+    name: "Growth",
+    range: "26 – 100 vehicles",
+    monthly: 3600,
+    accent: "blue",
+    popular: true,
+    cta: { label: "Start free trial", to: "/signup" },
+    features: [
+      "Up to 100 vehicles",
+      "Everything in Starter",
+      "Assisted onboarding and bulk import",
+      "Priority support",
+      "Custom invoicing",
+      "A named account contact",
+    ],
+    muted: [],
+  },
+  {
+    key: "scale",
+    name: "Scale",
+    range: "100+ vehicles",
+    monthly: 7500,
+    accent: "teal",
+    cta: { label: "Talk to us", to: "/contact" },
+    features: [
+      "Unlimited vehicles",
+      "Everything in Growth",
+      "Team training sessions",
+      "Custom invoicing and payment terms",
+      "Priority support with a named contact",
+      "Early access to new modules",
+    ],
+    muted: [],
+  },
+];
+
 export const fmtKES = (n) => n.toLocaleString("en-KE");

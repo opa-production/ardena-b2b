@@ -2,11 +2,23 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
-import SiteNav from "../components/SiteNav";
-import SiteFooter from "../components/SiteFooter";
-import PricingPlans from "../components/PricingPlans";
-import { PILLARS, RATE, LAUNCH_RATE } from "./pricingData";
-import "./landing.css";
+import ArdNav from "../components/ArdNav";
+import ArdFooter from "../components/ArdFooter";
+import { MODULES, TIERS, CHECK_PRICE, TRIAL_DAYS, fmtKES } from "./pricingData";
+import heroImg from "../assets/hero.jpg";
+import "./landingArdena.css";
+
+/* The landing page follows the ardena.co.ke design language: a full-bleed
+   photo hero with the copy on the shaded left, then alternating white /
+   #f8fafc / cream bands, each opening with a "▪ LABEL" eyebrow and pairing a
+   sticky intro with a numbered list on the opposite side.
+
+   Nav and footer are the ardena-styled ArdNav / ArdFooter rather than the
+   shared SiteNav / SiteFooter, and the styles live in ./landingArdena.css
+   scoped under `.ard`, so /contact keeps the older look untouched.
+
+   Full pricing lives on /pricing; this page carries only a teaser, so the
+   bands are stated in exactly one place. */
 
 function Reveal({ as: Tag = "div", className = "", children }) {
   const ref = useReveal();
@@ -17,6 +29,27 @@ function Reveal({ as: Tag = "div", className = "", children }) {
   );
 }
 
+const TRUST = [
+  {
+    title: "Verified businesses only",
+    desc: "Access is by request. We check your business registration and director details before issuing logins, so every fleet on the platform is a real, trading rental business.",
+  },
+  {
+    title: "Your data stays yours",
+    desc: "Every business runs in its own isolated workspace. Your fleet, your customers and your payments are never visible to another operator on the platform.",
+  },
+  {
+    title: "Roles and an audit trail",
+    desc: "Give each person the access their job needs — admin, booking agent, finance — and see every action they take recorded in an activity log.",
+  },
+];
+
+/* Built from TIERS so the landing can never quote a price /pricing disagrees
+   with. */
+const bandSummary = TIERS.map(
+  (t) => `KES ${fmtKES(t.monthly)} for ${t.range.toLowerCase()}`
+).join(", ");
+
 const FAQS = [
   {
     q: "How do I get an account?",
@@ -24,11 +57,11 @@ const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: "You pay per vehicle on the platform, KES 400 a month each, and just KES 200 during your first 3 months, with every module included. Pay by card or M-Pesa, cancel anytime, and every account starts with a 14 day free trial.",
+    a: `You pay one flat price for your fleet band — ${bandSummary} — billed monthly, with every module included on every band. Pay by card or M-Pesa and cancel anytime. Every account starts with a ${TRIAL_DAYS} day free trial.`,
   },
   {
     q: "Do I need my own identity verification account?",
-    a: "No. Verification is built into the platform and pay as you go, a flat KES 100 per renter check, paid from a prepaid wallet you top up like airtime. No monthly commitment.",
+    a: `No. Verification is built into the platform and pay as you go, a flat KES ${CHECK_PRICE} per renter check, paid from a prepaid wallet you top up like airtime. No monthly commitment.`,
   },
   {
     q: "How do customers pay?",
@@ -53,125 +86,162 @@ export default function Landing() {
   const [openFaq, setOpenFaq] = useState(null);
 
   return (
-    <div className="landing">
-      <SiteNav />
+    <div className="ard">
+      <ArdNav />
 
-      {/* ---- Hero (clean page, copy only) ---- */}
-      <section className="panel hero">
-        <div className="hero-body">
-          <div className="hero-copy">
-            <h1>
-              Run your entire rental
-              <br />
-              business from <span className="hl">one place</span>.
-            </h1>
-            <p className="hero-sub">
-              Fleet, bookings, verified customers and payments. The operational
-              backbone premium car rental businesses run on, billed monthly with
-              no heavy setup.
-            </p>
-            <div className="hero-cta">
-              <Link to="/signup" className="btn btn-primary">
+      <main>
+        {/* ---- Hero ---- */}
+        <section className="ard-hero">
+          <img
+            src={heroImg}
+            alt=""
+            className="ard-hero-img"
+            width="1920"
+            height="1080"
+            fetchpriority="high"
+            decoding="async"
+          />
+          <div className="ard-hero-overlay" />
+
+          <div className="ard-hero-inner">
+            <div className="ard-hero-content">
+              <h1 className="ard-hero-title">
+                Run your entire rental business from one place
+              </h1>
+              <p className="ard-hero-sub">
+                Fleet, bookings, verified customers and payments. The
+                operational backbone premium car rental businesses run on, at
+                one flat price with no heavy setup.
+              </p>
+              <div className="ard-hero-buttons">
+                <Link to="/signup" className="ard-btn ard-btn--solid">
+                  Request access
+                </Link>
+                <Link to="/login" className="ard-btn ard-btn--glass">
+                  Sign in
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ---- What's inside: sticky intro left, numbered modules right ---- */}
+        <section className="ard-section ard-section--light" id="modules">
+          <div className="ard-container">
+            <div className="ard-split">
+              <Reveal className="ard-intro">
+                <p className="ard-label">▪ WHAT&apos;S INSIDE</p>
+                <h2 className="ard-heading">
+                  The whole operation, one subscription
+                </h2>
+                <p className="ard-desc">
+                  Ardena for Business replaces the spreadsheets, the WhatsApp
+                  threads and the paper files with one system your whole team
+                  works from. Every module below is included on every band,
+                  whatever size your fleet.
+                </p>
+              </Reveal>
+
+              <Reveal className="ard-list">
+                {MODULES.map((m, i) => (
+                  <div className="ard-item" key={m.title}>
+                    <div className="ard-item-num">
+                      {String(i + 1).padStart(2, "0")}
+                    </div>
+                    <div className="ard-item-body">
+                      <h3 className="ard-item-title">{m.title}</h3>
+                      <p className="ard-item-desc">{m.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ---- Trust: cream band, sides flipped ---- */}
+        <section className="ard-section ard-section--cream">
+          <div className="ard-container">
+            <div className="ard-split ard-split--reverse">
+              <Reveal className="ard-list ard-trust-list">
+                {TRUST.map((t, i) => (
+                  <div className="ard-trust-item" key={t.title}>
+                    <span className="ard-trust-marker">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <div>
+                      <h3 className="ard-trust-title">{t.title}</h3>
+                      <p className="ard-trust-desc">{t.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </Reveal>
+
+              <Reveal className="ard-intro">
+                <p className="ard-label">▪ SAFETY &amp; TRUST</p>
+                <h2 className="ard-heading">Built for real businesses</h2>
+                <p className="ard-desc">
+                  You are trusting us with your fleet, your customers and your
+                  money. Here is how that trust is held up on our side.
+                </p>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ---- FAQ ---- */}
+        <section className="ard-section ard-section--white" id="faq">
+          <div className="ard-container">
+            <h2 className="ard-section-title">Frequently asked questions</h2>
+            <Reveal className="ard-faq-list">
+              {FAQS.map((f, i) => (
+                <div
+                  className={`ard-faq-item${openFaq === i ? " is-open" : ""}`}
+                  key={f.q}
+                >
+                  <button
+                    type="button"
+                    className="ard-faq-q"
+                    aria-expanded={openFaq === i}
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  >
+                    {f.q}
+                    <span className="ard-faq-icon" aria-hidden="true">
+                      +
+                    </span>
+                  </button>
+                  <div className="ard-faq-a">
+                    <p>{f.a}</p>
+                  </div>
+                </div>
+              ))}
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ---- Closing CTA ---- */}
+        <section className="ard-section ard-section--white">
+          <div className="ard-container">
+            <div className="ard-cta-card">
+              <div className="ard-cta-content">
+                <h2 className="ard-cta-title">
+                  Bring your fleet onto Ardena for Business
+                </h2>
+                <p className="ard-cta-text">
+                  Tell us about your business and we will verify it and send
+                  your logins within 24 hours. Every account starts with a{" "}
+                  {TRIAL_DAYS} day free trial, no card required.
+                </p>
+              </div>
+              <Link to="/signup" className="ard-btn ard-btn--ink">
                 Request access
               </Link>
-              <Link to="/login" className="btn btn-ghost">
-                Sign in
-              </Link>
             </div>
           </div>
-        </div>
+        </section>
+      </main>
 
-        <a href="#modules" className="scroll-cue" aria-label="Scroll to see more">
-          <span>See what's inside</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M8 3v10m0 0l-4-4m4 4l4-4"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </a>
-      </section>
-
-      {/* ---- Pillars (white) ---- */}
-      <section className="panel pillars" id="modules">
-        <Reveal className="section-head">
-          <h2>One subscription. The whole operation.</h2>
-        </Reveal>
-        <Reveal className="pillar-list">
-          {PILLARS.map((p, i) => (
-            <div className="pillar" key={p.title}>
-              <span className="pillar-no">{String(i + 1).padStart(2, "0")}</span>
-              <h3>{p.title}</h3>
-              <p>{p.desc}</p>
-            </div>
-          ))}
-          <p className="pillar-note">
-            Client profiles, staff roles, notifications and reports come with
-            all of it. <Link to="/pricing">See everything included</Link>.
-          </p>
-        </Reveal>
-      </section>
-
-      {/* ---- Pricing (white) ---- */}
-      <section className="panel pricing" id="pricing">
-        <Reveal className="section-head">
-          <h2>Simple pricing that scales with your fleet.</h2>
-          <p className="section-sub">
-            Every module included on every plan. KES {LAUNCH_RATE} per vehicle
-            for your first 3 months, KES {RATE} after. 14 day free trial, no
-            card required.
-          </p>
-        </Reveal>
-        <PricingPlans />
-      </section>
-
-      {/* ---- FAQ (black) ---- */}
-      <section className="panel faq" id="faq">
-        <Reveal className="section-head">
-          <h2>Frequently asked questions.</h2>
-        </Reveal>
-        <Reveal className="faq-list">
-          {FAQS.map((f, i) => (
-            <details key={f.q} open={openFaq === i}>
-              <summary
-                onClick={(e) => {
-                  e.preventDefault();
-                  setOpenFaq(openFaq === i ? null : i);
-                }}
-              >
-                {f.q}
-                <span className="faq-mark" aria-hidden="true" />
-              </summary>
-              <p>{f.a}</p>
-            </details>
-          ))}
-        </Reveal>
-      </section>
-
-      {/* ---- Closing (white) ---- */}
-      <section className="panel closing">
-        <Reveal className="closing-body">
-          <h2>
-            Built for businesses that
-            <br />
-            take rentals seriously.
-          </h2>
-          <p>Request access for your fleet, or sign in if you already have logins.</p>
-          <div className="hero-cta">
-            <Link to="/signup" className="btn btn-primary">
-              Request access
-            </Link>
-            <Link to="/login" className="btn btn-ghost">
-              Sign in
-            </Link>
-          </div>
-        </Reveal>
-      </section>
-
-      <SiteFooter />
+      <ArdFooter />
     </div>
   );
 }

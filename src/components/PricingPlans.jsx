@@ -1,90 +1,77 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import useReveal from "../hooks/useReveal";
-import {
-  RATE,
-  LAUNCH_RATE,
-  MINIMUM,
-  CHECK_PRICE,
-  monthlyFor,
-  fmtKES,
-} from "../pages/pricingData";
+import { TIERS, fmtKES } from "../pages/pricingData";
+import "../pages/pricingCards.css";
 
-/* The three pricing cards, shared by the landing page and /pricing
-   so the plans never drift apart. */
+/* Filled tick for an included line; hollow grey for one this tier doesn't get.
+   Showing the excluded lines rather than hiding them is what makes the ladder
+   legible — you can see what the next tier up buys you. */
+function Tick({ muted = false }) {
+  return (
+    <span className={`pc-tick${muted ? " pc-tick--muted" : ""}`} aria-hidden="true">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 6L9 17l-5-5" />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * The three fleet-band cards.
+ *
+ * Monthly billing only for now — annual prepay is a later phase, so there is
+ * deliberately no term to choose.
+ */
 export default function PricingPlans() {
   const ref = useReveal();
-  const [fleetSize, setFleetSize] = useState(12);
 
   return (
-    <div ref={ref} className="plan-grid pricing-trio reveal-group">
-      <article className="plan-card featured">
-        <span className="plan-tag">Launch price</span>
-        <h3>Fleet plan</h3>
-        <div className="calc">
-          <div className="calc-head">
-            <label htmlFor="fleet-size">How many vehicles do you run?</label>
-            <strong>{fleetSize}</strong>
-          </div>
-          <input
-            id="fleet-size"
-            type="range"
-            min="3"
-            max="100"
-            value={fleetSize}
-            onChange={(e) => setFleetSize(Number(e.target.value))}
-          />
-          <p className="calc-price">
-            KES {fmtKES(monthlyFor(fleetSize, LAUNCH_RATE))}
-            <span> /month for your first 3 months</span>
-          </p>
-          <p className="calc-after">
-            then KES {fmtKES(monthlyFor(fleetSize, RATE))} /month · cancel
-            anytime
-          </p>
-        </div>
-        <ul>
-          <li>Unlimited bookings &amp; staff seats</li>
-          <li>M-Pesa payment prompting included</li>
-          <li>Fleet, clients, notifications &amp; reports</li>
-          <li>KES {fmtKES(MINIMUM)} monthly minimum</li>
-        </ul>
-        <Link to="/signup" className="btn btn-primary inverse">
-          Request access
-        </Link>
-      </article>
+    <div ref={ref} className="pc-grid reveal-group">
+      {TIERS.map((tier) => (
+        <article
+          className={`pc-card pc-card--${tier.accent}${tier.popular ? " pc-card--popular" : ""}`}
+          key={tier.key}
+        >
+          {tier.popular && <span className="pc-flag">Most popular</span>}
 
-      <article className="plan-card">
-        <h3>Renter verification</h3>
-        <p className="plan-price">
-          KES {CHECK_PRICE} <span>per check · pay as you go</span>
-        </p>
-        <ul>
-          <li>ID lookup, selfie &amp; licence in one check</li>
-          <li>Top up like airtime, via M-Pesa or card</li>
-          <li>Credits never expire</li>
-          <li>No monthly commitment</li>
-        </ul>
-        <Link to="/signup" className="btn btn-ghost">
-          Request access
-        </Link>
-      </article>
+          <header className="pc-head">
+            <span className="pc-dot" aria-hidden="true" />
+            <h3 className="pc-name">{tier.name}</h3>
+          </header>
 
-      <article className="plan-card">
-        <h3>Large fleets</h3>
-        <p className="plan-price">
-          Let&apos;s talk <span>100+ vehicles · same per-vehicle rate</span>
-        </p>
-        <ul>
-          <li>Assisted onboarding &amp; team training</li>
-          <li>Bulk import of vehicles &amp; clients</li>
-          <li>Priority support</li>
-          <li>Custom invoicing available</li>
-        </ul>
-        <Link to="/contact" className="btn btn-ghost">
-          Contact sales
-        </Link>
-      </article>
+          <p className="pc-price">
+            <span className="pc-amount">KES {fmtKES(tier.monthly)}</span>
+            <span className="pc-per">/mo</span>
+          </p>
+
+          <p className="pc-range">{tier.range}</p>
+
+          <Link
+            to={tier.cta.to}
+            className={`pc-cta${tier.popular ? " pc-cta--solid" : ""}`}
+          >
+            {tier.cta.label}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </Link>
+
+          <ul className="pc-features">
+            {tier.features.map((f) => (
+              <li key={f}>
+                <Tick />
+                {f}
+              </li>
+            ))}
+            {tier.muted.map((f) => (
+              <li className="pc-feature--muted" key={f}>
+                <Tick muted />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
     </div>
   );
 }

@@ -35,7 +35,6 @@ export default function SiteFooter() {
         </div>
         <div className="footer-col">
           <p className="footer-head">Company</p>
-          <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <a href="/#faq">FAQ</a>
           <a href="https://ardena.co.ke" target="_blank" rel="noreferrer">

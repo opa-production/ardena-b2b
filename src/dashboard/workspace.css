@@ -257,6 +257,91 @@ tr.unread-row {
   min-width: 0;
 }
 
+/* ---- Quick links ----
+   Billing, support and tracking have no sidebar entry, so the profile is
+   where a business finds them. Raised tiles rather than a plain list: the
+   point is to be scannable at a glance, not to be read top to bottom. */
+
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.quick-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: var(--neo-out-sm);
+  transition: box-shadow 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.quick-link:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--neo-out);
+}
+
+.quick-link:active {
+  transform: translateY(0);
+  box-shadow: var(--neo-in);
+}
+
+.quick-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  background: var(--surface);
+}
+
+.quick-link:hover .quick-link-icon {
+  color: var(--brand);
+}
+
+.quick-link-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.quick-link-name {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* the shared badge pushes itself right for the sidebar; here it belongs
+   beside the label it counts */
+.quick-link-name .nav-badge {
+  margin-left: 0;
+}
+
+.quick-link-desc {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-mute);
+}
+
+.quick-link-caret {
+  flex-shrink: 0;
+  color: var(--ink-mute);
+  transition: transform 0.18s var(--ease);
+}
+
+.quick-link:hover .quick-link-caret {
+  transform: translateX(2px);
+}
+
 .pref-row {
   display: flex;
   align-items: center;

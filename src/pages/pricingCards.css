@@ -1,0 +1,265 @@
+/* =========================================================================
+   Pricing cards
+   -------------------------------------------------------------------------
+   Deliberately unscoped (own `pc-` prefix instead) so the same cards can be
+   dropped on /pricing and on the landing without either page's wrapper class
+   having to be present.
+
+   The card is a soft grey slab with coloured light entering from its left and
+   right edges, and the feature list sits in a white panel nested inside it —
+   the one place on the marketing site that isn't flat, because the price is
+   the thing we most want people to stop and look at. Corners stay near-sharp
+   (3px) in keeping with the brand's square language.
+   ========================================================================= */
+
+.pc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (max-width: 1000px) {
+  .pc-grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+}
+
+.pc-card {
+  --pc-glow-a: #a752f5;
+  --pc-glow-b: #ec4899;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.35rem 1.25rem;
+  border-radius: 3px;
+  background: #f4f5f8;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Colour enters from the left and right edges and climbs about three quarters
+   of the card, as on the reference — two corner lights rather than one wash
+   across the base, so the middle of the card stays clean behind the type.
+   Saturated stops and a light blur keep the band defined rather than hazy. */
+.pc-card::before,
+.pc-card::after {
+  content: "";
+  position: absolute;
+  bottom: -14%;
+  width: 62%;
+  height: 76%;
+  z-index: -1;
+  filter: blur(11px);
+  pointer-events: none;
+}
+
+.pc-card::before {
+  left: -20%;
+  background: radial-gradient(
+    ellipse at 30% 78%,
+    var(--pc-glow-a) 0%,
+    var(--pc-glow-a) 24%,
+    var(--pc-glow-b) 54%,
+    transparent 76%
+  );
+}
+
+.pc-card::after {
+  right: -20%;
+  background: radial-gradient(
+    ellipse at 70% 78%,
+    var(--pc-glow-b) 0%,
+    var(--pc-glow-b) 24%,
+    var(--pc-glow-a) 54%,
+    transparent 76%
+  );
+}
+
+.pc-card--violet {
+  --pc-glow-a: #a752f5;
+  --pc-glow-b: #f472b6;
+}
+
+.pc-card--blue {
+  --pc-glow-a: #3b82f6;
+  --pc-glow-b: #6366f1;
+}
+
+.pc-card--teal {
+  --pc-glow-a: #14b8a6;
+  --pc-glow-b: #4ade80;
+}
+
+/* the featured card sits a touch prouder than its neighbours */
+.pc-card--popular {
+  background: #eef0f4;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+}
+
+.pc-flag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  background: #0f172a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  padding: 0.3rem 0.85rem;
+  border-radius: 0 0 3px 3px;
+}
+
+.pc-card--popular {
+  padding-top: 2rem;
+}
+
+.pc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.6rem;
+}
+
+.pc-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0f172a;
+  box-shadow: inset 0 0 0 4px #f4f5f8;
+  flex-shrink: 0;
+}
+
+.pc-card--popular .pc-dot {
+  box-shadow: inset 0 0 0 4px #eef0f4;
+}
+
+.pc-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.pc-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.pc-amount {
+  font-size: 2.1rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.pc-per {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.pc-range {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.6rem;
+}
+
+/* ---- CTA ---- */
+
+.pc-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.pc-cta svg {
+  transition: transform 0.2s ease;
+}
+
+.pc-cta:hover {
+  background: #fff;
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+.pc-cta:hover svg {
+  transform: translateX(3px);
+}
+
+.pc-cta--solid {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.pc-cta--solid:hover {
+  background: #000;
+  border-color: #000;
+}
+
+/* ---- Feature panel ---- */
+
+.pc-features {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0.85rem 0.9rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+}
+
+.pc-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #1e293b;
+}
+
+.pc-feature--muted {
+  color: #94a3b8;
+}
+
+.pc-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #fff;
+  flex-shrink: 0;
+  margin-top: 0.12em;
+}
+
+.pc-tick--muted {
+  background: #cbd5e1;
+  color: #f8fafc;
+}

@@ -1,9 +1,8 @@
 /* ---- Auth pages: bordered card centered on both axes ----
-   Flat, not neumorphic. The rest of the app raises and carves surfaces with
-   --neo-*; sign-in and request-access instead sit on plain white with 1px
-   --line borders and sharp corners, matching the marketing pages. The shared
-   .btn / .field rules from global.css are neumorphic, so they are overridden
-   under .auth at the bottom of this file rather than changed globally. */
+   Flat: plain white, 1px --line borders, sharp corners, matching the
+   marketing pages. The shared .btn / .field rules from global.css are
+   overridden under .auth at the bottom of this file so these two pages keep
+   real borders rather than the --edge hairline the dashboard uses. */
 
 .auth {
   min-height: 100vh;
@@ -259,10 +258,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---- Flat overrides for the shared neumorphic components --------------
-   global.css gives .field inputs a carved shadow and the buttons a raised
-   one. Inside .auth they are outlined instead, so nothing on these two pages
-   reads as neumorphic. Scoped here so the dashboard keeps its own look. */
+/* ---- Flat overrides for the shared components -------------------------
+   global.css gives inputs and buttons the --edge hairline. Inside .auth they
+   take a real border on a white ground instead, and focus darkens that border
+   rather than adding a brand ring, a plainer treatment than the dashboard's.
+   Scoped here so the dashboard keeps its own look. */
 
 .auth .field input,
 .auth .field select,

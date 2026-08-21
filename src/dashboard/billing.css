@@ -39,7 +39,7 @@
 .usage-bar {
   height: 8px;
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   overflow: hidden;
 }
 
@@ -89,13 +89,13 @@
   flex-shrink: 0;
   color: #fff;
   background: #d97706;
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn.wallet-btn:hover {
   background: #b96305;
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn.wallet-btn:active {
@@ -172,7 +172,7 @@
 .invoice-row.is-due {
   margin-bottom: 6px;
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   border-bottom: none;
 }
 

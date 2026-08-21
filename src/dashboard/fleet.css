@@ -32,7 +32,7 @@
   align-items: center;
   gap: 9px;
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   padding: 10px 14px;
   color: var(--ink-mute);
   flex: 1;
@@ -41,7 +41,7 @@
 }
 
 .search:focus-within {
-  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
 }
 
 .search input {
@@ -72,13 +72,13 @@
 
 .seg button:hover {
   color: var(--ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .seg button.active {
   color: var(--ink);
   font-weight: 600;
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* primary action living inside a panel toolbar */
@@ -150,7 +150,7 @@
   font-weight: 600;
   color: var(--ink-mute);
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   font-variant-numeric: tabular-nums;
 }
 
@@ -176,7 +176,7 @@
   width: 64px;
   height: 7px;
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   overflow: hidden;
 }
 
@@ -237,7 +237,7 @@
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
@@ -252,7 +252,7 @@ a.icon-btn + .icon-btn {
 }
 
 .icon-btn:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .icon-btn.danger {
@@ -287,18 +287,18 @@ a.icon-btn + .icon-btn {
 .back-link:hover {
   color: var(--ink);
   background: var(--panel);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .back-link:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* ---- Details header card (name + status + actions in one compact card) ---- */
 
 .head-card {
   background: var(--panel);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -376,7 +376,7 @@ a.icon-btn + .icon-btn {
   gap: 10px;
   margin-top: 18px;
   padding: 26px;
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   color: var(--ink-mute);
   font-size: 13.5px;
 }
@@ -446,13 +446,13 @@ a.icon-btn + .icon-btn {
 .btn.danger-btn {
   color: #fff;
   background: var(--danger);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn.danger-btn:hover {
   background: #b91c1c;
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn.danger-btn:active {

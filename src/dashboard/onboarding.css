@@ -84,7 +84,7 @@
   position: relative;
   padding: 14px 16px;
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .onboard-steps li.done {

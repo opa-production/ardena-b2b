@@ -14,13 +14,13 @@
   letter-spacing: 0.02em;
 }
 
-/* Schematic map surface (carved, so it reads as a distinct panel) */
+/* Schematic map surface, outlined so it reads as a distinct panel */
 .map-face {
   position: relative;
   width: 100%;
   aspect-ratio: 100 / 62;
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   overflow: hidden;
 }
 
@@ -32,7 +32,7 @@
   color: var(--ink-mute);
 }
 
-/* real Mapbox canvas fills the same carved frame as the schematic */
+/* real Mapbox canvas fills the same outlined frame as the schematic */
 .live-map {
   box-shadow: none;
 }

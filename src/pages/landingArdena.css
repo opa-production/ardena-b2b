@@ -943,7 +943,7 @@
   }
 }
 
-/* the shared .field inputs carry dashboard neumorphism; flatten them here */
+/* the shared .field inputs carry the dashboard hairline; restyle them here */
 .ct-form .field input,
 .ct-form .field textarea,
 .ct-form .field select {

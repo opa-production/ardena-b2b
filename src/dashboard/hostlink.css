@@ -30,7 +30,7 @@
   line-height: 1.55;
   color: var(--ink-soft);
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   border-left: 3px solid var(--warn);
 }
 
@@ -76,7 +76,7 @@
   margin-bottom: 20px;
   padding: 14px 16px;
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   border-left: 3px solid var(--warn);
 }
 

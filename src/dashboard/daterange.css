@@ -148,13 +148,13 @@
   font-size: 15px;
   color: var(--ink);
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   transition: box-shadow 0.15s var(--ease);
 }
 
 .drp-trigger:focus-visible,
 .drp-trigger.open {
-  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
 }
 
 .drp-trigger .placeholder {

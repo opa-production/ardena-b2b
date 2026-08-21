@@ -15,7 +15,7 @@
   font-weight: 700;
   background: var(--ink-inv);
   color: var(--on-ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .chauffeur-avatar.sm {
@@ -67,7 +67,7 @@
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
@@ -77,7 +77,7 @@
 
 .duty-btn.active {
   color: var(--ink);
-  box-shadow: var(--neo-in), inset 2px 0 0 var(--brand);
+  box-shadow: var(--edge-in), inset 2px 0 0 var(--brand);
 }
 
 .end-assign {

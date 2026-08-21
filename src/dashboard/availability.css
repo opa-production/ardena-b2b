@@ -101,7 +101,7 @@
 }
 
 .cal-day:not(.empty):not(.past):not(.blocked):hover {
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transform: translateY(-1px);
 }
 

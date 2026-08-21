@@ -87,13 +87,13 @@
   font-size: 14px;
   background: #0b7a37;
   color: #fff;
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn.prompt-send:hover {
   background: #096530;
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn.prompt-send:active {
@@ -136,7 +136,7 @@
   flex-shrink: 0;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
@@ -145,7 +145,7 @@
 }
 
 .card-arrow:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .mini-pay-right {

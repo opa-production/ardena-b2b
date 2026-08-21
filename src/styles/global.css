@@ -14,26 +14,29 @@
      (hero highlight, plan tag) to lift the black/white. */
   --accent: #ffb43a;
 
-  /* Neutrals. --bg is a soft near-white so neumorphic shadows read. */
-  --bg: #eef1f6;
-  --panel: #ffffff; /* cards sit white against the grey-blue page */
-  --surface: #e7ebf2;
-  --line: #dde2ea;
+  /* Neutrals. --bg is a light neutral page; white panels sit on it and are
+     separated by a hairline, not by a shadow. */
+  --bg: #f6f7f9;
+  --panel: #ffffff; /* cards sit white against the light grey page */
+  --surface: #f0f2f5;
+  --line: #e3e6eb;
   --ink: #0a0d12;
   --ink-soft: #545c68;
   --ink-mute: #8b929d;
 
-  /* Neumorphic shadows: raised (out) and carved (in), light + dark themes */
-  --neo-out: 7px 7px 14px rgba(163, 174, 192, 0.45),
-    -7px -7px 14px rgba(255, 255, 255, 0.95);
-  --neo-out-sm: 4px 4px 8px rgba(163, 174, 192, 0.4),
-    -4px -4px 8px rgba(255, 255, 255, 0.9);
-  --neo-in: inset 3px 3px 7px rgba(163, 174, 192, 0.45),
-    inset -3px -3px 7px rgba(255, 255, 255, 0.95);
-  --neo-dark-out: 7px 7px 14px rgba(0, 0, 0, 0.45),
-    -7px -7px 14px rgba(255, 255, 255, 0.04);
-  --neo-dark-in: inset 3px 3px 7px rgba(0, 0, 0, 0.5),
-    inset -3px -3px 7px rgba(255, 255, 255, 0.04);
+  /* Edges. These replaced the old neumorphic raised/carved shadows: surfaces
+     are now defined by a 1px hairline rather than by light and shade.
+     They stay box-shadows rather than real borders so they cost no layout —
+     every call site was a box-shadow already.
+       --edge        the default hairline, on cards, buttons, popovers
+       --edge-strong the same line darkened, for hover and focus
+       --edge-in     drawn inside, for inputs, wells and pressed states
+       --edge-inv    for elements on a dark/inverted surface */
+  --edge: 0 0 0 1px var(--line);
+  --edge-strong: 0 0 0 1px var(--ink-mute);
+  --edge-in: inset 0 0 0 1px var(--line);
+  --edge-inv: 0 0 0 1px rgba(255, 255, 255, 0.22);
+  --edge-inv-in: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 
   /* Status */
   --ok: #16a34a;
@@ -47,9 +50,6 @@
   --ink-inv: #0a0d12;
   --ink-inv-hover: #000000;
   --on-ink: #ffffff;
-
-  /* Directional shadow the left sidebar / top bar cast onto content. */
-  --shell-shadow: rgba(163, 174, 192, 0.3);
 
   /* Drop shadow for floating popovers (dropdowns, date picker, toasts). */
   --pop-shadow: 0 14px 40px rgba(163, 174, 192, 0.5);
@@ -97,15 +97,12 @@
   --ink-soft: #a8afba;
   --ink-mute: #767d89;
 
-  /* Neumorphic shadows recomputed for a dark base (deep black + faint light) */
-  --neo-out: 7px 7px 14px rgba(0, 0, 0, 0.5),
-    -7px -7px 14px rgba(255, 255, 255, 0.03);
-  --neo-out-sm: 4px 4px 8px rgba(0, 0, 0, 0.5),
-    -4px -4px 8px rgba(255, 255, 255, 0.03);
-  --neo-in: inset 3px 3px 7px rgba(0, 0, 0, 0.55),
-    inset -3px -3px 7px rgba(255, 255, 255, 0.03);
+  /* Hairlines on graphite: --line is already light enough to read, and the
+     hover line lifts to --ink-mute the same way it does in the light theme. */
+  --edge: 0 0 0 1px var(--line);
+  --edge-strong: 0 0 0 1px var(--ink-mute);
+  --edge-in: inset 0 0 0 1px var(--line);
 
-  --shell-shadow: rgba(0, 0, 0, 0.45);
   --pop-shadow: 0 16px 42px rgba(0, 0, 0, 0.55);
 
   /* Dark steps are chosen against the dark surface, not flipped from light.
@@ -237,13 +234,13 @@ h3 {
 .btn-primary {
   background: var(--ink-inv);
   color: var(--on-ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn-primary:hover {
   background: var(--ink-inv-hover);
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn-primary:active {
@@ -254,13 +251,13 @@ h3 {
 .btn-brand {
   background: var(--brand);
   color: var(--on-ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn-brand:hover {
   background: var(--brand-dark);
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn-brand:active {
@@ -271,30 +268,30 @@ h3 {
 .btn-ghost {
   background: var(--bg);
   color: var(--ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn-ghost:hover {
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn-ghost:active {
   transform: translateY(0);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* Inverted variants for black sections */
 .btn-primary.inverse {
   background: #fff;
   color: var(--ink);
-  box-shadow: var(--neo-dark-out);
+  box-shadow: var(--edge-inv);
 }
 
 .btn-ghost.inverse {
   background: transparent;
   color: #fff;
-  box-shadow: var(--neo-dark-out);
+  box-shadow: var(--edge-inv);
 }
 
 /* button that reads as an inline text link (stage toggles, resend code) */
@@ -343,7 +340,7 @@ h3 {
   font-size: 15px;
   color: var(--ink);
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   outline: none;
   transition: box-shadow 0.15s var(--ease);
 }
@@ -360,7 +357,7 @@ h3 {
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
 }
 
 /* ---- Verified badge (shared: dashboard + public trust page) ---- */

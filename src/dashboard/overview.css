@@ -18,7 +18,7 @@
 .chart-card,
 .panel-card {
   background: var(--panel);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge);
   padding: 24px;
   position: relative;
 }
@@ -472,7 +472,7 @@
 .fleet-bar {
   height: 8px;
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   overflow: hidden;
 }
 

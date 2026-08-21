@@ -15,7 +15,7 @@
   display: flex;
   flex-direction: column;
   background: var(--bg);
-  box-shadow: 8px 0 18px var(--shell-shadow);
+  box-shadow: 1px 0 0 var(--line);
   padding: 24px 16px;
   position: sticky;
   top: 0;
@@ -76,13 +76,13 @@
 
 .nav-item:hover {
   color: var(--ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .nav-item.active {
   color: var(--ink);
   font-weight: 600;
-  box-shadow: var(--neo-in), inset 2px 0 0 var(--brand);
+  box-shadow: var(--edge-in), inset 2px 0 0 var(--brand);
 }
 
 .nav-item.active svg {
@@ -139,12 +139,12 @@
 }
 
 .tenant-chip:hover {
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .tenant-chip.open,
 .tenant-chip:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .tenant-caret {
@@ -201,7 +201,7 @@
   right: 0;
   bottom: calc(100% + 10px);
   background: var(--panel);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge), var(--pop-shadow);
   padding: 6px;
   z-index: 3;
   animation: rise 0.2s var(--ease) both;
@@ -223,12 +223,12 @@
 .tenant-menu button:hover,
 .tenant-menu a:hover {
   color: var(--ink);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .tenant-menu button:active,
 .tenant-menu a:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* ---- Mobile top bar (hidden on desktop) ---- */
@@ -286,7 +286,7 @@
 
 .stat-card {
   background: var(--panel);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge);
   border-radius: var(--radius);
   padding: 18px 20px;
   transition: transform 0.18s var(--ease);
@@ -318,7 +318,7 @@
 
 .empty-block {
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   border-radius: var(--radius);
   padding: 64px 24px;
   display: flex;
@@ -350,7 +350,7 @@
     gap: 12px;
     padding: 11px 16px;
     background: var(--bg);
-    box-shadow: 0 2px 14px var(--shell-shadow);
+    box-shadow: 0 1px 0 var(--line);
     position: sticky;
     top: 0;
     z-index: 20;
@@ -378,12 +378,12 @@
     flex-shrink: 0;
     color: var(--ink-soft);
     background: var(--bg);
-    box-shadow: var(--neo-out-sm);
+    box-shadow: var(--edge);
     transition: box-shadow 0.15s var(--ease), color 0.15s var(--ease);
   }
 
   .nav-toggle:active {
-    box-shadow: var(--neo-in);
+    box-shadow: var(--edge-in);
   }
 
   /* drawer: off-canvas, slides in from the left */

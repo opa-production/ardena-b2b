@@ -88,7 +88,7 @@
   gap: 4px;
   padding: 4px;
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   width: fit-content;
   max-width: 100%;
 }
@@ -126,7 +126,7 @@
 .money-tabs button.active {
   color: var(--ink);
   background: var(--panel);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 /* KPI cards that jump to their own tab read as pressable */

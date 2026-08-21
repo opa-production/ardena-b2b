@@ -18,8 +18,8 @@
 }
 
 /* ---- Flat marketing surfaces ----
-   The dashboard keeps its neumorphic depth; the public pages trade it for
-   flat fills and hairlines. Scoped to .landing so global.css stays untouched. */
+   The public pages drop the shared hairline entirely in favour of flat fills.
+   Scoped to .landing so global.css stays untouched. */
 
 .landing .btn-primary,
 .landing .btn-brand {

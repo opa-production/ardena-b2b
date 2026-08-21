@@ -73,7 +73,7 @@
   line-height: 1.5;
   color: var(--ink-soft);
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* Claim status chips — colour only, matching fleet.css / bookings.css. */

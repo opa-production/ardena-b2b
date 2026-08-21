@@ -76,7 +76,7 @@
   height: 28px;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
@@ -85,7 +85,7 @@
 }
 
 .bk-cal-nav button:active {
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .bk-cal-grid {
@@ -176,7 +176,7 @@
   gap: 16px;
   margin-top: 18px;
   padding: 16px 20px;
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .booking-total p {
@@ -225,13 +225,13 @@
   font-size: 14px;
   color: #fff;
   background: #0b7a37;
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
 }
 
 .btn.mpesa-btn:hover {
   background: #096530;
   transform: translateY(-1px);
-  box-shadow: var(--neo-out);
+  box-shadow: var(--edge-strong);
 }
 
 .btn.mpesa-btn:active {
@@ -255,8 +255,8 @@
   border-radius: var(--radius); /* sharp corners, per brand */
   width: 100%;
   max-width: 420px;
-  /* neomorphic lift, plus a soft drop so it reads off the dark scrim */
-  box-shadow: var(--neo-out), 0 24px 60px rgba(10, 13, 18, 0.22);
+  /* hairline, plus a soft drop so it reads off the dark scrim */
+  box-shadow: var(--edge), 0 24px 60px rgba(10, 13, 18, 0.22);
   overflow: hidden;
   animation: rise 0.25s var(--ease);
 }
@@ -298,7 +298,7 @@
   color: var(--ink-soft);
 }
 
-/* carved neomorphic input, matching the shared .field inputs */
+/* matches the shared .field inputs */
 .field-input {
   padding: 12px 14px;
   border: none;
@@ -306,7 +306,7 @@
   font-size: 15px;
   color: var(--ink);
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   outline: none;
   transition: box-shadow 0.15s var(--ease);
 }
@@ -316,7 +316,7 @@
 }
 
 .field-input:focus {
-  box-shadow: var(--neo-in), 0 0 0 3px var(--brand-soft);
+  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
 }
 
 .provider-group {
@@ -347,7 +347,7 @@
   flex-shrink: 0;
 }
 
-/* raised neutral chip; presses in (carved) when its option is selected */
+/* neutral chip; the line moves inside when its option is selected */
 .provider-pill {
   padding: 8px 16px;
   border-radius: var(--radius-sm);
@@ -355,7 +355,7 @@
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
 }
 
@@ -365,7 +365,7 @@
 
 .provider-option input:checked + .provider-pill {
   color: var(--ink);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .side-hint {
@@ -430,7 +430,7 @@
   padding: 0;
   overflow: hidden;
   background: var(--bg);
-  box-shadow: var(--neo-out-sm);
+  box-shadow: var(--edge);
   cursor: zoom-in;
 }
 
@@ -475,7 +475,7 @@
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
   cursor: pointer;
   transition: color 0.15s var(--ease);
 }
@@ -607,7 +607,7 @@
   line-height: 1.5;
   color: var(--ink-soft);
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 /* Rating the renter after a completed app booking. */

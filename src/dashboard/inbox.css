@@ -41,7 +41,7 @@
 
 .inbox-item.active {
   background: var(--surface);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .inbox-item-head {

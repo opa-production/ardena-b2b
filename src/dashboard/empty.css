@@ -23,7 +23,7 @@
   margin-bottom: 14px;
   color: var(--ink-soft);
   background: var(--bg);
-  box-shadow: var(--neo-in);
+  box-shadow: var(--edge-in);
 }
 
 .empty-state-icon svg {

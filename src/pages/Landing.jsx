@@ -5,11 +5,10 @@ import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
 import { MODULES, TIERS, CHECK_PRICE, TRIAL_DAYS, fmtKES } from "./pricingData";
-import heroImg from "../assets/hero.jpg";
 import "./landingArdena.css";
 
-/* The landing page follows the ardena.co.ke design language: a full-bleed
-   photo hero with the copy on the shaded left, then alternating white /
+/* The landing page follows the ardena.co.ke design language: an image-free
+   hero built from flat colour shades, then alternating white /
    #f8fafc / cream bands, each opening with a "▪ LABEL" eyebrow and pairing a
    sticky intro with a numbered list on the opposite side.
 
@@ -92,16 +91,12 @@ export default function Landing() {
       <main>
         {/* ---- Hero ---- */}
         <section className="ard-hero">
-          <img
-            src={heroImg}
-            alt=""
-            className="ard-hero-img"
-            width="1920"
-            height="1080"
-            fetchpriority="high"
-            decoding="async"
-          />
-          <div className="ard-hero-overlay" />
+          {/* purely decorative colour shades — no photo, no text over an image */}
+          <div className="ard-hero-shades" aria-hidden="true">
+            <span className="ard-hero-shade ard-hero-shade--cream" />
+            <span className="ard-hero-shade ard-hero-shade--slate" />
+            <span className="ard-hero-shade ard-hero-shade--blue" />
+          </div>
 
           <div className="ard-hero-inner">
             <div className="ard-hero-content">
@@ -114,10 +109,10 @@ export default function Landing() {
                 one flat price with no heavy setup.
               </p>
               <div className="ard-hero-buttons">
-                <Link to="/signup" className="ard-btn ard-btn--solid">
+                <Link to="/signup" className="ard-btn ard-btn--ink">
                   Request access
                 </Link>
-                <Link to="/login" className="ard-btn ard-btn--glass">
+                <Link to="/login" className="ard-btn ard-btn--outline">
                   Sign in
                 </Link>
               </div>

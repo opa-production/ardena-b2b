@@ -18,6 +18,7 @@ export const NAV_SECTIONS = [
       { to: "/dashboard/bookings", key: "bookings", name: "Bookings" },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
+      { to: "/dashboard/tracking", key: "tracking", name: "Vehicle tracking" },
       { to: "/dashboard/reviews", key: "reviews", name: "Reviews", appOnly: true },
       {
         to: "/dashboard/claims",
@@ -40,6 +41,12 @@ export const NAV_SECTIONS = [
         name: "Finances",
         requires: "manageBilling",
       },
+      {
+        to: "/dashboard/billing",
+        key: "billing",
+        name: "Usage & billing",
+        requires: "manageBilling",
+      },
     ],
   },
   {
@@ -50,6 +57,7 @@ export const NAV_SECTIONS = [
       // or a `requires` here — the pages gate their own write actions instead.
       { to: "/dashboard/staff", key: "staff", name: "Staff & roles" },
       { to: "/dashboard/notifications", key: "notifications", name: "Notifications" },
+      { to: "/dashboard/support", key: "support", name: "Support" },
     ],
   },
 ];
@@ -71,10 +79,13 @@ export const SECTION_TITLES = {
   bookings: "Bookings",
   clients: "Clients",
   chauffeurs: "Chauffeurs",
+  tracking: "Vehicle tracking",
   reviews: "Reviews",
   claims: "Claims & requests",
   verification: "Verification",
   payments: "Finances",
+  billing: "Usage & billing",
   staff: "Staff & roles",
   notifications: "Notifications",
+  support: "Support",
 };

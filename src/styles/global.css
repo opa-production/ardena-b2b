@@ -11,7 +11,7 @@
   --brand-glow: rgba(0, 127, 250, 0.25);
 
   /* Secondary accent: warm amber. Used in very few places
-     (hero highlight, plan tag, demo dot) to lift the black/white. */
+     (hero highlight, plan tag) to lift the black/white. */
   --accent: #ffb43a;
 
   /* Neutrals. --bg is a soft near-white so neumorphic shadows read. */
@@ -53,6 +53,15 @@
 
   /* Drop shadow for floating popovers (dropdowns, date picker, toasts). */
   --pop-shadow: 0 14px 40px rgba(163, 174, 192, 0.5);
+
+  /* Chart colours. Validated with the dataviz palette checker rather than
+     picked by eye: this trio clears CVD separation, the normal-vision floor
+     and 3:1 contrast on a light surface. The obvious green/red pair for
+     up/down does NOT — #16a34a vs #dc2626 sits at ΔE 5.0 under deuteranopia,
+     which is why --rr-down is a burnt orange. */
+  --rr-fill: #007ffa;
+  --rr-up: #0d7a52;
+  --rr-down: #c2410c;
 
   /* Shape & type, sharp corners everywhere, per brand */
   --radius: 0;
@@ -98,6 +107,12 @@
 
   --shell-shadow: rgba(0, 0, 0, 0.45);
   --pop-shadow: 0 16px 42px rgba(0, 0, 0, 0.55);
+
+  /* Dark steps are chosen against the dark surface, not flipped from light.
+     Re-validated: CVD separation ΔE 11.5 and 3:1 contrast both pass. */
+  --rr-fill: #2dd4bf;
+  --rr-up: #10b981;
+  --rr-down: #f97316;
 
   /* Inverted chips become light-on-graphite */
   --ink-inv: #e9ecf1;

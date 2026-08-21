@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import BookingHeatmap from "./charts/BookingHeatmap";
-import RevenueDumbbell from "./charts/RevenueDumbbell";
+import RevenueRanking from "./charts/RevenueRanking";
 import UtilisationTrend from "./charts/UtilisationTrend";
 import OnboardingChecklist from "./OnboardingChecklist";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
@@ -140,10 +140,10 @@ export default function Overview() {
         <section className="chart-card">
           <header className="card-head">
             <h2>Top earning vehicles</h2>
-            <p>KES by vehicle, last month vs this month</p>
+            <p>Ranked by earnings this month, with last month marked</p>
           </header>
           {(data?.top_vehicles?.length ?? 0) > 0 ? (
-            <RevenueDumbbell data={data.top_vehicles} />
+            <RevenueRanking data={data.top_vehicles} />
           ) : (
             <EmptyState
               icon={EMPTY_ICONS.chart}

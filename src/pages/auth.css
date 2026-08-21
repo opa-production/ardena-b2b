@@ -1,4 +1,9 @@
-/* ---- Auth pages: bordered card centered on both axes ---- */
+/* ---- Auth pages: bordered card centered on both axes ----
+   Flat, not neumorphic. The rest of the app raises and carves surfaces with
+   --neo-*; sign-in and request-access instead sit on plain white with 1px
+   --line borders and sharp corners, matching the marketing pages. The shared
+   .btn / .field rules from global.css are neumorphic, so they are overridden
+   under .auth at the bottom of this file rather than changed globally. */
 
 .auth {
   min-height: 100vh;
@@ -7,6 +12,7 @@
   place-items: center;
   padding: 96px clamp(20px, 5vw, 48px) 48px;
   position: relative;
+  background: var(--panel);
 }
 
 .auth-nav {
@@ -38,25 +44,25 @@
   width: 42px;
   height: 42px;
   color: var(--ink-soft);
-  background: var(--bg);
-  box-shadow: var(--neo-out-sm);
-  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 
 .auth-back:hover {
   color: var(--ink);
-  box-shadow: var(--neo-out);
+  border-color: var(--ink);
 }
 
 .auth-back:active {
-  box-shadow: var(--neo-in);
+  background: var(--surface);
 }
 
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: var(--bg);
-  box-shadow: var(--neo-out);
+  background: var(--panel);
+  border: 1px solid var(--line);
   padding: clamp(32px, 5vw, 48px);
   text-align: center;
   animation: rise 0.5s var(--ease) both;
@@ -190,8 +196,8 @@
 }
 
 .request-form {
-  background: var(--bg);
-  box-shadow: var(--neo-out);
+  background: var(--panel);
+  border: 1px solid var(--line);
   padding: clamp(24px, 3vw, 34px);
 }
 
@@ -251,4 +257,63 @@
   color: var(--ink-mute);
   margin: -16px 0 24px;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---- Flat overrides for the shared neumorphic components --------------
+   global.css gives .field inputs a carved shadow and the buttons a raised
+   one. Inside .auth they are outlined instead, so nothing on these two pages
+   reads as neumorphic. Scoped here so the dashboard keeps its own look. */
+
+.auth .field input,
+.auth .field select,
+.auth .field textarea {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: none;
+  transition: border-color 0.15s var(--ease);
+}
+
+.auth .field input:hover,
+.auth .field select:hover,
+.auth .field textarea:hover {
+  border-color: var(--ink-mute);
+}
+
+.auth .field input:focus,
+.auth .field select:focus,
+.auth .field textarea:focus {
+  border-color: var(--ink);
+  box-shadow: none;
+}
+
+.auth .btn-primary,
+.auth .btn-brand,
+.auth .btn-ghost {
+  box-shadow: none;
+}
+
+.auth .btn-ghost {
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.auth .btn-primary:hover,
+.auth .btn-brand:hover,
+.auth .btn-ghost:hover {
+  transform: none;
+}
+
+.auth .btn-ghost:hover {
+  border-color: var(--ink);
+}
+
+.auth .btn-ghost:active {
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.auth .btn-primary:active,
+.auth .btn-brand:active {
+  transform: none;
+  box-shadow: none;
 }

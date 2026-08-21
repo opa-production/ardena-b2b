@@ -50,8 +50,8 @@ export default function OnboardingChecklist() {
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   if (state.dismissed) return null;
 
-  // fleet/booking steps track real data so the checklist is truthful in
-  // both the demo and empty preview; the rest are flag-based
+  // fleet/booking steps track real data so the checklist stays truthful on a
+  // brand-new workspace; the rest are flag-based
   const isStepDone = (key) => {
     if (key === "vehicle") return vehicles.length > 0;
     if (key === "booking") return bookings.length > 0;

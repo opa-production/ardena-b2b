@@ -7,7 +7,8 @@
    Ported from the live ardena.co.ke stylesheet:
      · Space Grotesk throughout; hero title at weight 300, headings at 700
      · slate ink #1e293b, secondary #475569, bands white / #f8fafc / cream
-     · brand blue #007FFA in exactly one place — the nav CTA
+     · brand blue #007FFA as an accent only — the nav CTA and the thin
+       marker bar in the hero
      · eyebrow label → heading → description, then a sticky-intro split with
        a numbered list beside it, sides alternating section to section
 
@@ -147,37 +148,6 @@
   border: none;
   cursor: pointer;
   transition: var(--ard-t);
-}
-
-/* solid white — the primary CTA on the photo hero */
-.ard-btn--solid {
-  background: #fff;
-  color: #000;
-  border: 2px solid #fff;
-}
-
-.ard-btn--solid:hover {
-  transform: translateY(-1px);
-}
-
-/* frosted outline — the secondary CTA, readable over any part of the photo */
-.ard-btn--glass {
-  color: rgba(255, 255, 255, 0.98);
-  border: 2px solid rgba(255, 255, 255, 0.82);
-  padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.18);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-}
-
-.ard-btn--glass:hover {
-  background: rgba(255, 255, 255, 0.26);
-  border-color: rgba(255, 255, 255, 0.95);
-  color: #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 /* ink pill — used on light bands */
@@ -393,32 +363,79 @@
   justify-content: flex-start;
   text-align: left;
   overflow: hidden;
-  background-color: #1a1a1a;
-  color: #fff;
-}
-
-.ard-hero-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 65% center; /* keeps the fleet in frame as it narrows */
-  z-index: 0;
-}
-
-/* dark on the left where the copy sits, clear on the right over the cars */
-.ard-hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
+  /* base wash: cream at the top-left, cooling to white on the right */
   background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.72) 0%,
-    rgba(0, 0, 0, 0.45) 45%,
-    rgba(0, 0, 0, 0.1) 70%,
-    transparent 100%
+    115deg,
+    var(--ard-cream) 0%,
+    #faf7f2 32%,
+    var(--ard-bg-light) 68%,
+    var(--ard-white) 100%
   );
+  color: var(--ard-ink);
+  border-bottom: 1px solid var(--ard-line);
+}
+
+/* Decorative colour shades stand in for the old photo: three soft blocks of
+   the palette, blue kept faint so it stays an accent rather than a field. */
+.ard-hero-shades {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ard-hero-shade {
+  position: absolute;
+  display: block;
+}
+
+.ard-hero-shade--cream {
+  top: -12%;
+  right: -6%;
+  width: 46%;
+  height: 78%;
+  background: linear-gradient(
+    160deg,
+    var(--ard-cream) 0%,
+    var(--ard-cream-dark) 100%
+  );
+  opacity: 0.75;
+}
+
+.ard-hero-shade--slate {
+  right: 8%;
+  bottom: -14%;
+  width: 34%;
+  height: 62%;
+  background: linear-gradient(180deg, #eef2f7 0%, #dfe6ee 100%);
+  opacity: 0.9;
+}
+
+/* the one blue note on the page besides the nav CTA — a thin bar, not a wash */
+.ard-hero-shade--blue {
+  left: 0;
+  top: 32%;
+  width: 4px;
+  height: 34%;
+  background: var(--ard-blue);
+}
+
+@media (max-width: 768px) {
+  .ard-hero-shade--cream {
+    width: 62%;
+    height: 34%;
+  }
+
+  .ard-hero-shade--slate {
+    width: 48%;
+    height: 26%;
+  }
+
+  .ard-hero-shade--blue {
+    top: auto;
+    bottom: 12%;
+    height: 22%;
+  }
 }
 
 .ard-hero-inner {
@@ -448,7 +465,7 @@
   font-size: 1.25rem;
   line-height: 1.6;
   font-weight: 400;
-  opacity: 0.95;
+  color: var(--ard-text);
   max-width: 34em;
 }
 
@@ -457,6 +474,11 @@
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 2.5rem;
+}
+
+.ard-hero-buttons .ard-btn {
+  font-size: 1rem;
+  padding: 0.8rem 2rem;
 }
 
 @media (max-width: 1024px) {
@@ -487,7 +509,8 @@
     margin-top: 2rem;
   }
 
-  .ard-btn {
+  .ard-btn,
+  .ard-hero-buttons .ard-btn {
     padding: 0.7rem 1.5rem;
     font-size: 0.95rem;
   }

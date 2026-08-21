@@ -35,7 +35,7 @@
 }
 
 .chart-card > .heatmap,
-.chart-card > .dumbbell,
+.chart-card > .rr,
 .chart-card > .ut-chart,
 .chart-card > .collections-chart {
   flex: 1 1 auto;
@@ -169,76 +169,165 @@
   margin-left: 4px;
 }
 
-/* ---- Revenue dumbbell ---- */
+/* ---- Top earning vehicles: ranked bars ----
+   Replaced a dumbbell chart, which needed the reader to already know the
+   convention. Bar length is the encoding everyone reads without being taught;
+   last month rides the same row as a marker so before/after survives. */
 
-.dumbbell svg {
-  width: 100%;
-  height: auto;
-  display: block;
+.rr {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 2px;
 }
 
-.db-legend text {
-  font-size: 11px;
-  fill: var(--ink-soft);
-  font-family: var(--font-ui);
+.rr-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
 }
 
-.db-grid {
-  stroke: var(--line);
-  stroke-width: 1;
+.rr-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
 }
 
-.db-tick {
+.rr-key-bar {
+  width: 16px;
+  height: 8px;
+  border-radius: 0 2px 2px 0;
+  background: var(--rr-fill);
+}
+
+.rr-key-mark {
+  width: 2px;
+  height: 12px;
+  background: var(--ink-mute);
+}
+
+.rr-rows {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  margin: 0;
+  padding: 0;
+}
+
+.rr-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: default;
+}
+
+.rr-head {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.rr-rank {
+  font-family: var(--font-display);
   font-size: 10.5px;
-  fill: var(--ink-mute);
-  font-family: var(--font-ui);
-  font-variant-numeric: tabular-nums;
-}
-
-.db-label {
-  font-size: 12px;
-  fill: var(--ink-soft);
-  font-family: var(--font-ui);
-}
-
-.db-track {
-  stroke: #b4bdc9;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.db-dot {
-  stroke: var(--panel); /* 2px surface ring */
-  stroke-width: 2;
-}
-
-.db-dot.prev {
-  fill: #8fbdf7;
-}
-
-.db-dot.curr {
-  fill: var(--brand);
-}
-
-.db-value {
-  font-size: 12px;
   font-weight: 600;
-  fill: var(--ink);
-  font-family: var(--font-ui);
+  color: var(--ink-mute);
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
 }
 
-.db-delta {
+.rr-name {
+  font-size: 13px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* values and labels wear text tokens, never the series colour */
+.rr-value {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* the arrow carries direction, so colour is reinforcement and never the
+   only channel — the pair is CVD-validated regardless */
+.rr-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   font-size: 10.5px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  width: 46px;
+  justify-content: flex-end;
+  flex-shrink: 0;
 }
 
-.db-delta.up {
-  fill: #0b7a37;
+.rr-delta.up {
+  color: var(--rr-up);
 }
 
-.db-delta.down {
-  fill: var(--ink-mute);
+.rr-delta.down {
+  color: var(--rr-down);
+}
+
+.rr-track {
+  position: relative;
+  height: 10px;
+  background: var(--surface);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.rr-fill {
+  height: 100%;
+  background: var(--rr-fill);
+  border-radius: 0 3px 3px 0; /* rounded data-end, square at the baseline */
+  transition: width 0.45s var(--ease);
+}
+
+/* last month on the same scale, with a 2px surface gap either side so it
+   stays legible where it crosses the bar */
+.rr-mark {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  transform: translateX(-1px);
+  background: var(--ink-soft);
+  box-shadow: 0 0 0 2px var(--panel);
+}
+
+.rr-row:hover .rr-fill {
+  filter: brightness(1.08);
+}
+
+.rr-tip {
+  white-space: nowrap;
+}
+
+/* screen-reader row summary — the numbers are never colour- or length-gated */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---- Fleet utilisation trend ---- */

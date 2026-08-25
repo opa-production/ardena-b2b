@@ -361,20 +361,59 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Billing: two graphs on top + invoice list
+  // ---- Usage: head + the daily bar chart, nothing else
+  if (section === "usage") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <section className="chart-card">
+          <CardHead />
+          <span className="sk sk-block" />
+        </section>
+      </div>
+    );
+  }
+
+  // ---- Billing: head + the paid-over-time chart + the invoice list
   if (section === "billing") {
     return (
       <div aria-hidden="true">
-        <div className="chart-row">
-          {[0, 1].map((i) => (
-            <section className="chart-card" key={i}>
-              <CardHead />
-              <span className="sk sk-block" />
-            </section>
-          ))}
-        </div>
+        <HeadCard />
+        <section className="chart-card">
+          <CardHead />
+          <span className="sk sk-block" />
+        </section>
         <section className="panel-card">
-          <CardLines rows={3} />
+          <CardLines rows={4} />
+        </section>
+      </div>
+    );
+  }
+
+  // ---- Plans: head + the current-plan band + the tier grid
+  if (section === "plans") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <section className="panel-card">
+          <CardLines rows={2} />
+        </section>
+        <section className="panel-card">
+          <CardHead />
+          <div className="plan-grid">
+            {[0, 1, 2].map((i) => (
+              <article className="plan-card" key={i}>
+                <Line w="45%" h={14} />
+                <Line w="65%" h={24} className="sk-gap" />
+                <Line w="55%" h={10} className="sk-gap-sm" />
+                <div className="sk-rows">
+                  {[0, 1, 2, 3].map((r) => (
+                    <Line key={r} w={`${88 - r * 9}%`} h={11} />
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     );

@@ -89,6 +89,63 @@
   opacity: 1;
 }
 
+/* ---- Collapsible nav group (Account: Usage / Billing / Plans) ----
+   The parent row is a button, so it needs the <button> reset the shared
+   .nav-item rule doesn't cover, and the chevron flips to point up when the
+   group is open. */
+
+.nav-toggle-row {
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.nav-chevron {
+  margin-left: auto;
+  opacity: 0.6;
+  transition: transform 0.18s var(--ease), opacity 0.15s var(--ease);
+}
+
+.nav-parent.is-open .nav-chevron {
+  transform: rotate(180deg);
+  opacity: 0.9;
+}
+
+/* collapsed but holding the current page — mark the parent so the active
+   route isn't invisible when the group is shut */
+.nav-toggle-row.has-active {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.nav-toggle-row.has-active .nav-chevron {
+  opacity: 1;
+}
+
+.nav-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 4px;
+  /* the rail lines the children up under the parent's icon */
+  padding-left: 19px;
+  border-left: 1px solid var(--line);
+  margin-left: 19px;
+}
+
+/* the `hidden` attribute is how the group closes, and a class selector beats
+   the UA's [hidden] rule — so restate it here or the children never collapse */
+.nav-sub[hidden] {
+  display: none;
+}
+
+.nav-sub-item {
+  padding-top: 7px;
+  padding-bottom: 7px;
+  font-size: 13.5px;
+}
+
 /* unread counters on nav + menu items: a bare orange number, no box */
 .nav-badge {
   margin-left: auto;

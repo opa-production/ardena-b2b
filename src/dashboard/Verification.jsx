@@ -107,7 +107,7 @@ export default function Verification() {
           </p>
           <p className="stat-note">
             ≈ {Math.floor(wallet.balance / checkPrice)} checks ·{" "}
-            <Link className="spec-link" to="/dashboard/billing">
+            <Link className="spec-link" to="/dashboard/usage">
               top up
             </Link>
           </p>

@@ -30,8 +30,8 @@ const LINKS = [
   {
     key: "billing",
     to: "/dashboard/billing",
-    name: "Usage & billing",
-    desc: "Your plan, invoices and payment method",
+    name: "Billing",
+    desc: "Invoices, payments and receipts",
     icon: ICON_BILLING,
     requires: "manageBilling",
   },

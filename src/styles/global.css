@@ -63,6 +63,11 @@
   --rr-up: #0d7a52;
   --rr-down: #c2410c;
 
+  /* Single-series bar fill (usage). Checked with the dataviz validator against
+     this surface: lightness band, chroma floor and 3:1 contrast all pass. */
+  --usage-bar: #007ffa;
+  --usage-bar-hot: #0066c9;
+
   /* Shape & type, sharp corners everywhere, per brand */
   --radius: 0;
   --radius-sm: 0;
@@ -110,6 +115,11 @@
   --rr-fill: #2dd4bf;
   --rr-up: #10b981;
   --rr-down: #f97316;
+
+  /* Re-picked for graphite rather than flipped from light: #14a89b is the
+     nearest teal that clears the dark lightness band the validator enforces. */
+  --usage-bar: #14a89b;
+  --usage-bar-hot: #2dd4bf;
 
   /* Inverted chips become light-on-graphite */
   --ink-inv: #e9ecf1;

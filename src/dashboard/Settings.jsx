@@ -451,7 +451,7 @@ export default function Settings() {
             <p className="plan-price">
               {vehicles.length} vehicles · KES {PLAN.launchRate}/vehicle
             </p>
-            <Link to="/dashboard/billing" className="btn btn-ghost pay-btn">
+            <Link to="/dashboard/plans" className="btn btn-ghost pay-btn">
               Manage plan &amp; billing
             </Link>
           </section>

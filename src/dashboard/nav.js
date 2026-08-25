@@ -41,11 +41,20 @@ export const NAV_SECTIONS = [
         name: "Finances",
         requires: "manageBilling",
       },
+      // A collapsible group rather than a destination of its own: `children`
+      // makes the sidebar render a disclosure row with a chevron instead of a
+      // link. The group has no `to` — clicking it opens the three pages
+      // beneath it. Role and app-link gating is filtered on the children, so
+      // a group whose children all disappear disappears with them.
       {
-        to: "/dashboard/billing",
-        key: "billing",
-        name: "Usage & billing",
+        key: "account",
+        name: "Account",
         requires: "manageBilling",
+        children: [
+          { to: "/dashboard/usage", key: "usage", name: "Usage" },
+          { to: "/dashboard/billing", key: "billing", name: "Billing" },
+          { to: "/dashboard/plans", key: "plans", name: "Plans" },
+        ],
       },
     ],
   },
@@ -62,15 +71,24 @@ export const NAV_SECTIONS = [
   },
 ];
 
+const allowed = (item, can, appLinked) =>
+  (!item.requires || can(item.requires)) && (!item.appOnly || appLinked);
+
 /** NAV_SECTIONS with items the signed-in role can't reach removed, app-only
  *  destinations dropped when no Ardena app account is linked, and any section
- *  that empties out dropped with them. */
+ *  that empties out dropped with them. Grouped items are filtered a level
+ *  deeper, and a group left with no children is dropped like any other item. */
 export function visibleSections(can, appLinked = false) {
   return NAV_SECTIONS.map((section) => ({
     ...section,
-    items: section.items.filter(
-      (item) => (!item.requires || can(item.requires)) && (!item.appOnly || appLinked)
-    ),
+    items: section.items
+      .filter((item) => allowed(item, can, appLinked))
+      .map((item) =>
+        item.children
+          ? { ...item, children: item.children.filter((c) => allowed(c, can, appLinked)) }
+          : item
+      )
+      .filter((item) => !item.children || item.children.length > 0),
   })).filter((section) => section.items.length > 0);
 }
 
@@ -84,7 +102,9 @@ export const SECTION_TITLES = {
   claims: "Claims & requests",
   verification: "Verification",
   payments: "Finances",
-  billing: "Usage & billing",
+  usage: "Usage",
+  billing: "Billing",
+  plans: "Plans",
   staff: "Staff & roles",
   notifications: "Notifications",
   support: "Support",

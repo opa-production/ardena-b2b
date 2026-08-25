@@ -15,6 +15,7 @@ import {
   toggleTheme,
 } from "./themeStore";
 import { visibleSections } from "./nav";
+import NavGroup from "./NavGroup";
 import { ICONS } from "./icons";
 import {
   subscribe as subscribeBusiness,
@@ -286,25 +287,29 @@ export default function DashboardLayout() {
           {navSections.map((section) => (
             <div className="nav-group" key={section.label}>
               <p className="nav-group-label">{section.label}</p>
-              {section.items.map((item) => (
-                <NavLink
-                  key={item.key}
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    "nav-item" + (isActive ? " active" : "")
-                  }
-                >
-                  {ICONS[item.key]}
-                  {item.name}
-                  {item.key === "notifications" && unread > 0 && (
-                    <span className="nav-badge">{unread}</span>
-                  )}
-                  {item.key === "support" && supportUnread > 0 && (
-                    <span className="nav-badge">{supportUnread}</span>
-                  )}
-                </NavLink>
-              ))}
+              {section.items.map((item) =>
+                item.children ? (
+                  <NavGroup key={item.key} item={item} />
+                ) : (
+                  <NavLink
+                    key={item.key}
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      "nav-item" + (isActive ? " active" : "")
+                    }
+                  >
+                    {ICONS[item.key]}
+                    {item.name}
+                    {item.key === "notifications" && unread > 0 && (
+                      <span className="nav-badge">{unread}</span>
+                    )}
+                    {item.key === "support" && supportUnread > 0 && (
+                      <span className="nav-badge">{supportUnread}</span>
+                    )}
+                  </NavLink>
+                )
+              )}
             </div>
           ))}
         </nav>
@@ -340,9 +345,9 @@ export default function DashboardLayout() {
                 </svg>
                 Profile
               </button>
-              {/* Vehicle tracking, Usage & billing and Support used to hide in
-                  here; they are sidebar destinations now (see nav.js) so they
-                  can actually be found. */}
+              {/* Vehicle tracking, billing and Support used to hide in here;
+                  they are sidebar destinations now (see nav.js) so they can
+                  actually be found. */}
               <button type="button" role="menuitem" onClick={handleLogout}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3" />

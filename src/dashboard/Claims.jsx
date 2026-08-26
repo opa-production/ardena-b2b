@@ -106,15 +106,7 @@ export default function Claims() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Claims &amp; requests</h1>
-          <p>
-            Deposit claims on Ardena app bookings, and renters asking to keep a
-            vehicle longer
-          </p>
-        </div>
-      </header>
+      <h1 className="sr-only">Claims &amp; requests</h1>
 
       <div className="claims-grid">
         <section className="panel-card">

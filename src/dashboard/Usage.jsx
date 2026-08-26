@@ -100,20 +100,19 @@ export default function Usage() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Usage</h1>
-          <p>
-            Wallet KES {fmtAmount(walletBalance)} · ≈ {checksLeft} check
-            {checksLeft === 1 ? "" : "s"} left
-          </p>
-        </div>
-      </header>
+      {/* The card that used to sit here said "Usage" and nothing else — the
+          sidebar already says that. The wallet figures it carried are the
+          chart's own context, so they live in the chart's subtitle now. */}
+      <h1 className="sr-only">Usage</h1>
 
       <section className="chart-card">
         <header className="card-head">
           <h2>Daily usage</h2>
-          <p>KES {fmtAmount(spent)} drawn from your wallet this period</p>
+          <p>
+            KES {fmtAmount(spent)} drawn this period · wallet KES{" "}
+            {fmtAmount(walletBalance)} · ≈ {checksLeft} check
+            {checksLeft === 1 ? "" : "s"} left
+          </p>
         </header>
 
         {series.length === 0 ? (

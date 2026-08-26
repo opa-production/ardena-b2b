@@ -188,6 +188,23 @@ body {
   line-height: 1.6;
 }
 
+/* Screen-reader-only: kept in the accessibility tree, out of the layout.
+   Used for headings a page no longer shows (the sidebar names the page) and
+   for the data tables behind charts. Note that `height` is a *minimum* on a
+   <table>, so wrap a table in a .sr-only div rather than putting the class on
+   the table itself. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 a {
   color: inherit;
   text-decoration: none;

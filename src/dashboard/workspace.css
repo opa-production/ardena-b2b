@@ -450,3 +450,9 @@ tr.unread-row {
 .usage-row .util-bar-lg {
   height: 8px;
 }
+
+/* a second heading inside one card — Pending invites under Team — needs air
+   above it that the first heading doesn't */
+.card-head-second {
+  margin-top: 28px;
+}

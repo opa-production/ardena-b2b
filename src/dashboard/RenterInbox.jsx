@@ -103,15 +103,7 @@ export default function RenterInbox() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Renter messages</h1>
-          <p>
-            Questions from renters on the Ardena app
-            {unreadTotal > 0 ? ` · ${unreadTotal} unread` : ""}
-          </p>
-        </div>
-      </header>
+      <h1 className="sr-only">Renter messages</h1>
 
       {conversations.length === 0 ? (
         <EmptyState
@@ -124,6 +116,7 @@ export default function RenterInbox() {
           <section className="panel-card inbox-list">
             <header className="card-head">
               <h2>Conversations</h2>
+              {unreadTotal > 0 && <p>{unreadTotal} unread</p>}
             </header>
             {conversations.map((c) => (
               <button

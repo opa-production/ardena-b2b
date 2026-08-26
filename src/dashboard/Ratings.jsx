@@ -65,12 +65,7 @@ export default function Ratings() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Reviews</h1>
-          <p>What renters say after a trip on the Ardena app</p>
-        </div>
-      </header>
+      <h1 className="sr-only">Reviews</h1>
 
       {!hasAny ? (
         <EmptyState

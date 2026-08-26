@@ -159,20 +159,15 @@ export default function Billing() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-titles">
-          <h1>Billing</h1>
-          <p>
-            Invoices and payments
-            {sub?.next_billing_date ? ` · next bill ${fmtDate(sub.next_billing_date)}` : ""}
-          </p>
-        </div>
-      </header>
+      <h1 className="sr-only">Billing</h1>
 
       <section className="panel-card">
         <header className="card-head">
           <h2>Invoices</h2>
-          <p>Newest first</p>
+          <p>
+            Newest first
+            {sub?.next_billing_date ? ` · next bill ${fmtDate(sub.next_billing_date)}` : ""}
+          </p>
         </header>
 
         <div className="invoice-list">

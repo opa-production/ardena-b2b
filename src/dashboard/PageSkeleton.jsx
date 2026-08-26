@@ -306,7 +306,6 @@ export default function PageSkeleton({ path = "" }) {
   if (section === "renter-messages") {
     return (
       <div aria-hidden="true">
-        <HeadCard />
         <div className="inbox-grid">
           <section className="panel-card">
             <CardLines rows={5} />
@@ -317,11 +316,10 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Claims / Reviews: page head over a list of rows
+  // ---- Claims / Reviews: a list of rows
   if (section === "claims" || section === "reviews") {
     return (
       <div aria-hidden="true">
-        <HeadCard />
         <TableCard rows={5} />
       </div>
     );
@@ -361,11 +359,10 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Usage: head + the daily bar chart, nothing else
+  // ---- Usage: the daily bar chart, nothing else
   if (section === "usage") {
     return (
       <div aria-hidden="true">
-        <HeadCard />
         <section className="chart-card">
           <CardHead />
           <span className="sk sk-block" />
@@ -374,11 +371,10 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Billing: head + the invoice list
+  // ---- Billing: the invoice list
   if (section === "billing") {
     return (
       <div aria-hidden="true">
-        <HeadCard />
         <section className="panel-card">
           <CardLines rows={5} />
         </section>

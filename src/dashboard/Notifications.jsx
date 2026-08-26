@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Link, useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import {
@@ -7,6 +7,13 @@ import {
   markAllNotificationsRead,
 } from "../lib/api";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import { ICONS } from "./icons";
+import {
+  NOTIFICATION_PREFS,
+  getPrefs,
+  setPref,
+  subscribe as subscribePrefs,
+} from "./notificationPrefsStore";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
@@ -66,6 +73,8 @@ export default function Notifications() {
   const [filter, setFilter] = useState("All");
   const [busyId, setBusyId] = useState(null);
   const [markingAll, setMarkingAll] = useState(false);
+  const [prefsOpen, setPrefsOpen] = useState(false);
+  const prefs = useSyncExternalStore(subscribePrefs, getPrefs);
 
   const load = useCallback(async () => {
     try {
@@ -144,14 +153,27 @@ export default function Notifications() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className="btn btn-ghost toolbar-btn"
-            onClick={handleMarkAllRead}
-            disabled={unreadCount === 0 || markingAll}
-          >
-            {markingAll ? "Marking…" : "Mark all read"}
-          </button>
+          <div className="toolbar-actions">
+            <button
+              type="button"
+              className="btn btn-ghost toolbar-btn"
+              onClick={handleMarkAllRead}
+              disabled={unreadCount === 0 || markingAll}
+            >
+              {markingAll ? "Marking…" : "Mark all read"}
+            </button>
+            {/* Preferences belong beside the feed they shape, not buried in a
+                profile page three clicks away. */}
+            <button
+              type="button"
+              className="icon-btn toolbar-gear"
+              onClick={() => setPrefsOpen(true)}
+              aria-label="Notification preferences"
+              title="Notification preferences"
+            >
+              {ICONS.settings}
+            </button>
+          </div>
         </div>
 
         {filtered.length > 0 ? (
@@ -228,6 +250,47 @@ export default function Notifications() {
           />
         )}
       </section>
+
+      {/* ---- Notification preferences ---- */}
+      {prefsOpen && (
+        <div className="modal-overlay" onClick={() => setPrefsOpen(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Notification preferences</h3>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setPrefsOpen(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </header>
+            <div className="modal-body">
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                What lands in your inbox and this feed. Saved on this device.
+              </p>
+              {NOTIFICATION_PREFS.map((p) => (
+                <div className="pref-row" key={p.key}>
+                  <div>
+                    <p className="pref-name">{p.name}</p>
+                    <p className="pref-desc">{p.desc}</p>
+                  </div>
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      checked={prefs[p.key]}
+                      onChange={(e) => setPref(p.key, e.target.checked)}
+                      aria-label={`Toggle ${p.name}`}
+                    />
+                    <i />
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

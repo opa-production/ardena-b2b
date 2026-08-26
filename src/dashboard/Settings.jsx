@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
-import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
 import {
   subscribe as subscribeBusiness,
   getBusiness,
@@ -11,12 +9,12 @@ import {
 } from "./businessStore";
 import {
   updateBusiness,
-  updatePolicy,
   uploadBusinessLogo,
   forgotPassword,
   resetPassword,
 } from "../lib/api";
 import { getSession } from "../lib/authStore";
+import { ICONS } from "./icons";
 import VerifiedBadge from "../components/VerifiedBadge";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -26,17 +24,6 @@ import PayoutMethods from "./PayoutMethods";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
-
-// Per-vehicle pricing (mock, real numbers come with the billing engine)
-const PLAN = { launchRate: 200, minimum: 2000 };
-
-const PREFS = [
-  { key: "bookings", name: "Booking activity", desc: "New requests, confirmations and cancellations" },
-  { key: "payments", name: "Payments", desc: "Prompts paid, failed or refunded" },
-  { key: "verification", name: "Verification results", desc: "When a customer passes or fails a check" },
-  { key: "documents", name: "Document expiry", desc: "Insurance and inspection reminders" },
-  { key: "staff", name: "Staff changes", desc: "Invites accepted and roles changed" },
-];
 
 // draw the picked image onto a canvas capped at 256px so the data URL
 // stays small enough for localStorage
@@ -64,8 +51,6 @@ function resizeImage(file, max = 256) {
 }
 
 export default function Settings() {
-  const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
-  const policy = useSyncExternalStore(subscribePolicy, getPolicy);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [currency, setCurrency] = useState("KES, Kenyan shilling");
   const [logo, setLogo] = useState(business.logo);
@@ -75,7 +60,6 @@ export default function Settings() {
   const [email, setEmail] = useState(business.email);
   const [location, setLocation] = useState(business.location);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [savingPolicy, setSavingPolicy] = useState(false);
   const [savingLogo, setSavingLogo] = useState(false);
   const fileRef = useRef(null);
 
@@ -87,33 +71,6 @@ export default function Settings() {
     setLocation(business.location);
     setLogo((prev) => (logoFile ? prev : business.logo));
   }, [business, logoFile]);
-
-  async function handlePolicySave(e) {
-    e.preventDefault();
-    if (savingPolicy) return;
-    const f = new FormData(e.currentTarget);
-    const deposit = Number(f.get("deposit"));
-    const lateFeePerHour = Number(f.get("lateFee"));
-    setSavingPolicy(true);
-    try {
-      await updatePolicy({ deposit, late_fee_per_hour: lateFeePerHour });
-      setPolicy({ deposit, lateFeePerHour });
-      toast("Rental policy saved.");
-    } catch (err) {
-      toast(err.message, "danger");
-    } finally {
-      setSavingPolicy(false);
-    }
-  }
-  const [prefs, setPrefs] = useState({
-    bookings: true,
-    payments: true,
-    verification: true,
-    documents: true,
-    staff: false,
-  });
-
-  const monthly = Math.max(PLAN.minimum, vehicles.length * PLAN.launchRate);
 
   /* ---- Change password: emailed one-time code confirms it's you ---- */
   const accountEmail = getSession().user?.email || "";
@@ -239,6 +196,22 @@ export default function Settings() {
 
   return (
     <>
+      {/* The gear is the whole of this page's chrome — no title card, the
+          sidebar already says Profile. Everything you configure rather than
+          fill in lives behind it. */}
+      <div className="page-actions">
+        <Link
+          to="/dashboard/settings/preferences"
+          className="icon-btn toolbar-gear"
+          aria-label="Settings"
+          title="Settings"
+        >
+          {ICONS.settings}
+        </Link>
+      </div>
+
+      <h1 className="sr-only">Profile</h1>
+
       <div className="details-grid settings-grid">
         <div className="settings-main">
           <section className="panel-card">
@@ -312,78 +285,6 @@ export default function Settings() {
               connecting is deferred, see lib/features.js */}
           <HostLinkPanel />
 
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Rental policy</h2>
-              <p>Applied to agreements, deposits and late returns</p>
-            </header>
-            {/* keyed so the inputs refresh once the policy hydrates from the API */}
-            <form onSubmit={handlePolicySave} key={`${policy.deposit}-${policy.lateFeePerHour}`}>
-              <div className="form-grid">
-                <div className="field">
-                  <label htmlFor="pol-deposit">Security deposit (KES)</label>
-                  <input
-                    id="pol-deposit"
-                    name="deposit"
-                    type="number"
-                    min="0"
-                    step="500"
-                    defaultValue={policy.deposit}
-                    required
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="pol-late">Late return penalty (KES per hour)</label>
-                  <input
-                    id="pol-late"
-                    name="lateFee"
-                    type="number"
-                    min="0"
-                    step="50"
-                    defaultValue={policy.lateFeePerHour}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="btn btn-primary" disabled={savingPolicy}>
-                  {savingPolicy ? "Saving…" : "Save policy"}
-                </button>
-              </div>
-            </form>
-            <p className="side-hint">
-              Vehicles are due back by {RETURN_HOUR}:00 AM on the return date.
-              Every started hour after that is charged at the hourly penalty,
-              and both figures are written into every rental agreement.
-            </p>
-          </section>
-
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Notification preferences</h2>
-              <p>What lands in your inbox and notification feed</p>
-            </header>
-            {PREFS.map((p) => (
-              <div className="pref-row" key={p.key}>
-                <div>
-                  <p className="pref-name">{p.name}</p>
-                  <p className="pref-desc">{p.desc}</p>
-                </div>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={prefs[p.key]}
-                    onChange={(e) =>
-                      setPrefs({ ...prefs, [p.key]: e.target.checked })
-                    }
-                    aria-label={`Toggle ${p.name}`}
-                  />
-                  <i />
-                </label>
-              </div>
-            ))}
-          </section>
-
           {/* Account details for app-earnings payouts live with the rest of
               the business profile; withdrawing itself stays on Finances. */}
           <section className="panel-card">
@@ -440,20 +341,6 @@ export default function Settings() {
             <button type="button" className="btn btn-ghost pay-btn" onClick={saveLogo} disabled={savingLogo}>
               {savingLogo ? "Saving…" : "Save logo"}
             </button>
-          </section>
-
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Plan &amp; billing</h2>
-              <p>Fleet plan · billed monthly</p>
-            </header>
-            <p className="util-hero">KES {monthly.toLocaleString("en-KE")}<span className="util-per">/mo</span></p>
-            <p className="plan-price">
-              {vehicles.length} vehicles · KES {PLAN.launchRate}/vehicle
-            </p>
-            <Link to="/pricing" className="btn btn-ghost pay-btn">
-              See plans &amp; pricing
-            </Link>
           </section>
 
           <section className="panel-card">
@@ -585,27 +472,6 @@ export default function Settings() {
             )}
           </section>
 
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Workspace</h2>
-              <p>Tenant details</p>
-            </header>
-            <div className="pay-row">
-              <span>Tenant ID</span>
-              <span className="mini-amount">{business.id ?? "—"}</span>
-            </div>
-            <div className="pay-row">
-              <span>Region</span>
-              <span className="mini-amount">{business.location || "Kenya"}</span>
-            </div>
-            <div className="pay-row">
-              <span>Verified since</span>
-              <span className="mini-amount">{business.verifiedSince || "—"}</span>
-            </div>
-            <p className="side-hint">
-              Data export and workspace transfer arrive with the platform admin console.
-            </p>
-          </section>
         </div>
       </div>
     </>

@@ -266,7 +266,27 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Settings: no KPIs, two form cards + side cards
+  // ---- Settings behind the profile gear: back-link head, one form, two sides
+  if (section === "settings" && sub === "preferences") {
+    return (
+      <div aria-hidden="true">
+        <HeadCard />
+        <div className="details-grid">
+          <div className="settings-main">
+            <section className="panel-card">
+              <CardHead />
+              <div className="sk-gap">
+                <FormFields pairs={1} />
+              </div>
+            </section>
+          </div>
+          <SideCards cards={[2, 3]} />
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Profile: no KPIs, two form cards + side cards
   if (section === "settings") {
     return (
       <div aria-hidden="true">

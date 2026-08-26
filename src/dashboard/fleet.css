@@ -93,6 +93,28 @@
   height: 13px;
 }
 
+/* a toolbar's right-hand side when it holds more than one control */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* square icon-only button — the gear that opens a page's settings */
+.toolbar-gear {
+  padding: 7px;
+}
+
+.toolbar-gear svg {
+  width: 15px;
+  height: 15px;
+}
+
+.toolbar-gear:hover {
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
+}
+
 /* top-of-page primary action, right-aligned for quick reach */
 .page-actions {
   display: flex;

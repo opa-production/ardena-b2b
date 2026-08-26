@@ -1,0 +1,159 @@
+/* Settings — the things you configure once and then leave alone.
+ *
+ * Split out of the profile page, which was eight cards deep and mixed "who
+ * this business is" with "how it is set up". Identity stayed there; the rental
+ * policy, the plan figure and the tenant block moved here, behind the gear in
+ * the profile header.
+ *
+ * Notification preferences are not here: they belong beside the feed they
+ * shape, so they live behind the gear on the Notifications page instead. */
+import { useState, useSyncExternalStore } from "react";
+import { Link } from "react-router-dom";
+import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
+import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
+import { subscribe as subscribeBusiness, getBusiness } from "./businessStore";
+import { updatePolicy } from "../lib/api";
+import { toast } from "./toastStore";
+import usePageTitle from "../hooks/usePageTitle";
+import "./fleet.css";
+import "./bookings.css";
+import "./workspace.css";
+
+// Per-vehicle pricing (mock, real numbers come with the billing engine)
+const PLAN = { launchRate: 200, minimum: 2000 };
+
+export default function WorkspaceSettings() {
+  usePageTitle("Settings");
+  const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
+  const policy = useSyncExternalStore(subscribePolicy, getPolicy);
+  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
+  const [savingPolicy, setSavingPolicy] = useState(false);
+
+  const monthly = Math.max(PLAN.minimum, vehicles.length * PLAN.launchRate);
+
+  async function handlePolicySave(e) {
+    e.preventDefault();
+    if (savingPolicy) return;
+    const f = new FormData(e.currentTarget);
+    const deposit = Number(f.get("deposit"));
+    const lateFeePerHour = Number(f.get("lateFee"));
+    setSavingPolicy(true);
+    try {
+      await updatePolicy({ deposit, late_fee_per_hour: lateFeePerHour });
+      setPolicy({ deposit, lateFeePerHour });
+      toast("Rental policy saved.");
+    } catch (err) {
+      toast(err.message, "danger");
+    } finally {
+      setSavingPolicy(false);
+    }
+  }
+
+  return (
+    <>
+      {/* This head card earns its place: it carries the way back. */}
+      <header className="head-card">
+        <div className="head-left">
+          <Link to="/dashboard/settings" className="back-link" aria-label="Back to profile">
+            ←
+          </Link>
+          <div className="head-titles">
+            <h1>Settings</h1>
+            <p>How this workspace is set up</p>
+          </div>
+        </div>
+      </header>
+
+      <div className="details-grid settings-grid">
+        <div className="settings-main">
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Rental policy</h2>
+              <p>Applied to agreements, deposits and late returns</p>
+            </header>
+            {/* keyed so the inputs refresh once the policy hydrates from the API */}
+            <form onSubmit={handlePolicySave} key={`${policy.deposit}-${policy.lateFeePerHour}`}>
+              <div className="form-grid">
+                <div className="field">
+                  <label htmlFor="pol-deposit">Security deposit (KES)</label>
+                  <input
+                    id="pol-deposit"
+                    name="deposit"
+                    type="number"
+                    min="0"
+                    step="500"
+                    defaultValue={policy.deposit}
+                    required
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="pol-late">Late return penalty (KES per hour)</label>
+                  <input
+                    id="pol-late"
+                    name="lateFee"
+                    type="number"
+                    min="0"
+                    step="50"
+                    defaultValue={policy.lateFeePerHour}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={savingPolicy}>
+                  {savingPolicy ? "Saving…" : "Save policy"}
+                </button>
+              </div>
+            </form>
+            <p className="side-hint">
+              Vehicles are due back by {RETURN_HOUR}:00 AM on the return date.
+              Every started hour after that is charged at the hourly penalty,
+              and both figures are written into every rental agreement.
+            </p>
+          </section>
+        </div>
+
+        <div className="details-side">
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Plan &amp; billing</h2>
+              <p>Fleet plan · billed monthly</p>
+            </header>
+            <p className="util-hero">
+              KES {monthly.toLocaleString("en-KE")}
+              <span className="util-per">/mo</span>
+            </p>
+            <p className="plan-price">
+              {vehicles.length} vehicles · KES {PLAN.launchRate}/vehicle
+            </p>
+            <Link to="/pricing" className="btn btn-ghost pay-btn">
+              See plans &amp; pricing
+            </Link>
+          </section>
+
+          <section className="panel-card">
+            <header className="card-head">
+              <h2>Workspace</h2>
+              <p>Tenant details</p>
+            </header>
+            <div className="pay-row">
+              <span>Tenant ID</span>
+              <span className="mini-amount">{business.id ?? "—"}</span>
+            </div>
+            <div className="pay-row">
+              <span>Region</span>
+              <span className="mini-amount">{business.location || "Kenya"}</span>
+            </div>
+            <div className="pay-row">
+              <span>Verified since</span>
+              <span className="mini-amount">{business.verifiedSince || "—"}</span>
+            </div>
+            <p className="side-hint">
+              Data export and workspace transfer arrive with the platform admin console.
+            </p>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}

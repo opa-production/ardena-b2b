@@ -34,6 +34,7 @@ import Usage from "./dashboard/Usage";
 import Support from "./dashboard/Support";
 import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
+import WorkspaceSettings from "./dashboard/WorkspaceSettings";
 import Placeholder from "./dashboard/Placeholder";
 import MarketplaceListing from "./dashboard/MarketplaceListing";
 import RequireRole from "./dashboard/RequireRole";
@@ -137,7 +138,10 @@ export default function App() {
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />
+        {/* Profile, and the gear on it — what the business IS, and how it's
+            set up. See WorkspaceSettings.jsx for the split. */}
         <Route path="settings" element={<Settings />} />
+        <Route path="settings/preferences" element={<WorkspaceSettings />} />
         <Route path=":section" element={<Placeholder />} />
       </Route>
     </Routes>

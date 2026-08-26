@@ -44,6 +44,16 @@ function CardLines({ rows = 5 }) {
   );
 }
 
+/* The minimal back link that replaced the header card on form, full-list and
+   settings pages — one short muted row, not a card. */
+function BackLine() {
+  return (
+    <div className="page-back">
+      <Line w={90} h={13} />
+    </div>
+  );
+}
+
 function HeadCard() {
   return (
     <header className="head-card">
@@ -191,7 +201,7 @@ export default function PageSkeleton({ path = "" }) {
     const single = section === "bookings";
     return (
       <div aria-hidden="true">
-        <HeadCard />
+        <BackLine />
         {single ? (
           <section className="panel-card form-card">
             <FormFields pairs={4} />
@@ -244,11 +254,11 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Full-list pages (payments/all, verification/all): header card + table
+  // ---- Full-list pages (payments/all, verification/all): back link + table
   if (sub) {
     return (
       <div aria-hidden="true">
-        <HeadCard />
+        <BackLine />
         <TableCard rows={8} />
       </div>
     );
@@ -266,11 +276,11 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Settings behind the profile gear: back-link head, one form, two sides
+  // ---- Settings behind the profile gear: back link, one form, two sides
   if (section === "settings" && sub === "preferences") {
     return (
       <div aria-hidden="true">
-        <HeadCard />
+        <BackLine />
         <div className="details-grid">
           <div className="settings-main">
             <section className="panel-card">

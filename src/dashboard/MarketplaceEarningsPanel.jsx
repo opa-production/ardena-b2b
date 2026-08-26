@@ -4,7 +4,7 @@ import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
 import CollectionsArea from "./charts/CollectionsArea";
 import PaymentDonut from "./charts/PaymentDonut";
-import { methodDetail } from "./PayoutMethods";
+import PayoutMethods, { methodDetail } from "./PayoutMethods";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
 import { createMarketplaceWithdrawal } from "../lib/api";
@@ -103,7 +103,7 @@ export default function MarketplaceEarningsPanel({
       return;
     }
     if (!methodId) {
-      toast("Add a payout destination in Settings first", "warn");
+      toast("Add a payout destination first", "warn");
       return;
     }
     setBusy(true);
@@ -131,8 +131,8 @@ export default function MarketplaceEarningsPanel({
     return (
       <EmptyState
         icon={EMPTY_ICONS.payments}
-        title="No marketplace listings yet"
-        message="List a vehicle on the Ardena app and its bookings, earnings and payouts will show up here."
+        title="Nothing listed yet"
+        message="List a vehicle on the app to start earning."
         action={
           <Link className="btn btn-primary" to="/dashboard/fleet">
             Go to fleet
@@ -172,8 +172,8 @@ export default function MarketplaceEarningsPanel({
           {transactions.length === 0 ? (
             <EmptyState
               icon={EMPTY_ICONS.chart}
-              title="No app earnings yet"
-              message="Once renters book your listed vehicles, your weekly earnings build up here."
+              title="No earnings yet"
+              message="They build up once renters book."
             />
           ) : (
             <CollectionsArea data={weeklyNet(transactions)} />
@@ -190,7 +190,7 @@ export default function MarketplaceEarningsPanel({
               compact
               icon={EMPTY_ICONS.payments}
               title="Nothing earned yet"
-              message="Your commission split appears here after your first app booking."
+              message="Your split shows after the first booking."
             />
           ) : (
             <PaymentDonut segments={splitSegments} />
@@ -215,11 +215,7 @@ export default function MarketplaceEarningsPanel({
             </p>
           ) : methods.length === 0 ? (
             <p className="field-note earnings-empty-note">
-              Save a payout destination in{" "}
-              <Link className="spec-link" to="/dashboard/settings">
-                Settings
-              </Link>{" "}
-              before requesting a withdrawal.
+              Save a payout destination below before requesting a withdrawal.
             </p>
           ) : (
             <form className="withdraw-form" onSubmit={handleWithdraw}>
@@ -250,13 +246,7 @@ export default function MarketplaceEarningsPanel({
               <button type="submit" className="btn btn-primary" disabled={busy}>
                 Request withdrawal
               </button>
-              <p className="field-note">
-                Manage destinations in{" "}
-                <Link className="spec-link" to="/dashboard/settings">
-                  Settings
-                </Link>
-                .
-              </p>
+              <p className="field-note">Manage destinations below.</p>
             </form>
           )}
         </section>
@@ -272,7 +262,7 @@ export default function MarketplaceEarningsPanel({
               compact
               icon={EMPTY_ICONS.payments}
               title="No withdrawals yet"
-              message="Requested payouts and their status will appear here."
+              message="Requests and their status show here."
             />
           ) : (
             <table className="data-table">
@@ -311,6 +301,13 @@ export default function MarketplaceEarningsPanel({
         </section>
       </div>
 
+      {/* Destinations used to live on the profile page, a nav section away from
+          the only screen that spends them. They belong under the withdrawal
+          form that needs one. */}
+      <section className="panel-card">
+        <PayoutMethods />
+      </section>
+
       <section className="panel-card">
         <header className="card-head">
           <h2>App bookings</h2>
@@ -322,7 +319,7 @@ export default function MarketplaceEarningsPanel({
             compact
             icon={EMPTY_ICONS.bookings}
             title="No app bookings yet"
-            message="Bookings made by renters on the Ardena app will be itemised here."
+            message="Bookings from the Ardena app land here."
           />
         ) : (
           <table className="data-table">

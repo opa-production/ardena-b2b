@@ -290,7 +290,7 @@ export default function Payments() {
                 <EmptyState
                   icon={EMPTY_ICONS.chart}
                   title="No collections yet"
-                  message="Once customers pay via Paystack, your weekly collections build up here."
+                  message="They build up as customers pay."
                 />
               ) : (
                 <CollectionsArea data={weeklyCollections} />
@@ -307,7 +307,7 @@ export default function Payments() {
                   compact
                   icon={EMPTY_ICONS.payments}
                   title="Nothing billed yet"
-                  message="Your billing breakdown appears here after your first bookings."
+                  message="Your breakdown shows after the first booking."
                 />
               ) : (
                 <PaymentDonut segments={donutSegments} />
@@ -335,8 +335,8 @@ export default function Payments() {
               <EmptyState
                 compact
                 icon={EMPTY_ICONS.payments}
-                title="No payments received yet"
-                message="Settled Paystack payments and refunds land here with their receipt codes."
+                title="No payments yet"
+                message="Settled payments and refunds land here."
               />
             ) : (
               <table className="data-table">

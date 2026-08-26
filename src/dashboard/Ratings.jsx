@@ -71,7 +71,7 @@ export default function Ratings() {
         <EmptyState
           icon={EMPTY_ICONS.clients}
           title="No reviews yet"
-          message="Once renters complete trips in your listed vehicles, their ratings show up here. Reviews affect how high your cars rank in search."
+          message="Renters rate your cars after each trip."
         />
       ) : (
         <>

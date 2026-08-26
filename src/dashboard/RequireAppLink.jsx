@@ -9,15 +9,11 @@ function NotLinked() {
   return (
     <EmptyState
       icon={EMPTY_ICONS.clients}
-      title="Not connected to the Ardena app"
-      message={
-        "This section only applies once your vehicles are listed on the Ardena " +
-        "consumer app. Connect an Ardena host account from Settings to bring your " +
-        "listings, renter messages and reviews into this workspace."
-      }
+      title="Not connected yet"
+      message="This one needs an Ardena app account."
       action={
         <Link className="btn btn-primary" to="/dashboard/settings">
-          Go to Settings
+          Open profile
         </Link>
       }
     />

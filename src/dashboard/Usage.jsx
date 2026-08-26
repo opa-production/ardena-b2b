@@ -119,7 +119,7 @@ export default function Usage() {
           <EmptyState
             icon={EMPTY_ICONS.chart}
             title="Nothing used yet"
-            message="Once renter checks start running, each day's spend shows up here."
+            message="Each day's spend shows up here."
           />
         ) : (
           <UsageBars data={series} label="Wallet spend" />

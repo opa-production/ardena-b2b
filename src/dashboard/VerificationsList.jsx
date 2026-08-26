@@ -33,19 +33,14 @@ export default function VerificationsList() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-left">
-          <Link className="back-link" to="/dashboard/verification" aria-label="Back to verification">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="head-titles">
-            <h1>All checks</h1>
-            <p>Every renter you've looked up.</p>
-          </div>
-        </div>
-      </header>
+      <Link to="/dashboard/verification" className="page-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Verification
+      </Link>
+
+      <h1 className="sr-only">All checks</h1>
 
       <section className="panel-card">
         <div className="fleet-toolbar">

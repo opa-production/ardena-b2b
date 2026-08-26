@@ -176,7 +176,7 @@ export default function Billing() {
               compact
               icon={EMPTY_ICONS.payments}
               title="No invoices yet"
-              message="Your first invoice is generated when your trial ends."
+              message="Your first lands when the trial ends."
             />
           ) : (
             invoices.map((inv) => {

@@ -245,8 +245,8 @@ export default function Notifications() {
           <EmptyState
             compact
             icon={EMPTY_ICONS.notifications}
-            title="You're all caught up"
-            message="New activity across bookings, payments, verifications and your team will show up here."
+            title="All caught up"
+            message="Nothing needs you right now."
           />
         )}
       </section>

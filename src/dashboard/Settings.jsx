@@ -20,7 +20,6 @@ import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
 import HostLinkPanel from "./HostLinkPanel";
 import QuickLinks from "./QuickLinks";
-import PayoutMethods from "./PayoutMethods";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -284,12 +283,6 @@ export default function Settings() {
           {/* Renders only for workspaces that already linked an app account —
               connecting is deferred, see lib/features.js */}
           <HostLinkPanel />
-
-          {/* Account details for app-earnings payouts live with the rest of
-              the business profile; withdrawing itself stays on Finances. */}
-          <section className="panel-card">
-            <PayoutMethods />
-          </section>
         </div>
 
         <div className="details-side">

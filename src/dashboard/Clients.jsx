@@ -109,7 +109,7 @@ export default function Clients() {
           <EmptyState
             icon={EMPTY_ICONS.clients}
             title="No clients yet"
-            message="Every customer you book a car for gets a profile here, with their bookings, payments and verification history."
+            message="Everyone you book for gets a profile here."
             action={
               <Link to="/dashboard/bookings/new" className="btn btn-primary">
                 Create a booking

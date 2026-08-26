@@ -114,7 +114,7 @@ export default function Chauffeurs() {
           <EmptyState
             icon={EMPTY_ICONS.clients}
             title="No chauffeurs yet"
-            message="Add the drivers you rent out with a car. Track their licence, duty status, assignments and ratings here."
+            message="Add the drivers you rent out with."
             action={<Link to="/dashboard/chauffeurs/new" className="btn btn-primary">Add a chauffeur</Link>}
           />
         </section>

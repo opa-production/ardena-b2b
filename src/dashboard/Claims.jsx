@@ -120,7 +120,7 @@ export default function Claims() {
               compact
               icon={EMPTY_ICONS.bookings}
               title="No open requests"
-              message="When a renter asks to keep one of your vehicles longer, it lands here."
+              message="Renters asking for more days land here."
             />
           ) : (
             extensions.map((ext) => (
@@ -180,7 +180,7 @@ export default function Claims() {
               compact
               icon={EMPTY_ICONS.payments}
               title="No claims filed"
-              message="Raise one from a completed app booking if a vehicle comes back damaged, late or unclean."
+              message="Raise one from a finished app booking."
             />
           ) : (
             claims.map((c) => (

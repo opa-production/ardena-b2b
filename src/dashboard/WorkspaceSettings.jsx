@@ -51,18 +51,14 @@ export default function WorkspaceSettings() {
 
   return (
     <>
-      {/* This head card earns its place: it carries the way back. */}
-      <header className="head-card">
-        <div className="head-left">
-          <Link to="/dashboard/settings" className="back-link" aria-label="Back to profile">
-            ←
-          </Link>
-          <div className="head-titles">
-            <h1>Settings</h1>
-            <p>How this workspace is set up</p>
-          </div>
-        </div>
-      </header>
+      <Link to="/dashboard/settings" className="page-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Profile
+      </Link>
+
+      <h1 className="sr-only">Settings</h1>
 
       <div className="details-grid settings-grid">
         <div className="settings-main">

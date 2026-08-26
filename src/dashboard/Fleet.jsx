@@ -91,7 +91,7 @@ export default function Fleet() {
           <EmptyState
             icon={EMPTY_ICONS.fleet}
             title="No vehicles yet"
-            message="Add your first vehicle to start taking bookings. It's bookable the moment you save it."
+            message="Add one — it's bookable the moment you save."
             action={
               <Link to="/dashboard/fleet/new" className="btn btn-primary">
                 Add your first vehicle

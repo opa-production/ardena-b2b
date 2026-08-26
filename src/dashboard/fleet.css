@@ -93,6 +93,54 @@
   height: 13px;
 }
 
+/* One quiet line of standing context above a page's content — the kind of
+   thing a business needs to know once, not a dismissible alert. The rule on
+   the left is the only ornament. */
+.page-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: var(--panel);
+  box-shadow: var(--edge), inset 2px 0 0 var(--brand);
+}
+
+.page-note svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--brand);
+}
+
+/* Minimal way back: an arrow and the place it returns to, no card. Replaces a
+   whole header card on pages whose header was only a back button and a title —
+   the form or table underneath already says what the page is. */
+.page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  transition: color 0.15s var(--ease);
+}
+
+.page-back:hover {
+  color: var(--ink);
+}
+
+.page-back svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
 /* a toolbar's right-hand side when it holds more than one control */
 .toolbar-actions {
   display: flex;
@@ -100,19 +148,33 @@
   gap: 8px;
 }
 
-/* square icon-only button — the gear that opens a page's settings */
+/* Square icon-only button — the gear that opens a page's settings. It carries
+   ink rather than the muted grey the other icon buttons use: it is often the
+   only control on its row, with nothing beside it to read it against. */
 .toolbar-gear {
   padding: 7px;
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
 }
 
 .toolbar-gear svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.9;
 }
 
 .toolbar-gear:hover {
-  color: var(--ink);
-  box-shadow: var(--edge-strong);
+  background: var(--surface);
+}
+
+/* alone above the page rather than inside a card: it needs a panel of its own
+   to sit on, or it dissolves into the page background */
+.page-actions .toolbar-gear {
+  background: var(--panel);
+}
+
+.page-actions .toolbar-gear:hover {
+  background: var(--surface);
 }
 
 /* top-of-page primary action, right-aligned for quick reach */

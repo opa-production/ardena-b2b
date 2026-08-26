@@ -80,19 +80,14 @@ export default function AddVehicle() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-left">
-          <Link to="/dashboard/fleet" className="back-link" aria-label="Back to fleet">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="head-titles">
-            <h1>Add vehicle</h1>
-            <p>Register a vehicle to make it bookable.</p>
-          </div>
-        </div>
-      </header>
+      <Link to="/dashboard/fleet" className="page-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Fleet
+      </Link>
+
+      <h1 className="sr-only">Add vehicle</h1>
 
       {atCap && (
         <div className="panel-card fleet-cap-notice">

@@ -51,9 +51,12 @@ export function methodDetail(m) {
     .join(" · ");
 }
 
-/* Where payout destinations are managed: the Settings page. Withdrawing is a
-   money action that belongs on Finances; keeping the account details here
-   means the payout form only has to offer a choice, not a CRUD screen. */
+/* Where payout destinations are managed. Rendered on Finances, under the
+   withdrawal form: the account you pay out to and the act of paying out are
+   the same errand, and splitting them across two nav sections meant the
+   withdrawal form had to send you away to complete itself. Kept a component
+   rather than inlined so the payout form only has to offer a choice, not a
+   CRUD screen. */
 export default function PayoutMethods() {
   const { can } = useRole();
   const canManage = can("manageWithdrawals");

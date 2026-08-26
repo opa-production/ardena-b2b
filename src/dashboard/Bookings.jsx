@@ -134,7 +134,7 @@ export default function Bookings() {
           <EmptyState
             icon={EMPTY_ICONS.bookings}
             title="No bookings yet"
-            message="Reserve a car for a customer and it shows up here. New bookings start as pending until you confirm them."
+            message="Reserve a car and it shows up here."
             action={
               <Link to="/dashboard/bookings/new" className="btn btn-primary">
                 Create a booking

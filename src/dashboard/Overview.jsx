@@ -132,7 +132,7 @@ export default function Overview() {
             <EmptyState
               icon={EMPTY_ICONS.chart}
               title="No booking data yet"
-              message="Your busiest days and times appear here once bookings start coming in."
+              message="Your busy days show once bookings start."
             />
           )}
         </section>
@@ -148,7 +148,7 @@ export default function Overview() {
             <EmptyState
               icon={EMPTY_ICONS.chart}
               title="No revenue yet"
-              message="Your top earning vehicles will rank here after your first paid bookings."
+              message="Top earners rank here after the first payment."
             />
           )}
         </section>
@@ -167,7 +167,7 @@ export default function Overview() {
             <EmptyState
               icon={EMPTY_ICONS.chart}
               title="No utilisation yet"
-              message="Track how much of your fleet is earning once vehicles start going out on bookings."
+              message="Shows once vehicles start going out."
             />
           )}
         </section>
@@ -195,7 +195,7 @@ export default function Overview() {
                 compact
                 icon={EMPTY_ICONS.verification}
                 title="Nothing needs attention"
-                message="Expiring documents and failed checks will flag here."
+                message="All clear."
               />
             )}
           </section>

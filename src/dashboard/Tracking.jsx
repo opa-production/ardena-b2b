@@ -107,12 +107,31 @@ export default function Tracking() {
         </article>
       </div>
 
+      {/* The one thing this page can't do for you. Connecting a tracker in the
+          UI only registers a device that is already wired into the vehicle —
+          fitting it is an on-site job, and a business that doesn't know that
+          will sit waiting for a location that never arrives. */}
+      <p className="page-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 16v-4M12 8h.01" />
+        </svg>
+        <span>
+          Trackers are fitted in the vehicle by the Ardena team in person — the
+          hardware has to be wired in before it can report.{" "}
+          <Link className="spec-link" to="/dashboard/support">
+            Contact support
+          </Link>{" "}
+          to book an installation.
+        </span>
+      </p>
+
       {vehicles.length === 0 ? (
         <section className="panel-card">
           <EmptyState
             icon={EMPTY_ICONS.fleet}
-            title="No vehicles to track yet"
-            message="Add vehicles to your fleet, then connect a GPS tracker to each one to see it live here."
+            title="Nothing to track yet"
+            message="Ardena fits the tracker in person."
             action={<Link to="/dashboard/fleet/new" className="btn btn-primary">Add a vehicle</Link>}
           />
         </section>
@@ -222,7 +241,9 @@ export default function Tracking() {
                 />
               </label>
               <p className="side-hint" style={{ marginTop: 0 }}>
-                Once connected, {connectFor.name} streams its live location, speed and ignition state here.
+                This registers a device the Ardena team has already fitted to{" "}
+                {connectFor.name}. Once it is wired in and registered, the vehicle
+                streams its live location, speed and ignition state here.
               </p>
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setConnectFor(null)}>Cancel</button>

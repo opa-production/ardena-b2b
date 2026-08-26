@@ -8,11 +8,8 @@ function RoleBlocked({ role }) {
   return (
     <EmptyState
       icon={EMPTY_ICONS.verification}
-      title="Not available on your account"
-      message={
-        `Your role${role ? ` (${role})` : ""} doesn't include this section. ` +
-        "An Owner can change it under Staff & roles."
-      }
+      title="Not your section"
+      message={`Your role${role ? ` (${role})` : ""} doesn't cover this. An Owner can change that.`}
       action={
         <Link className="btn-ghost" to="/dashboard">
           Back to overview

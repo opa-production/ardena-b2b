@@ -1,3 +1,54 @@
+/* Three cards across, always: two figures and the action they lead to. The
+   default auto-fit grid would reflow them 2 + 1 at awkward widths and orphan
+   the button on its own row. */
+.verify-stats {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* The card that acts rather than reports. It keeps the same three rows as the
+   figures beside it — label, then the button where the number sits, then a
+   note — so it carries the same weight instead of reading as a half-empty
+   card. The note is deliberately two words: anything longer wraps at narrow
+   widths and drags the whole row taller. */
+.stat-action {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-btn {
+  width: 100%;
+  /* matches the height of .stat-value's line box, so the row lines up */
+  min-height: 38px;
+  margin-bottom: 6px;
+  padding: 9px 14px;
+  font-size: 13.5px;
+}
+
+/* mid-payment the pill takes the button's place on the figure line */
+.stat-action .pay-waiting {
+  min-height: 38px;
+  justify-content: center;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+}
+
+/* the way out of a stuck payment, worn as the note line rather than a button */
+.stat-cancel {
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.stat-cancel:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .verify-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---- Verification page: walk-in registry lookup ---- */
 
 /* card-head used inside a toolbar row shouldn't add bottom margin */

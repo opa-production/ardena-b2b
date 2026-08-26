@@ -54,19 +54,14 @@ export default function AddChauffeur() {
 
   return (
     <>
-      <header className="head-card">
-        <div className="head-left">
-          <Link to="/dashboard/chauffeurs" className="back-link" aria-label="Back to chauffeurs">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </Link>
-          <div className="head-titles">
-            <h1>Add chauffeur</h1>
-            <p>Register a driver you rent out with a car.</p>
-          </div>
-        </div>
-      </header>
+      <Link to="/dashboard/chauffeurs" className="page-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Chauffeurs
+      </Link>
+
+      <h1 className="sr-only">Add chauffeur</h1>
 
       <div className="details-grid">
         <form id="add-chauffeur-form" className="panel-card" onSubmit={handleSubmit}>

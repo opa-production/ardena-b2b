@@ -109,7 +109,7 @@ export default function RenterInbox() {
         <EmptyState
           icon={EMPTY_ICONS.clients}
           title="No messages yet"
-          message="When a renter asks about one of your listed vehicles, the conversation shows up here."
+          message="Renter questions land here."
         />
       ) : (
         <div className="inbox-grid">

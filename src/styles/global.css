@@ -19,6 +19,12 @@
   --bg: #f6f7f9;
   --panel: #ffffff; /* cards sit white against the light grey page */
   --surface: #f0f2f5;
+  /* The sidebar is near-black in both themes — the nav is chrome, not content,
+     and the sharpest way to say so is to invert it rather than tint it. The
+     ink tokens inside it are re-pointed in dashboard.css; --brand stays the
+     one accent, and the active row's blue bar carries it. */
+  --sidebar: #0d1117;
+  --sidebar-raised: #232a35; /* popovers lift off the panel by tone, not by a line */
   --line: #e3e6eb;
   --ink: #0a0d12;
   --ink-soft: #545c68;
@@ -97,6 +103,10 @@
   --bg: #25272c;
   --panel: #2d3037;
   --surface: #212228;
+  /* Same near-black panel as the light theme: it already reads as chrome
+     against graphite, so there is nothing to re-pick. */
+  --sidebar: #0d1117;
+  --sidebar-raised: #232a35;
   --line: #383b42;
   --ink: #e9ecf1;
   --ink-soft: #a8afba;

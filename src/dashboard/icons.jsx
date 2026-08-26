@@ -114,7 +114,7 @@ export const ICONS = {
       <path d="M2 10h20" />
     </svg>
   ),
-  // the collapsible Usage / Billing / Plans group
+  // the collapsible Usage / Billing group
   account: (
     <svg {...base}>
       <path d="M3 21V9l9-6 9 6v12" />

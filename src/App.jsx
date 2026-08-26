@@ -31,7 +31,6 @@ import PaymentsList from "./dashboard/PaymentsList";
 import Staff from "./dashboard/Staff";
 import Billing from "./dashboard/Billing";
 import Usage from "./dashboard/Usage";
-import Plans from "./dashboard/Plans";
 import Support from "./dashboard/Support";
 import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
@@ -126,7 +125,8 @@ export default function App() {
           element={<RequireRole capability="viewMoney"><Payments /></RequireRole>}
         />
         <Route path="staff" element={<Staff />} />
-        {/* The Account group in the sidebar: three pages, one capability. */}
+        {/* The Account group in the sidebar: two pages, one capability.
+            Plans lives on the public /pricing page, not in here. */}
         <Route
           path="usage"
           element={<RequireRole capability="manageBilling"><Usage /></RequireRole>}
@@ -134,10 +134,6 @@ export default function App() {
         <Route
           path="billing"
           element={<RequireRole capability="manageBilling"><Billing /></RequireRole>}
-        />
-        <Route
-          path="plans"
-          element={<RequireRole capability="manageBilling"><Plans /></RequireRole>}
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />

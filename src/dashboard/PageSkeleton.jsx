@@ -374,46 +374,13 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Billing: head + the paid-over-time chart + the invoice list
+  // ---- Billing: head + the invoice list
   if (section === "billing") {
     return (
       <div aria-hidden="true">
         <HeadCard />
-        <section className="chart-card">
-          <CardHead />
-          <span className="sk sk-block" />
-        </section>
         <section className="panel-card">
-          <CardLines rows={4} />
-        </section>
-      </div>
-    );
-  }
-
-  // ---- Plans: head + the current-plan band + the tier grid
-  if (section === "plans") {
-    return (
-      <div aria-hidden="true">
-        <HeadCard />
-        <section className="panel-card">
-          <CardLines rows={2} />
-        </section>
-        <section className="panel-card">
-          <CardHead />
-          <div className="plan-grid">
-            {[0, 1, 2].map((i) => (
-              <article className="plan-card" key={i}>
-                <Line w="45%" h={14} />
-                <Line w="65%" h={24} className="sk-gap" />
-                <Line w="55%" h={10} className="sk-gap-sm" />
-                <div className="sk-rows">
-                  {[0, 1, 2, 3].map((r) => (
-                    <Line key={r} w={`${88 - r * 9}%`} h={11} />
-                  ))}
-                </div>
-              </article>
-            ))}
-          </div>
+          <CardLines rows={5} />
         </section>
       </div>
     );

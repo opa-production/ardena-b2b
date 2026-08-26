@@ -25,7 +25,7 @@ export const TOPICS = [
     keywords: ["price", "pricing", "cost", "how much", "rate", "bill", "billing", "subscription", "plan", "charge", "minimum"],
     answer:
       `You pay per vehicle on the platform: KES ${PRODUCT_FACTS.rate} a month each, or KES ${PRODUCT_FACTS.launchRate} for your first ${PRODUCT_FACTS.launchMonths} months. There's a KES ${PRODUCT_FACTS.minimum} monthly minimum, every module is included on every plan, and you can cancel anytime. New accounts get a ${PRODUCT_FACTS.trialDays} day free trial with no card required.`,
-    to: { label: "Open plans", path: "/dashboard/plans" },
+    to: { label: "See pricing", path: "/pricing" },
   },
   {
     id: "verification",

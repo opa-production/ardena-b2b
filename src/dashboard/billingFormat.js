@@ -1,5 +1,5 @@
 /* Formatting and normalising shared by the three account pages — Usage,
-   Billing and Plans. They were one screen until they were split, so these
+   Billing. They were one screen until they were split, so these
    lived at the top of Billing.jsx; they sit here now so the three pages can't
    drift into formatting the same shilling figure two different ways. */
 

@@ -1,12 +1,14 @@
-/* Billing — what you owe and what you've paid.
+/* Billing — the invoice list, and nothing else.
  *
- * One of the three Account pages split out of the old single billing screen.
+ * One of the two Account pages split out of the old single billing screen.
  * This one owns invoices and the M-Pesa/Airtel prompt that settles them; the
- * running period breakdown lives on Usage and the plan itself on Plans.
+ * running period breakdown lives on Usage, and what the plans cost lives on
+ * the public /pricing page.
  *
- * Deliberately sparse: one chart, one list. Fleet size, plan and vehicle
- * counts are all on the Overview already, so repeating them here as KPI tiles
- * would only bury the two things this page exists to answer. */
+ * Deliberately one list. An outstanding invoice doesn't get a banner of its
+ * own — it is set apart in place by a heavy rule above and below, and turns
+ * red once its due date has passed. The row you must act on is therefore
+ * always in the same place as the rows you don't. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
@@ -16,7 +18,6 @@ import {
   payInvoiceMpesa,
   checkInvoiceCharge,
 } from "../lib/api";
-import BillingTimeline from "./charts/BillingTimeline";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
@@ -152,10 +153,9 @@ export default function Billing() {
 
   if (loading) return <PageSkeleton path={pathname} />;
 
-  const dueInvoices = invoices.filter((i) => i.status === "Due");
-  const paidInvoices = invoices.filter((i) => i.status === "Paid");
-  const dueTotal = dueInvoices.reduce((sum, i) => sum + Number(i.amount || 0), 0);
-  const nextDue = dueInvoices[0];
+  // Midnight today, so "overdue" flips on the day after the due date rather
+  // than partway through it.
+  const startOfToday = new Date().setHours(0, 0, 0, 0);
 
   return (
     <>
@@ -168,51 +168,6 @@ export default function Billing() {
           </p>
         </div>
       </header>
-
-      {/* An outstanding balance is the one thing on this page that can't wait,
-          so it gets its own band. When nothing is due, nothing appears. */}
-      {dueInvoices.length > 0 && (
-        <section className="due-banner">
-          <div>
-            <p className="due-banner-label">
-              {dueInvoices.length === 1
-                ? "1 invoice outstanding"
-                : `${dueInvoices.length} invoices outstanding`}
-            </p>
-            <p className="due-banner-amount">KES {fmtAmount(dueTotal)}</p>
-            {nextDue && <p className="due-banner-note">Due {fmtDate(nextDue.due_date)}</p>}
-          </div>
-          {invWaiting ? (
-            <span className="pay-waiting">
-              <span className="pay-waiting-dot" />
-              Waiting for payment…
-              <button type="button" className="icon-btn" onClick={stopInvPolling}>
-                Stop
-              </button>
-            </span>
-          ) : (
-            <button type="button" className="btn btn-primary" onClick={() => openInvModal(nextDue)}>
-              Pay now
-            </button>
-          )}
-        </section>
-      )}
-
-      <section className="chart-card">
-        <header className="card-head">
-          <h2>What you've paid</h2>
-          <p>Your monthly bill over time</p>
-        </header>
-        {paidInvoices.length > 0 ? (
-          <BillingTimeline />
-        ) : (
-          <EmptyState
-            icon={EMPTY_ICONS.chart}
-            title="No payments yet"
-            message="Your bill will chart here once your first billing cycle closes."
-          />
-        )}
-      </section>
 
       <section className="panel-card">
         <header className="card-head">
@@ -231,12 +186,19 @@ export default function Billing() {
           ) : (
             invoices.map((inv) => {
               const due = inv.status === "Due";
+              const overdue = due && new Date(inv.due_date).setHours(0, 0, 0, 0) < startOfToday;
               return (
-                <div className={`invoice-row ${due ? "is-due" : ""}`} key={inv.ref}>
+                <div
+                  className={
+                    "invoice-row" + (due ? " is-due" : "") + (overdue ? " is-overdue" : "")
+                  }
+                  key={inv.ref}
+                >
                   <div className="invoice-main">
                     <p className="invoice-title">{inv.title}</p>
                     <p className="invoice-detail">
-                      {inv.ref} · {inv.detail} · Due {fmtDate(inv.due_date)}
+                      {inv.ref} · {inv.detail} ·{" "}
+                      {overdue ? "Overdue since" : "Due"} {fmtDate(inv.due_date)}
                       {inv.paid_at ? ` · Paid ${fmtDate(inv.paid_at)}` : ""}
                     </p>
                   </div>

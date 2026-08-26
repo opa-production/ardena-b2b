@@ -43,9 +43,13 @@ export const NAV_SECTIONS = [
       },
       // A collapsible group rather than a destination of its own: `children`
       // makes the sidebar render a disclosure row with a chevron instead of a
-      // link. The group has no `to` — clicking it opens the three pages
-      // beneath it. Role and app-link gating is filtered on the children, so
-      // a group whose children all disappear disappears with them.
+      // link. The group has no `to` — clicking it opens the pages beneath it.
+      // Role and app-link gating is filtered on the children, so a group whose
+      // children all disappear disappears with them.
+      //
+      // Plans is deliberately not here: what the bands cost is a marketing
+      // question, answered once on the public /pricing page rather than
+      // duplicated inside the dashboard.
       {
         key: "account",
         name: "Account",
@@ -53,7 +57,6 @@ export const NAV_SECTIONS = [
         children: [
           { to: "/dashboard/usage", key: "usage", name: "Usage" },
           { to: "/dashboard/billing", key: "billing", name: "Billing" },
-          { to: "/dashboard/plans", key: "plans", name: "Plans" },
         ],
       },
     ],
@@ -104,7 +107,6 @@ export const SECTION_TITLES = {
   payments: "Finances",
   usage: "Usage",
   billing: "Billing",
-  plans: "Plans",
   staff: "Staff & roles",
   notifications: "Notifications",
   support: "Support",

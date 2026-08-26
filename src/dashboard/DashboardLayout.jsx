@@ -51,6 +51,12 @@ import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
 import "./dashboard.css";
 
+/* The dark theme is built and working, but the toggle is parked while the
+   light palette settles. Flip this back to true to return "Dark mode" to the
+   tenant menu — themeStore and every [data-theme="dark"] rule stay live, so
+   nothing else has to change. */
+const SHOW_THEME_TOGGLE = false;
+
 function PaymentWall({ gate }) {
   const navigate = useNavigate();
   const fmtAmt = (n) => Number(n).toLocaleString("en-KE");
@@ -317,27 +323,29 @@ export default function DashboardLayout() {
         <div className="sidebar-foot" ref={footRef}>
           {menuOpen && (
             <div className="tenant-menu" role="menu">
-              <button
-                type="button"
-                role="menuitemcheckbox"
-                aria-checked={theme === "dark"}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleTheme();
-                }}
-              >
-                {theme === "dark" ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="4" />
-                    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-                  </svg>
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
-                  </svg>
-                )}
-                {theme === "dark" ? "Light mode" : "Dark mode"}
-              </button>
+              {SHOW_THEME_TOGGLE && (
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={theme === "dark"}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleTheme();
+                  }}
+                >
+                  {theme === "dark" ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
+                    </svg>
+                  )}
+                  {theme === "dark" ? "Light mode" : "Dark mode"}
+                </button>
+              )}
               <button type="button" role="menuitem" onClick={() => go("/dashboard/settings")}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />

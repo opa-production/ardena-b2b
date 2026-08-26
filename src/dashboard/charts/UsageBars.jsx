@@ -3,8 +3,13 @@ import { useState } from "react";
 /* Daily usage as vertical bars — one bar per day of the billing period.
  *
  * Single series, so there is no legend: the card title names it. Colour is the
- * one validated single-series fill (--usage-bar); everything else — ticks,
- * labels, tooltip text — wears ink tokens, never the series colour.
+ * one validated single-series fill (--usage-bar); everything else — ticks and
+ * labels — wears ink tokens, never the series colour.
+ *
+ * There is no tooltip. Hovering a column simply flips that bar to a sharply
+ * different colour (--usage-bar-hot), which is enough to pick a day out of the
+ * run without a card covering the bars behind it. The exact figures are in the
+ * screen-reader table at the foot, which is the honest place for them.
  *
  * Bars are anchored to the baseline with rounded tops only, separated by a 2px
  * surface gap, over recessive gridlines. Each bar carries a full-height
@@ -63,15 +68,6 @@ export default function UsageBars({ data = [], label = "Spent" }) {
   // label every 5th day, and always the first — the reference cadence
   const showDay = (i) => i === 0 || (i + 1) % 5 === 0;
 
-  function enter(i, e) {
-    const svg = e.currentTarget.ownerSVGElement;
-    const rect = svg.getBoundingClientRect();
-    const card = svg.closest(".chart-card").getBoundingClientRect();
-    const cx = ((LEFT + i * slot + barW / 2) / W) * rect.width + rect.left - card.left;
-    const cy = (y(data[i].value) / H) * rect.height + rect.top - card.top;
-    setHover({ i, tipX: cx, tipY: cy - 12 });
-  }
-
   return (
     <div className="ub-chart">
       <svg
@@ -100,7 +96,7 @@ export default function UsageBars({ data = [], label = "Spent" }) {
                   empty column still explains that the day was zero */}
               {bh > 0 && (
                 <path
-                  className={"ub-bar" + (hover?.i === i ? " is-hot" : "")}
+                  className={"ub-bar" + (hover === i ? " is-hot" : "")}
                   d={barPath(bx, by, barW, bh)}
                 />
               )}
@@ -111,7 +107,7 @@ export default function UsageBars({ data = [], label = "Spent" }) {
                 y={TOP}
                 width={slot}
                 height={plotH}
-                onMouseEnter={(e) => enter(i, e)}
+                onMouseEnter={() => setHover(i)}
               />
               {showDay(i) && (
                 <text className="ub-tick" x={bx + barW / 2} y={H - 10} textAnchor="middle">
@@ -125,20 +121,8 @@ export default function UsageBars({ data = [], label = "Spent" }) {
         <line className="ub-axis" x1={LEFT} y1={TOP + plotH} x2={W - RIGHT} y2={TOP + plotH} />
       </svg>
 
-      {hover && (
-        <div className="chart-tip" style={{ left: hover.tipX, top: hover.tipY }}>
-          <strong>KES {fmtKES(data[hover.i].value)}</strong>
-          <span>
-            {fmtFull(data[hover.i].date)}
-            {data[hover.i].checks
-              ? ` · ${data[hover.i].checks} check${data[hover.i].checks === 1 ? "" : "s"}`
-              : ""}
-          </span>
-        </div>
-      )}
-
-      {/* The same numbers as a table, for screen readers and for anyone who
-          can't use the hover layer.
+      {/* The same numbers as a table — for screen readers, and the only place
+          the exact figures are written out now that there is no tooltip.
           The wrapper carries .sr-only, not the table: CSS treats `height` on a
           table as a minimum, so a bare .sr-only table ignores its 1px cap,
           grows to its real height and — being absolutely positioned inside a

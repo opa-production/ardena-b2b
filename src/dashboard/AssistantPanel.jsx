@@ -1,10 +1,28 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { subscribe, getState, sendMessage } from "./assistantStore";
+import { subscribe, getState, sendMessage, cancelTurn } from "./assistantStore";
 import { SUGGESTIONS } from "./assistantKnowledge";
 import { AttachIcon, BotIcon, MicIcon, SendIcon } from "./supportArt";
 import useDictation from "../hooks/useDictation";
 import { toast } from "./toastStore";
+
+/* The tool names the server sends in a `tool` frame, said in English. An
+   unlisted one falls back to a plain "Checking…" — the list is allowed to go
+   stale without the UI showing a raw identifier. */
+const TOOL_LABELS = {
+  look_up_help: "Checking the handbook…",
+  get_booking: "Looking up that booking…",
+  find_bookings: "Searching bookings…",
+  get_today: "Checking today…",
+  get_fleet: "Checking your fleet…",
+  get_chauffeurs: "Checking the roster…",
+  find_client: "Looking up that client…",
+  get_finances: "Checking your finances…",
+  get_billing: "Checking your billing…",
+  get_wallet: "Checking your wallet…",
+  get_settlement_accounts: "Checking settlement accounts…",
+  hand_off_to_human: "Passing this to a person…",
+};
 
 function fmtTime(iso) {
   const d = new Date(iso);
@@ -18,7 +36,10 @@ function fmtTime(iso) {
    where the humans are. `onNavigate` fires when the user follows a link out,
    letting the host (the slide-over) close itself. */
 export default function AssistantPanel({ onNavigate }) {
-  const { messages, thinking } = useSyncExternalStore(subscribe, getState);
+  const { messages, thinking, checking, escalated, offline } = useSyncExternalStore(
+    subscribe,
+    getState
+  );
   const [draft, setDraft] = useState("");
   const threadRef = useRef(null);
   const inputRef = useRef(null);
@@ -42,7 +63,11 @@ export default function AssistantPanel({ onNavigate }) {
   useEffect(() => {
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages, thinking]);
+  }, [messages, thinking, checking]);
+
+  // Closing the drawer mid-answer should stop the turn, not leave a stream
+  // writing into a store nobody is watching.
+  useEffect(() => cancelTurn, []);
 
   function send(text) {
     if (!text.trim() || thinking) return;
@@ -95,7 +120,13 @@ export default function AssistantPanel({ onNavigate }) {
           </div>
         ))}
 
-        {thinking && (
+        {/* ai.md §2: a `tool` frame means a lookup is running and the pause
+            before the first token is real, so name it rather than leave three
+            dots to stand for an unexplained wait. */}
+        {thinking && checking && (
+          <span className="assist-checking">{TOOL_LABELS[checking] || "Checking…"}</span>
+        )}
+        {thinking && !checking && (
           <span className="typing assist-typing" aria-label="Assistant is typing">
             <i />
             <i />
@@ -104,7 +135,7 @@ export default function AssistantPanel({ onNavigate }) {
         )}
       </div>
 
-      {isFresh && (
+      {isFresh && !escalated && (
         <div className="assist-suggestions">
           {SUGGESTIONS.map((s) => (
             <button type="button" key={s} onClick={() => send(s)}>
@@ -114,55 +145,74 @@ export default function AssistantPanel({ onNavigate }) {
         </div>
       )}
 
-      <form
-        className="chat-composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          send(draft);
-        }}
-      >
-        <button
-          type="button"
-          className="composer-btn"
-          aria-label="Attach a file"
-          title="Attach a file (coming soon)"
-          disabled
+      {/* ai.md §2: once a thread is escalated it belongs to a person, so the
+          composer is replaced rather than left inviting another question into
+          a conversation the assistant has stepped out of. */}
+      {escalated ? (
+        <p className="assist-handoff">
+          This is with Ardena support now.{" "}
+          <Link className="assist-escalate" to="/dashboard/support" onClick={onNavigate}>
+            Open Support
+          </Link>
+        </p>
+      ) : offline ? (
+        <p className="assist-handoff">
+          The assistant is offline. The rest of the dashboard is fine.{" "}
+          <Link className="assist-escalate" to="/dashboard/support" onClick={onNavigate}>
+            Talk to a person
+          </Link>
+        </p>
+      ) : (
+        <form
+          className="chat-composer"
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(draft);
+          }}
         >
-          <AttachIcon />
-        </button>
-
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder={listening ? "Listening…" : "Ask about fleet, bookings or payments"}
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          aria-label="Message the assistant"
-        />
-
-        {canDictate && (
           <button
             type="button"
-            className={"composer-btn" + (listening ? " is-live" : "")}
-            onClick={toggleDictation}
-            aria-label={listening ? "Stop dictating" : "Dictate your question"}
-            aria-pressed={listening}
-            title={listening ? "Stop dictating" : "Speak instead of typing"}
+            className="composer-btn"
+            aria-label="Attach a file"
+            title="Attach a file (coming soon)"
+            disabled
           >
-            <MicIcon />
+            <AttachIcon />
           </button>
-        )}
 
-        <button
-          type="submit"
-          className="composer-btn composer-send"
-          disabled={!draft.trim() || thinking}
-          aria-label="Send"
-          title="Send"
-        >
-          <SendIcon />
-        </button>
-      </form>
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder={listening ? "Listening…" : "Ask about fleet, bookings or payments"}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            aria-label="Message the assistant"
+          />
+
+          {canDictate && (
+            <button
+              type="button"
+              className={"composer-btn" + (listening ? " is-live" : "")}
+              onClick={toggleDictation}
+              aria-label={listening ? "Stop dictating" : "Dictate your question"}
+              aria-pressed={listening}
+              title={listening ? "Stop dictating" : "Speak instead of typing"}
+            >
+              <MicIcon />
+            </button>
+          )}
+
+          <button
+            type="submit"
+            className="composer-btn composer-send"
+            disabled={!draft.trim() || thinking}
+            aria-label="Send"
+            title="Send"
+          >
+            <SendIcon />
+          </button>
+        </form>
+      )}
 
       <p className="assist-note">
         Double-check anything money-related.{" "}

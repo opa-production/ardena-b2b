@@ -582,24 +582,124 @@ export function fetchSupportUnread() {
   return request("/support/messages/unread-count");
 }
 
-/* ---- Assistant (deferred, not on the launch path — docs/BACKEND.md §0) ----
-   Not live yet. The Assistant page answers from assistantStore.js's local
-   agent; when this endpoint ships, swap the body of that store's reply() for
-   a call to sendAssistantMessage and the page is unchanged. */
+/* ---- Workspace assistant (ai.md) ----
+   Read-only, scoped to the caller's business, role-gated server-side. It can
+   answer about the workspace and hand a thread to a person; it cannot change
+   anything. */
 
-// { messages: [{ id, role, text, action, at }] }
-export function fetchAssistantThread() {
-  return request("/assistant/messages");
+/**
+ * Ask the assistant something, streaming the reply.
+ *
+ * Server-sent events, but deliberately not `EventSource`: that API cannot set
+ * an Authorization header, and this endpoint is bearer-authed. So it is a POST
+ * read through a stream reader instead.
+ *
+ * Frames (ai.md §1): `meta` once at the start with the conversation id, `tool`
+ * when a lookup begins, `token` per chunk of reply, `done` at the end. Errors
+ * arrive as an `error` *frame*, not a status code — the response is already 200
+ * by the time the model can fail, so a 503 (assistant offline) would otherwise
+ * be invisible to a .catch().
+ *
+ * Returns a function that aborts the turn.
+ */
+export function streamAssistant({ message, conversationId, signal, on }) {
+  const controller = new AbortController();
+  if (signal) signal.addEventListener("abort", () => controller.abort());
+
+  (async () => {
+    const { token } = getSession();
+    let res;
+    try {
+      res = await fetch(`${BASE}/assistant/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/event-stream",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          message,
+          ...(conversationId ? { conversation_id: conversationId } : {}),
+        }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        on.error?.({ detail: "Can't reach the assistant. Check your connection.", status: 0 });
+      }
+      return;
+    }
+
+    // A non-200 here is the request being rejected before the stream opens —
+    // auth, or the 20/min rate limit — so it is still JSON.
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => null);
+      on.error?.({
+        detail:
+          res.status === 429
+            ? "Too many questions at once. Give it a moment."
+            : messageFrom(data, res.status),
+        status: res.status,
+      });
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // Frames are separated by a blank line. Anything after the last one is
+        // a partial frame — leave it in the buffer for the next chunk.
+        const frames = buffer.split("\n\n");
+        buffer = frames.pop() ?? "";
+
+        for (const frame of frames) {
+          let event = "message";
+          const dataLines = [];
+          for (const line of frame.split("\n")) {
+            // `: ping` keep-alives, sent so proxies don't drop an idle turn.
+            if (!line || line.startsWith(":")) continue;
+            if (line.startsWith("event:")) event = line.slice(6).trim();
+            else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+          }
+          if (!dataLines.length) continue;
+
+          let payload;
+          try {
+            payload = JSON.parse(dataLines.join("\n"));
+          } catch {
+            continue; // a frame we can't read is not worth killing the turn for
+          }
+          on[event]?.(payload);
+        }
+      }
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        on.error?.({ detail: "The assistant stopped responding.", status: 0 });
+      }
+    }
+  })();
+
+  return () => controller.abort();
 }
 
-// { text } → { id, role: "agent", text, action: { label, path } | null, at }
-export function sendAssistantMessage(text) {
-  return request("/assistant/messages", { method: "POST", body: { text } });
+// { data, total } — chats are workspace-wide, so `started_by` may be a colleague
+export function fetchAssistantConversations() {
+  return request("/assistant/conversations");
 }
 
-// Start a fresh conversation; the old transcript stays retrievable server-side
-export function resetAssistantThread() {
-  return request("/assistant/messages", { method: "DELETE" });
+export function fetchAssistantConversation(id) {
+  return request(`/assistant/conversation/${id}`);
+}
+
+export function closeAssistantConversation(id) {
+  return request(`/assistant/conversation/${id}/close`, { method: "POST" });
 }
 
 /* ---- Overview & reports (§11) ---- */
@@ -798,16 +898,23 @@ export function createMarketplaceWithdrawal(payload) {
   return request("/marketplace/withdrawals", { method: "POST", body: payload });
 }
 
+/* ---- Settlement accounts ----
+   Moved off /marketplace/payout-methods, which resolved a marketplace host
+   record first and so returned [] for any business that had never published to
+   the consumer app. The old path still works and reads the same table, but
+   nothing should point at it. Read is open to any member; write is Owner and
+   Finance, enforced server-side as well as by the UI. */
+
 export function fetchPayoutMethods() {
-  return request("/marketplace/payout-methods");
+  return request("/settlement-accounts");
 }
 
 export function createPayoutMethod(payload) {
-  return request("/marketplace/payout-methods", { method: "POST", body: payload });
+  return request("/settlement-accounts", { method: "POST", body: payload });
 }
 
 export function deletePayoutMethod(id) {
-  return request(`/marketplace/payout-methods/${id}`, { method: "DELETE" });
+  return request(`/settlement-accounts/${id}`, { method: "DELETE" });
 }
 
 /* ---------------- Renter inbox (Owner / Manager / Booking agent) ---------- */

@@ -1,20 +1,20 @@
-/* Assistant chat state + the stand-in agent.
+/* Assistant chat state, backed by the live agent (ai.md).
  *
  * Same store shape as the other modules: a module-level state object, a
- * listener set, and useSyncExternalStore on the page. The thread lives for the
- * session only — it is not persisted, because once the backend agent ships the
- * transcript belongs to it. The assistant endpoints are deferred; see
- * docs/BACKEND.md §0 for what is and isn't on the launch path.
+ * listener set, and useSyncExternalStore on the page.
  *
- * `reply()` is the single seam between this mock and the real thing. When the
- * endpoint exists, swap its body for `await sendAssistantMessage(text)` and
- * nothing else on the page has to change.
+ * The reply streams. A placeholder agent message goes in as soon as the turn
+ * starts and its text grows token by token, so the page renders progress
+ * without knowing anything about SSE. `conversationId` is whatever the server
+ * handed back in the `meta` frame — it is held for the session and deliberately
+ * not persisted: the transcript belongs to the backend, and the UI is one
+ * conversation with one assistant, not a thread list.
+ *
+ * The local knowledge base it used to answer from is gone. Everything it knows
+ * now comes from the server, which can see the workspace; a client-side guess
+ * that disagreed would be worse than no answer.
  */
-import { getVehicles } from "./fleetStore";
-import { getBookings } from "./bookingsStore";
-import { getClients } from "./clientsStore";
-import { getBusiness } from "./businessStore";
-import { TOPICS, FALLBACK } from "./assistantKnowledge";
+import { streamAssistant } from "../lib/api";
 
 let nextId = 1;
 
@@ -25,8 +25,16 @@ let nextId = 1;
    in fewer words. */
 let state = {
   messages: [],
-  thinking: false,
+  thinking: false, // a turn is in flight
+  checking: null, // the tool the server is running, for the "checking…" line
+  escalated: false, // this thread is with a person now; stop taking questions
+  offline: false, // no model key configured server-side (503)
 };
+
+// Server-assigned, per ai.md §1. Session-lived: closing the drawer keeps it,
+// reloading starts a new chat.
+let conversationId = null;
+let abort = null;
 
 const listeners = new Set();
 
@@ -43,123 +51,90 @@ export function getState() {
   return state;
 }
 
-/* ---- Live workspace answers ----
-   Questions about the user's own data are answered from the stores rather than
-   the static corpus, so "what's in my fleet" is true rather than generic. */
-
-function workspaceAnswer(q) {
-  const vehicles = getVehicles();
-  const bookings = getBookings();
-
-  const asksFleet = /\b(my|our)\b.*\b(fleet|vehicle|car)/.test(q) ||
-    /how many (vehicles|cars)/.test(q) ||
-    /what'?s in my fleet/.test(q);
-  if (asksFleet) {
-    if (!vehicles.length) {
-      return {
-        text: "Your fleet is empty right now. Add your first vehicle and it becomes bookable as soon as it has a rate and is marked available.",
-        to: { label: "Add a vehicle", path: "/dashboard/fleet/new" },
-      };
-    }
-    const available = vehicles.filter((v) => v.status === "Available").length;
-    return {
-      text: `You have ${vehicles.length} vehicle${vehicles.length === 1 ? "" : "s"} registered, ${available} of them marked available.`,
-      to: { label: "Open fleet", path: "/dashboard/fleet" },
-    };
-  }
-
-  const asksBookings = /\b(my|our)\b.*booking/.test(q) || /how many bookings/.test(q);
-  if (asksBookings) {
-    if (!bookings.length) {
-      return {
-        text: "You have no bookings yet. Create one from Bookings → New booking and Ardena will check availability for you.",
-        to: { label: "Create a booking", path: "/dashboard/bookings/new" },
-      };
-    }
-    const live = bookings.filter((b) => b.status === "Confirmed" || b.status === "Active").length;
-    return {
-      text: `You have ${bookings.length} booking${bookings.length === 1 ? "" : "s"} on record, ${live} currently confirmed or active.`,
-      to: { label: "Open bookings", path: "/dashboard/bookings" },
-    };
-  }
-
-  if (/how many (clients|customers)/.test(q) || /\b(my|our)\b.*(client|customer)/.test(q)) {
-    const clients = getClients();
-    return {
-      text: `You have ${clients.length} client${clients.length === 1 ? "" : "s"} on file.`,
-      to: { label: "Open clients", path: "/dashboard/clients" },
-    };
-  }
-
-  return null;
-}
-
-/* ---- Topic matching ----
-   Score each topic by how many of its keywords appear, longest keyword wins
-   ties so "payment prompt" beats a bare "pay". Good enough to feel responsive;
-   the real agent replaces it wholesale. */
-
-function topicAnswer(q) {
-  let best = null;
-  let bestScore = 0;
-
-  for (const topic of TOPICS) {
-    let score = 0;
-    for (const kw of topic.keywords) {
-      if (q.includes(kw)) score += kw.length;
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      best = topic;
-    }
-  }
-
-  if (!best) return null;
-  return { text: best.answer, to: best.to };
-}
-
-function reply(text) {
-  const q = text.toLowerCase();
-
-  if (/^(hi|hey|hello|howdy)\b/.test(q.trim())) {
-    const name = getBusiness().name;
-    return {
-      text: `Hi${name ? `, ${name}` : ""} — what would you like to know? I can explain how any part of Ardena works, or look at what's in your workspace.`,
-      to: null,
-    };
-  }
-
-  return workspaceAnswer(q) || topicAnswer(q) || { text: FALLBACK, to: null };
-}
-
 export function sendMessage(text) {
   const clean = text.trim();
-  if (!clean || state.thinking) return;
+  if (!clean || state.thinking || state.escalated) return;
 
+  // The agent bubble goes in empty and fills as tokens arrive, so there is
+  // never a moment where a reply exists but has nowhere to render.
+  const replyId = nextId + 1;
   state = {
     ...state,
     thinking: true,
+    checking: null,
     messages: [
       ...state.messages,
       { id: nextId++, from: "user", text: clean, at: new Date().toISOString(), to: null },
+      { id: nextId++, from: "agent", text: "", at: new Date().toISOString(), to: null },
     ],
   };
   emit();
 
-  // A beat of "thinking" so the exchange reads like a conversation rather
-  // than an instant lookup — and so the swap to a real (slower) agent is
-  // not a visible regression.
-  setTimeout(() => {
-    const { text: answer, to } = reply(clean);
+  const patchReply = (fn) => {
     state = {
       ...state,
-      thinking: false,
-      messages: [
-        ...state.messages,
-        { id: nextId++, from: "agent", text: answer, at: new Date().toISOString(), to },
-      ],
+      messages: state.messages.map((m) => (m.id === replyId ? fn(m) : m)),
+    };
+  };
+
+  const finish = (extra = {}) => {
+    abort = null;
+    state = { ...state, thinking: false, checking: null, ...extra };
+    // An error before the first token leaves an empty bubble; drop it rather
+    // than render a blank message from the assistant.
+    state = {
+      ...state,
+      messages: state.messages.filter((m) => m.id !== replyId || m.text),
     };
     emit();
-  }, 650);
+  };
+
+  abort = streamAssistant({
+    message: clean,
+    conversationId,
+    on: {
+      meta: (d) => {
+        if (d?.conversation_id) conversationId = d.conversation_id;
+      },
+      // ai.md §1: the pause before the first token is real, so say what is
+      // being looked at rather than leaving it silent.
+      tool: (d) => {
+        state = { ...state, checking: d?.name || null };
+        emit();
+      },
+      token: (d) => {
+        if (!d?.text) return;
+        patchReply((m) => ({ ...m, text: m.text + d.text }));
+        // The first token is the answer starting; the "checking" line has done
+        // its job and would otherwise sit under a reply already being written.
+        state = { ...state, checking: null };
+        emit();
+      },
+      done: (d) => {
+        if (d?.escalated) {
+          finish({ escalated: true });
+        } else {
+          finish();
+        }
+      },
+      error: (d) => {
+        const offline = d?.status === 503;
+        patchReply((m) => ({
+          ...m,
+          text: m.text || d?.detail || "Something went wrong.",
+        }));
+        finish({ offline });
+      },
+    },
+  });
 }
 
+/** Abandon the turn in flight — the drawer closing, or the page unmounting. */
+export function cancelTurn() {
+  abort?.();
+  abort = null;
+  if (state.thinking) {
+    state = { ...state, thinking: false, checking: null };
+    emit();
+  }
+}

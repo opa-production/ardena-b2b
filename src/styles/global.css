@@ -76,11 +76,10 @@
 
   /* Shape & type. Structure is square, per brand: cards, panels, tables and
      page furniture all sit at --radius / --radius-sm = 0.
-     The two below are the exceptions, and they are deliberate. Sharp corners
-     read as architecture; they read as *hostile* on the things a person
-     handles or talks into. A chat bubble with square corners is not a bubble,
-     and a round icon button is the difference between a control and a tile.
-     Use them for conversational surfaces and hand-sized controls only. */
+     The two below are the exceptions, and they are narrow ones: a chat bubble
+     with square corners is not a bubble, and a round icon button is the
+     difference between a control and a tile. Conversational surfaces and
+     hand-sized controls only — dialogs, cards and panels stay square. */
   --radius: 0;
   --radius-sm: 0;
   --radius-soft: 12px; /* message bubbles, composer, inputs you type into */

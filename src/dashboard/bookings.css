@@ -252,9 +252,7 @@
 
 .modal-card {
   background: var(--panel);
-  /* One of the deliberate exceptions to the sharp-corner rule: a dialog is a
-     thing you hold and type into, not a panel you read. See --radius-soft. */
-  border-radius: var(--radius-soft);
+  border-radius: var(--radius); /* sharp corners, per brand */
   width: 100%;
   max-width: 420px;
   /* hairline, plus a soft drop so it reads off the dark scrim */

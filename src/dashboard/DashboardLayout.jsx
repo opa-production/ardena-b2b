@@ -47,6 +47,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import useRole from "../hooks/useRole";
 import HostLinkDialog from "./HostLinkDialog";
 import PageSkeleton from "./PageSkeleton";
+import ConfirmDialog from "../components/ConfirmDialog";
 import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
 import "./dashboard.css";
@@ -201,7 +202,13 @@ export default function DashboardLayout() {
     };
   }, []);
 
+  /* Confirmed, because signing out is one click from a menu that also holds
+     Profile — and on a shared counter machine the cost of a misclick is the
+     next person having to find the password. */
+  const [confirmLogout, setConfirmLogout] = useState(false);
+
   async function handleLogout() {
+    setConfirmLogout(false);
     setMenuOpen(false);
     await logout();
     navigate("/login");
@@ -357,7 +364,15 @@ export default function DashboardLayout() {
               {/* Tracking, billing and Support used to hide in here;
                   they are sidebar destinations now (see nav.js) so they can
                   actually be found. */}
-              <button type="button" role="menuitem" onClick={handleLogout}>
+              <button
+                type="button"
+                role="menuitem"
+                className="menu-danger"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setConfirmLogout(true);
+                }}
+              >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3" />
                   <path d="M16 17l5-5-5-5M21 12H9" />
@@ -401,6 +416,15 @@ export default function DashboardLayout() {
           <Outlet />
         )}
       </main>
+
+      <ConfirmDialog
+        open={confirmLogout}
+        title="Log out?"
+        message="You'll need your password to sign back in."
+        confirmLabel="Log out"
+        onConfirm={handleLogout}
+        onCancel={() => setConfirmLogout(false)}
+      />
 
       <AssistantLauncher />
       <Toasts />

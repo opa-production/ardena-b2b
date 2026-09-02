@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import useReveal from "../hooks/useReveal";
-import { FREE_MONTHS, PLAN } from "../pages/pricingData";
+import { TIERS, fmtKES } from "../pages/pricingData";
 import "../pages/pricingCards.css";
 
 /* Filled tick for an included line; hollow grey for one that sits outside the
-   free period. Showing the excluded line rather than hiding it is the point —
-   nobody should discover the verification charge on an invoice. */
+   plan. Showing the excluded line rather than hiding it is the point, nobody
+   should discover the verification charge on an invoice. */
 function Tick({ muted = false }) {
   return (
     <span className={`pc-tick${muted ? " pc-tick--muted" : ""}`} aria-hidden="true">
@@ -16,59 +16,76 @@ function Tick({ muted = false }) {
   );
 }
 
+/* The price slot, which has three states and keeps the same shape in all of
+   them so the row of cards does not move when the figures land:
+   0 is free, a number is a price, and null is a tier we have not priced yet. */
+function Price({ price }) {
+  if (price === null) {
+    return (
+      <span className="pc-amount pc-amount--pending" aria-label="Price not announced yet">
+        Soon
+      </span>
+    );
+  }
+  if (price === 0) return <span className="pc-amount">Free</span>;
+  return (
+    <span className="pc-amount">
+      <span className="pc-cur">KES </span>
+      {fmtKES(price)}
+    </span>
+  );
+}
+
 /**
- * The launch offer: one card, one promise.
+ * The plan grid.
  *
- * This replaced a plan card and a per-vehicle estimator beside it. Both quoted
- * a subscription price, and there isn't one yet — pricing is set after the free
- * months and announced first. An estimator with nothing to estimate is worse
- * than no estimator, so the card says the two things that are true today: it
- * is free for FREE_MONTHS months, and — via the muted feature line — that
- * renter checks are still billed.
+ * Three tiers, one of which has a price. That is deliberate: the free months
+ * are real and the rest is not set, so the cards show the shape without
+ * quoting a figure nobody has committed to. Every tier is data in
+ * pricingData.js, so announcing prices is a number per tier rather than a
+ * markup change, and nothing here shifts when they arrive.
  */
 export default function PricingPlans() {
   const ref = useReveal();
 
   return (
     <div ref={ref} className="pc-grid reveal-group">
-      <article className="pc-card pc-card--violet pc-card--solo">
-        <header className="pc-head">
-          <span className="pc-dot" aria-hidden="true" />
-          <h3 className="pc-name">{PLAN.name}</h3>
-        </header>
+      {TIERS.map((t) => (
+        <article className={`pc-card${t.price === null ? " pc-card--pending" : ""}`} key={t.key}>
+          <header className="pc-head">
+            <span className="pc-name">{t.name}</span>
+          </header>
 
-        <p className="pc-price">
-          <span className="pc-amount">Free</span>
-          <span className="pc-per">for {FREE_MONTHS} months</span>
-        </p>
+          <p className="pc-price">
+            <Price price={t.price} />
+            <span className="pc-per">{t.per}</span>
+          </p>
 
-        <p className="pc-range">
-          No card required. We&apos;ll announce pricing well before the free
-          months end, and tell you first.
-        </p>
+          <p className="pc-range">{t.blurb}</p>
 
-        <Link to="/signup" className="pc-cta pc-cta--solid">
-          Get started free
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M5 12h14M13 6l6 6-6 6" />
-          </svg>
-        </Link>
+          <Link
+            to={t.cta.to}
+            className={`pc-cta${t.cta.solid ? " pc-cta--solid" : ""}`}
+          >
+            {t.cta.label}
+          </Link>
 
-        <ul className="pc-features">
-          {PLAN.features.map((f) => (
-            <li key={f}>
-              <Tick />
-              {f}
-            </li>
-          ))}
-          {PLAN.muted.map((f) => (
-            <li className="pc-feature--muted" key={f}>
-              <Tick muted />
-              {f}
-            </li>
-          ))}
-        </ul>
-      </article>
+          <ul className="pc-features">
+            {t.features.map((f) => (
+              <li key={f}>
+                <Tick />
+                {f}
+              </li>
+            ))}
+            {t.muted.map((f) => (
+              <li className="pc-feature--muted" key={f}>
+                <Tick muted />
+                {f}
+              </li>
+            ))}
+          </ul>
+        </article>
+      ))}
     </div>
   );
 }

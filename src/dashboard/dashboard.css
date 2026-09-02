@@ -185,6 +185,19 @@
   font-size: 13.5px;
 }
 
+/* Log out is the one destructive item in the tenant menu, and it sits directly
+   under Profile — colour is what stops a misclick. #f05252 rather than the
+   light theme's --danger: this menu is always on the near-black panel, where
+   the deeper red drops to about 3:1. */
+.tenant-menu button.menu-danger {
+  color: #f05252;
+}
+
+.tenant-menu button.menu-danger:hover {
+  color: #ff6b6b;
+  background: rgba(240, 82, 82, 0.12);
+}
+
 /* a nav destination that exists but isn't switched on yet */
 .nav-soon {
   margin-left: auto;

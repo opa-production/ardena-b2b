@@ -84,19 +84,65 @@ export const FREE_MONTHS = 2;
  *  Charged during the free months too — see the note above. */
 export const CHECK_PRICE = 100;
 
-/* One plan, every module. The muted line is the charge that sits outside the
-   free period, shown rather than hidden so nobody discovers it on an invoice. */
-export const PLAN = {
-  name: "Fleet",
-  features: [
-    "Every module — fleet, bookings, clients, staff, reports",
-    "Unlimited vehicles, bookings and staff seats",
-    "M-Pesa and card payment prompting",
-    "Vehicle tracking and document expiry alerts",
-    "List on the Ardena app and take marketplace bookings",
-    "Exports, custom invoicing and email support",
-  ],
-  muted: [`Renter verification — KES ${CHECK_PRICE} per check, from your wallet`],
-};
+/* The plan grid.
+ *
+ * Three tiers, and only the first has a price — because only the first is
+ * true today. `price: null` means "not announced yet" and renders as "Soon";
+ * `price: 0` renders "Free". Launching pricing is therefore one number per
+ * tier in this file, with no markup to touch and no layout that shifts when
+ * the figures arrive.
+ *
+ * The `fleet` and `enterprise` tiers are placeholders for the shape we expect,
+ * not committed product. Their names and feature lines should be confirmed
+ * before the prices are.
+ */
+export const TIERS = [
+  {
+    key: "free",
+    name: "Free",
+    price: 0,
+    per: `for ${FREE_MONTHS} months`,
+    blurb: "Everything, for your first two months. No card required.",
+    cta: { label: "Get started free", to: "/signup", solid: true },
+    features: [
+      "Every module: fleet, bookings, clients, staff, reports",
+      "Unlimited vehicles, bookings and staff seats",
+      "M-Pesa and card payment prompting",
+      "Document expiry alerts and exports",
+      "Email support",
+    ],
+    // Shown rather than hidden: nobody should meet this on an invoice.
+    muted: [`Renter checks, KES ${CHECK_PRICE} each, from your wallet`],
+  },
+  {
+    key: "fleet",
+    name: "Fleet",
+    price: null,
+    per: "per month",
+    blurb:
+      "For a rental business running its own fleet. What the free months become.",
+    cta: { label: "Get started free", to: "/signup" },
+    features: [
+      "Everything in Free, kept",
+      "Priced per vehicle, so a small fleet pays like one",
+      "Announced well before your free months end",
+    ],
+    muted: [],
+  },
+  {
+    key: "enterprise",
+    name: "Enterprise",
+    price: null,
+    per: "custom",
+    blurb: "For large fleets, multiple branches and bespoke terms.",
+    cta: { label: "Talk to us", to: "/contact" },
+    features: [
+      "Everything in Fleet",
+      "Volume terms for 100+ vehicles",
+      "Onboarding help and a named contact",
+    ],
+    muted: [],
+  },
+];
 
 export const fmtKES = (n) => (Number(n) || 0).toLocaleString("en-KE");

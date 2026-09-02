@@ -189,7 +189,7 @@ export default function PayoutMethods() {
       <section className="panel-card">
         <header className="card-head">
           <h2>Settlement accounts</h2>
-          <p>Settled within 2 hours of request</p>
+          <p>Settled within one business day</p>
         </header>
 
         {loading ? null : methods.length === 0 ? (

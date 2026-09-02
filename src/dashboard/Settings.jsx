@@ -79,6 +79,22 @@ export default function Settings() {
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
 
+  /* Opening and closing clear the fields, so an abandoned attempt never leaves
+     a stale code and a half-typed password behind for the next one. */
+  function openPasswordModal() {
+    setPwOtp("");
+    setPwNew("");
+    setPwConfirm("");
+    sendPasswordCode();
+  }
+
+  function closePasswordModal() {
+    setPwStage("idle");
+    setPwOtp("");
+    setPwNew("");
+    setPwConfirm("");
+  }
+
   async function sendPasswordCode() {
     if (pwBusy) return;
     if (!accountEmail) {
@@ -387,86 +403,114 @@ export default function Settings() {
               <h2>Password &amp; security</h2>
               <p>Change the password for {accountEmail || "your account"}</p>
             </header>
-            {pwStage === "idle" ? (
-              <>
-                <p className="side-hint">
-                  We'll email you a one-time code to confirm it's you, then you
-                  set the new password here.
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-ghost pay-btn"
-                  onClick={sendPasswordCode}
-                  disabled={pwBusy}
-                >
-                  {pwBusy ? "Sending…" : "Change password"}
-                </button>
-              </>
-            ) : (
-              <form onSubmit={handlePasswordChange}>
-                <div className="field">
-                  <label htmlFor="pw-otp">One-time code</label>
-                  <input
-                    id="pw-otp"
-                    type="text"
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    placeholder="123456"
-                    value={pwOtp}
-                    onChange={(e) => setPwOtp(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="pw-new">New password</label>
-                  <input
-                    id="pw-new"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="••••••••"
-                    minLength={8}
-                    value={pwNew}
-                    onChange={(e) => setPwNew(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="pw-confirm">Confirm new password</label>
-                  <input
-                    id="pw-confirm"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="••••••••"
-                    minLength={8}
-                    value={pwConfirm}
-                    onChange={(e) => setPwConfirm(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-actions">
-                  <button type="submit" className="btn btn-primary" disabled={pwBusy}>
-                    {pwBusy ? "Saving…" : "Save password"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost"
-                    onClick={() => setPwStage("idle")}
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <p className="side-hint">
-                  Didn't get the code?{" "}
-                  <button type="button" className="auth-linkish" onClick={sendPasswordCode} disabled={pwBusy}>
-                    Send another
-                  </button>
-                </p>
-              </form>
-            )}
+            <p className="side-hint">
+              We&apos;ll email you a one-time code to confirm it&apos;s you, then
+              you set the new password.
+            </p>
+            <button
+              type="button"
+              className="btn btn-ghost pay-btn"
+              onClick={openPasswordModal}
+              disabled={pwBusy}
+            >
+              {pwBusy && pwStage === "idle" ? "Sending…" : "Change password"}
+            </button>
           </section>
 
         </div>
       </div>
+
+      {/* Changing a password is a task, not a panel: it takes over until it is
+          done or abandoned. As a card it sat open mid-page in a half-finished
+          state — a code sent, three empty fields — while the rest of the
+          profile stayed editable around it. */}
+      {pwStage === "code" && (
+        <div className="modal-overlay" onClick={() => !pwBusy && closePasswordModal()}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Change password</h3>
+              <button
+                type="button"
+                className="icon-btn"
+                disabled={pwBusy}
+                onClick={closePasswordModal}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </header>
+            <form onSubmit={handlePasswordChange} className="modal-body">
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                We sent a code to {accountEmail || "your email"}.
+              </p>
+              <label className="field-label">
+                One-time code
+                <input
+                  className="field-input"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="123456"
+                  value={pwOtp}
+                  onChange={(e) => setPwOtp(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </label>
+              <label className="field-label">
+                New password
+                <input
+                  className="field-input"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  minLength={8}
+                  value={pwNew}
+                  onChange={(e) => setPwNew(e.target.value)}
+                  required
+                />
+              </label>
+              <label className="field-label">
+                Confirm new password
+                <input
+                  className="field-input"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  minLength={8}
+                  value={pwConfirm}
+                  onChange={(e) => setPwConfirm(e.target.value)}
+                  required
+                />
+              </label>
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                Didn&apos;t get the code?{" "}
+                <button
+                  type="button"
+                  className="auth-linkish"
+                  onClick={sendPasswordCode}
+                  disabled={pwBusy}
+                >
+                  Send another
+                </button>
+              </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={pwBusy}
+                  onClick={closePasswordModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={pwBusy}>
+                  {pwBusy ? "Saving…" : "Save password"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

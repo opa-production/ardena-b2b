@@ -32,16 +32,16 @@ src/
   dashboard/    The product: one .jsx per screen plus its *Store.js
   lib/          api.js (API client) and authStore.js (session)
   components/   Shared bits: dropdowns, dialogs, logo, badges
-  hooks/        usePageTitle, useReveal
-docs/
-  backend-api.md   The API contract the backend builds against
+  hooks/        usePageTitle, useReveal, useDictation
 scripts/
-  remove-dashes.mjs   Copy rule: no em dashes in UI text
+  strip-dashes.mjs   Copy rule: no em dashes in UI text
+ai.md            The workspace assistant's contract
+changesreply.md  What the backend shipped, section by section
 ```
 
 ### Data layer
 
-Every dashboard screen reads from a small store (`src/dashboard/*Store.js`) that pages subscribe to via `useSyncExternalStore`. Stores whose endpoints are live are hydrated from the API by `DashboardLayout` on mount; the rest hold local mock data until their endpoints ship. The full contract, screen by screen, is in [`docs/backend-api.md`](docs/backend-api.md).
+Every dashboard screen reads from a small store (`src/dashboard/*Store.js`) that pages subscribe to via `useSyncExternalStore`. Stores whose endpoints are live are hydrated from the API by `DashboardLayout` on mount; the rest hold local mock data until their endpoints ship. The API contract lives on the backend side; [`changesreply.md`](changesreply.md) records what shipped for this launch and [`ai.md`](ai.md) covers the assistant.
 
 | Module | Backend status |
 |---|---|
@@ -85,7 +85,7 @@ action is disabled with a *Soon* tag, and **Tracking** keeps its sidebar
 entry and renders a coming-soon page. Each is one flag from working — grep the
 flag before flipping it, the doc comment beside it lists what it gates.
 
-Backend contract for everything on the launch path: [`docs/BACKEND.md`](docs/BACKEND.md).
+What the backend shipped for this launch: [`changesreply.md`](changesreply.md).
 
 ## Known gaps, roughly by cost of leaving them
 

@@ -4,7 +4,15 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
-import { MODULES, TIERS, CHECK_PRICE, TRIAL_DAYS, fmtKES } from "./pricingData";
+import {
+  MODULES,
+  CHECK_PRICE,
+  COMMISSION_RATE,
+  MIN_VEHICLES,
+  RATE,
+  TRIAL_DAYS,
+  fmtKES,
+} from "./pricingData";
 import "./landingArdena.css";
 
 /* The landing page follows the ardena.co.ke design language: an image-free
@@ -43,11 +51,10 @@ const TRUST = [
   },
 ];
 
-/* Built from TIERS so the landing can never quote a price /pricing disagrees
-   with. */
-const bandSummary = TIERS.map(
-  (t) => `KES ${fmtKES(t.monthly)} for ${t.range.toLowerCase()}`
-).join(", ");
+/* Built from pricingData so the landing can never quote a price /pricing
+   disagrees with — which is exactly what happened when this page advertised
+   fleet bands the backend had never heard of. */
+const COMMISSION_PCT = Math.round(COMMISSION_RATE * 1000) / 10;
 
 const FAQS = [
   {
@@ -56,7 +63,7 @@ const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `You pay one flat price for your fleet band — ${bandSummary} — billed monthly, with every module included on every band. Pay by card or M-Pesa and cancel anytime. Every account starts with a ${TRIAL_DAYS} day free trial.`,
+    a: `KES ${fmtKES(RATE)} per vehicle per month, billed for a minimum of ${MIN_VEHICLES} vehicles — the same price per car whether you run three or thirty. List on the Ardena app and we take ${COMMISSION_PCT}% commission on the bookings it sends you, which comes straight off your subscription: earn more in commission than the subscription is worth and the dashboard is free that month. Pay by card or M-Pesa, cancel anytime, and every account starts with a ${TRIAL_DAYS} day free trial.`,
   },
   {
     q: "Do I need my own identity verification account?",
@@ -132,8 +139,8 @@ export default function Landing() {
                 <p className="ard-desc">
                   Ardena for Business replaces the spreadsheets, the WhatsApp
                   threads and the paper files with one system your whole team
-                  works from. Every module below is included on every band,
-                  whatever size your fleet.
+                  works from. Every module below is included, whatever size your
+                  fleet.
                 </p>
               </Reveal>
 

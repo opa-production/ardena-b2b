@@ -11,7 +11,7 @@ import {
 } from "../lib/api";
 import CollectionsArea from "./charts/CollectionsArea";
 import PaymentDonut from "./charts/PaymentDonut";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import MarketplaceEarningsPanel from "./MarketplaceEarningsPanel";
 import useRole from "../hooks/useRole";
 import {
@@ -287,11 +287,7 @@ export default function Payments() {
                 <p>Settled payments per week, last 10 weeks</p>
               </header>
               {payments.length === 0 ? (
-                <EmptyState
-                  icon={EMPTY_ICONS.chart}
-                  title="No collections yet"
-                  message="They build up as customers pay."
-                />
+                <EmptyState minimal title="No collections yet" />
               ) : (
                 <CollectionsArea data={weeklyCollections} />
               )}
@@ -303,12 +299,7 @@ export default function Payments() {
                 <p>Collected, outstanding &amp; refunded</p>
               </header>
               {payments.length === 0 ? (
-                <EmptyState
-                  compact
-                  icon={EMPTY_ICONS.payments}
-                  title="Nothing billed yet"
-                  message="Your breakdown shows after the first booking."
-                />
+                <EmptyState minimal title="Nothing billed yet" />
               ) : (
                 <PaymentDonut segments={donutSegments} />
               )}
@@ -332,12 +323,7 @@ export default function Payments() {
             </header>
 
             {processed.length === 0 ? (
-              <EmptyState
-                compact
-                icon={EMPTY_ICONS.payments}
-                title="No payments yet"
-                message="Settled payments and refunds land here."
-              />
+              <EmptyState minimal title="No payments yet" />
             ) : (
               <table className="data-table">
                 <thead>

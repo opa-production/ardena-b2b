@@ -170,11 +170,7 @@ export default function MarketplaceEarningsPanel({
             <p>Your net per week, last 10 weeks</p>
           </header>
           {transactions.length === 0 ? (
-            <EmptyState
-              icon={EMPTY_ICONS.chart}
-              title="No earnings yet"
-              message="They build up once renters book."
-            />
+            <EmptyState minimal title="No earnings yet" />
           ) : (
             <CollectionsArea data={weeklyNet(transactions)} />
           )}
@@ -186,12 +182,7 @@ export default function MarketplaceEarningsPanel({
             <p>KES {fmtAmount(s.total_gross)} gross, split</p>
           </header>
           {!Number(s.total_gross) ? (
-            <EmptyState
-              compact
-              icon={EMPTY_ICONS.payments}
-              title="Nothing earned yet"
-              message="Your split shows after the first booking."
-            />
+            <EmptyState minimal title="Nothing earned yet" />
           ) : (
             <PaymentDonut segments={splitSegments} />
           )}
@@ -258,12 +249,7 @@ export default function MarketplaceEarningsPanel({
           </header>
 
           {withdrawals.length === 0 ? (
-            <EmptyState
-              compact
-              icon={EMPTY_ICONS.payments}
-              title="No withdrawals yet"
-              message="Requests and their status show here."
-            />
+            <EmptyState minimal title="No withdrawals yet" />
           ) : (
             <table className="data-table">
               <thead>
@@ -315,12 +301,7 @@ export default function MarketplaceEarningsPanel({
         </header>
 
         {transactions.length === 0 ? (
-          <EmptyState
-            compact
-            icon={EMPTY_ICONS.bookings}
-            title="No app bookings yet"
-            message="Bookings from the Ardena app land here."
-          />
+          <EmptyState minimal title="No app bookings yet" />
         ) : (
           <table className="data-table">
             <thead>

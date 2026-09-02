@@ -1142,3 +1142,95 @@
   font-size: 0.85rem;
   color: var(--ard-light);
 }
+
+/* =========================================================================
+   Pricing — "your Ardena bookings pay your bill"
+   -------------------------------------------------------------------------
+   The estimator on the cards above shows the mechanism moving; this shows it
+   standing still, four fleets side by side. Both read the same numbers out of
+   pricingData, so the page can never quote a price the invoice won't.
+   ========================================================================= */
+
+.pr-explain {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pr-explain-lead {
+  font-size: 1.02rem;
+  line-height: 1.7;
+  color: var(--ard-text);
+  max-width: 46em;
+  margin-bottom: 1rem;
+}
+
+.pr-explain-foot {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ard-light);
+}
+
+/* Wide content scrolls inside its own box rather than pushing the page sideways. */
+.pr-table-wrap {
+  margin-top: 1.75rem;
+  overflow-x: auto;
+  border: 1px solid var(--ard-line);
+  border-radius: 3px;
+}
+
+.pr-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.pr-table th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ard-light);
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--ard-line);
+  white-space: nowrap;
+}
+
+.pr-table td {
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--ard-line);
+  color: var(--ard-ink);
+  vertical-align: top;
+  font-variant-numeric: tabular-nums;
+}
+
+.pr-table tr:last-child td {
+  border-bottom: none;
+}
+
+.pr-table td strong {
+  display: block;
+  font-weight: 600;
+  color: var(--ard-ink-dark);
+}
+
+.pr-table-note {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--ard-light);
+  font-variant-numeric: normal;
+}
+
+.pr-table-credit {
+  color: #059669;
+  font-weight: 600;
+}
+
+.pr-table-total {
+  font-weight: 600;
+  color: var(--ard-ink-dark);
+  white-space: nowrap;
+}

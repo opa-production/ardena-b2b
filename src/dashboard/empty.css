@@ -1,5 +1,16 @@
 /* ---- Fresh-business empty states ---- */
 
+/* One quiet line where a card has nothing to show yet — no icon, no sentence.
+   `margin: auto` centres it in a chart card's flex column and is harmless in
+   an ordinary block. */
+.empty-line {
+  margin: auto;
+  padding: 28px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--ink-mute);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;

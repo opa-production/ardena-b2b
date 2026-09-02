@@ -1,9 +1,18 @@
 import "./empty.css";
 
-/* Fresh-business empty state: icon in a soft circle, title, one line of
-   guidance, and an optional call to action. Distinct from the terse
-   "no search results" note. */
-export default function EmptyState({ icon, title, message, action, compact = false }) {
+/* Fresh-business empty state, in two strengths.
+ *
+ * `minimal` is one quiet line and nothing else. It is what a card inside a
+ * working page gets: an icon in a circle plus a sentence of guidance is fine
+ * once, but the Overview has four cards waiting on their first data at the
+ * same time, and four of those read as clutter rather than help.
+ *
+ * The full treatment — icon, title, a line of guidance and a button — is for
+ * a page that is empty end to end and has somewhere to send you. In practice
+ * that means: if there is an `action`, it earns the furniture. */
+export default function EmptyState({ icon, title, message, action, compact = false, minimal = false }) {
+  if (minimal) return <p className="empty-line">{title}</p>;
+
   return (
     <div className={"empty-state" + (compact ? " compact" : "")}>
       {icon && <span className="empty-state-icon">{icon}</span>}

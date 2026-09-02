@@ -5,7 +5,7 @@ import BookingHeatmap from "./charts/BookingHeatmap";
 import RevenueRanking from "./charts/RevenueRanking";
 import UtilisationTrend from "./charts/UtilisationTrend";
 import OnboardingChecklist from "./OnboardingChecklist";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { fetchOverview, exportReport } from "../lib/api";
 import { toast } from "./toastStore";
 import "./overview.css";
@@ -129,11 +129,7 @@ export default function Overview() {
           {hasBookings ? (
             <BookingHeatmap data={data.booking_heatmap} />
           ) : (
-            <EmptyState
-              icon={EMPTY_ICONS.chart}
-              title="No booking data yet"
-              message="Your busy days show once bookings start."
-            />
+            <EmptyState minimal title="No booking data yet" />
           )}
         </section>
 
@@ -145,11 +141,7 @@ export default function Overview() {
           {(data?.top_vehicles?.length ?? 0) > 0 ? (
             <RevenueRanking data={data.top_vehicles} />
           ) : (
-            <EmptyState
-              icon={EMPTY_ICONS.chart}
-              title="No revenue yet"
-              message="Top earners rank here after the first payment."
-            />
+            <EmptyState minimal title="No revenue yet" />
           )}
         </section>
       </div>
@@ -164,11 +156,7 @@ export default function Overview() {
           {(data?.utilisation_trend?.length ?? 0) >= 2 ? (
             <UtilisationTrend data={data.utilisation_trend} />
           ) : (
-            <EmptyState
-              icon={EMPTY_ICONS.chart}
-              title="No utilisation yet"
-              message="Shows once vehicles start going out."
-            />
+            <EmptyState minimal title="No utilisation yet" />
           )}
         </section>
 
@@ -191,12 +179,7 @@ export default function Overview() {
                 ))}
               </ul>
             ) : (
-              <EmptyState
-                compact
-                icon={EMPTY_ICONS.verification}
-                title="Nothing needs attention"
-                message="All clear."
-              />
+              <EmptyState minimal title="Nothing needs attention" />
             )}
           </section>
 

@@ -18,7 +18,7 @@ import {
   payInvoiceMpesa,
   checkInvoiceCharge,
 } from "../lib/api";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { fmtAmount, fmtDate } from "./billingFormat";
@@ -172,12 +172,7 @@ export default function Billing() {
 
         <div className="invoice-list">
           {invoices.length === 0 ? (
-            <EmptyState
-              compact
-              icon={EMPTY_ICONS.payments}
-              title="No invoices yet"
-              message="Your first lands when the trial ends."
-            />
+            <EmptyState minimal title="No invoices yet" />
           ) : (
             invoices.map((inv) => {
               const due = inv.status === "Due";

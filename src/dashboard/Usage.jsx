@@ -12,7 +12,7 @@ import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import { fetchBillingUsage, fetchWalletTransactions } from "../lib/api";
 import UsageBars from "./charts/UsageBars";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { fmtAmount, normalizeTxn } from "./billingFormat";
@@ -116,11 +116,7 @@ export default function Usage() {
         </header>
 
         {series.length === 0 ? (
-          <EmptyState
-            icon={EMPTY_ICONS.chart}
-            title="Nothing used yet"
-            message="Each day's spend shows up here."
-          />
+          <EmptyState minimal title="Nothing used yet" />
         ) : (
           <UsageBars data={series} label="Wallet spend" />
         )}

@@ -6,7 +6,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from "../lib/api";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { ICONS } from "./icons";
 import {
   NOTIFICATION_PREFS,
@@ -242,12 +242,7 @@ export default function Notifications() {
             </tbody>
           </table>
         ) : (
-          <EmptyState
-            compact
-            icon={EMPTY_ICONS.notifications}
-            title="All caught up"
-            message="Nothing needs you right now."
-          />
+          <EmptyState minimal title="All caught up" />
         )}
       </section>
 

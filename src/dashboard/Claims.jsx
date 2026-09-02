@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
 import usePageTitle from "../hooks/usePageTitle";
@@ -116,12 +116,7 @@ export default function Claims() {
           </header>
 
           {extensions.length === 0 ? (
-            <EmptyState
-              compact
-              icon={EMPTY_ICONS.bookings}
-              title="No open requests"
-              message="Renters asking for more days land here."
-            />
+            <EmptyState minimal title="No open requests" />
           ) : (
             extensions.map((ext) => (
               <div className="ext-row" key={ext.id}>
@@ -176,12 +171,7 @@ export default function Claims() {
           </header>
 
           {claims.length === 0 ? (
-            <EmptyState
-              compact
-              icon={EMPTY_ICONS.payments}
-              title="No claims filed"
-              message="Raise one from a finished app booking."
-            />
+            <EmptyState minimal title="No claims filed" />
           ) : (
             claims.map((c) => (
               <div className="claim-row" key={c.id}>

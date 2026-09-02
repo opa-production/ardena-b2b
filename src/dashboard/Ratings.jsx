@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { fetchMarketplaceRatings, fetchVehicleRatings } from "../lib/api";
@@ -68,11 +68,7 @@ export default function Ratings() {
       <h1 className="sr-only">Reviews</h1>
 
       {!hasAny ? (
-        <EmptyState
-          icon={EMPTY_ICONS.clients}
-          title="No reviews yet"
-          message="Renters rate your cars after each trip."
-        />
+        <EmptyState minimal title="No reviews yet" />
       ) : (
         <>
           <div className="stat-grid finance-stats">

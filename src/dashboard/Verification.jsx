@@ -15,7 +15,7 @@ import {
 } from "./verificationsStore";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
@@ -331,12 +331,7 @@ export default function Verification() {
         </div>
 
         {lookups.length === 0 ? (
-          <EmptyState
-            compact
-            icon={EMPTY_ICONS.verification}
-            title="No checks yet"
-            message="Look up a renter above to start."
-          />
+          <EmptyState minimal title="No checks yet" />
         ) : (
           <table className="data-table">
             <thead>

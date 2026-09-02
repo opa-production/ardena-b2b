@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import {
@@ -106,11 +106,7 @@ export default function RenterInbox() {
       <h1 className="sr-only">Renter messages</h1>
 
       {conversations.length === 0 ? (
-        <EmptyState
-          icon={EMPTY_ICONS.clients}
-          title="No messages yet"
-          message="Renter questions land here."
-        />
+        <EmptyState minimal title="No messages yet" />
       ) : (
         <div className="inbox-grid">
           <section className="panel-card inbox-list">

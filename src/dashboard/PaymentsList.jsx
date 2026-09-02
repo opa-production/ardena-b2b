@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { fetchPayments, refundPayment } from "../lib/api";
 import { PAY_CHIP } from "./Bookings";
 import { fmtAmount } from "./Payments";
-import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
@@ -129,12 +129,7 @@ export default function PaymentsList() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState
-            compact
-            icon={EMPTY_ICONS.payments}
-            title="Nothing matches"
-            message="Try a different filter."
-          />
+          <EmptyState minimal title="Nothing matches those filters" />
         ) : (
           <table className="data-table">
             <thead>

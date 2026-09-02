@@ -58,79 +58,97 @@ export const PILLARS = [
 ];
 
 /* ---------------------------------------------------------------------------
-   Banded pricing — MOCK DATA, front end only.
+   Pricing — mirrors app/b2b/billing.py in the backend. Keep them in step.
    ---------------------------------------------------------------------------
-   Replaces the old per-vehicle rate (KES 400/vehicle, KES 2,000 minimum) with
-   one fixed price per fleet band, so a business always knows its bill before
-   it adds a car. The backend still bills per vehicle; wiring these tiers to it
-   is a later phase, so treat every number here as display copy for now.
+   Per vehicle, per month, with a 3-vehicle minimum. This replaced two earlier
+   attempts, both of which broke the same promise in different ways:
 
-   Monthly billing only for now. Annual prepay is a later phase, so there is
-   deliberately no yearly rate here to quote.
+   - a KES 2,000 cash floor, which meant every fleet of five or fewer paid an
+     identical bill — a 3-car fleet worked out at 667/vehicle while a 25-car
+     fleet paid 400;
+   - three fixed fleet bands (1-25 / 26-100 / 100+), which was worse: a 3-car
+     fleet and a 25-car fleet paid exactly the same 1,200, and none of the band
+     prices matched what the backend actually invoiced.
 
-   Renter verification stays outside the tiers at CHECK_PRICE per check. It is
-   a genuine pass-through cost with unpredictable volume, so folding it into a
+   A minimum expressed as a *quantity* keeps the per-vehicle price honest at
+   every fleet size, which is the only version of this a salesperson can say out
+   loud and have be true.
+
+   On top of that, commission earned on a workspace's Ardena-app bookings is
+   credited against its bill. Ardena ends up earning whichever is larger —
+   commission or subscription — never both. See COMMISSION_RATE below.
+
+   Renter verification stays outside the plan at CHECK_PRICE per check. It is a
+   genuine pass-through cost with unpredictable volume, so folding it into a
    fixed price would mean eating the variance on the heaviest users. */
 
+/** KES per vehicle per month, standard. */
+export const RATE = 400;
+
+/** Discounted rate for a workspace's first LAUNCH_MONTHS months. */
+export const LAUNCH_RATE = 200;
+export const LAUNCH_MONTHS = 3;
+
+/** Smallest fleet we bill for — a count, not a shilling floor. */
+export const MIN_VEHICLES = 3;
+
+/** Ardena's cut of bookings that come through the consumer app. */
+export const COMMISSION_RATE = 0.09;
+
+/** KES per renter verification check, drawn from the prepaid wallet. */
 export const CHECK_PRICE = 100;
 
 /** Free trial length, in days. Quoted in one place so it can't drift. */
 export const TRIAL_DAYS = 30;
 
-export const TIERS = [
-  {
-    key: "starter",
-    name: "Starter",
-    range: "1 – 25 vehicles",
-    monthly: 1200,
-    accent: "violet",
-    cta: { label: "Start free trial", to: "/signup" },
-    features: [
-      "Up to 25 vehicles",
-      "All modules included",
-      "Unlimited bookings and staff seats",
-      "M-Pesa payment prompting",
-      "Vehicle tracking",
-      "Reports and exports",
-      "Email support",
-    ],
-    muted: ["Assisted onboarding", "Priority support"],
-  },
-  {
-    key: "growth",
-    name: "Growth",
-    range: "26 – 100 vehicles",
-    monthly: 3600,
-    accent: "blue",
-    popular: true,
-    cta: { label: "Start free trial", to: "/signup" },
-    features: [
-      "Up to 100 vehicles",
-      "Everything in Starter",
-      "Assisted onboarding and bulk import",
-      "Priority support",
-      "Custom invoicing",
-      "A named account contact",
-    ],
-    muted: [],
-  },
-  {
-    key: "scale",
-    name: "Scale",
-    range: "100+ vehicles",
-    monthly: 7500,
-    accent: "teal",
-    cta: { label: "Talk to us", to: "/contact" },
-    features: [
-      "Unlimited vehicles",
-      "Everything in Growth",
-      "Team training sessions",
-      "Custom invoicing and payment terms",
-      "Priority support with a named contact",
-      "Early access to new modules",
-    ],
-    muted: [],
-  },
-];
+/** Vehicles above this need a custom plan. */
+export const FLEET_CAP = 100;
 
-export const fmtKES = (n) => n.toLocaleString("en-KE");
+/** The subscription before any Ardena-app credit. */
+export const monthlyFor = (vehicles, rate = RATE) =>
+  Math.max(Number(vehicles) || 0, MIN_VEHICLES) * rate;
+
+/** Commission Ardena earns on a month of app bookings, in KES. */
+export const commissionOn = (appBookingsKes, rate = COMMISSION_RATE) =>
+  Math.round((Number(appBookingsKes) || 0) * rate);
+
+/** What's actually payable. Floored at zero — the credit never becomes a refund. */
+export const billAfterCredit = (subscription, credit) =>
+  Math.max(0, subscription - credit);
+
+/* One plan, every module. The muted line is what sits outside the subscription
+   on purpose, shown rather than hidden so nobody discovers it on an invoice. */
+export const PLAN = {
+  name: "Fleet",
+  features: [
+    "Every module — fleet, bookings, clients, staff, reports",
+    "Unlimited bookings and staff seats",
+    "M-Pesa and card payment prompting",
+    "Vehicle tracking and document expiry alerts",
+    "List on the Ardena app and take marketplace bookings",
+    "Exports, custom invoicing and email support",
+  ],
+  muted: [`Renter verification — KES ${CHECK_PRICE} per check, from your wallet`],
+};
+
+/* Worked examples for the explanation section. Deliberately concrete: the model
+   only lands when you see a 3-car fleet paying nothing next to a 25-car fleet
+   paying full price. Figures are computed, not typed, so they cannot drift from
+   the functions above. */
+export const CREDIT_EXAMPLES = [
+  { vehicles: 3, appBookings: 0, note: "Direct bookings only" },
+  { vehicles: 3, appBookings: 100000, note: "Listed, selling well" },
+  { vehicles: 10, appBookings: 20000, note: "Listed, getting started" },
+  { vehicles: 25, appBookings: 0, note: "Not listed on the app" },
+].map((row) => {
+  const subscription = monthlyFor(row.vehicles);
+  const credit = commissionOn(row.appBookings);
+  return {
+    ...row,
+    subscription,
+    credit: Math.min(credit, subscription),
+    payable: billAfterCredit(subscription, credit),
+  };
+});
+
+export const fmtKES = (n) => (Number(n) || 0).toLocaleString("en-KE");

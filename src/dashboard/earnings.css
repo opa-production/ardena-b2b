@@ -146,3 +146,27 @@
   padding: 7px 16px;
   font-size: 13px;
 }
+
+/* ---- Settlement accounts table ---- */
+
+/* A row number, so a business can say "delete the second one" on the phone to
+   support without reading an account number aloud. */
+.settle-table .num-col {
+  width: 44px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The destination is the value the eye scans down the column, so it gets the
+   tabular face the rest of the app uses for account and plate numbers.
+   Declared in full rather than leaning on the shared .mono, which lives in
+   tracking.css and verification.css — neither of which this page loads. */
+.settle-table td.mono {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* The verify action sits next to a bare icon; keep them from crowding. */
+.settle-table .actions-cell {
+  white-space: nowrap;
+}

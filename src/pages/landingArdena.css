@@ -850,17 +850,53 @@
    it keeps its own half rather than sitting under the type — any overlay dark
    enough to carry white text would flatten it. */
 .ct-hero {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: clamp(2rem, 5vw, 4.5rem);
   min-height: 100vh;
   min-height: 100dvh;
   padding: 7rem 5% 4rem;
   background: var(--ard-white);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ct-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.ct-hero-bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The handset sits at the left of the frame and the copy is hard left, per
+     the rest of the site. Mirroring moves the subject to the far side rather
+     than moving the type off its axis. */
+  transform: scaleX(-1);
+}
+
+/* White, not dark: the photograph is a black object on a white ground, so the
+   scrim only has to guarantee the left third stays clean where the cord sweeps
+   through it. A dark overlay would erase the picture. */
+.ct-hero-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    var(--ard-white) 0%,
+    var(--ard-white) 26%,
+    rgba(255, 255, 255, 0.86) 42%,
+    rgba(255, 255, 255, 0.35) 58%,
+    transparent 72%
+  );
 }
 
 .ct-hero-copy {
+  position: relative;
   max-width: 34em;
 }
 
@@ -879,27 +915,36 @@
   color: var(--ard-text);
 }
 
-.ct-hero-media {
-  overflow: hidden;
-  border-radius: 3px;
-}
-
-.ct-hero-media img {
-  display: block;
-  width: 100%;
-  height: clamp(320px, 58vh, 560px);
-  object-fit: cover;
-}
-
 @media (max-width: 900px) {
   .ct-hero {
-    grid-template-columns: 1fr;
-    min-height: 0;
+    min-height: 78vh;
     padding: 6.5rem 1.5rem 3rem;
   }
 
-  .ct-hero-media img {
-    height: clamp(220px, 38vh, 320px);
+  /* A portrait crop of a landscape frame keeps only a narrow slice, so pick
+     the one with the handset in it. `object-position` addresses the source
+     image, which is un-mirrored — the subject is at its left, and the flip
+     then carries it to the right of the box. Anchoring at 78% selected empty
+     frame and left a stray length of cord across the paragraph. */
+  .ct-hero-bg img {
+    object-position: 16% center;
+  }
+
+  /* Copy to the top, subject below it: on a narrow screen there is no room
+     beside the type, only under it. */
+  .ct-hero {
+    align-items: flex-start;
+  }
+
+  .ct-hero-bg::after {
+    background: linear-gradient(
+      180deg,
+      var(--ard-white) 0%,
+      var(--ard-white) 36%,
+      rgba(255, 255, 255, 0.6) 52%,
+      rgba(255, 255, 255, 0.15) 74%,
+      transparent 92%
+    );
   }
 }
 

@@ -8,6 +8,8 @@ import {
   fetchPayoutMethods,
   createPayoutMethod,
   deletePayoutMethod,
+  requestSettlementVerification,
+  confirmSettlementVerification,
 } from "../lib/api";
 import "./earnings.css";
 
@@ -65,6 +67,35 @@ const FIELD_PLACEHOLDERS = {
    registered string. */
 const OPTIONAL = new Set(["account_name"]);
 
+const TYPE_LABEL = {
+  mpesa: "M-Pesa",
+  till: "Till",
+  paybill: "Paybill",
+  bank: "Bank",
+};
+
+/* The destination itself, without the type — the table has a column for that.
+   Paybill is the one that needs both its numbers: a paybill without an account
+   number reaches Safaricom and stops. */
+function accountLine(m) {
+  if (m.method_type === "paybill") {
+    return [m.paybill_number, m.account_number].filter(Boolean).join(" · ");
+  }
+  if (m.method_type === "bank") {
+    return [m.bank_name, m.account_number].filter(Boolean).join(" · ");
+  }
+  return m.mpesa_number || m.till_number || "—";
+}
+
+/* "d***@ardena.co.ke and 07** *** 678" — where the code went. Both values are
+   masked by the server; this only joins them. Falls back to something true
+   rather than empty if a channel is missing. */
+function sentToLine(sent) {
+  const parts = [sent?.email, sent?.phone].filter(Boolean);
+  if (!parts.length) return "your registered email and phone";
+  return parts.join(" and ");
+}
+
 /* "mpesa · 0702248984" — the detail that tells two saved destinations apart.
    Exported because the withdraw dropdown needs the same line. */
 export function methodDetail(m) {
@@ -97,6 +128,10 @@ export default function PayoutMethods() {
   const [methodName, setMethodName] = useState("");
   const [methodFields, setMethodFields] = useState({});
   const [removing, setRemoving] = useState(null);
+  const [verifyBusy, setVerifyBusy] = useState(null); // id mid-request
+  const [verifying, setVerifying] = useState(null); // the account being confirmed
+  const [otp, setOtp] = useState("");
+  const [otpSentTo, setOtpSentTo] = useState(null); // { email, phone }, masked
 
   const load = useCallback(async () => {
     try {
@@ -149,6 +184,42 @@ export default function PayoutMethods() {
     }
   }
 
+  /* Two steps, the same shape as changing a password: ask for a code, then
+     send it back. The code goes to the signed-in user's registered email, not
+     to anything on the account being verified — the point is proving it is
+     still them, not that the account exists. */
+  async function startVerify(m) {
+    if (verifyBusy) return;
+    setVerifyBusy(m.id);
+    try {
+      const res = await requestSettlementVerification(m.id);
+      setOtpSentTo({ email: res?.sent_to_email, phone: res?.sent_to_phone });
+      setOtp("");
+      setVerifying(m);
+    } catch (err) {
+      toast(err.message || "Couldn't send the code", "danger");
+    } finally {
+      setVerifyBusy(null);
+    }
+  }
+
+  async function handleVerify(e) {
+    e.preventDefault();
+    if (busy || !verifying) return;
+    setBusy(true);
+    try {
+      await confirmSettlementVerification(verifying.id, otp.trim());
+      toast("Settlement account verified.");
+      setVerifying(null);
+      setOtp("");
+      await load();
+    } catch (err) {
+      toast(err.message || "That code didn't work", "danger");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleRemove() {
     if (!removing) return;
     try {
@@ -195,23 +266,70 @@ export default function PayoutMethods() {
         {loading ? null : methods.length === 0 ? (
           <EmptyState minimal title="No account saved yet" />
         ) : (
-          methods.map((m) => (
-            <div className="payout-row" key={m.id}>
-              <div>
-                <strong>{m.name}</strong>
-                <p className="cell-sub">{methodDetail(m)}</p>
-              </div>
-              {canManage && (
-                <button
-                  type="button"
-                  className="icon-btn danger"
-                  onClick={() => setRemoving(m)}
-                >
-                  Remove
-                </button>
-              )}
-            </div>
-          ))
+          /* A row per account rather than a stack of blocks: type, where the
+             money lands, and whether it is verified are three short values
+             that belong on one line, and the block layout was spending a full
+             card width on two of them. */
+          <table className="data-table settle-table">
+            <thead>
+              <tr>
+                <th className="num-col">#</th>
+                <th>Type</th>
+                <th>Details</th>
+                <th>Status</th>
+                <th className="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {methods.map((m, i) => {
+                const verified = m.status === "verified" || m.verified;
+                return (
+                  <tr key={m.id}>
+                    <td className="num-col">{i + 1}</td>
+                    <td>
+                      <p className="strong">{TYPE_LABEL[m.method_type] || m.method_type}</p>
+                      {m.name && m.name !== TYPE_LABEL[m.method_type] && (
+                        <p className="cell-sub">{m.name}</p>
+                      )}
+                    </td>
+                    <td className="mono">{accountLine(m)}</td>
+                    <td>
+                      <span className={`chip ${verified ? "active" : "pending"}`}>
+                        {verified ? "Verified" : "Unverified"}
+                      </span>
+                    </td>
+                    <td className="actions-cell">
+                      {/* Verifying is the only action that changes anything
+                          about an unverified account, so it leads. */}
+                      {!verified && canManage && (
+                        <button
+                          type="button"
+                          className="icon-btn"
+                          disabled={verifyBusy === m.id}
+                          onClick={() => startVerify(m)}
+                        >
+                          {verifyBusy === m.id ? "Sending…" : "Verify"}
+                        </button>
+                      )}
+                      {canManage && (
+                        <button
+                          type="button"
+                          className="icon-btn danger"
+                          aria-label={`Remove ${m.name || "account"}`}
+                          onClick={() => setRemoving(m)}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         )}
       </section>
 
@@ -324,6 +442,73 @@ export default function PayoutMethods() {
           </div>
         </div>
       )}
+      {/* ---- Verify by one-time code ---- */}
+      {verifying && (
+        <div className="modal-overlay" onClick={() => !busy && setVerifying(null)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Verify settlement account</h3>
+              <button
+                type="button"
+                className="icon-btn"
+                disabled={busy}
+                onClick={() => setVerifying(null)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </header>
+            <form className="modal-body" onSubmit={handleVerify}>
+              {/* Say which contacts it went to, so someone who has lost one of
+                  them knows to check the other rather than assume it failed. */}
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                We sent a code to {sentToLine(otpSentTo)}. Enter it to confirm{" "}
+                <strong>{accountLine(verifying)}</strong> as a settlement
+                destination.
+              </p>
+              <label className="field-label">
+                One-time code
+                <input
+                  className="field-input"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="123456"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </label>
+              <p className="side-hint" style={{ marginTop: 0 }}>
+                Didn&apos;t get it?{" "}
+                <button
+                  type="button"
+                  className="auth-linkish"
+                  onClick={() => startVerify(verifying)}
+                  disabled={Boolean(verifyBusy)}
+                >
+                  Send another
+                </button>
+              </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={busy}
+                  onClick={() => setVerifying(null)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={busy || !otp.trim()}>
+                  {busy ? "Verifying…" : "Verify account"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

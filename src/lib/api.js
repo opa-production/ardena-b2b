@@ -917,6 +917,33 @@ export function deletePayoutMethod(id) {
   return request(`/settlement-accounts/${id}`, { method: "DELETE" });
 }
 
+/* Verifying an account, by one-time code sent to BOTH the business's
+   registered email and its registered phone. Changing where money lands is the
+   highest-value single edit in the product, so proving control of the contacts
+   on file is a second factor against a hijacked session, not a formality.
+
+   Two channels because either one alone can be the thing that is compromised,
+   and because a business that has lost access to one can still complete the
+   change. One code, valid from whichever arrives first.
+
+   Nothing is sent to the *account being verified* — the code goes to the
+   business's contacts, so naming a stranger's till cannot mail that stranger.
+   Spec: settlements-otp.md. */
+
+// → { sent_to_email, sent_to_phone } — both masked, so the UI can say where
+//   to look without printing a full address or number on screen
+export function requestSettlementVerification(id) {
+  return request(`/settlement-accounts/${id}/verify`, { method: "POST" });
+}
+
+// { otp } → the updated account, with status: "verified"
+export function confirmSettlementVerification(id, otp) {
+  return request(`/settlement-accounts/${id}/verify/confirm`, {
+    method: "POST",
+    body: { otp },
+  });
+}
+
 /* ---------------- Renter inbox (Owner / Manager / Booking agent) ---------- */
 
 export function fetchRenterConversations(params = {}) {

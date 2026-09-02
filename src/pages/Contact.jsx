@@ -33,11 +33,18 @@ export default function Contact() {
       <ArdNav />
 
       <main>
-        {/* ---- Hero: copy left, image right.
-               The photo is a saturated yellow graphic, so it sits beside the
-               type rather than under it — an overlay dark enough to carry
-               white text would flatten the picture entirely. ---- */}
+        {/* ---- Hero: the photograph is the background.
+               It is a black handset on white, subject hard left. Mirrored so
+               the handset sits opposite the copy rather than under it, and
+               laid behind a white gradient that keeps the type on clean ground
+               however the frame crops. No dark overlay: the picture is almost
+               entirely white, so dimming it to carry light text would throw
+               away the photograph and the page's white/black rhythm with
+               it. ---- */}
         <section className="ct-hero">
+          <div className="ct-hero-bg" aria-hidden="true">
+            <img src={contactImg} alt="" fetchPriority="high" decoding="async" />
+          </div>
           <div className="ct-hero-copy">
             <h1 className="ct-title">Talk to us.</h1>
             <p className="ct-sub">
@@ -45,9 +52,6 @@ export default function Contact() {
               you around or help you get unstuck. We reply within one business
               day.
             </p>
-          </div>
-          <div className="ct-hero-media">
-            <img src={contactImg} alt="" fetchpriority="high" decoding="async" />
           </div>
         </section>
 

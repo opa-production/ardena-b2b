@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AssistantPanel from "./AssistantPanel";
+import { BotIcon } from "./supportArt";
 import "./support.css";
 import "./assistant.css";
 
@@ -29,10 +30,7 @@ export default function AssistantLauncher() {
         aria-label="Ask the Ardena assistant"
         title="Ask the Ardena assistant"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20.5 12.5a7.5 7.5 0 01-7.5 7.5H4.5l2-2.6A7.5 7.5 0 1120.5 12.5z" />
-          <path d="M9 11.5h6M9 14.5h3.5" />
-        </svg>
+        <BotIcon />
       </button>
 
       {open && (

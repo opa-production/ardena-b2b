@@ -2,6 +2,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getVehicles, removeVehicle, isFleetLoaded } from "./fleetStore";
 import { toast } from "./toastStore";
+import { B2C_MARKETPLACE } from "../lib/features";
 import {
   subscribe as subscribeBusiness,
   getBusiness,
@@ -91,7 +92,7 @@ export default function Fleet() {
           <EmptyState
             icon={EMPTY_ICONS.fleet}
             title="No vehicles yet"
-            message="Add one — it's bookable the moment you save."
+            message="Add one, it's bookable the moment you save."
             action={
               <Link to="/dashboard/fleet/new" className="btn btn-primary">
                 Add your first vehicle
@@ -129,7 +130,7 @@ export default function Fleet() {
           </div>
           {vehicles.length >= 100 ? (
             <Link to="/dashboard/support" className="btn toolbar-btn" style={{ background: "var(--warning-bg,#fef3c7)", color: "#92400e", border: "1px solid #fcd34d" }}>
-              Fleet at capacity — contact sales
+              Fleet at capacity, contact sales
             </Link>
           ) : (
             <Link to="/dashboard/fleet/new" className="btn btn-primary toolbar-btn">
@@ -201,7 +202,13 @@ export default function Fleet() {
                         >
                           View
                         </Link>
-                        {appLinked && (
+                        {/* Shown but dead until the consumer app launches.
+                            Hiding it entirely would mean a business never
+                            learns the marketplace is coming. Disabled is the
+                            whole message — a "Soon" badge beside it said the
+                            same thing twice and pushed the actions cell wider
+                            than the column it sits in. */}
+                        {B2C_MARKETPLACE && appLinked ? (
                           <Link
                             className="icon-btn"
                             to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
@@ -209,6 +216,15 @@ export default function Fleet() {
                           >
                             Marketplace
                           </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            disabled
+                            title="Listing on the Ardena app is coming soon"
+                          >
+                            Marketplace
+                          </button>
                         )}
                         <button
                           type="button"

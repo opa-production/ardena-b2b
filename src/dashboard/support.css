@@ -1,20 +1,66 @@
 /* ---- Support page: chat thread + composer ---- */
 
-.chat-thread {
+/* Breaks out of .dash-content's gutter so the conversation runs from the
+   sidebar to the right edge and fills the height. The negative margin is
+   exactly the padding it cancels, so the page still measures 100dvh and
+   nothing scrolls behind it. */
+.support-page {
+  margin: calc(var(--content-pad) * -1);
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  height: 420px;
-  overflow-y: auto;
-  padding: 4px 4px 12px 0;
-  margin-bottom: 18px;
+  min-height: 0;
 }
 
+.support-head {
+  flex: 0 0 auto;
+  padding: 22px clamp(20px, 3vw, 40px) 16px;
+  box-shadow: 0 1px 0 var(--line);
+}
+
+.support-head h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.support-head p {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--ink-mute);
+}
+
+.chat-thread {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  padding: 20px clamp(20px, 3vw, 40px) 8px;
+}
+
+/* Bubbles, so rounded — with the corner nearest the speaker squared off, the
+   way every messaging app does it, so a run of messages reads as coming from
+   one side rather than floating free.
+
+   Wide on purpose: a sent message runs almost the full width and leaves only a
+   short gap on the far side, which is what makes a thread feel like a
+   conversation rather than a column of cards. Short messages are unaffected —
+   this is a cap, not a width. */
 .msg {
-  max-width: 78%;
-  padding: 10px 14px;
+  max-width: 88%;
+  padding: 9px 13px;
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 1.45;
+  border-radius: var(--radius-soft);
+}
+
+.msg.support {
+  border-bottom-left-radius: 4px;
+}
+
+.msg.user {
+  border-bottom-right-radius: 4px;
 }
 
 .msg.support {
@@ -48,24 +94,56 @@
   color: var(--ink-mute);
 }
 
+/* One rounded bar holding the whole composer, rather than a row of separate
+   boxes: attach, what you are typing, dictate, send. */
 .chat-composer {
   display: flex;
-  gap: 10px;
-}
-
-.chat-composer input {
-  flex: 1;
-  border: none;
-  outline: none;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 6px;
   background: var(--bg);
   box-shadow: var(--edge-in);
-  padding: 11px 14px;
-  font-size: 14px;
-  color: var(--ink);
-  transition: box-shadow 0.15s var(--ease);
+  border-radius: var(--radius-round);
 }
 
-.chat-composer input:focus {
+/* On the support page the bar floats clear of the foot of the thread rather
+   than sitting on it: room to breathe underneath, a lift so it reads as
+   over the conversation, and a hard right stop so it never runs under the
+   assistant button pinned in that corner. */
+.support-page .chat-composer {
+  flex: 0 0 auto;
+  margin: 8px clamp(20px, 3vw, 40px) 22px;
+  margin-right: calc(clamp(20px, 3vw, 40px) + 68px);
+  padding: 6px 8px;
+  background: var(--panel);
+  box-shadow: var(--edge), 0 8px 28px rgba(10, 13, 18, 0.1);
+}
+
+[data-theme="dark"] .support-page .chat-composer {
+  box-shadow: var(--edge), 0 8px 28px rgba(0, 0, 0, 0.4);
+}
+
+/* a touch taller than the drawer's, since it has the room */
+.support-page .chat-composer input {
+  padding: 14px 10px;
+  font-size: 14.5px;
+}
+
+/* The input is now inside the bar, so it drops its own chrome entirely. */
+.chat-composer input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  box-shadow: none;
+  padding: 10px 8px;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+/* focus lands on the whole bar, not the bare field inside it */
+.chat-composer:focus-within {
   box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
 }
 
@@ -121,4 +199,103 @@
   font-size: 13px;
   color: var(--ink-soft);
   line-height: 1.55;
+}
+
+/* ---- Composer controls ---- */
+
+/* Round, because they are handled rather than read. Ghost by default so the
+   bar stays quiet; only send carries fill, and only once there is something
+   to send. */
+.composer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-round);
+  background: none;
+  color: var(--ink-mute);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+
+.composer-btn:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Readable while inert, same reasoning as .icon-btn:disabled — attach is
+   permanently off until uploads ship, so it has to be legible enough for the
+   tooltip to be worth reaching for. */
+.composer-btn:disabled {
+  cursor: default;
+  color: var(--ink-soft);
+}
+
+/* except send, which is meant to recede until there is something to send */
+.composer-send:disabled {
+  opacity: 0.4;
+}
+
+.composer-send {
+  background: var(--ink-inv);
+  color: var(--on-ink);
+}
+
+.composer-send:hover:not(:disabled) {
+  background: var(--ink-inv-hover);
+  color: var(--on-ink);
+}
+
+/* Dictating: the mic fills and pulses, so it is obvious the room is being
+   listened to and obvious how to stop. */
+.composer-btn.is-live {
+  background: var(--brand);
+  color: #fff;
+  animation: mic-pulse 1.4s ease-in-out infinite;
+}
+
+.composer-btn.is-live:hover {
+  background: var(--brand-dark);
+  color: #fff;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--brand-glow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-btn.is-live {
+    animation: none;
+  }
+}
+
+/* ---- Empty thread ---- */
+
+.chat-empty {
+  margin: auto;
+  padding: 12px 20px 24px;
+  text-align: center;
+  color: var(--brand);
+}
+
+.chat-empty-title {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.chat-empty-note {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--ink-mute);
 }

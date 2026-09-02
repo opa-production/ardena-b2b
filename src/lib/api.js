@@ -363,6 +363,18 @@ export function bookingDepositAction(ref, action) {
 }
 
 
+/* Record money taken outside Ardena — cash at the counter, or a bank transfer
+   straight to the business. Nothing moves through us, so this is a bookkeeping
+   entry, not a charge: it marks the booking paid and files the amount under
+   cash so Finances can separate what we collected from what they did.
+   { amount, note? } — the backend stamps who recorded it and when. */
+export function markBookingPaidCash(ref, payload) {
+  return request(`/bookings/${encodeURIComponent(ref)}/cash-payment`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function fetchBookingAgreement(ref) {
   return request(`/bookings/${encodeURIComponent(ref)}/agreement`);
 }
@@ -570,7 +582,7 @@ export function fetchSupportUnread() {
   return request("/support/messages/unread-count");
 }
 
-/* ---- Assistant (docs/backend-new-modules.md §G) ----
+/* ---- Assistant (deferred, not on the launch path — docs/BACKEND.md §0) ----
    Not live yet. The Assistant page answers from assistantStore.js's local
    agent; when this endpoint ships, swap the body of that store's reply() for
    a call to sendAssistantMessage and the page is unchanged. */

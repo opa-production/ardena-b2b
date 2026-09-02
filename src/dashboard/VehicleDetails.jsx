@@ -18,6 +18,7 @@ import { setVehiclePlate, uploadVehicleDocument } from "../lib/api";
 import { downloadVehicleStatement } from "./pdf";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
+import { B2C_MARKETPLACE } from "../lib/features";
 import "./fleet.css";
 import "./hostlink.css";
 
@@ -40,8 +41,8 @@ const DOC_KINDS = [
 ];
 
 const UPCOMING = [
-  { customer: "Wanjiku Kamau", dates: "Jul 2 – Jul 6", amount: "48,000" },
-  { customer: "James Otieno", dates: "Jul 12 – Jul 15", amount: "36,000" },
+  { customer: "Wanjiku Kamau", dates: "Jul 2 to Jul 6", amount: "48,000" },
+  { customer: "James Otieno", dates: "Jul 12 to Jul 15", amount: "36,000" },
 ];
 
 export default function VehicleDetails() {
@@ -132,7 +133,7 @@ export default function VehicleDetails() {
           </div>
         </div>
         <div className="details-actions">
-          {business.appLinked && (
+          {B2C_MARKETPLACE && business.appLinked && (
             <Link
               to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
               className="btn btn-ghost"

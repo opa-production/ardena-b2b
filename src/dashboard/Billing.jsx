@@ -22,6 +22,7 @@ import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { fmtAmount, fmtDate } from "./billingFormat";
+import { FREE_MONTHS } from "../pages/pricingData";
 import "./overview.css";
 import "./fleet.css";
 import "./billing.css";
@@ -98,7 +99,7 @@ export default function Billing() {
 
         if (Date.now() > invPollDeadlineRef.current) {
           stopInvPolling();
-          toast("STK push expired — please try again.", "warn");
+          toast("STK push expired, please try again.", "warn");
           await load();
           return;
         }
@@ -142,7 +143,7 @@ export default function Billing() {
     try {
       const res = await payInvoiceMpesa(invModal.ref, { phone, provider: invProvider });
       setInvModal(null);
-      toast(res.message || "STK push sent — enter your PIN.");
+      toast(res.message || "STK push sent, enter your PIN.");
       if (res.paystack_reference) startInvPolling(res.paystack_reference);
     } catch (err) {
       toast(err.message || "Failed to send payment request.", "danger");
@@ -172,7 +173,7 @@ export default function Billing() {
 
         <div className="invoice-list">
           {invoices.length === 0 ? (
-            <EmptyState minimal title="No invoices yet" />
+            <EmptyState minimal title={`Nothing billed, you're in your first ${FREE_MONTHS} free months`} />
           ) : (
             invoices.map((inv) => {
               const due = inv.status === "Due";
@@ -231,7 +232,7 @@ export default function Billing() {
             </header>
             <form onSubmit={handleInvMpesa} className="modal-body">
               <p className="side-hint" style={{ marginTop: 0 }}>
-                {invModal.title} — <strong>KES {fmtAmount(invModal.amount)}</strong>
+                {invModal.title} · <strong>KES {fmtAmount(invModal.amount)}</strong>
               </p>
               <fieldset className="provider-group">
                 <legend className="field-label">Payment method</legend>
@@ -269,7 +270,7 @@ export default function Billing() {
                 />
               </label>
               <p className="side-hint" style={{ marginTop: 0 }}>
-                An STK push will be sent to this number — enter your PIN to confirm.
+                An STK push will be sent to this number, enter your PIN to confirm.
               </p>
               <div className="modal-actions">
                 <button

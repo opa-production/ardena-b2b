@@ -149,7 +149,7 @@ export default function HostLinkPanel() {
                   <p className="cell-sub">
                     Already list cars on the Ardena app? Connect that account and
                     your vehicles come across with their reviews, messages and
-                    booking history — nothing is re-listed and no bookings are
+                    booking history, nothing is re-listed and no bookings are
                     interrupted.
                   </p>
                   <p className="cell-sub hostlink-unlocks">

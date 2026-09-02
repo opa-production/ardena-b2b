@@ -128,37 +128,6 @@
   gap: 16px;
 }
 
-/* honest about what this is until the backend agent is wired in */
-.assist-tag {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 2px 7px;
-  background: var(--brand-soft);
-  color: var(--brand-dark);
-  font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  vertical-align: 1px;
-}
-
-.assist-clear {
-  flex-shrink: 0;
-  padding: 7px 12px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  box-shadow: var(--edge);
-  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
-}
-
-.assist-clear:hover {
-  color: var(--ink);
-}
-
-.assist-clear:active {
-  box-shadow: var(--edge-in);
-}
 
 /* the agent's replies run longer than support's, so give them more room */
 .chat-card .msg.support {
@@ -258,4 +227,23 @@
   font-size: 11.5px;
   color: var(--ink-mute);
   line-height: 1.5;
+}
+
+/* The fresh-thread state: the mark, one line, and the suggestions under it.
+   Tighter than the support page's, which has a whole page to fill. */
+.assist-empty {
+  margin: auto;
+  padding: 8px 12px;
+}
+
+.assist-empty .chat-empty-title {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+/* the tag rides the heading now, not the description line under it */
+.assist-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

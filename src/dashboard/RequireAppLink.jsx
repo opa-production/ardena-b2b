@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getBusiness } from "./businessStore";
+import { B2C_MARKETPLACE } from "../lib/features";
 import usePageTitle from "../hooks/usePageTitle";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 
@@ -30,5 +31,7 @@ function NotLinked() {
  */
 export default function RequireAppLink({ children }) {
   const business = useSyncExternalStore(subscribe, getBusiness);
-  return business.appLinked ? children : <NotLinked />;
+  // B2C_MARKETPLACE is the launch gate; appLinked is the per-workspace one.
+  // Both have to be true, so a stale server flag can't open a deferred page.
+  return B2C_MARKETPLACE && business.appLinked ? children : <NotLinked />;
 }

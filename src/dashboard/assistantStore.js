@@ -3,7 +3,8 @@
  * Same store shape as the other modules: a module-level state object, a
  * listener set, and useSyncExternalStore on the page. The thread lives for the
  * session only — it is not persisted, because once the backend agent ships the
- * transcript belongs to it (see docs/backend-new-modules.md §G).
+ * transcript belongs to it. The assistant endpoints are deferred; see
+ * docs/BACKEND.md §0 for what is and isn't on the launch path.
  *
  * `reply()` is the single seam between this mock and the real thing. When the
  * endpoint exists, swap its body for `await sendAssistantMessage(text)` and
@@ -13,14 +14,17 @@ import { getVehicles } from "./fleetStore";
 import { getBookings } from "./bookingsStore";
 import { getClients } from "./clientsStore";
 import { getBusiness } from "./businessStore";
-import { TOPICS, GREETING, FALLBACK } from "./assistantKnowledge";
+import { TOPICS, FALLBACK } from "./assistantKnowledge";
 
-let nextId = 2;
+let nextId = 1;
 
+/* Starts genuinely empty. The thread used to be seeded with a greeting the
+   panel then hid and sliced past — a sentinel that existed only so "is this a
+   fresh thread" could be asked as `length === 1`. An empty array asks it
+   honestly, and the panel's empty state says the same thing the greeting did
+   in fewer words. */
 let state = {
-  messages: [
-    { id: 1, from: "agent", text: GREETING, at: new Date().toISOString(), to: null },
-  ],
+  messages: [],
   thinking: false,
 };
 
@@ -159,13 +163,3 @@ export function sendMessage(text) {
   }, 650);
 }
 
-export function clearThread() {
-  nextId = 2;
-  state = {
-    messages: [
-      { id: 1, from: "agent", text: GREETING, at: new Date().toISOString(), to: null },
-    ],
-    thinking: false,
-  };
-  emit();
-}

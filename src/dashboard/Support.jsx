@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   fetchSupportThread,
   sendSupportMessage,
   markSupportRead,
-  fetchRenterConversations,
 } from "../lib/api";
-import useRole from "../hooks/useRole";
 import { toast } from "./toastStore";
+import useDictation from "../hooks/useDictation";
+import {
+  AttachIcon,
+  MicIcon,
+  SendIcon,
+  SupportIllustration,
+} from "./supportArt";
 import "./fleet.css";
 import "./bookings.css";
 import "./support.css";
@@ -20,18 +24,34 @@ function fmtTime(iso) {
   return d.toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" });
 }
 
-/* Every conversation with a person, in one place: the Ardena support thread,
-   and the renter conversations that used to have their own sidebar entry.
-   Product questions go to the Assistant, which has its own page. */
+/* Talking to a human at Ardena. Product questions go to the assistant, which
+   rides along in a slide-over on every page.
+
+   The renter-message rail that used to sit beside this thread is gone: those
+   conversations are a consumer-app surface, deferred with the rest of B2C, and
+   a column reserved for something switched off is just a hole in the page. */
 export default function Support() {
-  const { can } = useRole();
-  const showRenters = can("renterInbox");
-  const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const threadRef = useRef(null);
+
+  const {
+    supported: canDictate,
+    listening,
+    toggle: toggleDictation,
+  } = useDictation({
+    value: draft,
+    onChange: setDraft,
+    onError: (kind) =>
+      toast(
+        kind === "blocked"
+          ? "Microphone blocked. Allow it in your browser to dictate."
+          : "Couldn't hear that. Try again or type it.",
+        "warn"
+      ),
+  });
 
   const load = useCallback(async (markRead = false) => {
     try {
@@ -53,15 +73,6 @@ export default function Support() {
     const id = setInterval(() => load(true), 15_000);
     return () => clearInterval(id);
   }, [load]);
-
-  // Renter conversations feed the side rail; roles without inbox access
-  // simply don't get the card.
-  useEffect(() => {
-    if (!showRenters) return;
-    fetchRenterConversations({ limit: 8 })
-      .then((d) => setConversations(d?.conversations || []))
-      .catch(() => {});
-  }, [showRenters]);
 
   // Keep newest message in view
   useEffect(() => {
@@ -102,96 +113,95 @@ export default function Support() {
     }
   }
 
+  /* No card. The conversation is the page: it runs from the sidebar to the
+     right edge and from the top of the content area to the bottom, with the
+     composer floating over the foot of it. A chat boxed inside a panel with a
+     gutter around it reads as a widget; this reads as the thing you came for.
+     Renter messages, when the B2C launch brings them back, get their own route
+     rather than a column stealing a third of this one. */
   return (
-    <div className="details-grid">
-      <section className="panel-card chat-card">
-          <header className="card-head">
-            <h2>Message support</h2>
-            <p>Real people, Mon – Sat, 8am – 8pm EAT · usually reply in minutes</p>
-          </header>
+    <div className="support-page">
+      <header className="support-head">
+        <div>
+          <h2>Message support</h2>
+          <p>Real people, Mon to Sat, 8am to 8pm EAT · usually reply in minutes</p>
+        </div>
+      </header>
 
-          <div className="chat-thread" ref={threadRef} aria-live="polite">
-            {loading && messages.length === 0 && (
-              <div className="sk-chat" style={{ padding: "16px 0" }}>
-                {[{ w: "52%" }, { w: "40%", r: true }, { w: "58%" }, { w: "34%", r: true }].map((b, i) => (
-                  <span key={i} className={`sk sk-bubble${b.r ? " right" : ""}`} style={{ width: b.w }} />
-                ))}
-              </div>
-            )}
-            {messages.map((m) => (
-              <div key={m.id} className={`msg ${m.from}`}>
-                <p>{m.text}</p>
-                <span className="msg-time">
-                  {m.from === "support" ? "Ardena support · " : ""}
-                  {fmtTime(m.at)}
-                </span>
-              </div>
-            ))}
+      <div className="chat-thread" ref={threadRef} aria-live="polite">
+      {loading && messages.length === 0 && (
+        <div className="sk-chat" style={{ padding: "16px 0" }}>
+          {[{ w: "52%" }, { w: "40%", r: true }, { w: "58%" }, { w: "34%", r: true }].map((b, i) => (
+            <span key={i} className={`sk sk-bubble${b.r ? " right" : ""}`} style={{ width: b.w }} />
+          ))}
+        </div>
+      )}
+      {!loading && messages.length === 0 && (
+        <div className="chat-empty">
+          <SupportIllustration />
+          <p className="chat-empty-title">No messages yet</p>
+          <p className="chat-empty-note">
+            Tell us what is going on and a person will reply.
+          </p>
+        </div>
+      )}
+      {messages.map((m) => (
+        <div key={m.id} className={`msg ${m.from}`}>
+          <p>{m.text}</p>
+          <span className="msg-time">
+            {m.from === "support" ? "Ardena support · " : ""}
+            {fmtTime(m.at)}
+          </span>
+        </div>
+      ))}
           </div>
 
           <form className="chat-composer" onSubmit={handleSend}>
-            <input
-              type="text"
-              placeholder="Describe the issue, include a booking ref if you have one"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              aria-label="Message support"
-              disabled={sending}
-            />
-            <button
-              type="submit"
-              className="btn btn-primary toolbar-btn"
-              disabled={!draft.trim() || sending}
-            >
-              {sending ? "Sending…" : "Send"}
-            </button>
-          </form>
-      </section>
+      <button
+        type="button"
+        className="composer-btn"
+        aria-label="Attach a file"
+        title="Attach a file (coming soon)"
+        disabled
+      >
+        <AttachIcon />
+      </button>
 
-      <div className="details-side">
-        {showRenters && (
-          <section className="panel-card">
-            <header className="card-head mini-payments-head">
-              <div>
-                <h2>Renter messages</h2>
-                <p>Questions from renters on the Ardena app</p>
-              </div>
-              {conversations.length > 0 && (
-                <Link className="head-link" to="/dashboard/renter-messages">
-                  Open inbox
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </Link>
-              )}
-            </header>
+      <input
+        type="text"
+        placeholder={
+          listening ? "Listening…" : "Describe the issue, include a booking ref if you have one"
+        }
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        aria-label="Message support"
+        disabled={sending}
+      />
 
-            {conversations.length === 0 ? (
-              <p className="side-hint">
-                When a renter asks about one of your listed vehicles, the
-                conversation shows up here.
-              </p>
-            ) : (
-              conversations.map((c) => (
-                <Link
-                  className="inbox-item"
-                  key={c.id}
-                  to="/dashboard/renter-messages"
-                >
-                  <div className="inbox-item-head">
-                    <strong>{c.client_name || "Renter"}</strong>
-                    <span className="inbox-time">{fmtTime(c.last_message_at)}</span>
-                  </div>
-                  <p className="inbox-preview">{c.last_message || "No messages yet"}</p>
-                  {c.unread_count > 0 && (
-                    <span className="inbox-badge">{c.unread_count}</span>
-                  )}
-                </Link>
-              ))
-            )}
-          </section>
-        )}
-      </div>
+      {canDictate && (
+        <button
+          type="button"
+          className={"composer-btn" + (listening ? " is-live" : "")}
+          onClick={toggleDictation}
+          disabled={sending}
+          aria-label={listening ? "Stop dictating" : "Dictate your message"}
+          aria-pressed={listening}
+          title={listening ? "Stop dictating" : "Speak instead of typing"}
+        >
+          <MicIcon />
+        </button>
+      )}
+
+      <button
+        type="submit"
+        className="composer-btn composer-send"
+        disabled={!draft.trim() || sending}
+        aria-label={sending ? "Sending" : "Send message"}
+        title="Send"
+      >
+        <SendIcon />
+      </button>
+      </form>
     </div>
   );
 }

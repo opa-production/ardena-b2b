@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { subscribe, getState, sendMessage, clearThread } from "./assistantStore";
+import { subscribe, getState, sendMessage } from "./assistantStore";
 import { SUGGESTIONS } from "./assistantKnowledge";
+import { AttachIcon, BotIcon, MicIcon, SendIcon } from "./supportArt";
+import useDictation from "../hooks/useDictation";
+import { toast } from "./toastStore";
 
 function fmtTime(iso) {
   const d = new Date(iso);
@@ -20,6 +23,22 @@ export default function AssistantPanel({ onNavigate }) {
   const threadRef = useRef(null);
   const inputRef = useRef(null);
 
+  const {
+    supported: canDictate,
+    listening,
+    toggle: toggleDictation,
+  } = useDictation({
+    value: draft,
+    onChange: setDraft,
+    onError: (kind) =>
+      toast(
+        kind === "blocked"
+          ? "Microphone blocked. Allow it in your browser to dictate."
+          : "Couldn't hear that. Try again or type it.",
+        "warn"
+      ),
+  });
+
   useEffect(() => {
     const el = threadRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -32,26 +51,32 @@ export default function AssistantPanel({ onNavigate }) {
     inputRef.current?.focus();
   }
 
-  const isFresh = messages.length === 1;
+  const isFresh = messages.length === 0;
 
   return (
     <>
+      {/* No "New chat". Nothing here is stored between sessions, so a reset
+          control offers to clear something that already clears itself — and
+          this is one conversation with one assistant, not a list of threads to
+          manage. */}
       <header className="card-head assist-head">
-        <div>
-          <h2>Ardena assistant</h2>
-          <p>
-            Instant answers about the platform and your workspace
-            <span className="assist-tag">Preview</span>
-          </p>
-        </div>
-        {!isFresh && (
-          <button type="button" className="assist-clear" onClick={clearThread}>
-            New chat
-          </button>
-        )}
+        <h2>
+          Ardena assistant
+          <span className="assist-tag">Preview</span>
+        </h2>
       </header>
 
       <div className="chat-thread" ref={threadRef} aria-live="polite">
+        {/* No greeting bubble. One that says the same thing every time is
+            furniture; the mark and one line carry it, and the suggestions
+            below say more about what this can do than a paragraph would. */}
+        {isFresh && (
+          <div className="chat-empty assist-empty">
+            <BotIcon size={44} />
+            <p className="chat-empty-title">Ask me anything</p>
+            <p className="chat-empty-note">Fleet, bookings, payments, billing.</p>
+          </div>
+        )}
         {messages.map((m) => (
           <div key={m.id} className={`msg ${m.from === "user" ? "user" : "support"}`}>
             <p>{m.text}</p>
@@ -96,28 +121,53 @@ export default function AssistantPanel({ onNavigate }) {
           send(draft);
         }}
       >
+        <button
+          type="button"
+          className="composer-btn"
+          aria-label="Attach a file"
+          title="Attach a file (coming soon)"
+          disabled
+        >
+          <AttachIcon />
+        </button>
+
         <input
           ref={inputRef}
           type="text"
-          placeholder="Ask about fleet, bookings, payments, verification or billing"
+          placeholder={listening ? "Listening…" : "Ask about fleet, bookings or payments"}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           aria-label="Message the assistant"
         />
+
+        {canDictate && (
+          <button
+            type="button"
+            className={"composer-btn" + (listening ? " is-live" : "")}
+            onClick={toggleDictation}
+            aria-label={listening ? "Stop dictating" : "Dictate your question"}
+            aria-pressed={listening}
+            title={listening ? "Stop dictating" : "Speak instead of typing"}
+          >
+            <MicIcon />
+          </button>
+        )}
+
         <button
           type="submit"
-          className="btn btn-primary toolbar-btn"
+          className="composer-btn composer-send"
           disabled={!draft.trim() || thinking}
+          aria-label="Send"
+          title="Send"
         >
-          Send
+          <SendIcon />
         </button>
       </form>
 
       <p className="assist-note">
-        Answers come from Ardena&apos;s product documentation and your own
-        workspace data — double-check anything money-related.{" "}
+        Double-check anything money-related.{" "}
         <Link className="assist-escalate" to="/dashboard/support" onClick={onNavigate}>
-          Talk to a person instead
+          Talk to a person
         </Link>
       </p>
     </>

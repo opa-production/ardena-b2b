@@ -9,6 +9,8 @@
 // linked an Ardena consumer-app account. Until it does, these are hidden
 // entirely rather than shown empty — a business doing direct bookings should
 // not be navigating pages that can only ever be blank.
+import { B2C_MARKETPLACE, VEHICLE_TRACKING } from "../lib/features";
+
 export const NAV_SECTIONS = [
   {
     label: "Operations",
@@ -18,7 +20,9 @@ export const NAV_SECTIONS = [
       { to: "/dashboard/bookings", key: "bookings", name: "Bookings" },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
-      { to: "/dashboard/tracking", key: "tracking", name: "Vehicle tracking" },
+      // `soon` renders a muted tag in the sidebar — the page is a coming-soon
+      // state until VEHICLE_TRACKING flips (see lib/features.js).
+      { to: "/dashboard/tracking", key: "tracking", name: "Tracking", soon: !VEHICLE_TRACKING },
       { to: "/dashboard/reviews", key: "reviews", name: "Reviews", appOnly: true },
       {
         to: "/dashboard/claims",
@@ -57,6 +61,7 @@ export const NAV_SECTIONS = [
         children: [
           { to: "/dashboard/usage", key: "usage", name: "Usage" },
           { to: "/dashboard/billing", key: "billing", name: "Billing" },
+          { to: "/dashboard/settlements", key: "settlements", name: "Settlements" },
         ],
       },
     ],
@@ -75,7 +80,8 @@ export const NAV_SECTIONS = [
 ];
 
 const allowed = (item, can, appLinked) =>
-  (!item.requires || can(item.requires)) && (!item.appOnly || appLinked);
+  (!item.requires || can(item.requires)) &&
+  (!item.appOnly || (appLinked && B2C_MARKETPLACE));
 
 /** NAV_SECTIONS with items the signed-in role can't reach removed, app-only
  *  destinations dropped when no Ardena app account is linked, and any section
@@ -100,13 +106,14 @@ export const SECTION_TITLES = {
   bookings: "Bookings",
   clients: "Clients",
   chauffeurs: "Chauffeurs",
-  tracking: "Vehicle tracking",
+  tracking: "Tracking",
   reviews: "Reviews",
   claims: "Claims & requests",
   verification: "Verification",
   payments: "Finances",
   usage: "Usage",
   billing: "Billing",
+  settlements: "Settlements",
   staff: "Staff & roles",
   notifications: "Notifications",
   support: "Support",

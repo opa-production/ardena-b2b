@@ -63,7 +63,7 @@ export default function DepositClaimDialog({ booking, depositAmount, onClose, on
       return;
     }
     if (description.trim().length < 10) {
-      setError("Describe what happened — Ardena reviews this before moving any money.");
+      setError("Describe what happened, Ardena reviews this before moving any money.");
       return;
     }
 
@@ -141,7 +141,7 @@ export default function DepositClaimDialog({ booking, depositAmount, onClose, on
               placeholder="Rear bumper scuffed on return, not present at check-out. Quote from the panel beater attached."
             />
             <p className="field-note">
-              Be specific — this is what Ardena weighs against the renter&apos;s account.
+              Be specific, this is what Ardena weighs against the renter&apos;s account.
             </p>
           </div>
 

@@ -252,7 +252,9 @@
 
 .modal-card {
   background: var(--panel);
-  border-radius: var(--radius); /* sharp corners, per brand */
+  /* One of the deliberate exceptions to the sharp-corner rule: a dialog is a
+     thing you hold and type into, not a panel you read. See --radius-soft. */
+  border-radius: var(--radius-soft);
   width: 100%;
   max-width: 420px;
   /* hairline, plus a soft drop so it reads off the dark scrim */
@@ -639,4 +641,36 @@
 .rate-star.on,
 .rate-star:hover {
   color: var(--accent);
+}
+
+/* The two ways to settle a booking, given equal room. They used to stack flush
+   against each other, which read as one control with a stray second label. */
+.pay-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pay-actions .btn {
+  width: 100%;
+  margin: 0;
+}
+
+/* a filled dot on an icon action, meaning "this one already has something" */
+.icon-btn .dot-on {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  margin-left: 5px;
+  flex-shrink: 0;
+}
+
+/* On a booking the note is an instruction, not a standing notice — it sits
+   closer to the cards it is about. */
+.details-grid + .page-note,
+.head-card + .page-note {
+  margin-bottom: 14px;
+  padding: 10px 14px;
 }

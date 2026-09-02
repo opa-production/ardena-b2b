@@ -58,71 +58,39 @@ export const PILLARS = [
 ];
 
 /* ---------------------------------------------------------------------------
-   Pricing — mirrors app/b2b/billing.py in the backend. Keep them in step.
+   Pricing — launch phase. Mirrors docs/BACKEND.md §4; keep them in step.
    ---------------------------------------------------------------------------
-   Per vehicle, per month, with a 3-vehicle minimum. This replaced two earlier
-   attempts, both of which broke the same promise in different ways:
+   Ardena for Business is FREE for a workspace's first FREE_MONTHS months.
+   Subscription pricing has not been set yet: it will be announced, and every
+   existing workspace told, well before anyone is charged. Nothing on the
+   marketing site or in the dashboard may quote a subscription figure until
+   then — an unannounced number that later changes is worse than no number.
 
-   - a KES 2,000 cash floor, which meant every fleet of five or fewer paid an
-     identical bill — a 3-car fleet worked out at 667/vehicle while a 25-car
-     fleet paid 400;
-   - three fixed fleet bands (1-25 / 26-100 / 100+), which was worse: a 3-car
-     fleet and a 25-car fleet paid exactly the same 1,200, and none of the band
-     prices matched what the backend actually invoiced.
+   The earlier model (KES 400 per vehicle per month, a 3-vehicle minimum, and
+   a 9% Ardena-app commission credit against the bill) has been removed rather
+   than hidden, so nothing can quote it by accident. It is in git history at
+   commit 173f9b3 if the next model builds on it.
 
-   A minimum expressed as a *quantity* keeps the per-vehicle price honest at
-   every fleet size, which is the only version of this a salesperson can say out
-   loud and have be true.
+   Renter verification is the one thing that IS charged during the free
+   months, and it is unchanged: CHECK_PRICE per check, drawn from a prepaid
+   wallet. It is a genuine pass-through cost with unpredictable volume, so it
+   never sat inside the subscription and does not sit inside the free period
+   either. This is the only price the UI may state. */
 
-   On top of that, commission earned on a workspace's Ardena-app bookings is
-   credited against its bill. Ardena ends up earning whichever is larger —
-   commission or subscription — never both. See COMMISSION_RATE below.
+/** Months free from signup. The whole launch offer, in one number. */
+export const FREE_MONTHS = 2;
 
-   Renter verification stays outside the plan at CHECK_PRICE per check. It is a
-   genuine pass-through cost with unpredictable volume, so folding it into a
-   fixed price would mean eating the variance on the heaviest users. */
-
-/** KES per vehicle per month, standard. */
-export const RATE = 400;
-
-/** Discounted rate for a workspace's first LAUNCH_MONTHS months. */
-export const LAUNCH_RATE = 200;
-export const LAUNCH_MONTHS = 3;
-
-/** Smallest fleet we bill for — a count, not a shilling floor. */
-export const MIN_VEHICLES = 3;
-
-/** Ardena's cut of bookings that come through the consumer app. */
-export const COMMISSION_RATE = 0.09;
-
-/** KES per renter verification check, drawn from the prepaid wallet. */
+/** KES per renter verification check, drawn from the prepaid wallet.
+ *  Charged during the free months too — see the note above. */
 export const CHECK_PRICE = 100;
 
-/** Free trial length, in days. Quoted in one place so it can't drift. */
-export const TRIAL_DAYS = 30;
-
-/** Vehicles above this need a custom plan. */
-export const FLEET_CAP = 100;
-
-/** The subscription before any Ardena-app credit. */
-export const monthlyFor = (vehicles, rate = RATE) =>
-  Math.max(Number(vehicles) || 0, MIN_VEHICLES) * rate;
-
-/** Commission Ardena earns on a month of app bookings, in KES. */
-export const commissionOn = (appBookingsKes, rate = COMMISSION_RATE) =>
-  Math.round((Number(appBookingsKes) || 0) * rate);
-
-/** What's actually payable. Floored at zero — the credit never becomes a refund. */
-export const billAfterCredit = (subscription, credit) =>
-  Math.max(0, subscription - credit);
-
-/* One plan, every module. The muted line is what sits outside the subscription
-   on purpose, shown rather than hidden so nobody discovers it on an invoice. */
+/* One plan, every module. The muted line is the charge that sits outside the
+   free period, shown rather than hidden so nobody discovers it on an invoice. */
 export const PLAN = {
   name: "Fleet",
   features: [
     "Every module — fleet, bookings, clients, staff, reports",
-    "Unlimited bookings and staff seats",
+    "Unlimited vehicles, bookings and staff seats",
     "M-Pesa and card payment prompting",
     "Vehicle tracking and document expiry alerts",
     "List on the Ardena app and take marketplace bookings",
@@ -130,25 +98,5 @@ export const PLAN = {
   ],
   muted: [`Renter verification — KES ${CHECK_PRICE} per check, from your wallet`],
 };
-
-/* Worked examples for the explanation section. Deliberately concrete: the model
-   only lands when you see a 3-car fleet paying nothing next to a 25-car fleet
-   paying full price. Figures are computed, not typed, so they cannot drift from
-   the functions above. */
-export const CREDIT_EXAMPLES = [
-  { vehicles: 3, appBookings: 0, note: "Direct bookings only" },
-  { vehicles: 3, appBookings: 100000, note: "Listed, selling well" },
-  { vehicles: 10, appBookings: 20000, note: "Listed, getting started" },
-  { vehicles: 25, appBookings: 0, note: "Not listed on the app" },
-].map((row) => {
-  const subscription = monthlyFor(row.vehicles);
-  const credit = commissionOn(row.appBookings);
-  return {
-    ...row,
-    subscription,
-    credit: Math.min(credit, subscription),
-    payable: billAfterCredit(subscription, credit),
-  };
-});
 
 export const fmtKES = (n) => (Number(n) || 0).toLocaleString("en-KE");

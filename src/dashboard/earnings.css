@@ -32,12 +32,11 @@
 
 /* Second heading inside the same card — needs a rule above it so the payout
    list doesn't read as part of the withdrawal form. */
+/* No longer a section appended to another card — it heads its own card on
+   Settlements, so it loses the rule above it. */
 .payout-head {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }

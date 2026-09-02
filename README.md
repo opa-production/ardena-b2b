@@ -62,8 +62,53 @@ The API client (`src/lib/api.js`) handles bearer tokens, single-flight refresh o
 
 - Plain CSS, one stylesheet per feature area, kept next to the components.
 - Blue `#007FFA` is used only as a small accent; sections alternate white and black; corners are sharp. Check ardena.co.ke for the reference look.
-- No em dashes in UI copy (enforced by `node scripts/remove-dashes.mjs`).
+- No em dashes in UI copy. `node scripts/strip-dashes.mjs` reports them; add `--write` to apply, `--all` to include the marketing pages.
 - Money is integer KES, dates are ISO 8601 at the API boundary and display strings ("12 Aug 2026") in the UI.
+
+## First launch scope
+
+The first public release is the B2B dashboard on its own: fleet, bookings,
+clients, chauffeurs, verification, payments, staff. Two flags in
+`src/lib/features.js` hold the rest back, and both are harder gates than the
+server's own `app_linked` so a stale backend flag cannot leak an unfinished
+screen into a build.
+
+| Flag | Holds back |
+|---|---|
+| `B2C_MARKETPLACE` | Listings, renter messages, reviews, deposit claims, app earnings and withdrawals |
+| `VEHICLE_TRACKING` | The live map and tracker pages — no GPS connector exists yet |
+| `HOST_ACCOUNT_LINKING` | Connecting an existing Ardena host account |
+
+Two things are shown but deliberately inert, so a business learns the capability
+is coming rather than never hearing of it: Fleet's per-vehicle **Marketplace**
+action is disabled with a *Soon* tag, and **Tracking** keeps its sidebar
+entry and renders a coming-soon page. Each is one flag from working — grep the
+flag before flipping it, the doc comment beside it lists what it gates.
+
+Backend contract for everything on the launch path: [`docs/BACKEND.md`](docs/BACKEND.md).
+
+## Known gaps, roughly by cost of leaving them
+
+1. **An empty workspace has nothing to do.** A new account lands on an Overview
+   of zeroes. `OnboardingChecklist` exists; making it the whole first-run screen
+   until a vehicle and a booking exist is the highest-value change left.
+2. **Bulk vehicle import.** A 25-car fleet will not type 25 forms to evaluate
+   us, and the landing FAQ already promises it.
+3. **Booking conflicts must be impossible, not warned about.** Confirm the
+   availability check is enforced server-side, not only in the form.
+4. **Password reset needs an end-to-end test** on a real device, email included.
+5. **Receipts.** After paying, the customer gets nothing they can keep. The
+   agreement PDF machinery in `pdf.js` already does most of this.
+6. **Document expiry has to reach people.** The fields and the Overview
+   "Needs attention" card exist, but nobody checks a dashboard daily.
+7. **Mobile.** Counter staff work on phones; handover especially needs testing
+   on a real handset, since it uses the camera.
+8. **An audit trail.** The Activity log was removed from Staff & roles. A
+   multi-user workspace handling money will want it back; `fetchActivityLog` is
+   still in `api.js`.
+
+Deliberately not on this list: anything B2C, tracking, annual prepay,
+multi-currency. They widen the surface without making the core journey work.
 
 ## Deployment
 

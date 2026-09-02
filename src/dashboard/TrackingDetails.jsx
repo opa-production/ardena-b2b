@@ -1,5 +1,5 @@
 import { useState, useSyncExternalStore } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import {
   subscribe as subscribeFleet,
   getVehicle,
@@ -18,6 +18,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import LiveMap from "./LiveMap";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
+import { VEHICLE_TRACKING } from "../lib/features";
 import "./fleet.css";
 import "./bookings.css";
 import "./tracking.css";
@@ -71,6 +72,10 @@ export default function TrackingDetails() {
 
   const trail = tracker.trail || [];
   const recent = [...trail].reverse();
+
+  // Same gate as the list — see features.js. A typed URL shouldn't reach a
+  // live map that has no hardware feeding it.
+  if (!VEHICLE_TRACKING) return <Navigate to="/dashboard/tracking" replace />;
 
   return (
     <>

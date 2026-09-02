@@ -375,7 +375,7 @@ export default function Settings() {
             ) : (
               <p className="side-hint">
                 Verification confirms your registration, KRA PIN and director ID.
-                Direct bookings work without it — it unlocks listing vehicles on the
+                Direct bookings work without it, it unlocks listing vehicles on the
                 Ardena app and your public trust page.{" "}
                 <Link to="/dashboard/support">Ask Ardena to verify your business</Link>.
               </p>

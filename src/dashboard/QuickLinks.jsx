@@ -46,7 +46,7 @@ const LINKS = [
   {
     key: "tracking",
     to: "/dashboard/tracking",
-    name: "Vehicle tracking",
+    name: "Tracking",
     desc: "Live location of your connected vehicles",
     icon: ICONS.tracking,
   },

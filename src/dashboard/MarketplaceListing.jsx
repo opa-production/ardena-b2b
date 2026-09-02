@@ -38,9 +38,9 @@ const CANCELLATION_TIERS = [
 
 // Plain-language summary so the choice isn't three words with no consequence.
 const TIER_NOTES = {
-  flexible: "Most generous to the renter — full refund until close to pickup. Attracts more bookings.",
+  flexible: "Most generous to the renter, full refund until close to pickup. Attracts more bookings.",
   standard: "A balance between filling the vehicle and covering a late drop-out.",
-  strict: "Least refundable. Best for in-demand vehicles and peak season — the default for fleets.",
+  strict: "Least refundable. Best for in-demand vehicles and peak season, the default for fleets.",
 };
 
 function CommissionModal({ onAccept, onClose }) {
@@ -436,7 +436,7 @@ export default function MarketplaceListing() {
       {review === "pending_review" && (
         <div className="mkt-banner mkt-banner-review">
           <strong>Waiting on Ardena review.</strong> Every new listing is checked
-          before it reaches renters — usually within a day. You&apos;ll see
+          before it reaches renters, usually within a day. You&apos;ll see
           &ldquo;Live on Ardena&rdquo; here once it&apos;s approved. Edits you make
           in the meantime are saved and reviewed together.
         </div>
@@ -479,7 +479,7 @@ export default function MarketplaceListing() {
                   <textarea
                     id="mkt-desc"
                     rows={4}
-                    placeholder="Describe the vehicle — comfort, condition, what makes it great for a trip…"
+                    placeholder="Describe the vehicle, comfort, condition, what makes it great for a trip…"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />

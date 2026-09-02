@@ -265,166 +265,18 @@
 }
 
 /* =========================================================================
-   Two-up layout: the plan, and the estimator beside it
+   Solo layout: one card, centred
    -------------------------------------------------------------------------
-   There is one plan now, so there is no ladder to compare. What replaced the
-   third card is a thing the cards could never do — answer "what does MY fleet
-   cost", and show the Ardena-app credit moving the number in real time.
+   The estimator that used to sit beside the plan is gone with the per-vehicle
+   model it estimated — see pricingData.js. One card left, so it is centred at
+   a readable width rather than stretched across the grid.
    ========================================================================= */
 
-.pc-grid--two {
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 900px;
+.pc-card--solo {
+  /* the grid is still three columns wide; without this the only card sits in
+     the left third rather than under the middle of the page */
+  grid-column: 1 / -1;
+  max-width: 460px;
+  margin: 0 auto;
 }
 
-@media (max-width: 1000px) {
-  .pc-grid--two {
-    grid-template-columns: 1fr;
-    max-width: 460px;
-  }
-}
-
-/* ---- Estimator inputs ---- */
-
-.pc-field {
-  margin-bottom: 0.9rem;
-}
-
-.pc-field-label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 500;
-  color: #475569;
-  margin-bottom: 0.45rem;
-}
-
-.pc-field-label strong {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #0f172a;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.pc-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 4px;
-  border-radius: 2px;
-  background: rgba(15, 23, 42, 0.15);
-  outline: none;
-  cursor: pointer;
-}
-
-.pc-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #0f172a;
-  border: 3px solid #fff;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.3);
-  cursor: pointer;
-}
-
-.pc-slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: #0f172a;
-  border: 3px solid #fff;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.3);
-  cursor: pointer;
-}
-
-.pc-slider:focus-visible {
-  outline: 2px solid #0f172a;
-  outline-offset: 4px;
-}
-
-/* ---- Running total ---- */
-
-.pc-breakdown {
-  margin: 0.35rem 0 0;
-  padding: 0.85rem 0.9rem;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.85);
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.pc-breakdown > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.85rem;
-  color: #1e293b;
-}
-
-.pc-breakdown dt {
-  min-width: 0;
-}
-
-.pc-breakdown dd {
-  margin: 0;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.pc-note {
-  color: #94a3b8;
-  font-weight: 400;
-}
-
-/* Green only once it is actually taking money off the bill — a permanently
-   green "KES 0" reads as a feature they're missing, not one they're using. */
-.pc-breakdown-credit dd {
-  color: #059669;
-}
-
-.pc-breakdown-total {
-  border-top: 1px solid rgba(15, 23, 42, 0.1);
-  padding-top: 0.5rem;
-  margin-top: 0.1rem;
-}
-
-.pc-breakdown-total dt {
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.pc-breakdown-total dd {
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: #0f172a;
-}
-
-.pc-calc-foot {
-  margin-top: 0.7rem;
-  font-size: 0.78rem;
-  line-height: 1.5;
-  color: #475569;
-}
-
-.pc-inline-link {
-  color: #0f172a;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pc-slider {
-    transition: none;
-  }
-}

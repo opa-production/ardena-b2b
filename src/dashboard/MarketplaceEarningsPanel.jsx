@@ -4,7 +4,7 @@ import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import Dropdown from "../components/Dropdown";
 import CollectionsArea from "./charts/CollectionsArea";
 import PaymentDonut from "./charts/PaymentDonut";
-import PayoutMethods, { methodDetail } from "./PayoutMethods";
+import { methodDetail } from "./PayoutMethods";
 import { toast } from "./toastStore";
 import useRole from "../hooks/useRole";
 import { createMarketplaceWithdrawal } from "../lib/api";
@@ -206,7 +206,8 @@ export default function MarketplaceEarningsPanel({
             </p>
           ) : methods.length === 0 ? (
             <p className="field-note earnings-empty-note">
-              Save a payout destination below before requesting a withdrawal.
+              Save a settlement account under Account → Settlements before
+              requesting a withdrawal.
             </p>
           ) : (
             <form className="withdraw-form" onSubmit={handleWithdraw}>
@@ -237,7 +238,7 @@ export default function MarketplaceEarningsPanel({
               <button type="submit" className="btn btn-primary" disabled={busy}>
                 Request withdrawal
               </button>
-              <p className="field-note">Manage destinations below.</p>
+              <p className="field-note">Manage destinations under Account → Settlements.</p>
             </form>
           )}
         </section>
@@ -286,13 +287,6 @@ export default function MarketplaceEarningsPanel({
           )}
         </section>
       </div>
-
-      {/* Destinations used to live on the profile page, a nav section away from
-          the only screen that spends them. They belong under the withdrawal
-          form that needs one. */}
-      <section className="panel-card">
-        <PayoutMethods />
-      </section>
 
       <section className="panel-card">
         <header className="card-head">

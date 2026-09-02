@@ -7,13 +7,11 @@
  * swap. Keep the numbers here in step with src/pages/pricingData.js.
  */
 
+/* Launch phase: there is no subscription price yet, so there is none here.
+   Mirrors src/pages/pricingData.js and docs/BACKEND.md §4; keep them in step. */
 export const PRODUCT_FACTS = {
-  rate: 400,
-  launchRate: 200,
-  launchMonths: 3,
-  minimum: 2000,
+  freeMonths: 2,
   checkPrice: 100,
-  trialDays: 30,
 };
 
 /* Each topic: keywords that route to it, a short answer, and where in the
@@ -24,7 +22,7 @@ export const TOPICS = [
     id: "pricing",
     keywords: ["price", "pricing", "cost", "how much", "rate", "bill", "billing", "subscription", "plan", "charge", "minimum"],
     answer:
-      `You pay per vehicle on the platform: KES ${PRODUCT_FACTS.rate} a month each, or KES ${PRODUCT_FACTS.launchRate} for your first ${PRODUCT_FACTS.launchMonths} months. There's a KES ${PRODUCT_FACTS.minimum} monthly minimum, every module is included on every plan, and you can cancel anytime. New accounts get a ${PRODUCT_FACTS.trialDays} day free trial with no card required.`,
+      `Your first ${PRODUCT_FACTS.freeMonths} months are free — every module, every vehicle, your whole team, no card required. We haven't set the prices that follow yet; they'll be announced well before your free months end, and you'll hear it from us first. Renter checks are the one thing billed from day one, at KES ${PRODUCT_FACTS.checkPrice} each from your wallet.`,
     to: { label: "See pricing", path: "/pricing" },
   },
   {
@@ -73,21 +71,21 @@ export const TOPICS = [
     id: "tracking",
     keywords: ["track", "tracking", "gps", "location", "map", "where is"],
     answer:
-      "Tracking shows where vehicles on active rentals are, on a live map. If no Mapbox token is configured the map falls back to a schematic view — the positions still work.",
+      "Tracking shows where vehicles on active rentals are, on a live map. If no Mapbox token is configured the map falls back to a schematic view, the positions still work.",
     to: { label: "Open tracking", path: "/dashboard/tracking" },
   },
   {
     id: "staff",
     keywords: ["staff", "team", "role", "permission", "invite", "seat", "access", "audit", "activity log"],
     answer:
-      "Invite your team from Staff & roles and give each person a role — admin, booking agent or finance — so they only see what they should. Seats are unlimited on the Fleet plan, and every action is written to an activity log you can audit later.",
+      "Invite your team from Staff & roles and give each person a role, admin, booking agent or finance, so they only see what they should. Seats are unlimited on the Fleet plan, and every action is written to an activity log you can audit later.",
     to: { label: "Open staff & roles", path: "/dashboard/staff" },
   },
   {
     id: "marketplace",
     keywords: ["marketplace", "listing", "public", "visibility", "list my cars", "b2c"],
     answer:
-      "Marketplace visibility puts selected vehicles in front of renters browsing Ardena. You choose which cars are listed and what they show — nothing is published without you switching it on.",
+      "Marketplace visibility puts selected vehicles in front of renters browsing Ardena. You choose which cars are listed and what they show, nothing is published without you switching it on.",
     to: { label: "Open settings", path: "/dashboard/settings" },
   },
   {
@@ -115,7 +113,7 @@ export const TOPICS = [
     id: "support",
     keywords: ["support", "human", "agent", "contact", "help me", "talk to someone", "phone", "whatsapp"],
     answer:
-      "I can handle product questions here. For anything account-specific — a stuck payment, a verification you want reviewed manually — Support puts you through to a person, Mon–Sat 8am–8pm EAT. Renter messages live there too.",
+      "I can handle product questions here. For anything account-specific, a stuck payment, a verification you want reviewed manually, Support puts you through to a person, Mon to Sat 8am to 8pm EAT. Renter messages live there too.",
     to: { label: "Go to Support", path: "/dashboard/support" },
   },
 ];
@@ -128,8 +126,5 @@ export const SUGGESTIONS = [
   "How do I give a booking agent limited access?",
 ];
 
-export const GREETING =
-  "Hi — I'm the Ardena assistant. Ask me how anything on the platform works, or about what's in your own workspace: fleet, bookings, payments, verification and billing.";
-
 export const FALLBACK =
-  "I don't have a confident answer for that one yet. I can help with fleet, bookings, clients, chauffeurs, tracking, verification, payments, staff roles, notifications, reports and billing — or Support will put you through to a person.";
+  "I don't have a confident answer for that one yet. I can help with fleet, bookings, clients, chauffeurs, tracking, verification, payments, staff roles, notifications, reports and billing, or Support will put you through to a person.";

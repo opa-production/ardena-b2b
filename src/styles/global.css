@@ -74,9 +74,17 @@
   --usage-bar: #007ffa;
   --usage-bar-hot: #0066c9;
 
-  /* Shape & type, sharp corners everywhere, per brand */
+  /* Shape & type. Structure is square, per brand: cards, panels, tables and
+     page furniture all sit at --radius / --radius-sm = 0.
+     The two below are the exceptions, and they are deliberate. Sharp corners
+     read as architecture; they read as *hostile* on the things a person
+     handles or talks into. A chat bubble with square corners is not a bubble,
+     and a round icon button is the difference between a control and a tile.
+     Use them for conversational surfaces and hand-sized controls only. */
   --radius: 0;
   --radius-sm: 0;
+  --radius-soft: 12px; /* message bubbles, composer, inputs you type into */
+  --radius-round: 999px; /* icon buttons, avatars, pills */
   --font-ui: "Inter", system-ui, -apple-system, sans-serif;
   --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
 

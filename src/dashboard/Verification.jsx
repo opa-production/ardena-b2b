@@ -51,7 +51,8 @@ export default function Verification() {
   const stats = useMemo(() => {
     const monthPrefix = new Date().toISOString().slice(0, 7);
     const thisMonth = lookups.filter((c) => (c.date || "").startsWith(monthPrefix)).length;
-    return { total: lookups.length, thisMonth };
+    const verified = lookups.filter((c) => c.status === "Verified").length;
+    return { total: lookups.length, thisMonth, verified };
   }, [lookups]);
 
   /* ---- Top up the check wallet ----
@@ -104,7 +105,7 @@ export default function Verification() {
         ) {
           stopTopupPolling();
           await hydrateWallet().catch(() => {});
-          toast("Top-up wasn't confirmed — the prompt may have expired. Try again.", "warn");
+          toast("Top-up wasn't confirmed, the prompt may have expired. Try again.", "warn");
         }
         // still pending — retry next tick
       } catch {
@@ -145,9 +146,9 @@ export default function Verification() {
       const reference = res.reference || res.paystack_reference;
       if (topupMethod === "card" && res.checkout_url) {
         window.open(res.checkout_url, "_blank", "noopener,noreferrer");
-        toast("Paystack checkout opened — complete your payment there.");
+        toast("Paystack checkout opened, complete your payment there.");
       } else {
-        toast("STK push sent — enter your M-Pesa PIN to complete the top-up.");
+        toast("STK push sent, enter your M-Pesa PIN to complete the top-up.");
       }
       setTopupModal(false);
       if (reference) startTopupPolling(reference);
@@ -193,44 +194,56 @@ export default function Verification() {
 
   return (
     <>
-      {/* Two numbers and the one action they lead to: how many checks you have
-          run, what is left to run more, and the button that buys more. */}
+      {/* Top-right page action, the same control as "New booking". */}
+      <div className="page-actions">
+        {topupWaiting ? (
+          <button
+            type="button"
+            className="btn btn-ghost page-action-btn"
+            onClick={stopTopupPolling}
+          >
+            <span className="pay-waiting-dot" />
+            Waiting for payment
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-primary page-action-btn"
+            onClick={openTopupModal}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Top up wallet
+          </button>
+        )}
+      </div>
+
+      {/* The wallet is the card that gates everything else here, so it is the
+          one that carries colour — the other two only report. */}
       <div className="stat-grid verify-stats">
+        <article className="stat-card stat-card--brand">
+          <p className="stat-label">KYC wallet</p>
+          <p className="stat-value">
+            {walletLoaded ? `KES ${wallet.balance.toLocaleString("en-KE")}` : "…"}
+          </p>
+          <p className="stat-note">
+            {topupWaiting
+              ? "Waiting for payment…"
+              : `≈ ${Math.floor(wallet.balance / checkPrice)} checks left`}
+          </p>
+        </article>
         <article className="stat-card">
           <p className="stat-label">Total checks</p>
           <p className="stat-value">{stats.total}</p>
           <p className="stat-note">{stats.thisMonth} this month</p>
         </article>
         <article className="stat-card">
-          <p className="stat-label">Wallet</p>
-          <p className="stat-value">
-            {walletLoaded ? `KES ${wallet.balance.toLocaleString("en-KE")}` : "…"}
-          </p>
+          <p className="stat-label">Verified</p>
+          <p className="stat-value">{stats.verified}</p>
           <p className="stat-note">
-            ≈ {Math.floor(wallet.balance / checkPrice)} checks left
+            {stats.total ? `${Math.round((stats.verified / stats.total) * 100)}% pass rate` : "no checks yet"}
           </p>
-        </article>
-        <article className="stat-card stat-action">
-          {topupWaiting ? (
-            <>
-              <p className="stat-label">Top up</p>
-              <span className="pay-waiting">
-                <span className="pay-waiting-dot" />
-                Waiting…
-              </span>
-              <button type="button" className="stat-note stat-cancel" onClick={stopTopupPolling}>
-                Stop waiting
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="stat-label">Top up</p>
-              <button type="button" className="btn btn-primary stat-btn" onClick={openTopupModal}>
-                Top up wallet
-              </button>
-              <p className="stat-note">M-Pesa or card</p>
-            </>
-          )}
         </article>
       </div>
 
@@ -440,7 +453,7 @@ export default function Verification() {
               )}
               <p className="side-hint" style={{ marginTop: 0 }}>
                 {topupMethod === "mpesa"
-                  ? "An STK push goes to this phone — enter the PIN to complete."
+                  ? "An STK push goes to this phone, enter the PIN to complete."
                   : "A Paystack checkout opens in a new tab."}
               </p>
               <div className="modal-actions">

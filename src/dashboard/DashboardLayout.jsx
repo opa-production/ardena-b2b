@@ -313,6 +313,7 @@ export default function DashboardLayout() {
                     {item.key === "support" && supportUnread > 0 && (
                       <span className="nav-badge">{supportUnread}</span>
                     )}
+                    {item.soon && <span className="nav-soon">Soon</span>}
                   </NavLink>
                 )
               )}
@@ -353,7 +354,7 @@ export default function DashboardLayout() {
                 </svg>
                 Profile
               </button>
-              {/* Vehicle tracking, billing and Support used to hide in here;
+              {/* Tracking, billing and Support used to hide in here;
                   they are sidebar destinations now (see nav.js) so they can
                   actually be found. */}
               <button type="button" role="menuitem" onClick={handleLogout}>

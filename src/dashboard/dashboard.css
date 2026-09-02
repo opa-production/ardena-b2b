@@ -185,6 +185,18 @@
   font-size: 13.5px;
 }
 
+/* a nav destination that exists but isn't switched on yet */
+.nav-soon {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 1px 5px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
 /* unread counters on nav + menu items: a bare orange number, no box */
 .nav-badge {
   margin-left: auto;
@@ -340,14 +352,38 @@
 
 /* ---- Content ---- */
 
+/* The gutter is a variable so a page can deliberately break out of it — see
+   .support-page, which runs the conversation edge to edge. */
 .dash-content {
+  --content-pad: clamp(24px, 3.5vw, 44px);
   flex: 1;
   min-width: 0;
-  padding: clamp(24px, 3.5vw, 44px);
+  padding: var(--content-pad);
 }
 
+/* Opacity only, deliberately — no transform.
+ *
+ * This used to be `rise`, which slides content up 22px. The catch is that an
+ * animation with fill-mode `both` leaves its final value applied, and `to {
+ * transform: none }` computes to matrix(1,0,0,1,0,0) — an identity transform,
+ * but a transform all the same. Any transform other than `none` makes the
+ * element the containing block for every `position: fixed` descendant, so
+ * modals opened from inside a page stopped being sized to the viewport and
+ * anchored themselves to whichever card they were declared in.
+ *
+ * Fading is worth more than sliding. Do not put a transform back here without
+ * moving every dashboard modal into a portal first. */
 .dash-content > * {
-  animation: rise 0.45s var(--ease) both;
+  animation: settle 0.4s var(--ease) both;
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .dash-content > *:nth-child(2) {
@@ -515,6 +551,7 @@
   }
 
   .dash-content {
+    --content-pad: 16px;
     padding: 20px 16px 44px;
   }
 

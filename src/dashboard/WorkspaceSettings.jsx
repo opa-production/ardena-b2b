@@ -13,14 +13,12 @@ import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
 import { subscribe as subscribeBusiness, getBusiness } from "./businessStore";
 import { updatePolicy } from "../lib/api";
+import { CHECK_PRICE, FREE_MONTHS, fmtKES } from "../pages/pricingData";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
-
-// Per-vehicle pricing (mock, real numbers come with the billing engine)
-const PLAN = { launchRate: 200, minimum: 2000 };
 
 export default function WorkspaceSettings() {
   usePageTitle("Settings");
@@ -28,8 +26,6 @@ export default function WorkspaceSettings() {
   const policy = useSyncExternalStore(subscribePolicy, getPolicy);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [savingPolicy, setSavingPolicy] = useState(false);
-
-  const monthly = Math.max(PLAN.minimum, vehicles.length * PLAN.launchRate);
 
   async function handlePolicySave(e) {
     e.preventDefault();
@@ -110,20 +106,28 @@ export default function WorkspaceSettings() {
         </div>
 
         <div className="details-side">
+          {/* No subscription figure here on purpose — there isn't one yet.
+              See the launch-phase note in src/pages/pricingData.js. */}
           <section className="panel-card">
             <header className="card-head">
               <h2>Plan &amp; billing</h2>
-              <p>Fleet plan · billed monthly</p>
+              <p>Launch offer</p>
             </header>
             <p className="util-hero">
-              KES {monthly.toLocaleString("en-KE")}
-              <span className="util-per">/mo</span>
+              Free
+              <span className="util-per">for {FREE_MONTHS} months</span>
             </p>
             <p className="plan-price">
-              {vehicles.length} vehicles · KES {PLAN.launchRate}/vehicle
+              {vehicles.length} vehicle{vehicles.length === 1 ? "" : "s"} · every
+              module included
+            </p>
+            <p className="side-hint">
+              We&apos;ll announce pricing well before your free months end, and
+              tell you first. Renter checks stay billed at KES{" "}
+              {fmtKES(CHECK_PRICE)} each.
             </p>
             <Link to="/pricing" className="btn btn-ghost pay-btn">
-              See plans &amp; pricing
+              See what&apos;s included
             </Link>
           </section>
 

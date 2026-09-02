@@ -1,53 +1,77 @@
-/* Three cards across, always: two figures and the action they lead to. The
-   default auto-fit grid would reflow them 2 + 1 at awkward widths and orphan
-   the button on its own row. */
+/* Three cards across, always: the wallet that gates the page, and two figures
+   about what it has bought. The default auto-fit grid reflows them 2 + 1 at
+   awkward widths and orphans the odd one. */
 .verify-stats {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* The card that acts rather than reports. It keeps the same three rows as the
-   figures beside it — label, then the button where the number sits, then a
-   note — so it carries the same weight instead of reading as a half-empty
-   card. The note is deliberately two words: anything longer wraps at narrow
-   widths and drags the whole row taller. */
-.stat-action {
+/* The wallet card carries colour because it is the one that stops work when it
+   runs out — the other two only report. Ink ground rather than brand blue: the
+   blue stays an accent, and white figures on near-black read at a glance
+   across the room, which is where a counter screen usually is. */
+.stat-card--brand {
+  background: var(--ink-inv);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+
+.stat-card--brand .stat-label,
+.stat-card--brand .stat-note {
+  color: rgba(255, 255, 255, 0.66);
+}
+
+[data-theme="dark"] .stat-card--brand .stat-label,
+[data-theme="dark"] .stat-card--brand .stat-note {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.stat-card--brand .stat-value {
+  color: var(--on-ink);
+}
+
+/* label left, action right, on the label's own line */
+.stat-card-head {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.stat-btn {
-  width: 100%;
-  /* matches the height of .stat-value's line box, so the row lines up */
-  min-height: 38px;
-  margin-bottom: 6px;
-  padding: 9px 14px;
-  font-size: 13.5px;
+.stat-card-head .stat-label {
+  margin-bottom: 0;
 }
 
-/* mid-payment the pill takes the button's place on the figure line */
-.stat-action .pay-waiting {
-  min-height: 38px;
-  justify-content: center;
-  margin-bottom: 6px;
-  font-size: 12.5px;
+.add-btn--on-brand {
+  color: var(--on-ink);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
 }
 
-/* the way out of a stuck payment, worn as the note line rather than a button */
-.stat-cancel {
-  text-align: left;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.add-btn--on-brand:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--on-ink);
 }
 
-.stat-cancel:hover {
-  color: var(--ink);
+[data-theme="dark"] .add-btn--on-brand {
+  background: rgba(0, 0, 0, 0.14);
 }
 
-@media (max-width: 720px) {
+[data-theme="dark"] .add-btn--on-brand:hover {
+  background: rgba(0, 0, 0, 0.24);
+}
+
+/* mid top-up: the + becomes a pulsing dot that cancels the wait */
+.add-btn--on-brand.is-waiting {
+  padding: 11px;
+}
+
+@media (max-width: 820px) {
   .verify-stats {
     grid-template-columns: 1fr;
   }
 }
+
 
 /* ---- Verification page: walk-in registry lookup ---- */
 

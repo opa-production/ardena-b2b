@@ -4,15 +4,7 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
-import {
-  MODULES,
-  CHECK_PRICE,
-  COMMISSION_RATE,
-  MIN_VEHICLES,
-  RATE,
-  TRIAL_DAYS,
-  fmtKES,
-} from "./pricingData";
+import { MODULES, CHECK_PRICE, FREE_MONTHS, fmtKES } from "./pricingData";
 import "./landingArdena.css";
 
 /* The landing page follows the ardena.co.ke design language: an image-free
@@ -54,8 +46,6 @@ const TRUST = [
 /* Built from pricingData so the landing can never quote a price /pricing
    disagrees with — which is exactly what happened when this page advertised
    fleet bands the backend had never heard of. */
-const COMMISSION_PCT = Math.round(COMMISSION_RATE * 1000) / 10;
-
 const FAQS = [
   {
     q: "How do I get an account?",
@@ -63,7 +53,7 @@ const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `KES ${fmtKES(RATE)} per vehicle per month, billed for a minimum of ${MIN_VEHICLES} vehicles — the same price per car whether you run three or thirty. List on the Ardena app and we take ${COMMISSION_PCT}% commission on the bookings it sends you, which comes straight off your subscription: earn more in commission than the subscription is worth and the dashboard is free that month. Pay by card or M-Pesa, cancel anytime, and every account starts with a ${TRIAL_DAYS} day free trial.`,
+    a: `Your first ${FREE_MONTHS} months are free — every module, every vehicle, your whole team, no card required. We are still setting the prices that follow, and we will announce them well before your free months end; every workspace already signed up hears it from us first. Renter checks are the one thing billed from day one, at KES ${fmtKES(CHECK_PRICE)} each.`,
   },
   {
     q: "Do I need my own identity verification account?",
@@ -231,8 +221,8 @@ export default function Landing() {
                 </h2>
                 <p className="ard-cta-text">
                   Tell us about your business and we will verify it and send
-                  your logins within 24 hours. Every account starts with a{" "}
-                  {TRIAL_DAYS} day free trial, no card required.
+                  your logins within 24 hours. Your first {FREE_MONTHS} months
+                  are free, no card required.
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">

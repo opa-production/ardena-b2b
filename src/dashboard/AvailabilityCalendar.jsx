@@ -177,7 +177,7 @@ export default function AvailabilityCalendar() {
       </div>
 
       <p className="cal-hint">
-        {vehicle ? `${vehicle.name} · ${vehicle.plate}` : ""} — click a free day
+        {vehicle ? `${vehicle.name} · ${vehicle.plate}` : ""} · click a free day
         to block it, click a blocked day to reopen it. Booked days open the
         booking, and blocked days can't be picked in new bookings.
       </p>

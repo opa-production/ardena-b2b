@@ -5,17 +5,7 @@ import useReveal from "../hooks/useReveal";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
 import PricingPlans from "../components/PricingPlans";
-import {
-  CHECK_PRICE,
-  COMMISSION_RATE,
-  CREDIT_EXAMPLES,
-  LAUNCH_MONTHS,
-  LAUNCH_RATE,
-  MIN_VEHICLES,
-  RATE,
-  TRIAL_DAYS,
-  fmtKES,
-} from "./pricingData";
+import { CHECK_PRICE, FREE_MONTHS, fmtKES } from "./pricingData";
 import "./landingArdena.css";
 import "./pricingCards.css";
 
@@ -28,48 +18,41 @@ function Reveal({ as: Tag = "div", className = "", children }) {
   );
 }
 
-const COMMISSION_PCT = Math.round(COMMISSION_RATE * 1000) / 10;
-
 /* Every figure here is derived from pricingData, never typed. A pricing page
-   that disagrees with the invoice is worse than no pricing page. */
+   that disagrees with the invoice is worse than no pricing page — which during
+   the launch phase means these answers may state exactly two things: the free
+   months, and the per-check verification price. */
 const PRICING_FAQS = [
   {
-    q: "How is my bill worked out?",
-    a: `KES ${fmtKES(RATE)} per vehicle per month, with a minimum of ${MIN_VEHICLES} vehicles. So a ${MIN_VEHICLES}-car fleet pays KES ${fmtKES(RATE * MIN_VEHICLES)} and a 25-car fleet pays KES ${fmtKES(RATE * 25)} — the same price per car either way. Your first ${LAUNCH_MONTHS} months are KES ${fmtKES(LAUNCH_RATE)} per vehicle.`,
+    q: "What does it cost?",
+    a: `Nothing for your first ${FREE_MONTHS} months. No card, no commitment, every module included. We are still setting the prices that follow, and we would rather say that plainly than publish a number we might change.`,
   },
   {
-    q: `Why a ${MIN_VEHICLES}-vehicle minimum?`,
-    a: `It's the floor that keeps the per-vehicle price honest. We used to set a minimum in shillings instead, which meant every fleet under five cars paid an identical bill — a ${MIN_VEHICLES}-car fleet was effectively paying nearly double per car what a big fleet paid. A minimum expressed in vehicles doesn't do that.`,
+    q: "What happens after the free months?",
+    a: `We will announce pricing well before your free months run out, and every workspace already signed up hears it from us first — by email and in the dashboard. Nobody gets moved onto a paid plan by surprise, and nobody is charged without agreeing to the price.`,
   },
   {
-    q: "How does the Ardena app credit work?",
-    a: `List your cars on the Ardena consumer app and we take ${COMMISSION_PCT}% commission on the bookings that come through it. That commission comes straight off your subscription. Earn more in commission than your subscription is worth and you pay nothing for the dashboard that month — we've already been paid.`,
+    q: "Is renter verification free too?",
+    a: `No — checks are the one thing billed during the free months, at KES ${fmtKES(CHECK_PRICE)} each, paid from a prepaid wallet you top up like airtime. Each check costs us money at the registry, so it is a genuine pass-through rather than something we can give away. You only pay for checks you actually run.`,
+  },
+  {
+    q: "Is there a limit on vehicles or staff during the free months?",
+    a: "No. Add every car you run and invite your whole team. We would rather see the platform used properly than meter a trial.",
   },
   {
     q: "Do I have to list on the Ardena app?",
-    a: "No. The dashboard runs your own direct bookings perfectly well on its own, and plenty of fleets use it that way. Listing is how you stop paying for it — and how you fill the cars that are sitting idle.",
+    a: "No. The dashboard runs your own direct bookings perfectly well on its own, and plenty of fleets use it that way. Listing is how you fill the cars that are sitting idle.",
   },
   {
     q: "Do you take commission on my own direct bookings?",
-    a: "Never. Bookings you bring in yourself — walk-ins, phone, your repeat corporate clients — are yours in full. We only take a cut of business the Ardena app sends you, because that's business you didn't have.",
-  },
-  {
-    q: "What counts as a vehicle?",
-    a: `Any vehicle active on your account. Cars you've archived or sold don't count, so a fleet that shrinks pays less the following cycle — down to the ${MIN_VEHICLES}-vehicle minimum.`,
-  },
-  {
-    q: "What happens when I add a car mid-month?",
-    a: "Nothing until your next cycle. We snapshot your fleet size when the invoice is raised, so adding a car never triggers a bill mid-month. Nobody should be worse off for growing.",
-  },
-  {
-    q: "Is renter verification included?",
-    a: `No, and deliberately so. Checks are KES ${CHECK_PRICE} each, paid from a prepaid wallet you top up like airtime. It is a real cost we pass straight through rather than padding every plan to cover the heaviest users. The app credit applies to your subscription, not to check charges.`,
+    a: "Never. Bookings you bring in yourself — walk-ins, phone, your repeat corporate clients — are yours in full. We only take a cut of business the Ardena app sends you, because that is business you did not have.",
   },
   {
     q: "Am I tied into a contract?",
-    a: `No. Billing is monthly and you can cancel anytime — you keep the rest of the month you've paid for. Start on the ${TRIAL_DAYS} day free trial and decide after that.`,
+    a: "No. There is nothing to cancel during the free months, and when pricing does start it will be monthly with no lock-in. Your data is yours to export whenever you want it.",
   },
 ];
+
 
 export default function Pricing() {
   usePageTitle("Pricing");
@@ -84,14 +67,14 @@ export default function Pricing() {
         <section className="pr-hero">
           <div className="pr-hero-inner">
             <h1 className="pr-title">
-              Pay for the cars
+              Free for your
               <br />
-              <span className="pr-title-soft">you actually run.</span>
+              <span className="pr-title-soft">first {FREE_MONTHS} months.</span>
             </h1>
             <p className="pr-sub">
-              KES {fmtKES(RATE)} per vehicle per month — the same price whether
-              you run three cars or thirty. List on the Ardena app and your
-              commission pays the bill for you.
+              Every module, every vehicle, your whole team — no card required.
+              We&apos;re still setting what comes after, and we&apos;ll announce
+              it well before it starts.
             </p>
           </div>
         </section>
@@ -103,70 +86,31 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* ---- How the credit works ----
-             The estimator shows the mechanism moving; this shows it standing
-             still, side by side, which is what makes it obvious that a small
-             listed fleet can pay nothing while a big unlisted one pays full
-             price. Both read from the same numbers. */}
+        {/* ---- What happens after the free months ----
+             The one question a free launch offer always raises. Answering it
+             here, unprompted and above the FAQ, is the difference between an
+             offer and a trap. */}
         <section className="ard-section ard-section--white">
           <div className="ard-container">
-            <h2 className="ard-section-title">
-              Your Ardena bookings pay your bill
-            </h2>
+            <h2 className="ard-section-title">And after that?</h2>
             <Reveal className="pr-explain">
               <p className="pr-explain-lead">
-                Every booking the Ardena consumer app sends you earns us{" "}
-                {COMMISSION_PCT}% commission. Rather than charge you that{" "}
-                <em>and</em> a subscription, we take the commission off your
-                subscription. We end up earning whichever is larger — never
-                both.
+                We haven&apos;t set the prices yet, and we&apos;re not going to
+                pretend otherwise. What we can promise is how it will happen:
+                pricing gets announced well before your free months end, every
+                workspace already signed up hears it from us first, and nobody
+                is moved onto a paid plan without agreeing to the price.
               </p>
               <p className="pr-explain-lead">
-                Which means the fleets selling well on Ardena pay nothing for
-                the software, and the ones using the software without listing
-                pay for it normally. Your own direct bookings are never touched.
+                When it lands it will be competitive for the Kenyan market,
+                monthly, and cancellable — the same terms we would want. Your
+                data is yours to export either way.
               </p>
-
-              <div className="pr-table-wrap">
-                <table className="pr-table">
-                  <thead>
-                    <tr>
-                      <th>Fleet</th>
-                      <th>Ardena app bookings</th>
-                      <th>Subscription</th>
-                      <th>Credit</th>
-                      <th>You pay</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {CREDIT_EXAMPLES.map((row) => (
-                      <tr key={`${row.vehicles}-${row.appBookings}`}>
-                        <td>
-                          <strong>{row.vehicles} cars</strong>
-                          <span className="pr-table-note">{row.note}</span>
-                        </td>
-                        <td>KES {fmtKES(row.appBookings)}</td>
-                        <td>KES {fmtKES(row.subscription)}</td>
-                        <td className={row.credit > 0 ? "pr-table-credit" : ""}>
-                          {row.credit > 0
-                            ? `− KES ${fmtKES(row.credit)}`
-                            : "—"}
-                        </td>
-                        <td className="pr-table-total">
-                          {row.payable === 0
-                            ? "Nothing"
-                            : `KES ${fmtKES(row.payable)}`}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
               <p className="pr-explain-foot">
-                Figures at the standard KES {fmtKES(RATE)} rate. Your first{" "}
-                {LAUNCH_MONTHS} months are KES {fmtKES(LAUNCH_RATE)} per
-                vehicle, and the first {TRIAL_DAYS} days are free.
+                Renter verification is the exception, and it is charged from day
+                one: KES {fmtKES(CHECK_PRICE)} per check, drawn from a prepaid
+                wallet. Each check costs us money at the registry, so it is
+                passed straight through rather than given away.
               </p>
             </Reveal>
           </div>
@@ -207,11 +151,14 @@ export default function Pricing() {
           <div className="ard-container">
             <div className="ard-cta-card">
               <div className="ard-cta-content">
-                <h2 className="ard-cta-title">Start free, pay when it works</h2>
+                <h2 className="ard-cta-title">
+                  Start free, decide later
+                </h2>
                 <p className="ard-cta-text">
-                  Every account begins with a {TRIAL_DAYS} day free trial and no
-                  card. If it isn&apos;t running your business by the end of it,
-                  walk away.
+                  {FREE_MONTHS} months, every module, no card. If it
+                  isn&apos;t running your business by the end of them, walk
+                  away — and if it is, you&apos;ll know the price before you
+                  ever pay it.
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">

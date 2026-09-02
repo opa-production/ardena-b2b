@@ -124,7 +124,7 @@ export default function Overview() {
         <section className="chart-card">
           <header className="card-head">
             <h2>Booking rhythm</h2>
-            <p>When bookings are created, by day and time — last 4 weeks</p>
+            <p>When bookings are created, by day and time, last 4 weeks</p>
           </header>
           {hasBookings ? (
             <BookingHeatmap data={data.booking_heatmap} />

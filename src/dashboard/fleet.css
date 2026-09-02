@@ -148,6 +148,19 @@
   gap: 8px;
 }
 
+/* The + that adds a row to the card it heads. Square, ink, and the same
+   weight as .toolbar-gear so the two read as one family of card actions. */
+.add-btn {
+  padding: 7px;
+  flex-shrink: 0;
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
+}
+
+.add-btn:hover {
+  background: var(--surface);
+}
+
 /* Square icon-only button — the gear that opens a page's settings. It carries
    ink rather than the muted grey the other icon buttons use: it is often the
    only control on its row, with nothing beside it to read it against. */
@@ -239,8 +252,23 @@
 }
 
 /* icon-only table action (e.g. delete): square, no label padding */
+/* No label, so the glyph is the entire affordance and has to carry it: full
+   ink and a firmer edge than a button whose text does the work. These sit in
+   page headers — the chauffeur and agreement actions on a booking — where a
+   soft grey outline read as decoration rather than something to press. */
 .icon-btn.icon-only {
-  padding: 7px 8px;
+  padding: 8px;
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
+}
+
+.icon-btn.icon-only:hover {
+  background: var(--surface);
+}
+
+.icon-btn.icon-only svg {
+  width: 17px;
+  height: 17px;
 }
 
 /* extra gap so a right-aligned numeric column doesn't crowd the next one */
@@ -322,7 +350,26 @@
   color: var(--ink-soft);
   background: var(--bg);
   box-shadow: var(--edge);
-  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  transition: color 0.15s var(--ease), box-shadow 0.15s var(--ease),
+    background 0.15s var(--ease);
+}
+
+/* Inert, not invisible. A control that exists to say "not yet" has to be
+   readable enough to say it, and the old treatment — 0.72 opacity over
+   --ink-mute — measured 2.80:1 on this ground, under the 4.5:1 text floor.
+   The state is carried by the recess instead of by fading the label: a filled
+   ground and an inset hairline where an enabled button has a raised one, so it
+   reads as pressed shut rather than half-erased. Text stays at --ink-soft,
+   6.03:1, the same weight as an enabled button's. */
+.icon-btn:disabled {
+  cursor: default;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--edge-in);
+}
+
+.icon-btn:disabled:hover {
+  color: var(--ink-soft);
 }
 
 .icon-btn + .icon-btn,
@@ -563,10 +610,12 @@ a.icon-btn + .icon-btn {
   }
 }
 
+/* Tight enough that a booking's whole record fits a laptop screen alongside
+   the payment card, which is the point of the detail layout. */
 .spec-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 22px 24px;
+  gap: 15px 24px;
 }
 
 .spec-full {

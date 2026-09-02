@@ -14,6 +14,7 @@ import PaymentDonut from "./charts/PaymentDonut";
 import EmptyState from "./EmptyState";
 import MarketplaceEarningsPanel from "./MarketplaceEarningsPanel";
 import useRole from "../hooks/useRole";
+import { B2C_MARKETPLACE } from "../lib/features";
 import {
   subscribe as subscribeBusiness,
   getBusiness,
@@ -53,7 +54,7 @@ export default function Payments() {
   // this workspace is actually on the Ardena app. Without the second, a
   // direct-bookings business got a source toggle, a "From the Ardena app" card
   // reading zero, and a tab leading nowhere — all for a channel it isn't on.
-  const canSeeApp = can("viewMoney") && business.appLinked;
+  const canSeeApp = B2C_MARKETPLACE && can("viewMoney") && business.appLinked;
 
   // /dashboard/payments/marketplace still works — it just opens this page on
   // the app tab, so old links and bookmarks land somewhere sensible.
@@ -118,13 +119,15 @@ export default function Payments() {
     );
   }
 
-  const stats = summary || {
-    collected: 0,
-    outstanding: 0,
-    refunded: 0,
-    net: 0,
-    paid_count: 0,
-  };
+  /* `cash_collected` / `cash_count` are the counter takings recorded against
+     bookings (see markBookingPaidCash). Defaulted to 0 so the page is correct
+     against a backend that hasn't shipped them yet — it reads as "no cash
+     recorded", which is true, rather than breaking. */
+  const stats = summary || {};
+  const collected = Number(stats.collected) || 0;
+  const cashCollected = Number(stats.cash_collected) || 0;
+  const outstanding = Number(stats.outstanding) || 0;
+  const refunded = Number(stats.refunded) || 0;
   const earn = app.summary || {};
 
   // Build last-10-weeks buckets from completed payment records only
@@ -157,16 +160,17 @@ export default function Payments() {
   })();
 
   const donutSegments = [
-    { label: "Collected", value: stats.collected, color: "#0b7a37" },
-    { label: "Outstanding", value: stats.outstanding, color: "#d97706" },
-    { label: "Refunded", value: stats.refunded, color: "#94a3b8" },
+    { label: "Through Ardena", value: collected, color: "#0b7a37" },
+    { label: "Cash", value: cashCollected, color: "#0f766e" },
+    { label: "Outstanding", value: outstanding, color: "#d97706" },
+    { label: "Refunded", value: refunded, color: "#94a3b8" },
   ];
 
   const processed = payments.filter((p) => p.status === "completed").slice(0, 8);
 
   if (loading) return <PageSkeleton path={pathname} />;
 
-  const totalIn = stats.net + Number(earn.net_earnings || 0);
+  const totalIn = collected + cashCollected + Number(earn.net_earnings || 0);
 
   return (
     <>
@@ -207,9 +211,9 @@ export default function Payments() {
           </article>
           <article className="stat-card is-clickable" onClick={() => switchTab("direct")}>
             <p className="stat-label">From direct bookings</p>
-            <p className="stat-value">KES {fmtAmount(stats.net)}</p>
+            <p className="stat-value">KES {fmtAmount(collected + cashCollected)}</p>
             <p className="stat-note">
-              {stats.paid_count} payments · KES {fmtAmount(stats.outstanding)} still owed
+              {stats.paid_count || 0} payments · KES {fmtAmount(outstanding)} still owed
             </p>
           </article>
           <article className="stat-card is-clickable" onClick={() => switchTab("app")}>
@@ -246,26 +250,38 @@ export default function Payments() {
           </article>
         </div>
       ) : (
+        /* Four numbers: what came in altogether, then the two channels it came
+           through, then what has not arrived yet. Net leads because it is the
+           one figure a rental business quotes; the split matters because only
+           one half of it settles to their account. */
         <div className="stat-grid finance-stats">
           <article className="stat-card">
-            <p className="stat-label">Collected</p>
-            <p className="stat-value">KES {fmtAmount(stats.collected)}</p>
-            <p className="stat-note">{stats.paid_count} payments via Paystack</p>
+            <p className="stat-label">Net collections</p>
+            <p className="stat-value">KES {fmtAmount(collected + cashCollected)}</p>
+            <p className="stat-note">
+              cash and Ardena
+              {refunded > 0 ? ` · KES ${fmtAmount(refunded)} refunded` : ""}
+            </p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Through Ardena</p>
+            <p className="stat-value">KES {fmtAmount(collected)}</p>
+            <p className="stat-note">
+              {stats.paid_count || 0} payment
+              {(stats.paid_count || 0) === 1 ? "" : "s"} · settles to your account
+            </p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Cash</p>
+            <p className="stat-value">KES {fmtAmount(cashCollected)}</p>
+            <p className="stat-note">
+              {stats.cash_count || 0} at the counter · you bank these
+            </p>
           </article>
           <article className="stat-card">
             <p className="stat-label">Outstanding</p>
-            <p className="stat-value">KES {fmtAmount(stats.outstanding)}</p>
-            <p className="stat-note">owed on live bookings</p>
-          </article>
-          <article className="stat-card">
-            <p className="stat-label">Refunded</p>
-            <p className="stat-value">KES {fmtAmount(stats.refunded)}</p>
-            <p className="stat-note">from cancelled bookings</p>
-          </article>
-          <article className="stat-card">
-            <p className="stat-label">Net collected</p>
-            <p className="stat-value">KES {fmtAmount(stats.net)}</p>
-            <p className="stat-note">after refunds</p>
+            <p className="stat-value">KES {fmtAmount(outstanding)}</p>
+            <p className="stat-note">still owed on live bookings</p>
           </article>
         </div>
       )}

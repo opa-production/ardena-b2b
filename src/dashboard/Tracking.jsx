@@ -17,6 +17,7 @@ import Dropdown from "../components/Dropdown";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
+import { VEHICLE_TRACKING } from "../lib/features";
 import "./fleet.css";
 import "./bookings.css";
 import "./tracking.css";
@@ -78,6 +79,29 @@ export default function Tracking() {
     }
   }
 
+  /* No GPS connector exists yet and Ardena fits the units in person, so the
+     live screens would show a map that never moves. Say so instead — the
+     whole page below is ready for the day there is hardware behind it. */
+  if (!VEHICLE_TRACKING) {
+    return (
+      <>
+        <h1 className="sr-only">Tracking</h1>
+        <section className="panel-card">
+          <EmptyState
+            icon={EMPTY_ICONS.fleet}
+            title="Tracking is coming soon"
+            message="Ardena fits the tracker in your vehicle in person. Talk to us to join the first installations."
+            action={
+              <Link to="/dashboard/support" className="btn btn-primary">
+                Register interest
+              </Link>
+            }
+          />
+        </section>
+      </>
+    );
+  }
+
   if (!loaded) {
     return <div className="empty-block fleet-empty"><p>Loading vehicles…</p></div>;
   }
@@ -117,7 +141,7 @@ export default function Tracking() {
           <path d="M12 16v-4M12 8h.01" />
         </svg>
         <span>
-          Trackers are fitted in the vehicle by the Ardena team in person — the
+          Trackers are fitted in the vehicle by the Ardena team in person, the
           hardware has to be wired in before it can report.{" "}
           <Link className="spec-link" to="/dashboard/support">
             Contact support

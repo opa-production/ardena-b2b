@@ -31,6 +31,7 @@ import PaymentsList from "./dashboard/PaymentsList";
 import Staff from "./dashboard/Staff";
 import Billing from "./dashboard/Billing";
 import Usage from "./dashboard/Usage";
+import Settlements from "./dashboard/Settlements";
 import Support from "./dashboard/Support";
 import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
@@ -135,6 +136,10 @@ export default function App() {
         <Route
           path="billing"
           element={<RequireRole capability="manageBilling"><Billing /></RequireRole>}
+        />
+        <Route
+          path="settlements"
+          element={<RequireRole capability="manageBilling"><Settlements /></RequireRole>}
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />

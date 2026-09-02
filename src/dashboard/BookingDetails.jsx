@@ -6,6 +6,7 @@ import {
   recordHandoverOut,
   recordHandoverIn,
   bookingDepositAction,
+  markBookingPaidCash,
   sendStkPush,
   checkChargeStatus,
   uploadHandoverPhotos,
@@ -64,9 +65,12 @@ const NEXT_STEP = {
   Active: { label: "Mark completed", to: "Completed" },
 };
 
-// Note: a paid-but-Pending booking is advanced to Confirmed server-side now
-// (the Paystack webhook / charge poll does it — b2b.md §F), so the frontend no
-// longer patches the status after payment.
+/* A paid-but-Pending booking is advanced to Confirmed server-side (the
+   Paystack webhook / charge poll does it, b2b.md §F), and recording cash does
+   the same. So payment *is* the confirmation for the ordinary case, and the
+   button below is only for the other one: reserving a car for a customer who
+   will pay at the counter. It says so while the booking is unpaid rather than
+   sitting there as a second primary action competing with taking the money. */
 
 const CANCELLABLE = ["Pending", "Confirmed"];
 
@@ -90,6 +94,12 @@ export default function BookingDetails() {
   const [inFuel, setInFuel] = useState("Full");
   const [payModal, setPayModal] = useState(false);
   const [payPhone, setPayPhone] = useState("");
+  const [chauffeurModal, setChauffeurModal] = useState(false);
+  const [agreementModal, setAgreementModal] = useState(false);
+  const [cashModal, setCashModal] = useState(false);
+  const [cashAmount, setCashAmount] = useState("");
+  const [cashNote, setCashNote] = useState("");
+  const [cashBusy, setCashBusy] = useState(false);
   const [payProvider, setPayProvider] = useState("mpesa");
   const [payBusy, setPayBusy] = useState(false);
   const [payWaiting, setPayWaiting] = useState(false);
@@ -167,7 +177,7 @@ export default function BookingDetails() {
               // Refresh booking so the chip reflects the current DB state
               const updated = await fetchBooking(decodedRef);
               setB(updated);
-              toast("Payment not confirmed — the STK push may have expired. You can resend the request.", "warn");
+              toast("Payment not confirmed, the STK push may have expired. You can resend the request.", "warn");
             }
           } catch { /* ignore */ }
           stopPolling();
@@ -218,7 +228,16 @@ export default function BookingDetails() {
 
   const days = rentalDays(b.pickup, b.dropoff);
   const total = days * b.rate;
+  /* A booking has two halves and staff only ever work one of them at a time:
+     arrange it (take the money, put a driver on it), then hand the car over.
+     Showing both at once buried the two controls that matter on the day the
+     booking is made under a condition form nobody can fill in yet. Handover
+     stays closed until the money is settled — cash counts, see the cash
+     recording action on the payment card. */
+  const settled = b.payment === "Paid" || b.payment === "Refunded";
   const next = NEXT_STEP[b.status];
+  // Confirming by hand only means something before the money lands.
+  const confirmWithoutPay = b.status === "Pending" && !settled;
   const canCancel = CANCELLABLE.includes(b.status);
   const canPrompt = b.payment !== "Paid" && b.payment !== "Refunded" && b.status !== "Cancelled" && b.status !== "Completed";
   const ho = b.handover || { out: null, inn: null };
@@ -310,7 +329,7 @@ export default function BookingDetails() {
         review: renterNote.trim() || null,
       });
       setRated(true);
-      toast("Thanks — that helps other hosts decide who to rent to.");
+      toast("Thanks, that helps other hosts decide who to rent to.");
     } catch (err) {
       // 409 means it was already rated, which is a success from the user's
       // point of view: the form should go away either way.
@@ -414,6 +433,28 @@ export default function BookingDetails() {
     setPayPhone(b.phone || "");
     setPayProvider("mpesa");
     setPayModal(true);
+  }
+
+  async function handleCashPayment(e) {
+    e.preventDefault();
+    if (cashBusy) return;
+    const amount = Number(cashAmount);
+    if (!amount || amount <= 0) {
+      toast("Enter the amount received.", "danger");
+      return;
+    }
+    setCashBusy(true);
+    try {
+      await markBookingPaidCash(b.ref, { amount, note: cashNote.trim() || undefined });
+      setCashModal(false);
+      setCashNote("");
+      toast(`KES ${fmtAmount(amount)} recorded as cash.`);
+      await load();
+    } catch (err) {
+      toast(err.message || "Couldn't record the cash payment.", "danger");
+    } finally {
+      setCashBusy(false);
+    }
   }
 
   async function handleStkPush(e) {
@@ -539,14 +580,44 @@ export default function BookingDetails() {
           </div>
         </div>
         <div className="details-actions">
+          <button
+            type="button"
+            className="icon-btn icon-only"
+            onClick={() => setChauffeurModal(true)}
+            aria-label="Chauffeur"
+            title={assignedChauffeur ? `Chauffeur: ${assignedChauffeur.name}` : "Assign a chauffeur"}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="3.2" />
+              <path d="M5.5 20a6.5 6.5 0 0113 0" />
+            </svg>
+            {assignedChauffeur && <span className="dot-on" aria-hidden="true" />}
+          </button>
+          <button
+            type="button"
+            className="icon-btn icon-only"
+            onClick={() => setAgreementModal(true)}
+            aria-label="Rental agreement"
+            title="Rental agreement"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
+              <path d="M14 3v5h5M9 13h6M9 17h4" />
+            </svg>
+          </button>
           {next && (
             <button
               type="button"
-              className="btn btn-primary"
+              className={confirmWithoutPay ? "btn btn-ghost" : "btn btn-primary"}
               disabled={busy}
               onClick={() => doStatus(next.to)}
+              title={
+                confirmWithoutPay
+                  ? "Hold the car for a customer paying at the counter. Taking payment confirms it on its own."
+                  : undefined
+              }
             >
-              {next.label}
+              {confirmWithoutPay ? "Confirm without payment" : next.label}
             </button>
           )}
           {canCancel &&
@@ -585,6 +656,21 @@ export default function BookingDetails() {
             ))}
         </div>
       </header>
+
+      {/* What to do next, in one line, so a booking just created opens on an
+          instruction rather than on six cards of equal weight. */}
+      {!settled && b.status !== "Cancelled" && (
+        <p className="page-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+          <span>
+            Next: take payment and assign a chauffeur if this rental needs one.
+            Handover opens once the payment is settled.
+          </span>
+        </p>
+      )}
 
       <div className="details-grid">
         <div className="settings-main">
@@ -647,7 +733,20 @@ export default function BookingDetails() {
             </dl>
           </section>
 
-          {/* ---- Handover ---- */}
+          {/* ---- Handover: the second half, closed until the first is done ---- */}
+          {!settled ? (
+            <section className="panel-card">
+              <header className="card-head">
+                <h2>Handover</h2>
+                <p>Opens once payment is settled</p>
+              </header>
+              <p className="side-hint">
+                Record the payment, by request or in cash, and the check-out
+                form appears here, ready for the odometer, fuel level and
+                condition photos before you hand over the keys.
+              </p>
+            </section>
+          ) : (
           <section className="panel-card">
             <header className="card-head">
               <h2>Handover</h2>
@@ -818,6 +917,7 @@ export default function BookingDetails() {
               <p className="side-hint">Booking was cancelled before handover.</p>
             )}
           </section>
+          )}
         </div>
 
         <div className="details-side">
@@ -936,6 +1036,7 @@ export default function BookingDetails() {
             )}
             {canPrompt && (
               <>
+                <div className="pay-actions">
                 <button
                   type="button"
                   className="btn mpesa-btn"
@@ -944,10 +1045,73 @@ export default function BookingDetails() {
                 >
                   {b.payment === "Prompt sent" ? "Resend payment request" : b.payment === "Failed" ? "Retry payment request" : "Request payment"}
                 </button>
+                {/* Plenty of counter business is settled in notes. Without this
+                    the booking sits "Unpaid" forever and the handover step it
+                    gates never opens, so staff learn to ignore the status. */}
+                <button
+                  type="button"
+                  className="btn btn-ghost pay-btn"
+                  disabled={busy || payWaiting}
+                  onClick={() => {
+                    setCashAmount(String(total));
+                    setCashModal(true);
+                  }}
+                >
+                  Mark paid in cash
+                </button>
+                </div>
                 <p className="side-hint">
-                  Sends an STK push to the customer's phone for KES {fmtAmount(total)}.
+                  Request sends an STK push for KES {fmtAmount(total)}. Cash is a
+                  record only, the money never passes through Ardena.
                 </p>
               </>
+            )}
+
+            {cashModal && (
+              <div className="modal-overlay" onClick={() => !cashBusy && setCashModal(false)}>
+                <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+                  <header className="modal-head">
+                    <h3>Record cash payment</h3>
+                    <button type="button" className="icon-btn" disabled={cashBusy} onClick={() => setCashModal(false)} aria-label="Close">✕</button>
+                  </header>
+                  <form onSubmit={handleCashPayment} className="modal-body">
+                    <label className="field-label">
+                      Amount received (KES)
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        className="field-input"
+                        value={cashAmount}
+                        onChange={(e) => setCashAmount(e.target.value)}
+                        required
+                        autoFocus
+                      />
+                    </label>
+                    <label className="field-label">
+                      Note <span className="ho-photos-hint">· optional</span>
+                      <input
+                        type="text"
+                        className="field-input"
+                        value={cashNote}
+                        onChange={(e) => setCashNote(e.target.value)}
+                        placeholder="Who took it, receipt number…"
+                      />
+                    </label>
+                    <p className="side-hint" style={{ marginTop: 0 }}>
+                      This marks the booking paid and files KES{" "}
+                      {fmtAmount(Number(cashAmount) || 0)} under cash in Finances.
+                      It does not move any money, bank it yourself.
+                    </p>
+                    <div className="modal-actions">
+                      <button type="button" className="btn btn-ghost" disabled={cashBusy} onClick={() => setCashModal(false)}>Cancel</button>
+                      <button type="submit" className="btn btn-primary" disabled={cashBusy}>
+                        {cashBusy ? "Recording…" : "Record cash payment"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
             )}
 
             {payModal && (
@@ -1008,102 +1172,7 @@ export default function BookingDetails() {
             )}
           </section>
 
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Chauffeur</h2>
-              <p>Driver assigned to this rental</p>
-            </header>
-            {assignedChauffeur ? (
-              <>
-                <div className="pay-row">
-                  <span>Driver</span>
-                  <Link className="spec-link" to={`/dashboard/chauffeurs/${assignedChauffeur.id}`}>
-                    {assignedChauffeur.name}
-                  </Link>
-                </div>
-                <div className="pay-row">
-                  <span>Phone</span>
-                  <span className="mini-amount">{assignedChauffeur.phone}</span>
-                </div>
-                <div className="pay-row">
-                  <span>Daily rate</span>
-                  <span className="mini-amount">KES {fmtAmount(assignedChauffeur.daily_rate)}</span>
-                </div>
-                <button
-                  type="button"
-                  className="icon-btn danger"
-                  disabled={assignBusy}
-                  onClick={handleUnassignChauffeur}
-                >
-                  Unassign chauffeur
-                </button>
-              </>
-            ) : canAssignChauffeur ? (
-              availableChauffeurs.length ? (
-                <>
-                  <label className="field-label">
-                    Available chauffeurs
-                    <Dropdown
-                      value={chauffeurPick}
-                      onChange={setChauffeurPick}
-                      options={availableChauffeurs.map((c) => ({
-                        value: c.id,
-                        label: `${c.name} · ${c.phone}`,
-                      }))}
-                      placeholder="Choose a driver"
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="btn btn-primary pay-btn"
-                    disabled={!chauffeurPick || assignBusy}
-                    onClick={handleAssignChauffeur}
-                  >
-                    {assignBusy ? "Assigning…" : "Assign chauffeur"}
-                  </button>
-                  <p className="side-hint">
-                    Assigning sets the driver to <strong>On trip</strong> for this booking's dates.
-                  </p>
-                </>
-              ) : (
-                <p className="side-hint">
-                  No available chauffeurs.{" "}
-                  <Link className="spec-link" to="/dashboard/chauffeurs/new">Add one</Link>{" "}
-                  or free up a driver from another trip.
-                </p>
-              )
-            ) : (
-              <p className="side-hint">
-                This booking is {b.status.toLowerCase()} — no chauffeur can be assigned.
-              </p>
-            )}
-          </section>
 
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Rental agreement</h2>
-              <p>PDF, ready for signing at pickup</p>
-            </header>
-            <button
-              type="button"
-              className="btn btn-primary pay-btn"
-              onClick={() => downloadAgreement(
-                { ...b, depositStatus: b.deposit_status, depositAmount: depositAmt },
-                { ...policy, deposit: depositAmt }
-              )}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
-                <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-              </svg>
-              Download agreement
-            </button>
-            <p className="side-hint">
-              Pre-filled with the booking, the KES {fmtAmount(depositAmt)}{" "}
-              deposit and the KES {fmtAmount(policy.lateFeePerHour)}/hour late
-              clause from your rental policy.
-            </p>
-          </section>
 
           <section className="panel-card">
             <header className="card-head">
@@ -1131,6 +1200,121 @@ export default function BookingDetails() {
           <button type="button" className="photo-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close">✕</button>
         </div>
       )}
+      {/* Chauffeur and the agreement are occasional errands, not things you
+          read. As cards they doubled the page's height and pushed payment
+          below the fold; as icons in the header they cost a row and open on
+          demand. */}
+      {chauffeurModal && (
+        <div className="modal-overlay" onClick={() => !assignBusy && setChauffeurModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Chauffeur</h3>
+              <button type="button" className="icon-btn" onClick={() => setChauffeurModal(false)} aria-label="Close">✕</button>
+            </header>
+            <div className="modal-body">
+              {assignedChauffeur ? (
+                <>
+                  <div className="pay-row">
+                    <span>Driver</span>
+                    <Link className="spec-link" to={`/dashboard/chauffeurs/${assignedChauffeur.id}`}>
+                      {assignedChauffeur.name}
+                    </Link>
+                  </div>
+                  <div className="pay-row">
+                    <span>Phone</span>
+                    <span className="mini-amount">{assignedChauffeur.phone}</span>
+                  </div>
+                  <div className="pay-row">
+                    <span>Daily rate</span>
+                    <span className="mini-amount">KES {fmtAmount(assignedChauffeur.daily_rate)}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="icon-btn danger"
+                    disabled={assignBusy}
+                    onClick={handleUnassignChauffeur}
+                  >
+                    Unassign chauffeur
+                  </button>
+                </>
+              ) : canAssignChauffeur ? (
+                availableChauffeurs.length ? (
+                  <>
+                    <label className="field-label">
+                      Available chauffeurs
+                      <Dropdown
+                        value={chauffeurPick}
+                        onChange={setChauffeurPick}
+                        options={availableChauffeurs.map((c) => ({
+                          value: c.id,
+                          label: `${c.name} · ${c.phone}`,
+                        }))}
+                        placeholder="Choose a driver"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn-primary pay-btn"
+                      disabled={!chauffeurPick || assignBusy}
+                      onClick={handleAssignChauffeur}
+                    >
+                      {assignBusy ? "Assigning…" : "Assign chauffeur"}
+                    </button>
+                    <p className="side-hint">
+                      Assigning sets the driver to <strong>On trip</strong> for this booking's dates.
+                    </p>
+                  </>
+                ) : (
+                  <p className="side-hint">
+                    No available chauffeurs.{" "}
+                    <Link className="spec-link" to="/dashboard/chauffeurs/new">Add one</Link>{" "}
+                    or free up a driver from another trip.
+                  </p>
+                )
+              ) : (
+                <p className="side-hint">
+                  This booking is {b.status.toLowerCase()}, so no chauffeur can be assigned.
+                </p>
+              )}
+          
+            </div>
+          </div>
+        </div>
+      )}
+
+      {agreementModal && (
+        <div className="modal-overlay" onClick={() => setAgreementModal(false)}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>Rental agreement</h3>
+              <button type="button" className="icon-btn" onClick={() => setAgreementModal(false)} aria-label="Close">✕</button>
+            </header>
+            <div className="modal-body">
+              <button
+                type="button"
+                className="btn btn-primary pay-btn"
+                onClick={() => downloadAgreement(
+                  { ...b, depositStatus: b.deposit_status, depositAmount: depositAmt },
+                  { ...policy, deposit: depositAmt }
+                )}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
+                  <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                </svg>
+                Download agreement
+              </button>
+              <p className="side-hint">
+                Pre-filled with the booking, the KES {fmtAmount(depositAmt)}{" "}
+                deposit and the KES {fmtAmount(policy.lateFeePerHour)}/hour late
+                clause from your rental policy.
+              </p>
+          
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }

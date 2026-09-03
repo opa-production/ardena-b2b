@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { fetchBookings, requestBookingRating } from "../lib/api";
 import PageSkeleton from "./PageSkeleton";
-import { fmtRange, rentalDays } from "./bookingsStore";
+import { fmtRange, rentalDays, STATUS_CHIP } from "./bookingsStore";
 import BookingsTrend from "./charts/BookingsTrend";
 import BookingCalendar from "./BookingCalendar";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
@@ -17,22 +17,6 @@ function todayLocalISO() {
 }
 
 const STATUSES = ["All", "Pending", "Confirmed", "Active", "Completed", "Cancelled"];
-
-export const STATUS_CHIP = {
-  Pending: "pending",
-  Confirmed: "confirmed",
-  Active: "active",
-  Completed: "completed",
-  Cancelled: "cancelled",
-};
-
-export const PAY_CHIP = {
-  Paid: "active",
-  "Prompt sent": "pending",
-  Unpaid: "completed",
-  Refunded: "cancelled",
-  Failed: "cancelled",
-};
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 

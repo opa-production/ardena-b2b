@@ -19,8 +19,7 @@ import {
   getPolicy,
   RETURN_HOUR,
 } from "./policyStore";
-import { STATUS_CHIP, PAY_CHIP } from "./Bookings";
-import { fmtDate, rentalDays } from "./bookingsStore";
+import { STATUS_CHIP, PAY_CHIP, fmtDate, rentalDays } from "./bookingsStore";
 import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import LoadingOverlay from "../components/LoadingOverlay";

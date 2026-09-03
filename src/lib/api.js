@@ -14,6 +14,7 @@ import { resetTracking } from "../dashboard/trackingStore";
 
 // locally cached per-account state, wiped whenever the session changes hands
 function resetLocalCaches() {
+  clearApiCache();
   resetBusiness();
   resetOnboarding();
   resetFleet();
@@ -48,6 +49,44 @@ function messageFrom(data, status) {
   return "Something went wrong. Please try again.";
 }
 
+/* ---- Response cache for reads ----
+ *
+ * Two separate problems, one small map each.
+ *
+ * `inflight` deduplicates: if the same GET is already in the air, the second
+ * caller joins it instead of opening a second connection. That happens more
+ * than it looks — a page and a widget inside it wanting the same list, or a
+ * route change that remounts a component mid-fetch.
+ *
+ * `cached` is opt-in, per endpoint, via `cache: <ms>`. It exists because
+ * navigating back to a list you were looking at ten seconds ago should show
+ * that list, not a skeleton over an identical request. It is deliberately NOT
+ * applied to anything polled or anything whose whole purpose is to be current
+ * — payment status checks, unread counts, the support thread — so a short TTL
+ * can never freeze a screen that is waiting for something to change.
+ *
+ * Any write empties the cache, and so does the session changing hands. Blunt,
+ * but a mutation is rare and a stale list after one — or worse, one account
+ * seeing the previous account's list — is the exact bug this must not
+ * introduce.
+ *
+ * One rule for callers: a cached response may be handed to more than one of
+ * them, so treat what comes back as read-only. Everything in here already
+ * does — pages map API rows into their own shape rather than editing them in
+ * place.
+ */
+const inflight = new Map();
+const cached = new Map();
+
+/* How long a list stays good enough to show without asking again. Long enough
+   to cover going into a record and coming back out, short enough that nobody
+   is looking at yesterday. */
+const LIST_TTL = 20_000;
+
+export function clearApiCache() {
+  cached.clear();
+}
+
 // One refresh at a time; concurrent 401s all wait on the same attempt.
 let refreshing = null;
 
@@ -79,7 +118,38 @@ function refreshSession() {
   return refreshing;
 }
 
-async function request(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false) {
+async function request(path, opts = {}, retried = false) {
+  const { method = "GET", cache = 0 } = opts;
+
+  /* Reads go through the maps above; writes go straight out and invalidate
+     them. A retry after a token refresh skips both — it is already inside a
+     request that owns its inflight slot. */
+  if (method === "GET" && !retried) {
+    const key = path;
+    if (cache > 0) {
+      const hit = cached.get(key);
+      if (hit && Date.now() - hit.at < cache) return hit.data;
+    }
+    const pending = inflight.get(key);
+    if (pending) return pending;
+
+    const p = send(path, opts, retried)
+      .then((data) => {
+        if (cache > 0) cached.set(key, { at: Date.now(), data });
+        return data;
+      })
+      .finally(() => {
+        inflight.delete(key);
+      });
+    inflight.set(key, p);
+    return p;
+  }
+
+  if (method !== "GET") clearApiCache();
+  return send(path, opts, retried);
+}
+
+async function send(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false) {
   const headers = { ...extra };
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -99,9 +169,10 @@ async function request(path, { method = "GET", body, auth = true, headers: extra
 
   if (res.status === 401 && auth) {
     if (!retried && (await refreshSession())) {
-      return request(path, { method, body, auth, headers: extra }, true);
+      return send(path, { method, body, auth, headers: extra }, true);
     }
     clearSession(); // bounces the app back to /login via RequireAuth
+    clearApiCache(); // never let the next session read this one's lists
   }
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);
@@ -206,7 +277,7 @@ export function fetchVehicles(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/vehicles${qs ? `?${qs}` : ""}`);
+  return request(`/vehicles${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 export function createVehicle(payload) {
@@ -303,7 +374,7 @@ export function fetchWalletTransactions(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/verification/wallet/transactions${qs ? `?${qs}` : ""}`);
+  return request(`/verification/wallet/transactions${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 /* ---- Bookings (§4) ---- */
@@ -313,7 +384,7 @@ export function fetchBookings(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/bookings${qs ? `?${qs}` : ""}`);
+  return request(`/bookings${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 // { customer, phone, plate, pickup, dropoff, location, notes?, deposit_amount?, client_id? }
@@ -406,7 +477,7 @@ export function fetchClients(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/clients${qs ? `?${qs}` : ""}`);
+  return request(`/clients${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 // { name, phone, email?, id_type?, notes? }
@@ -434,11 +505,11 @@ export function fetchPayments(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/payments${qs ? `?${qs}` : ""}`);
+  return request(`/payments${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 export function fetchPaymentsSummary() {
-  return request("/payments/summary");
+  return request("/payments/summary", { cache: LIST_TTL });
 }
 
 // { reason? }
@@ -464,7 +535,7 @@ export function checkChargeStatus(paystackRef) {
 
 // Returns { members, invites, active_count, pending_count }
 export function fetchStaff() {
-  return request("/staff");
+  return request("/staff", { cache: LIST_TTL });
 }
 
 // { name, email, role } → { message, email, role }
@@ -529,7 +600,7 @@ export function markAllNotificationsRead() {
 
 // { plan, vehicle_count, rate, launch_rate_until, monthly_total, trial_ends, status }
 export function fetchSubscription() {
-  return request("/billing/subscription");
+  return request("/billing/subscription", { cache: LIST_TTL });
 }
 
 // { gated, status, vehicle_count, due_amount, fleet_cap }
@@ -557,7 +628,7 @@ export function checkInvoiceCharge(paystackRef) {
 
 // { items, total, checks_used, wallet_balance, check_price }
 export function fetchBillingUsage() {
-  return request("/billing/usage");
+  return request("/billing/usage", { cache: LIST_TTL });
 }
 
 /* ---- Support (§12) ---- */
@@ -762,7 +833,7 @@ export function closeAssistantConversation(id) {
 
 // period: "30d" (default) | "90d"
 export function fetchOverview(period = "30d") {
-  return request(`/dashboard/overview?period=${period}`);
+  return request(`/dashboard/overview?period=${period}`, { cache: LIST_TTL });
 }
 
 // Fetches CSV as a Blob and triggers browser download.
@@ -799,7 +870,7 @@ export function fetchChauffeurs(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
   ).toString();
-  return request(`/chauffeurs${qs ? `?${qs}` : ""}`);
+  return request(`/chauffeurs${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
 // { name, phone, email?, id_no?, licence_no?, licence_expiry?, daily_rate?, status?, notes? }

@@ -1,50 +1,60 @@
-import { useSyncExternalStore } from "react";
+import { lazy, Suspense, useSyncExternalStore } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { subscribe as subscribeAuth, isAuthed } from "./lib/authStore";
+import { load } from "./dashboard/pageLoaders";
 import Landing from "./pages/Landing";
-import Pricing from "./pages/Pricing";
-import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import VerifyBusiness from "./pages/VerifyBusiness";
 import AcceptInvite from "./pages/AcceptInvite";
-import DashboardLayout from "./dashboard/DashboardLayout";
-import Overview from "./dashboard/Overview";
-import Fleet from "./dashboard/Fleet";
-import AddVehicle from "./dashboard/AddVehicle";
-import VehicleDetails from "./dashboard/VehicleDetails";
-import Bookings from "./dashboard/Bookings";
-import NewBooking from "./dashboard/NewBooking";
-import BookingDetails from "./dashboard/BookingDetails";
-import Clients from "./dashboard/Clients";
-import ClientDetails from "./dashboard/ClientDetails";
-import Chauffeurs from "./dashboard/Chauffeurs";
-import AddChauffeur from "./dashboard/AddChauffeur";
-import ChauffeurDetails from "./dashboard/ChauffeurDetails";
-import Tracking from "./dashboard/Tracking";
-import TrackingDetails from "./dashboard/TrackingDetails";
-import Verification from "./dashboard/Verification";
-import VerificationsList from "./dashboard/VerificationsList";
-import Payments from "./dashboard/Payments";
-import PaymentsList from "./dashboard/PaymentsList";
-import Staff from "./dashboard/Staff";
-import Usage from "./dashboard/Usage";
-import Marketing from "./dashboard/Marketing";
-import FeatureRequest from "./dashboard/FeatureRequest";
-import Settlements from "./dashboard/Settlements";
-import Support from "./dashboard/Support";
-import Notifications from "./dashboard/Notifications";
-import Settings from "./dashboard/Settings";
-import WorkspaceSettings from "./dashboard/WorkspaceSettings";
-import Placeholder from "./dashboard/Placeholder";
 import NotFound from "./pages/NotFound";
-import MarketplaceListing from "./dashboard/MarketplaceListing";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
-import RenterInbox from "./dashboard/RenterInbox";
-import Claims from "./dashboard/Claims";
-import Ratings from "./dashboard/Ratings";
+
+/* Dashboard screens are code-split — see dashboard/pageLoaders.js for why, and
+   for the idle preload that keeps the split from costing a pause on the first
+   click. The Suspense boundary lives in DashboardLayout, around the Outlet, so
+   a chunk still arriving shows the same skeleton that page's data shows. */
+const DashboardLayout = lazy(load.layout);
+const Overview = lazy(load.overview);
+const Fleet = lazy(load.fleet);
+const AddVehicle = lazy(load.addVehicle);
+const VehicleDetails = lazy(load.vehicleDetails);
+const MarketplaceListing = lazy(load.marketplaceListing);
+const Bookings = lazy(load.bookings);
+const NewBooking = lazy(load.newBooking);
+const BookingDetails = lazy(load.bookingDetails);
+const Clients = lazy(load.clients);
+const ClientDetails = lazy(load.clientDetails);
+const Chauffeurs = lazy(load.chauffeurs);
+const AddChauffeur = lazy(load.addChauffeur);
+const ChauffeurDetails = lazy(load.chauffeurDetails);
+const Tracking = lazy(load.tracking);
+const TrackingDetails = lazy(load.trackingDetails);
+const Verification = lazy(load.verification);
+const VerificationsList = lazy(load.verificationsList);
+const Payments = lazy(load.payments);
+const PaymentsList = lazy(load.paymentsList);
+const Staff = lazy(load.staff);
+const Usage = lazy(load.usage);
+const Settlements = lazy(load.settlements);
+const Marketing = lazy(load.marketing);
+const FeatureRequest = lazy(load.featureRequest);
+const Support = lazy(load.support);
+const Notifications = lazy(load.notifications);
+const Settings = lazy(load.settings);
+const WorkspaceSettings = lazy(load.workspaceSettings);
+const RenterInbox = lazy(load.renterInbox);
+const Claims = lazy(load.claims);
+const Ratings = lazy(load.ratings);
+const Placeholder = lazy(load.placeholder);
+
+/* The public pages a signed-in user never opens. Landing, the auth forms and
+   the 404 stay eager — they are small, and every one of them is somebody's
+   first paint. */
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Contact = lazy(() => import("./pages/Contact"));
+const VerifyBusiness = lazy(() => import("./pages/VerifyBusiness"));
 
 // Gate the dashboard behind a session; reacts to the session being
 // cleared (e.g. an expired token) by bouncing back to sign-in.
@@ -54,7 +64,12 @@ function RequireAuth({ children }) {
 }
 
 export default function App() {
+  /* Public routes need a boundary of their own: the dashboard's lives inside
+     DashboardLayout, but a lazy /pricing has nothing above it. Deliberately an
+     empty fallback — these chunks are small and a flash of spinner on a
+     marketing page is worse than a beat of nothing. */
   return (
+    <Suspense fallback={null}>
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
@@ -163,5 +178,6 @@ export default function App() {
           this is for addresses that were never going to exist. */}
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </Suspense>
   );
 }

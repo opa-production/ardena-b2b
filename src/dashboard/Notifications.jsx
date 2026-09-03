@@ -15,6 +15,7 @@ import {
   subscribe as subscribePrefs,
 } from "./notificationPrefsStore";
 import { toast } from "./toastStore";
+import { setUnread as setUnreadBadge } from "./unreadStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -113,7 +114,13 @@ export default function Notifications() {
       setNotifications((prev) =>
         prev.map((x) => (x.id === n.id ? { ...x, read: true } : x))
       );
-      setUnreadCount((c) => Math.max(0, c - 1));
+      setUnreadCount((c) => {
+        const next = Math.max(0, c - 1);
+        // Keep the sidebar badge honest now rather than up to a minute from
+        // now, when the shared poll would next notice.
+        setUnreadBadge({ notifications: next });
+        return next;
+      });
     } catch {
       // silent — user can retry
     } finally {
@@ -128,6 +135,7 @@ export default function Notifications() {
       await markAllNotificationsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
+      setUnreadBadge({ notifications: 0 });
     } catch (err) {
       toast(err.message || "Failed to mark all read", "danger");
     } finally {

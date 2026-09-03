@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { ICONS } from "./icons";
-import { fetchSupportUnread } from "../lib/api";
+import { subscribe as subscribeUnread, getUnread } from "./unreadStore";
 import useRole from "../hooks/useRole";
 
 /* Billing and support have no sidebar entry — they live only in the tenant
@@ -83,21 +83,9 @@ const LINKS = [
  */
 export default function QuickLinks() {
   const { can } = useRole();
-  const [supportUnread, setSupportUnread] = useState(0);
-
-  useEffect(() => {
-    let alive = true;
-    fetchSupportUnread()
-      .then((d) => {
-        if (alive) setSupportUnread(d?.unread_count || 0);
-      })
-      .catch(() => {
-        /* the badge is a nicety — a failed count just doesn't show one */
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
+  /* The same count the sidebar badge shows, from the store the layout already
+     polls — this used to fetch it a second time on every visit to Overview. */
+  const { support: supportUnread } = useSyncExternalStore(subscribeUnread, getUnread);
 
   const links = LINKS.filter((l) => !l.requires || can(l.requires));
   if (links.length === 0) return null;

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchPayments, refundPayment } from "../lib/api";
-import { PAY_CHIP } from "./Bookings";
+import { PAY_CHIP } from "./bookingsStore";
 import { fmtAmount } from "./Payments";
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";

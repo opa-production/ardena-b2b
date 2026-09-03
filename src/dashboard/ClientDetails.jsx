@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import { fetchClient } from "../lib/api";
-import { STATUS_CHIP } from "./Bookings";
+import { STATUS_CHIP } from "./bookingsStore";
 import { VERIF_CHIP } from "./Clients";
 import { fmtDate, fmtRange, rentalDays } from "./bookingsStore";
 import { toast } from "./toastStore";

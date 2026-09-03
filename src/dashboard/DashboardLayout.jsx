@@ -1,4 +1,5 @@
 import {
+  Suspense,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -30,23 +31,27 @@ import { hydrateFleet } from "./fleetStore";
 import { hydrateConfig } from "./configStore";
 import { hydrateChauffeurs } from "./chauffeursStore";
 import { hydrateTracking } from "./trackingStore";
+import PageSkeleton from "./PageSkeleton";
+import { preloadCommonPages } from "./pageLoaders";
+import {
+  subscribe as subscribeUnread,
+  getUnread,
+  startUnreadPolling,
+} from "./unreadStore";
 import {
   fetchMe,
   fetchBusiness,
   fetchPolicy,
   fetchOnboarding,
-  fetchUnreadCount,
-  fetchSupportUnread,
   fetchBillingGate,
   fetchHostLinkSuggestion,
   logout,
 } from "../lib/api";
 import Logo from "../components/Logo";
-import { HOST_ACCOUNT_LINKING } from "../lib/features";
+import { HOST_ACCOUNT_LINKING, VEHICLE_TRACKING } from "../lib/features";
 import usePageTitle from "../hooks/usePageTitle";
 import useRole from "../hooks/useRole";
 import HostLinkDialog from "./HostLinkDialog";
-import PageSkeleton from "./PageSkeleton";
 import ConfirmDialog from "../components/ConfirmDialog";
 import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
@@ -102,8 +107,10 @@ export default function DashboardLayout() {
   const [navOpen, setNavOpen] = useState(false);
   const footRef = useRef(null);
 
-  const [unread, setUnread] = useState(0);
-  const [supportUnread, setSupportUnread] = useState(0);
+  const { notifications: unread, support: supportUnread } = useSyncExternalStore(
+    subscribeUnread,
+    getUnread
+  );
   const [gate, setGate] = useState(null);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const theme = useSyncExternalStore(subscribeTheme, getTheme);
@@ -146,61 +153,50 @@ export default function DashboardLayout() {
     };
   }, [can]);
 
-  // hydrate the session: profile, business, policy, onboarding + fleet
+  /* Hydrate the session: profile, business, policy, onboarding + fleet.
+   *
+   * All of it goes out at once. This used to await fetchMe and only then fire
+   * the other three, but none of them take anything from its response — they
+   * are all "what is this workspace", answered from the bearer token. On a
+   * backend answering in the better part of a second, that ordering cost a
+   * whole round trip of blank dashboard for nothing.
+   *
+   * Each lands on its own: the business name appears the moment fetchMe
+   * returns, whether or not the policy is still in flight. */
   useEffect(() => {
     let alive = true;
+    const settle = (fn) => (data) => {
+      if (alive && data) fn(data);
+    };
+
     hydrateFleet().catch(() => {}); // every page reads the fleet store
     hydrateConfig(); // pulls the Mapbox token (and any future client config)
     hydrateChauffeurs().catch(() => {}); // chauffeur roster (§C)
-    hydrateTracking().catch(() => {}); // connected GPS trackers (§D)
-    (async () => {
-      try {
-        const { user, business: biz } = await fetchMe();
+    // Tracking is behind a flag and every screen that reads the store is a
+    // coming-soon page while it's off, so don't spend a request on it.
+    if (VEHICLE_TRACKING) hydrateTracking().catch(() => {});
+
+    fetchMe()
+      .then(({ user, business: biz }) => {
         if (!alive) return;
         const name = biz?.name || biz?.business_name || user?.business_name;
         if (name) setBusiness({ name });
-
-        const [businessData, policyData, onboarding] = await Promise.all([
-          fetchBusiness().catch(() => null),
-          fetchPolicy().catch(() => null),
-          fetchOnboarding().catch(() => null),
-        ]);
-        if (!alive) return;
-        if (businessData) hydrateBusiness(businessData);
-        if (policyData) hydratePolicy(policyData);
-        if (onboarding) hydrateOnboarding(onboarding);
-      } catch {
+      })
+      .catch(() => {
         /* a dead session is cleared by the client; RequireAuth redirects */
-      }
-    })();
+      });
+    fetchBusiness().then(settle(hydrateBusiness)).catch(() => {});
+    fetchPolicy().then(settle(hydratePolicy)).catch(() => {});
+    fetchOnboarding().then(settle(hydrateOnboarding)).catch(() => {});
+
     return () => {
       alive = false;
     };
   }, []);
 
-  // Poll unread counts every 60 s — notifications + support badge
-  useEffect(() => {
-    let alive = true;
-    async function poll() {
-      try {
-        const [notifData, supportData] = await Promise.allSettled([
-          fetchUnreadCount(),
-          fetchSupportUnread(),
-        ]);
-        if (!alive) return;
-        if (notifData.status === "fulfilled") setUnread(notifData.value.unread_count);
-        if (supportData.status === "fulfilled") setSupportUnread(supportData.value.unread_count);
-      } catch {
-        // silent
-      }
-    }
-    poll();
-    const id = setInterval(poll, 60_000);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, []);
+  // The shared 60 s badge poll — see unreadStore. Everything else that shows
+  // a count reads the same store rather than asking again.
+  useEffect(() => startUnreadPolling(), []);
 
   /* Confirmed, because signing out is one click from a menu that also holds
      Profile — and on a shared counter machine the cost of a misclick is the
@@ -214,21 +210,32 @@ export default function DashboardLayout() {
     navigate("/login");
   }
 
-  // Re-check subscription gate on every route change (clears after paying on /usage).
+  /* The subscription gate: checked once on entry, and again when the billing
+     page is opened — that is where it gets cleared, so that is the only
+     navigation whose outcome can change it. It used to re-check on every route
+     change, which put an extra request in front of every click for an answer
+     that changes at most once a month. */
+  const onBillingPage = location.pathname === "/dashboard/usage";
   useEffect(() => {
     fetchBillingGate().then(setGate).catch(() => {});
+  }, [onBillingPage]);
+
+  /* No artificial gate before the page renders.
+   *
+   * There used to be an 80 ms skeleton here on every route change, meant as
+   * instant feedback. It did the opposite: the Outlet was unmounted for the
+   * duration, so the page component didn't mount — and therefore didn't start
+   * its own fetch — until the timer expired. Every navigation paid 80 ms
+   * before the first request even left the browser, and then showed the
+   * page's own skeleton anyway. Pages render immediately now and manage their
+   * own loading state, which is what they were already doing. */
+  useEffect(() => {
+    setNavOpen(false); // close the mobile drawer whenever we navigate
   }, [location.pathname]);
 
-  // Brief skeleton flash on every route change — just long enough to give
-  // instant visual feedback before the page component mounts and fetches its
-  // own data. Keep this as short as possible; pages manage their own loading.
-  const [pageLoading, setPageLoading] = useState(true);
-  useEffect(() => {
-    setPageLoading(true);
-    setNavOpen(false); // close the mobile drawer whenever we navigate
-    const t = setTimeout(() => setPageLoading(false), 80);
-    return () => clearTimeout(t);
-  }, [location.pathname]);
+  // Fetch the screens people move between while the shell sits idle, so the
+  // code split never costs a wait on the first click — see pageLoaders.
+  useEffect(() => preloadCommonPages(), []);
 
   // mobile drawer: lock body scroll while open, close on Escape
   useEffect(() => {
@@ -419,12 +426,14 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="dash-content">
-        {gate?.gated && location.pathname !== "/dashboard/usage" ? (
+        {gate?.gated && !onBillingPage ? (
           <PaymentWall gate={gate} />
-        ) : pageLoading ? (
-          <PageSkeleton path={location.pathname} />
         ) : (
-          <Outlet />
+          /* A page's chunk still arriving looks the same as its data still
+             arriving — the skeleton it was going to show anyway. */
+          <Suspense fallback={<PageSkeleton path={location.pathname} />}>
+            <Outlet />
+          </Suspense>
         )}
       </main>
 

@@ -128,3 +128,25 @@ export function rentalDays(a, b) {
 export function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
+
+
+/* Status → chip class, shared by every screen that shows a booking's state.
+   These lived in Bookings.jsx, which meant Booking details, Client details and
+   the payments list each imported a whole page module — and, once the routes
+   were code-split, dragged that page's chunk along with it — for two lookup
+   tables. */
+export const STATUS_CHIP = {
+  Pending: "pending",
+  Confirmed: "confirmed",
+  Active: "active",
+  Completed: "completed",
+  Cancelled: "cancelled",
+};
+
+export const PAY_CHIP = {
+  Paid: "active",
+  "Prompt sent": "pending",
+  Unpaid: "completed",
+  Refunded: "cancelled",
+  Failed: "cancelled",
+};

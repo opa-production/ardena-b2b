@@ -5,6 +5,7 @@ import {
   markSupportRead,
 } from "../lib/api";
 import { toast } from "./toastStore";
+import { setUnread as setUnreadBadge } from "./unreadStore";
 import useDictation from "../hooks/useDictation";
 import {
   AttachIcon,
@@ -90,6 +91,9 @@ export default function Support() {
       });
       if (markRead && (data.unread_count ?? 0) > 0) {
         await markSupportRead();
+        // Reading the thread is what clears the badge; say so immediately
+        // instead of leaving a count up for the rest of the poll window.
+        setUnreadBadge({ support: 0 });
       }
     } catch {
       // silent on background polls

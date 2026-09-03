@@ -3,7 +3,11 @@ import "./dropdown.css";
 
 /* Custom select: inset trigger like the other inputs, floating option
    panel with a check on the selected row. A hidden input carries the
-   value so FormData-based forms keep working. */
+   value so FormData-based forms keep working.
+
+   `ariaLabel` is for the places where the visible label is a plain <span>
+   rather than a <label> — a <label> cannot name a button, so the trigger has
+   to carry the name itself. */
 export default function Dropdown({
   id,
   name,
@@ -11,6 +15,7 @@ export default function Dropdown({
   onChange,
   options,
   placeholder = "Select",
+  ariaLabel,
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -43,6 +48,7 @@ export default function Dropdown({
         type="button"
         id={id}
         className="dd-trigger"
+        aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}

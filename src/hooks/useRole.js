@@ -35,6 +35,10 @@ export const PERMISSIONS = {
   // Bookings. Creating and editing is open to agents; only the roles above
   // settle a deposit on a walk-in booking.
   manageBookings: ["Owner", "Manager", "Booking agent"],
+  // Marketing speaks to the business's clients in the business's name, and
+  // every send costs it something, so it sits with the roles that answer for
+  // both rather than with everyone who can open a booking.
+  sendMarketing: ["Owner", "Manager"],
   settleDeposit: ["Owner", "Manager", "Finance"],
 
   // Identity checks: everyone operational, since any of them may be standing

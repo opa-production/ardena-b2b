@@ -55,6 +55,12 @@
   font-size: 13px;
 }
 
+/* A hint that explains the button under it was sitting on top of it — the
+   hint's own margin only separates it from what came before. */
+.settings-grid .side-hint + .btn {
+  margin-top: 16px;
+}
+
 .settings-grid .logo-btn {
   padding: 7px 13px;
   font-size: 12.5px;
@@ -433,26 +439,126 @@ tr.unread-row {
   margin-left: 3px;
 }
 
-.usage-row {
-  margin-bottom: 14px;
-}
-
-.usage-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 12.5px;
-  color: var(--ink-soft);
-  margin-bottom: 6px;
-  font-variant-numeric: tabular-nums;
-}
-
-.usage-row .util-bar-lg {
-  height: 8px;
-}
-
 /* a second heading inside one card — Pending invites under Team — needs air
    above it that the first heading doesn't */
 .card-head-second {
   margin-top: 28px;
+}
+
+
+/* ---- Feature request: one centred form ---- */
+
+/* Centred rather than pinned to the left gutter: the page holds one card and
+   nothing beside it, so a left-aligned column reads as a layout waiting for a
+   second column that never arrives. */
+.request-card {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.request-form,
+.mk-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.request-detail,
+.mk-message {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.request-detail {
+  min-height: 130px;
+}
+
+.request-foot,
+.mk-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.request-count,
+.mk-count {
+  font-size: 12px;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+
+.request-sent-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+/* ---- Marketing: email on the left, SMS on the right ---- */
+
+.marketing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: stretch;
+}
+
+@media (max-width: 1000px) {
+  .marketing-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Both columns are the same form in the same order, so they line up row for
+   row; the body field takes the slack, which keeps the two Send buttons on one
+   line however long the notes above them run. */
+.mk-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.mk-form {
+  flex: 1 1 auto;
+}
+
+.mk-body {
+  flex: 1 1 auto;
+}
+
+.mk-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mk-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: var(--edge-in);
+}
+
+/* Who this actually reaches — the one line on the page worth reading twice. */
+.mk-reach {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.mk-nosubject {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  line-height: 1.5;
+}
+
+.mk-message {
+  min-height: 150px;
+  height: 100%;
 }

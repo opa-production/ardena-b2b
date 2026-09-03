@@ -1,0 +1,63 @@
+/* ---- Coming soon, and the 404 that borrows its shape ---- */
+
+/* Centred in whatever it is given, with the illustration doing the talking and
+   the text kept to two short lines under it. No card: a panel around this
+   would frame an absence as if it were content. */
+.coming {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
+  min-height: 60vh;
+  padding: 32px 20px;
+}
+
+/* Capped by height as well as width — these are wide landscape drawings, and
+   sizing on width alone lets them swallow a short viewport. */
+.coming-art {
+  width: 100%;
+  max-width: 380px;
+  max-height: 260px;
+  height: auto;
+  margin-bottom: 22px;
+}
+
+.coming-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.coming-note {
+  max-width: 440px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-mute);
+}
+
+.coming-action {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* The 404 stands on its own page rather than inside the dashboard shell, so it
+   paints its own ground and fills the window. */
+.notfound {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+.notfound .coming-art {
+  max-width: 420px;
+  max-height: 300px;
+}
+
+.notfound .coming-title {
+  font-size: 24px;
+}

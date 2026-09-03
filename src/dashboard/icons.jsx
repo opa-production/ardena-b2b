@@ -121,6 +121,14 @@ export const ICONS = {
       <path d="M9 21v-6h6v6" />
     </svg>
   ),
+  // megaphone — reaching your own clients, not broadcasting at strangers
+  marketing: (
+    <svg {...base}>
+      <path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z" />
+      <path d="M15.5 9.5a3.5 3.5 0 010 5" />
+      <path d="M18.5 7a7 7 0 010 10" />
+    </svg>
+  ),
   support: (
     <svg {...base}>
       <circle cx="12" cy="12" r="9" />

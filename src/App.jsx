@@ -29,14 +29,16 @@ import VerificationsList from "./dashboard/VerificationsList";
 import Payments from "./dashboard/Payments";
 import PaymentsList from "./dashboard/PaymentsList";
 import Staff from "./dashboard/Staff";
-import Billing from "./dashboard/Billing";
 import Usage from "./dashboard/Usage";
+import Marketing from "./dashboard/Marketing";
+import FeatureRequest from "./dashboard/FeatureRequest";
 import Settlements from "./dashboard/Settlements";
 import Support from "./dashboard/Support";
 import Notifications from "./dashboard/Notifications";
 import Settings from "./dashboard/Settings";
 import WorkspaceSettings from "./dashboard/WorkspaceSettings";
 import Placeholder from "./dashboard/Placeholder";
+import NotFound from "./pages/NotFound";
 import MarketplaceListing from "./dashboard/MarketplaceListing";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
@@ -127,16 +129,23 @@ export default function App() {
           element={<RequireRole capability="viewMoney"><Payments /></RequireRole>}
         />
         <Route path="staff" element={<Staff />} />
-        {/* The Account group in the sidebar: two pages, one capability.
-            Plans lives on the public /pricing page, not in here. */}
+        {/* Reaching this workspace's own clients — a send costs the
+            business and speaks in its name, hence its own capability. */}
+        <Route
+          path="marketing"
+          element={<RequireRole capability="sendMarketing"><Marketing /></RequireRole>}
+        />
+        <Route path="feature-request" element={<FeatureRequest />} />
+        {/* The Account group in the sidebar. Usage and Billing were two
+            pages until the invoice list moved under the spend chart; /billing
+            stays as a redirect because it is linked from the payment wall,
+            old emails and bookmarks. Plans lives on the public /pricing page,
+            not in here. */}
         <Route
           path="usage"
           element={<RequireRole capability="manageBilling"><Usage /></RequireRole>}
         />
-        <Route
-          path="billing"
-          element={<RequireRole capability="manageBilling"><Billing /></RequireRole>}
-        />
+        <Route path="billing" element={<Navigate to="/dashboard/usage" replace />} />
         <Route
           path="settlements"
           element={<RequireRole capability="manageBilling"><Settlements /></RequireRole>}
@@ -149,6 +158,10 @@ export default function App() {
         <Route path="settings/preferences" element={<WorkspaceSettings />} />
         <Route path=":section" element={<Placeholder />} />
       </Route>
+      {/* Anything that is not a route at all — a typo, a dead link, an old
+          bookmark. Dashboard sections keep their own coming-soon page above;
+          this is for addresses that were never going to exist. */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

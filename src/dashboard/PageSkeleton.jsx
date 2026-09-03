@@ -389,24 +389,41 @@ export default function PageSkeleton({ path = "" }) {
     );
   }
 
-  // ---- Usage: the daily bar chart, nothing else
-  if (section === "usage") {
+  // ---- Usage & billing: the spend chart, then the invoice list
+  if (section === "usage" || section === "billing") {
     return (
       <div aria-hidden="true">
-        <section className="chart-card">
+        <section className="chart-card usage-card">
           <CardHead />
           <span className="sk sk-block" />
+        </section>
+        <section className="panel-card">
+          <CardLines rows={5} />
         </section>
       </div>
     );
   }
 
-  // ---- Billing: the invoice list
-  if (section === "billing") {
+  // ---- Marketing: the composer, and the ratings card beside it
+  if (section === "marketing") {
+    return (
+      <div aria-hidden="true" className="marketing-grid">
+        <section className="panel-card">
+          <CardLines rows={6} />
+        </section>
+        <section className="panel-card">
+          <CardLines rows={3} />
+        </section>
+      </div>
+    );
+  }
+
+  // ---- Feature request: one short form
+  if (section === "feature-request") {
     return (
       <div aria-hidden="true">
-        <section className="panel-card">
-          <CardLines rows={5} />
+        <section className="panel-card request-card">
+          <CardLines rows={4} />
         </section>
       </div>
     );

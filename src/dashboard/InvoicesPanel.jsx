@@ -1,17 +1,15 @@
-/* Billing — the invoice list, and nothing else.
+/* The invoice list, and the M-Pesa/Airtel prompt that settles one.
  *
- * One of the two Account pages split out of the old single billing screen.
- * This one owns invoices and the M-Pesa/Airtel prompt that settles them; the
- * running period breakdown lives on Usage, and what the plans cost lives on
- * the public /pricing page.
+ * Lifted out of the old Billing page when Usage and Billing merged into one
+ * Account screen: the chart answers "what am I running up?", this answers
+ * "what do I owe?", and they were never two visits.
  *
  * Deliberately one list. An outstanding invoice doesn't get a banner of its
  * own — it is set apart in place by a heavy rule above and below, and turns
  * red once its due date has passed. The row you must act on is therefore
  * always in the same place as the rows you don't. */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import PageSkeleton from "./PageSkeleton";
+import { useNavigate } from "react-router-dom";
 import {
   fetchSubscription,
   fetchInvoices,
@@ -21,17 +19,12 @@ import {
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import LoadingOverlay from "../components/LoadingOverlay";
-import usePageTitle from "../hooks/usePageTitle";
 import { fmtAmount, fmtDate } from "./billingFormat";
 import { FREE_MONTHS } from "../pages/pricingData";
-import "./overview.css";
-import "./fleet.css";
 import "./billing.css";
 import "./bookings.css"; // modal + provider-pill styles
 
-export default function Billing() {
-  usePageTitle("Billing");
-  const { pathname } = useLocation();
+export default function InvoicesPanel() {
   const navigate = useNavigate();
   const [sub, setSub] = useState(null);
   const [invoices, setInvoices] = useState([]);
@@ -153,16 +146,12 @@ export default function Billing() {
     }
   }
 
-  if (loading) return <PageSkeleton path={pathname} />;
-
   // Midnight today, so "overdue" flips on the day after the due date rather
   // than partway through it.
   const startOfToday = new Date().setHours(0, 0, 0, 0);
 
   return (
     <>
-      <h1 className="sr-only">Billing</h1>
-
       <section className="panel-card">
         <header className="card-head">
           <h2>Invoices</h2>
@@ -173,7 +162,9 @@ export default function Billing() {
         </header>
 
         <div className="invoice-list">
-          {invoices.length === 0 ? (
+          {loading ? (
+            <p className="side-hint" style={{ marginTop: 0 }}>Loading invoices…</p>
+          ) : invoices.length === 0 ? (
             <EmptyState minimal title={`Nothing billed, you're in your first ${FREE_MONTHS} free months`} />
           ) : (
             invoices.map((inv) => {

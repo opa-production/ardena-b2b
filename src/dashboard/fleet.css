@@ -336,6 +336,11 @@
   white-space: nowrap;
 }
 
+/* two controls in one cell — the rating ask and View */
+.actions-cell .icon-btn + .icon-btn {
+  margin-left: 8px;
+}
+
 /* .data-table th sets text-align:left with higher specificity, so the
    Actions header needs an equally specific rule to stay right-aligned */
 .data-table th.actions-col {
@@ -369,6 +374,17 @@
   color: var(--ink-soft);
   background: var(--surface);
   box-shadow: var(--edge-in);
+}
+
+/* Already asked. It stays disabled — the recess says that — but the star is
+   filled in the amber it would wear on a rating, so a glance down the column
+   shows which finished rentals have been chased. */
+.icon-btn.is-done {
+  color: var(--warn);
+}
+
+.icon-btn.is-done svg {
+  fill: currentColor;
 }
 
 .icon-btn:disabled:hover {

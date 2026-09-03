@@ -29,9 +29,9 @@ const ICON_SUPPORT = (
 const LINKS = [
   {
     key: "billing",
-    to: "/dashboard/billing",
-    name: "Billing",
-    desc: "Invoices, payments and receipts",
+    to: "/dashboard/usage",
+    name: "Usage & billing",
+    desc: "Spend, invoices and receipts",
     icon: ICON_BILLING,
     requires: "manageBilling",
   },

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { fetchBookings } from "../lib/api";
+import { fetchBookings, requestBookingRating } from "../lib/api";
 import PageSkeleton from "./PageSkeleton";
 import { fmtRange, rentalDays } from "./bookingsStore";
 import BookingsTrend from "./charts/BookingsTrend";
@@ -36,12 +36,25 @@ export const PAY_CHIP = {
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
+/* Ask-for-a-rating, offered on a booking that finished. A star rather than a
+   word: it sits in a row of actions that has room for one control, and the
+   label rides in the title and aria-label where it can be read in full. */
+const StarIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 3.6l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.8l5.9-.9z" />
+  </svg>
+);
+
 export default function Bookings() {
   const { pathname } = useLocation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
+  // Bookings already asked this session. The backend is the real guard against
+  // asking twice; this is so the button doesn't invite a second click.
+  const [asked, setAsked] = useState(() => new Set());
+  const [asking, setAsking] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -60,6 +73,23 @@ export default function Bookings() {
     setLoading(true);
     load();
   }, [load]);
+
+  /* One message to the client who rented, asking them to rate it. Sent
+     straight from the row: there is nothing to fill in, and a dialog in front
+     of a one-line SMS would be more ceremony than the act deserves. */
+  async function askForRating(b) {
+    if (asking || asked.has(b.ref)) return;
+    setAsking(b.ref);
+    try {
+      await requestBookingRating(b.ref);
+      setAsked((prev) => new Set(prev).add(b.ref));
+      toast(`Asked ${b.customer} to rate this rental.`);
+    } catch (err) {
+      toast(err.message || "Couldn't send the rating request.", "danger");
+    } finally {
+      setAsking(null);
+    }
+  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -228,6 +258,29 @@ export default function Bookings() {
                     <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
                   </td>
                   <td className="actions-cell">
+                    {/* A finished rental is the moment to ask — the client
+                        still has the vehicle in mind, and this is the row that
+                        knows which vehicle it was. */}
+                    {b.status === "Completed" && (
+                      <button
+                        type="button"
+                        className={"icon-btn icon-only" + (asked.has(b.ref) ? " is-done" : "")}
+                        disabled={asking === b.ref || asked.has(b.ref)}
+                        title={
+                          asked.has(b.ref)
+                            ? `${b.customer} has been asked to rate this rental`
+                            : `Ask ${b.customer} to rate this rental`
+                        }
+                        aria-label={
+                          asked.has(b.ref)
+                            ? `${b.customer} has been asked to rate this rental`
+                            : `Ask ${b.customer} to rate this rental`
+                        }
+                        onClick={() => askForRating(b)}
+                      >
+                        <StarIcon />
+                      </button>
+                    )}
                     <Link
                       className="icon-btn"
                       to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}

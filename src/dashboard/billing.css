@@ -3,60 +3,103 @@
    the usage bars and wallet lists belong to Usage, the invoice list and due
    banner to Billing, and the plan cards to Plans. */
 
-/* ---- This month: bill-composition progress bars ---- */
+/* ---- Usage: the figure, the window switch, the trend ---- */
 
-.usage-list {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  flex: 1 1 auto;
-  justify-content: center;
-}
-
-.usage-row {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+/* The chart card carries its own bottom gap: the invoice list sits under it
+   on the same page now, not on a page of its own. */
+.usage-card {
+  margin-bottom: 20px;
 }
 
 .usage-head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .usage-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
 }
 
-.usage-amount {
-  font-size: 14px;
+/* The number the tabs change, at the size that says so. */
+.usage-figure {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 26px;
   font-weight: 600;
+  line-height: 1.1;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
 }
 
-.usage-bar {
-  height: 8px;
+/* Up is not automatically bad here — this is spend, and a business reading a
+   rise wants it stated, not judged. Both directions wear the same muted chip;
+   only the arrow differs. */
+.usage-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
   background: var(--surface);
   box-shadow: var(--edge-in);
-  overflow: hidden;
 }
 
-.usage-bar i {
-  display: block;
-  height: 100%;
-  min-width: 4px;
-  transition: width 0.4s var(--ease);
+.usage-delta.is-down {
+  color: #0b7a37;
 }
 
-.usage-detail {
+.usage-sub {
+  margin-top: 7px;
   font-size: 12.5px;
   color: var(--ink-mute);
   font-variant-numeric: tabular-nums;
+}
+
+/* Segmented window switch. One recessed group, the live segment lifted out of
+   it — the same treatment the filter rows elsewhere use. */
+.usage-ranges {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface);
+  box-shadow: var(--edge-in);
+}
+
+.usage-range {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  background: transparent;
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.usage-range:hover {
+  color: var(--ink);
+}
+
+.usage-range.is-on {
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: var(--edge);
+}
+
+@media (max-width: 700px) {
+  .usage-head {
+    flex-direction: column;
+  }
 }
 
 /* wallet line sits at the foot of the breakdown card */
@@ -261,49 +304,64 @@
 }
 
 
-/* ---- Usage: the daily bar chart ---- */
+/* ---- Usage: the spend trend ---- */
 
-.ub-chart {
+/* Shares the .ut-* line-chart styles with the overview's utilisation trend
+   (overview.css); only what is particular to two-series comparison lives
+   here. */
+.usage-trend {
   position: relative;
   margin-top: 4px;
 }
 
-.ub-chart svg {
-  width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
+.ut-legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-bottom: 6px;
 }
 
-/* grid and axis stay recessive — the bars are the content */
-.ub-grid {
-  stroke: var(--line);
-  stroke-width: 1;
+.ut-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--ink-mute);
 }
 
-.ub-axis {
-  stroke: var(--line);
-  stroke-width: 1;
+.ut-key::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
 }
 
-.ub-tick {
-  font-size: 10.5px;
+.ut-key.is-prev::before {
+  background: var(--line);
+  box-shadow: var(--edge-in);
+}
+
+/* The comparison series stays a dotted grey: it is a reference, and a second
+   coloured line would make the reader decide which one they are looking at. */
+.ut-line.is-prev {
+  stroke: var(--ink-mute);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 4;
+  opacity: 0.55;
+}
+
+.ut-dot.is-prev {
   fill: var(--ink-mute);
-  font-family: var(--font-ui);
-  font-variant-numeric: tabular-nums;
 }
 
-.ub-bar {
-  fill: var(--usage-bar);
-  transition: fill 0.12s var(--ease);
+/* Pinned to the top of the plot under the hovered column, so it never covers
+   the line it is describing. */
+.usage-tip {
+  transform: translate(-50%, 0);
 }
 
-.ub-bar.is-hot {
-  fill: var(--usage-bar-hot);
-}
-
-/* full-column hover target, invisible but pointer-active */
-.ub-hit {
-  fill: transparent;
-  cursor: default;
+.usage-tip-prev {
+  display: block;
+  margin-top: 2px;
 }

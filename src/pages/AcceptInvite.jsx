@@ -4,6 +4,51 @@ import { acceptInvite } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
 import "./auth.css";
 
+/* Why the activation failed, said in a sentence the person can act on.
+ *
+ * The backend answers a duplicate email with a 500 and a generic body — the
+ * unique-constraint violation never reaches the browser — so "Something went
+ * wrong. Please try again." was the whole message, and trying again produced
+ * exactly the same wall. These map the statuses this endpoint can actually
+ * return onto the two things that are really happening: the link is spent, or
+ * the address already has an account.
+ *
+ * The API's own message wins wherever it says something specific; this only
+ * fills the silence. */
+function explainFailure(err) {
+  const raw = String(err?.message || "");
+  const detail = raw.toLowerCase();
+  const generic =
+    !raw || detail.startsWith("something went wrong") || detail.includes("internal server");
+
+  if (detail.includes("already exists") || detail.includes("duplicate") || err?.status === 409) {
+    return {
+      title: "That email already has an account",
+      body: "Sign in with your existing password instead — the invite doesn't need accepting. If you've forgotten it, use “Forgot password” on the sign-in page.",
+    };
+  }
+
+  if (err?.status === 400 || err?.status === 404 || err?.status === 410) {
+    return {
+      title: generic ? "This invite link is no longer valid" : raw,
+      body: "It may have already been used, or it has expired. Ask your workspace admin to send a fresh invite.",
+    };
+  }
+
+  if (err?.status === 0) {
+    return { title: raw, body: "" };
+  }
+
+  if (err?.status >= 500 || generic) {
+    return {
+      title: "We couldn't activate this account",
+      body: "This usually means the email on the invite already has an Ardena account — try signing in instead. If that isn't it, ask your admin to re-send the invite and let us know.",
+    };
+  }
+
+  return { title: raw, body: "" };
+}
+
 export default function AcceptInvite() {
   usePageTitle("Accept invite");
   const navigate = useNavigate();
@@ -44,7 +89,7 @@ export default function AcceptInvite() {
     e.preventDefault();
     if (busy) return;
     if (password !== confirm) {
-      setError("Passwords don't match.");
+      setError({ title: "Passwords don't match.", body: "" });
       return;
     }
     setBusy(true);
@@ -53,7 +98,7 @@ export default function AcceptInvite() {
       await acceptInvite({ token, password });
       setDone(true);
     } catch (err) {
-      setError(err.message);
+      setError(explainFailure(err));
       setBusy(false);
     }
   }
@@ -94,7 +139,12 @@ export default function AcceptInvite() {
             />
           </div>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && (
+            <div className="auth-error" role="alert">
+              <strong>{error.title}</strong>
+              {error.body && <span>{error.body}</span>}
+            </div>
+          )}
 
           <button type="submit" className="btn btn-primary auth-submit" disabled={busy}>
             {busy ? "Activating…" : "Activate account"}

@@ -79,8 +79,8 @@ function PaymentWall({ gate }) {
           </span>
           <span className="pay-wall-total">KES {fmtAmt(gate.due_amount)}</span>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => navigate("/dashboard/billing")}>
-          Go to Billing
+        <button type="button" className="btn btn-primary" onClick={() => navigate("/dashboard/usage")}>
+          Go to billing
         </button>
         <button type="button" className="btn btn-ghost" style={{ width: "100%", marginTop: "8px" }} onClick={() => navigate("/dashboard/support")}>
           Contact support
@@ -214,7 +214,7 @@ export default function DashboardLayout() {
     navigate("/login");
   }
 
-  // Re-check subscription gate on every route change (clears after paying on /billing).
+  // Re-check subscription gate on every route change (clears after paying on /usage).
   useEffect(() => {
     fetchBillingGate().then(setGate).catch(() => {});
   }, [location.pathname]);
@@ -361,9 +361,20 @@ export default function DashboardLayout() {
                 </svg>
                 Profile
               </button>
-              {/* Tracking, billing and Support used to hide in here;
-                  they are sidebar destinations now (see nav.js) so they can
-                  actually be found. */}
+              {/* Tracking, billing and Support used to hide in here; they are
+                  sidebar destinations now (see nav.js) so they can actually be
+                  found. Feature request is the exception that belongs here: it
+                  is about Ardena rather than about the workspace, in the same
+                  way Profile and Log out are, and it would have been the only
+                  sidebar row that isn't part of running the business. */}
+              <button type="button" role="menuitem" onClick={() => go("/dashboard/feature-request")}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18h6" />
+                  <path d="M10 21h4" />
+                  <path d="M12 3a6 6 0 00-3.5 10.9c.3.3.5.7.5 1.1h6c0-.4.2-.8.5-1.1A6 6 0 0012 3z" />
+                </svg>
+                Feature request
+              </button>
               <button
                 type="button"
                 role="menuitem"
@@ -408,7 +419,7 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="dash-content">
-        {gate?.gated && location.pathname !== "/dashboard/billing" ? (
+        {gate?.gated && location.pathname !== "/dashboard/usage" ? (
           <PaymentWall gate={gate} />
         ) : pageLoading ? (
           <PageSkeleton path={location.pathname} />

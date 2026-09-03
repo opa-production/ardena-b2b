@@ -15,6 +15,7 @@ import {
 } from "./trackingStore";
 import Dropdown from "../components/Dropdown";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import ComingSoon from "./ComingSoon";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { VEHICLE_TRACKING } from "../lib/features";
@@ -86,18 +87,15 @@ export default function Tracking() {
     return (
       <>
         <h1 className="sr-only">Tracking</h1>
-        <section className="panel-card">
-          <EmptyState
-            icon={EMPTY_ICONS.fleet}
-            title="Tracking is coming soon"
-            message="Ardena fits the tracker in your vehicle in person. Talk to us to join the first installations."
-            action={
-              <Link to="/dashboard/support" className="btn btn-primary">
-                Register interest
-              </Link>
-            }
-          />
-        </section>
+        <ComingSoon
+          title="Tracking"
+          message="Ardena fits the tracker in your vehicle in person. Talk to us to join the first installations."
+          action={
+            <Link to="/dashboard/support" className="btn btn-primary">
+              Register interest
+            </Link>
+          }
+        />
       </>
     );
   }

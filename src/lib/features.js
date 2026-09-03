@@ -46,3 +46,15 @@ export const B2C_MARKETPLACE = false;
  * coming-soon page until there is a connector behind it.
  */
 export const VEHICLE_TRACKING = false;
+
+/**
+ * Marketing: emailing and texting a workspace's own clients.
+ *
+ * The composers are built and wired to `/marketing/*`, but nothing sends yet —
+ * there is no email or SMS gateway behind those endpoints, and a business that
+ * wrote a campaign today would watch it fail after committing to the send.
+ * Shown as a coming-soon page until there is a sender behind it.
+ *
+ * Flip to `true` to bring the page back; nothing else needs changing.
+ */
+export const MARKETING = false;

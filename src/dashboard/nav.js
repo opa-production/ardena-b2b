@@ -9,7 +9,7 @@
 // linked an Ardena consumer-app account. Until it does, these are hidden
 // entirely rather than shown empty — a business doing direct bookings should
 // not be navigating pages that can only ever be blank.
-import { B2C_MARKETPLACE, VEHICLE_TRACKING } from "../lib/features";
+import { B2C_MARKETPLACE, MARKETING, VEHICLE_TRACKING } from "../lib/features";
 
 export const NAV_SECTIONS = [
   {
@@ -59,10 +59,21 @@ export const NAV_SECTIONS = [
         name: "Account",
         requires: "manageBilling",
         children: [
-          { to: "/dashboard/usage", key: "usage", name: "Usage" },
-          { to: "/dashboard/billing", key: "billing", name: "Billing" },
+          { to: "/dashboard/usage", key: "usage", name: "Usage & billing" },
           { to: "/dashboard/settlements", key: "settlements", name: "Settlements" },
         ],
+      },
+      // Last in the section, under the Account group: reaching clients is the
+      // thing you do once the money side is in order, and it is the only item
+      // here that sends something outward.
+      {
+        to: "/dashboard/marketing",
+        key: "marketing",
+        name: "Marketing",
+        requires: "sendMarketing",
+        // same muted tag Tracking wears — the page is a coming-soon state
+        // until MARKETING flips (see lib/features.js)
+        soon: !MARKETING,
       },
     ],
   },
@@ -111,10 +122,13 @@ export const SECTION_TITLES = {
   claims: "Claims & requests",
   verification: "Verification",
   payments: "Finances",
-  usage: "Usage",
-  billing: "Billing",
+  usage: "Usage & billing",
   settlements: "Settlements",
   staff: "Staff & roles",
+  marketing: "Marketing",
+  // Not a sidebar item — it lives in the profile menu — but the page still
+  // needs a title when it is the current route.
+  "feature-request": "Feature request",
   notifications: "Notifications",
   support: "Support",
 };

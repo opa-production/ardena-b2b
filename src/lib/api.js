@@ -582,6 +582,62 @@ export function fetchSupportUnread() {
   return request("/support/messages/unread-count");
 }
 
+/* ---- Feature requests ----
+
+   A feature request is a message to the Ardena team, so it rides the support
+   thread rather than inventing a channel with no inbox behind it: the reply
+   lands where every other reply from Ardena lands. The endpoint below is the
+   one it will move to when the product board ships; until it exists the call
+   falls back to Support, which the requester is told about either way. */
+
+// { title, detail, area } → the created request
+export async function submitFeatureRequest({ title, detail, area }) {
+  const body = { title, detail, area };
+  try {
+    return await request("/feature-requests", { method: "POST", body });
+  } catch (err) {
+    // 404/405 = the board isn't live yet. Anything else is a real failure and
+    // is thrown on, so the form can say what went wrong.
+    if (err.status !== 404 && err.status !== 405) throw err;
+    const text = [`Feature request: ${title}`, area ? `Area: ${area}` : null, "", detail]
+      .filter((l) => l !== null)
+      .join("\n");
+    await sendSupportMessage(text);
+    return { via: "support" };
+  }
+}
+
+/* ---- Marketing ----
+
+   Sending to a business's own clients: email, SMS, and the rating nudge that
+   goes to whoever rented recently. Every send is a real message to a real
+   person, so nothing here fires without an explicit confirmed submit, and the
+   audience is always counted back to the sender first. */
+
+// { channel: "email" | "sms", audience } → { count } — how many will receive it
+export function fetchMarketingAudience(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/marketing/audience${qs ? `?${qs}` : ""}`);
+}
+
+// { channel, audience, subject?, message } → { sent, skipped }
+export function sendMarketingCampaign(payload) {
+  return request("/marketing/campaigns", { method: "POST", body: payload });
+}
+
+/* Ask one client to rate the rental they just finished.
+   Per booking rather than per batch: the request names the vehicle and the
+   dates, and the person sending it is looking at the booking when they decide
+   it went well enough to ask. */
+export function requestBookingRating(bookingRef) {
+  return request("/marketing/rating-requests", {
+    method: "POST",
+    body: { booking_ref: bookingRef },
+  });
+}
+
 /* ---- Workspace assistant (ai.md) ----
    Read-only, scoped to the caller's business, role-gated server-side. It can
    answer about the workspace and hand a thread to a person; it cannot change

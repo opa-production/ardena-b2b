@@ -5,8 +5,8 @@ import { ICONS } from "./icons";
 /* A sidebar row that opens to reveal its children rather than navigating.
  *
  * The group itself is a button, not a link — there is no "Account" page, only
- * the three underneath it. It starts open when one of its children is the
- * current route, so landing on /dashboard/billing from a bookmark shows you
+ * the pages underneath it. It starts open when one of its children is the
+ * current route, so landing on /dashboard/usage from a bookmark shows you
  * where you are instead of a collapsed row you have to go hunting through.
  *
  * Open state is deliberately local and unpersisted: the only thing that should

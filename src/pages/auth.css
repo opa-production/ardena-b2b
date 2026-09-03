@@ -4,11 +4,9 @@
    overridden under .auth at the bottom of this file so these two pages keep
    real borders rather than the --edge hairline the dashboard uses.
 
-   The page sits on home.jpg, a soft blue-on-white gradient. It is set as a
-   background rather than an <img> because it is decoration in three different
-   page shapes and never needs alt text, sizing or a load priority of its own.
-   The card stays opaque white on top: the artwork is atmosphere behind a form,
-   not something to read type against. */
+   The page sits on drifting blue bands, drawn in CSS rather than shipped as an
+   image. The card stays opaque white on top: the artwork is atmosphere behind
+   a form, not something to read type against. */
 
 .auth {
   min-height: 100vh;
@@ -17,17 +15,91 @@
   place-items: center;
   padding: 96px clamp(20px, 5vw, 48px) 48px;
   position: relative;
-  background-color: var(--panel);
-  background-image: url("../assets/home.jpg");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--panel) 0%, #eef4fd 100%);
 }
 
-/* The image is a light gradient built for the light theme; on graphite it
-   would be a bright slab behind a dark card. Drop it rather than tint it. */
+/* A different wave from the heroes, and deliberately so.
+ *
+ * The heroes use one big organic mass in a corner. This is the opposite: three
+ * long, shallow bands running the full width and sliding past each other at
+ * different speeds, so what you get is a calm horizon rather than a shape. An
+ * auth page is a form to fill in, not a statement, and the artwork has to stay
+ * behind the card without competing with it.
+ *
+ * Brand blue at low opacity, on a light ground: the card is opaque white, so
+ * the contrast that matters is card-against-page, and pale blue gives that
+ * without the card needing a heavier border.
+ *
+ * Replaced a 258 KB background photograph with about a kilobyte of inline SVG
+ * that scales cleanly at any size and follows the theme.
+ */
+.auth-wave {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(100% + 960px);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 960px 100%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.auth-wave--back {
+  height: clamp(180px, 42vh, 420px);
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 400' preserveAspectRatio='none'%3E%3Cpath fill='%23007ffa' fill-opacity='0.22' d='M0 210C160 150 320 150 480 210C640 270 800 270 960 210L960 400L0 400Z'/%3E%3C/svg%3E");
+  animation: auth-drift-a 60s linear infinite;
+}
+
+.auth-wave--mid {
+  height: clamp(140px, 32vh, 320px);
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 400' preserveAspectRatio='none'%3E%3Cpath fill='%23007ffa' fill-opacity='0.18' d='M0 230C240 300 480 160 720 230C840 265 900 265 960 250L960 400L0 400Z'/%3E%3C/svg%3E");
+  animation: auth-drift-b 44s linear infinite;
+}
+
+.auth-wave--front {
+  height: clamp(90px, 20vh, 200px);
+  opacity: 0.6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 960 400' preserveAspectRatio='none'%3E%3Cpath fill='%23007ffa' fill-opacity='0.28' d='M0 260C120 210 240 210 360 260C480 310 600 310 720 260C840 210 900 210 960 235L960 400L0 400Z'/%3E%3C/svg%3E");
+  animation: auth-drift-c 32s linear infinite;
+}
+
+/* Each band is one tile wider than the viewport and repeats, so translating by
+   exactly one tile loops with no seam. */
+@keyframes auth-drift-a {
+  to {
+    transform: translateX(-960px);
+  }
+}
+
+@keyframes auth-drift-b {
+  from {
+    transform: translateX(-960px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes auth-drift-c {
+  to {
+    transform: translateX(-960px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-wave {
+    animation: none !important;
+  }
+}
+
+/* On graphite the page ground darkens; the bands keep their blue and simply
+   read as deeper water. */
 [data-theme="dark"] .auth {
-  background-image: none;
+  background: linear-gradient(180deg, var(--bg) 0%, #141c26 100%);
 }
 
 .auth-nav {

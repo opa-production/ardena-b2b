@@ -4,6 +4,7 @@ import Logo from "../components/Logo";
 import Dropdown from "../components/Dropdown";
 import usePageTitle from "../hooks/usePageTitle";
 import { requestAccess } from "../lib/api";
+import AuthWaves from "./AuthWaves";
 import "./auth.css";
 
 /* Display labels mapped to the API's fleet_size values.
@@ -63,6 +64,7 @@ export default function Signup() {
   if (sent) {
     return (
       <div className="auth">
+      <AuthWaves />
         <header className="auth-nav">
           <Logo />
         </header>
@@ -91,6 +93,7 @@ export default function Signup() {
 
   return (
     <div className="auth">
+      <AuthWaves />
       <header className="auth-nav">
         <Logo />
       </header>

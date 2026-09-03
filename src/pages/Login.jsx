@@ -4,6 +4,7 @@ import Logo from "../components/Logo";
 import PasswordField from "../components/PasswordField";
 import { login } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
+import AuthWaves from "./AuthWaves";
 import "./auth.css";
 
 export default function Login() {
@@ -30,6 +31,7 @@ export default function Login() {
 
   return (
     <div className="auth">
+      <AuthWaves />
       <header className="auth-nav">
         <Logo />
       </header>

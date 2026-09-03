@@ -4,6 +4,7 @@ import Logo from "../components/Logo";
 import PasswordField from "../components/PasswordField";
 import usePageTitle from "../hooks/usePageTitle";
 import { forgotPassword, resetPassword } from "../lib/api";
+import AuthWaves from "./AuthWaves";
 import "./auth.css";
 
 /* OTP reset flow: we email a one-time code, then take code + new password.
@@ -54,6 +55,7 @@ export default function ForgotPassword({ startAtReset = false }) {
 
   return (
     <div className="auth">
+      <AuthWaves />
       <header className="auth-nav">
         <Logo />
       </header>

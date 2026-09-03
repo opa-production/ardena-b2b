@@ -362,10 +362,9 @@
    bottom-right corner. Two overlapping blobs rotating against each other at
    different speeds, so the silhouette breathes rather than spins.
 
-   Departs from the reference on one point, deliberately: als draws the mass in
-   white, and this draws it in brand blue. #007FFA is Ardena for Business's one
-   accent, and this is the single place on the site with room to state it at
-   scale. */
+   White, matching the reference and the pricing hero. Brand blue is left to do
+   its job as an accent on the nav CTA rather than filling a third of the
+   screen. */
 
 .ard-hero {
   position: relative;
@@ -380,8 +379,9 @@
   text-align: left;
 }
 
-/* The mass: both blobs are brand blue, overlapping at different opacities so
-   the crossing gives a denser core. A single flat shape reads as a sticker. */
+/* The mass. The second blob is a fractionally cooler white at 72% rather than
+   pure white on pure white, so the overlap still reads as two forms; one flat
+   silhouette reads as a sticker. */
 .ard-hero-shades {
   position: absolute;
   inset: 0;
@@ -404,7 +404,7 @@
   height: 118vh;
   right: -62vh;
   bottom: -45vh;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23007ffa' d='M461.6 250C452.2 279.8 425.5 304.2 407.5 325.8C389.5 347.5 373.2 363.7 353.6 379.9C333.9 396.1 313.5 415 289.5 423C265.5 431 235.1 432.7 209.4 427.9C183.7 423 158.8 409 135.2 394C111.6 378.9 86.4 361.6 68 337.6C49.6 313.7 27.1 280.3 24.9 250C22.7 219.7 35.3 178.4 55.1 156.1C74.8 133.8 116 123 143.3 116.2C170.7 109.4 195.6 119.1 219.3 115.4C243 111.7 258.3 99.5 285.6 94.1C312.9 88.7 353.3 74.3 383.1 83.1C412.8 91.9 450.9 119.1 464 146.9C477.1 174.7 471 220.2 461.6 250Z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23ffffff' d='M461.6 250C452.2 279.8 425.5 304.2 407.5 325.8C389.5 347.5 373.2 363.7 353.6 379.9C333.9 396.1 313.5 415 289.5 423C265.5 431 235.1 432.7 209.4 427.9C183.7 423 158.8 409 135.2 394C111.6 378.9 86.4 361.6 68 337.6C49.6 313.7 27.1 280.3 24.9 250C22.7 219.7 35.3 178.4 55.1 156.1C74.8 133.8 116 123 143.3 116.2C170.7 109.4 195.6 119.1 219.3 115.4C243 111.7 258.3 99.5 285.6 94.1C312.9 88.7 353.3 74.3 383.1 83.1C412.8 91.9 450.9 119.1 464 146.9C477.1 174.7 471 220.2 461.6 250Z'/%3E%3C/svg%3E");
   animation: ard-turn-a 120s linear infinite;
 }
 
@@ -413,8 +413,8 @@
   height: 90vh;
   right: -29vh;
   bottom: -49vh;
-  opacity: 0.62;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%233d9bff' d='M424.2 250C412.4 272.6 371 283.8 355.5 300.8C340 317.8 342.6 333 331.3 351.9C319.9 370.8 308.8 396.8 287.4 414C266.1 431.2 233 452.8 203.2 455.1C173.3 457.4 124.3 450.5 108.2 427.8C92.2 405.1 103.4 348.5 107 318.9C110.6 289.2 128.2 272.2 129.8 250C131.3 227.8 112.8 206.4 116.3 185.6C119.8 164.9 135.1 144.1 150.7 125.5C166.3 106.9 186.3 83.9 209.9 74.1C233.4 64.3 267.1 60.2 291.8 66.9C316.5 73.7 335.7 98 358.2 114.4C380.6 130.7 415.6 142.4 426.6 165C437.6 187.6 436.1 227.4 424.2 250Z'/%3E%3C/svg%3E");
+  opacity: 0.72;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23f1f5f9' d='M424.2 250C412.4 272.6 371 283.8 355.5 300.8C340 317.8 342.6 333 331.3 351.9C319.9 370.8 308.8 396.8 287.4 414C266.1 431.2 233 452.8 203.2 455.1C173.3 457.4 124.3 450.5 108.2 427.8C92.2 405.1 103.4 348.5 107 318.9C110.6 289.2 128.2 272.2 129.8 250C131.3 227.8 112.8 206.4 116.3 185.6C119.8 164.9 135.1 144.1 150.7 125.5C166.3 106.9 186.3 83.9 209.9 74.1C233.4 64.3 267.1 60.2 291.8 66.9C316.5 73.7 335.7 98 358.2 114.4C380.6 130.7 415.6 142.4 426.6 165C437.6 187.6 436.1 227.4 424.2 250Z'/%3E%3C/svg%3E");
   animation: ard-turn-b 88s linear infinite;
 }
 
@@ -830,54 +830,64 @@
   display: flex;
   align-items: center;
   /* Owns the viewport, like the landing and contact heroes: the cards are a
-     deliberate scroll away rather than half-visible under the fold, which
-     otherwise reads as the page having started badly. */
+     deliberate scroll away rather than half-visible under the fold. */
   min-height: 100vh;
   min-height: 100svh;
-  padding: 10.5rem 5% clamp(150px, 24vh, 250px);
+  padding: 10.5rem 5% 7rem;
   overflow: hidden;
   background: var(--ard-night);
   color: var(--ard-white);
 }
 
-/* Both swells are wider than the viewport by exactly one tile (720px) and
-   repeat horizontally, so translating by that tile loops seamlessly. */
+/* The same corner mass as the landing hero, in white rather than brand blue.
+   Two overlapping blobs counter-rotating at different speeds, so the
+   silhouette breathes and never repeats. White here because the section that
+   follows is white: the mass reads as that surface pushing up into the frame
+   rather than a shape laid over it. */
 .pr-hero::before,
 .pr-hero::after {
   content: "";
   position: absolute;
   z-index: 0;
-  inset: auto auto 0 0;
-  width: calc(100% + 720px);
-  height: clamp(110px, 20vh, 200px);
-  background-repeat: repeat-x;
-  background-position: left bottom;
-  background-size: 720px 100%;
+  inset: auto 0 0 auto;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   will-change: transform;
 }
 
 .pr-hero::before {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 300' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 100C90 160 270 160 360 100C450 40 630 40 720 100L720 300L0 300Z'/%3E%3C/svg%3E");
-  animation: ard-swell-a 34s linear infinite;
+  width: 118vh;
+  height: 118vh;
+  right: -62vh;
+  bottom: -45vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23ffffff' d='M461.6 250C452.2 279.8 425.5 304.2 407.5 325.8C389.5 347.5 373.2 363.7 353.6 379.9C333.9 396.1 313.5 415 289.5 423C265.5 431 235.1 432.7 209.4 427.9C183.7 423 158.8 409 135.2 394C111.6 378.9 86.4 361.6 68 337.6C49.6 313.7 27.1 280.3 24.9 250C22.7 219.7 35.3 178.4 55.1 156.1C74.8 133.8 116 123 143.3 116.2C170.7 109.4 195.6 119.1 219.3 115.4C243 111.7 258.3 99.5 285.6 94.1C312.9 88.7 353.3 74.3 383.1 83.1C412.8 91.9 450.9 119.1 464 146.9C477.1 174.7 471 220.2 461.6 250Z'/%3E%3C/svg%3E");
+  animation: ard-turn-a 120s linear infinite;
 }
 
 .pr-hero::after {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 300' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 105C45 180 135 180 180 105C225 30 315 30 360 105C405 180 495 180 540 105C585 30 675 30 720 105L720 300L0 300Z'/%3E%3C/svg%3E");
-  animation: ard-swell-b 23s linear infinite;
+  width: 90vh;
+  height: 90vh;
+  right: -29vh;
+  bottom: -49vh;
+  opacity: 0.72;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23f1f5f9' d='M424.2 250C412.4 272.6 371 283.8 355.5 300.8C340 317.8 342.6 333 331.3 351.9C319.9 370.8 308.8 396.8 287.4 414C266.1 431.2 233 452.8 203.2 455.1C173.3 457.4 124.3 450.5 108.2 427.8C92.2 405.1 103.4 348.5 107 318.9C110.6 289.2 128.2 272.2 129.8 250C131.3 227.8 112.8 206.4 116.3 185.6C119.8 164.9 135.1 144.1 150.7 125.5C166.3 106.9 186.3 83.9 209.9 74.1C233.4 64.3 267.1 60.2 291.8 66.9C316.5 73.7 335.7 98 358.2 114.4C380.6 130.7 415.6 142.4 426.6 165C437.6 187.6 436.1 227.4 424.2 250Z'/%3E%3C/svg%3E");
+  animation: ard-turn-b 88s linear infinite;
 }
 
-@keyframes ard-swell-a {
-  to {
-    transform: translateX(-720px);
+@media (max-width: 899px) {
+  .pr-hero::before {
+    width: min(110vw, 52vh);
+    height: min(110vw, 52vh);
+    right: -25vw;
+    bottom: -45vw;
   }
-}
 
-@keyframes ard-swell-b {
-  from {
-    transform: translateX(-720px);
-  }
-  to {
-    transform: translateX(0);
+  .pr-hero::after {
+    width: min(85vw, 45vh);
+    height: min(85vw, 45vh);
+    right: -10vw;
+    bottom: -40vw;
   }
 }
 

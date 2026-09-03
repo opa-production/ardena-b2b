@@ -14,11 +14,18 @@ import {
   CHECK_PRICE,
 } from "./verificationsStore";
 import Dropdown from "../components/Dropdown";
+import LoadingOverlay from "../components/LoadingOverlay";
 import { toast } from "./toastStore";
 import EmptyState from "./EmptyState";
 import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
+
+/* Value is what the API takes; label is what the person reads. */
+const PAYMENT_METHODS = [
+  { value: "mpesa", label: "M-Pesa" },
+  { value: "card", label: "Card" },
+];
 
 const PLACEHOLDER = {
   "National ID": "e.g. 29845112",
@@ -220,7 +227,6 @@ export default function Verification() {
             className="btn btn-ghost page-action-btn"
             onClick={stopTopupPolling}
           >
-            <span className="pay-waiting-dot" />
             Waiting for payment
           </button>
         ) : (
@@ -480,29 +486,20 @@ export default function Verification() {
                   autoFocus
                 />
               </label>
-              <fieldset className="provider-group">
-                <legend className="field-label">Payment method</legend>
-                <label className="provider-option">
-                  <input
-                    type="radio"
-                    name="topup-method"
-                    value="mpesa"
-                    checked={topupMethod === "mpesa"}
-                    onChange={() => setTopupMethod("mpesa")}
-                  />
-                  <span className="provider-pill mpesa-pill">M-Pesa</span>
-                </label>
-                <label className="provider-option">
-                  <input
-                    type="radio"
-                    name="topup-method"
-                    value="card"
-                    checked={topupMethod === "card"}
-                    onChange={() => setTopupMethod("card")}
-                  />
-                  <span className="provider-pill card-pill">Card</span>
-                </label>
-              </fieldset>
+              {/* A dropdown rather than two radio pills: there are only two
+                  today but card is about to grow siblings, and a pill row
+                  stops scaling at three. */}
+              <label className="field-label">
+                Payment method
+                <Dropdown
+                  id="topup-method"
+                  name="topup-method"
+                  value={topupMethod}
+                  onChange={setTopupMethod}
+                  options={PAYMENT_METHODS}
+                />
+              </label>
+
               {topupMethod === "mpesa" && (
                 <label className="field-label">
                   M-Pesa phone
@@ -538,6 +535,25 @@ export default function Verification() {
           </div>
         </div>
       )}
+      {/* One centred wait for both slow paths on this page. The registry
+          lookup and the STK push are the two things a person actually stands
+          and waits for, so the loader goes where the eye already is rather
+          than inside the button that started it. */}
+      {checking && (
+        <LoadingOverlay
+          label="Checking the registry…"
+          note={`Looking up that ${type.toLowerCase()}.`}
+        />
+      )}
+
+      {topupWaiting && (
+        <LoadingOverlay
+          label="Waiting for payment…"
+          note="Approve the prompt on your phone. This closes on its own once it clears."
+          onCancel={stopTopupPolling}
+        />
+      )}
+
     </>
   );
 }

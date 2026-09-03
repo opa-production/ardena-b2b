@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Logo from "../components/Logo";
 import PasswordField from "../components/PasswordField";
 import { login } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
@@ -32,9 +31,6 @@ export default function Login() {
   return (
     <div className="auth">
       <AuthWaves />
-      <header className="auth-nav">
-        <Logo />
-      </header>
 
       <main className="auth-card">
         <h1>Welcome back</h1>

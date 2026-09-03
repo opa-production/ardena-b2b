@@ -1,0 +1,107 @@
+/* ScaleLoader. See ScaleLoader.jsx for why this is hand-rolled. */
+
+.sl {
+  --sl-h: 35px;
+  --sl-w: 4px;
+  --sl-gap: 2px;
+  --sl-color: var(--brand);
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sl-gap);
+  height: var(--sl-h);
+  line-height: 0;
+}
+
+.sl > span {
+  display: block;
+  width: var(--sl-w);
+  height: 100%;
+  border-radius: 2px;
+  background: var(--sl-color);
+  animation: sl-scale 1s ease-in-out infinite;
+}
+
+/* Sitting in a line of text rather than owning its own row: the bars shrink to
+   the cap height so they do not push the line box open. */
+.sl--inline {
+  --sl-h: 15px;
+  --sl-w: 3px;
+  vertical-align: middle;
+}
+
+@keyframes sl-scale {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.4);
+  }
+}
+
+/* Motion is the whole point of a spinner, so it does not vanish under
+   reduced-motion; it holds the bars at their mid height instead, which still
+   reads as a placeholder rather than a stray row of ticks. */
+@media (prefers-reduced-motion: reduce) {
+  .sl > span {
+    animation: none;
+    transform: scaleY(0.7);
+  }
+}
+
+/* ---- Centred page wait ---- */
+
+/* Above .modal-overlay (900), because both flows that use this start inside a
+   dialog and the wait has to cover it. */
+.load-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(10, 13, 18, 0.55);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: load-in 0.16s var(--ease) both;
+}
+
+.load-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 240px;
+  padding: 32px 36px;
+  text-align: center;
+  background: var(--panel);
+  box-shadow: var(--edge), 0 24px 60px rgba(10, 13, 18, 0.25);
+}
+
+.load-label {
+  margin-top: 14px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.load-note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-mute);
+  max-width: 30ch;
+}
+
+.load-cancel {
+  margin-top: 16px;
+  padding: 8px 18px;
+  font-size: 13px;
+}
+
+@keyframes load-in {
+  from {
+    opacity: 0;
+  }
+}

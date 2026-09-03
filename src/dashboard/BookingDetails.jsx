@@ -23,6 +23,7 @@ import { STATUS_CHIP, PAY_CHIP } from "./Bookings";
 import { fmtDate, rentalDays } from "./bookingsStore";
 import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
+import LoadingOverlay from "../components/LoadingOverlay";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
 import { compressImage } from "./handoverPhotosStore";
@@ -1027,13 +1028,6 @@ export default function BookingDetails() {
                 </div>
               )
             )}
-            {payWaiting && (
-              <div className="pay-waiting">
-                <span className="pay-waiting-dot" />
-                Waiting for customer to pay…
-                <button type="button" className="icon-btn" onClick={stopPolling}>Stop</button>
-              </div>
-            )}
             {canPrompt && (
               <>
                 <div className="pay-actions">
@@ -1313,6 +1307,17 @@ export default function BookingDetails() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* The customer is looking at their phone and so is whoever is standing
+          at the counter with them; a corner indicator on a long page is the
+          wrong place for the only thing happening. */}
+      {payWaiting && (
+        <LoadingOverlay
+          label="Waiting for the customer to pay…"
+          note="They approve the prompt on their phone. This closes on its own once it clears."
+          onCancel={stopPolling}
+        />
       )}
 
     </>

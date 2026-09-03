@@ -260,14 +260,6 @@
   color: var(--ink-soft);
 }
 
-/* the "waiting for payment" pill, docked above the viewport floor */
-.pay-waiting-dock {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
-}
 
 /* ---- Usage: the daily bar chart ---- */
 

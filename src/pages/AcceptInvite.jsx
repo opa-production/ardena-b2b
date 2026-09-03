@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import Logo from "../components/Logo";
 import { acceptInvite } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
 import "./auth.css";
@@ -20,7 +19,6 @@ export default function AcceptInvite() {
   if (!token) {
     return (
       <div className="auth">
-        <header className="auth-nav"><Logo /></header>
         <main className="auth-card">
           <h1>Invalid link</h1>
           <p>This invite link is missing or malformed. Ask your workspace admin to resend the invite.</p>
@@ -33,7 +31,6 @@ export default function AcceptInvite() {
   if (done) {
     return (
       <div className="auth">
-        <header className="auth-nav"><Logo /></header>
         <main className="auth-card">
           <h1>Account activated</h1>
           <p>Your account is ready. Sign in with your email and the password you just set.</p>
@@ -63,7 +60,6 @@ export default function AcceptInvite() {
 
   return (
     <div className="auth">
-      <header className="auth-nav"><Logo /></header>
 
       <main className="auth-card">
         <h1>Set your password</h1>

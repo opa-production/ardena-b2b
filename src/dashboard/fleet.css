@@ -194,6 +194,9 @@
 .page-actions {
   display: flex;
   justify-content: flex-end;
+  /* Two actions here read as one control when they touch; a page that offers
+     both "top up" and "run a check" needs them told apart at a glance. */
+  gap: 10px;
   margin-bottom: 12px;
 }
 

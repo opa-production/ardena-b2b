@@ -20,13 +20,14 @@ import {
 } from "../lib/api";
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
+import LoadingOverlay from "../components/LoadingOverlay";
 import usePageTitle from "../hooks/usePageTitle";
 import { fmtAmount, fmtDate } from "./billingFormat";
 import { FREE_MONTHS } from "../pages/pricingData";
 import "./overview.css";
 import "./fleet.css";
 import "./billing.css";
-import "./bookings.css"; // modal + provider-pill + pay-waiting styles
+import "./bookings.css"; // modal + provider-pill styles
 
 export default function Billing() {
   usePageTitle("Billing");
@@ -290,17 +291,14 @@ export default function Billing() {
         </div>
       )}
 
-      {/* ---- Invoice payment waiting indicator ---- */}
+      {/* Centred, not docked in a corner: the person is holding a phone
+          waiting for a prompt, and this is the only thing happening. */}
       {invWaiting && (
-        <div className="pay-waiting-dock">
-          <span className="pay-waiting">
-            <span className="pay-waiting-dot" />
-            Waiting for payment…
-            <button type="button" className="icon-btn" onClick={stopInvPolling}>
-              Stop
-            </button>
-          </span>
-        </div>
+        <LoadingOverlay
+          label="Waiting for payment…"
+          note="Approve the prompt on your phone. This closes on its own once it clears."
+          onCancel={stopInvPolling}
+        />
       )}
     </>
   );

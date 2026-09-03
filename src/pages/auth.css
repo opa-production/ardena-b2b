@@ -13,7 +13,7 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 96px clamp(20px, 5vw, 48px) 48px;
+  padding: 64px clamp(20px, 5vw, 48px) 48px;
   position: relative;
   overflow: hidden;
   background: linear-gradient(180deg, var(--panel) 0%, #eef4fd 100%);
@@ -100,25 +100,6 @@
    read as deeper water. */
 [data-theme="dark"] .auth {
   background: linear-gradient(180deg, var(--bg) 0%, #141c26 100%);
-}
-
-.auth-nav {
-  position: absolute;
-  top: 36px;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  /* full-width strip must not swallow clicks on the back button under it */
-  pointer-events: none;
-}
-
-.auth-nav .brand {
-  pointer-events: auto;
-}
-
-.auth-nav .brand svg {
-  height: 24px;
 }
 
 .auth-card {

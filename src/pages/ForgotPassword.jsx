@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../components/Logo";
 import PasswordField from "../components/PasswordField";
 import usePageTitle from "../hooks/usePageTitle";
 import { forgotPassword, resetPassword } from "../lib/api";
@@ -56,9 +55,6 @@ export default function ForgotPassword({ startAtReset = false }) {
   return (
     <div className="auth">
       <AuthWaves />
-      <header className="auth-nav">
-        <Logo />
-      </header>
 
       {stage === "done" ? (
         <main className="auth-card">

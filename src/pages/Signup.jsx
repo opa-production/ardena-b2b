@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../components/Logo";
 import Dropdown from "../components/Dropdown";
 import usePageTitle from "../hooks/usePageTitle";
 import { requestAccess } from "../lib/api";
@@ -65,9 +64,6 @@ export default function Signup() {
     return (
       <div className="auth">
       <AuthWaves />
-        <header className="auth-nav">
-          <Logo />
-        </header>
 
         <main className="auth-card">
           <span className="request-check" aria-hidden="true">
@@ -94,9 +90,6 @@ export default function Signup() {
   return (
     <div className="auth">
       <AuthWaves />
-      <header className="auth-nav">
-        <Logo />
-      </header>
 
       <main className="request-split">
         <div className="request-intro">

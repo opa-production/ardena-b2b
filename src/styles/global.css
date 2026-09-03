@@ -48,8 +48,12 @@
      Cream is already the brand's third ground (see --ard-cream on the
      marketing pages); this is that colour with an edge dark enough to hold the
      card's shape against a near-white page. */
+  /* A KPI card's edge: the hairline with brand blue mixed into it, so a row of
+     figures reads as one instrument panel rather than four loose boxes. Faint
+     on purpose (1.5:1 against the card) — it is an edge, not a border. */
+  --kpi-edge: #bcd6f8;
+
   --kpi-cream: #f5f0e8;
-  --kpi-cream-edge: #e6ddcc;
   --kpi-cream-ink: #6b6252;
 
   /* Status */
@@ -164,8 +168,9 @@
 
   /* Cream on graphite is a warm dark, not a light card: inverting it to a
      pale slab would make this the brightest thing on the screen. */
+  --kpi-edge: #2b3f5c;
+
   --kpi-cream: #332f27;
-  --kpi-cream-edge: #45402f;
   --kpi-cream-ink: #b8ae99;
 
   /* Inverted on graphite: a deep burnt orange barely separates from the card

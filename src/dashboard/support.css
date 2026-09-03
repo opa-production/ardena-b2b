@@ -299,3 +299,12 @@
   font-size: 13px;
   color: var(--ink-mute);
 }
+
+
+/* A message that has left the composer but not yet been acknowledged by the
+   server. Held back slightly rather than spinner-ed: it is on screen, in
+   place, and about to settle — the only thing not yet true is the timestamp
+   under it. */
+.msg.is-sending {
+  opacity: 0.62;
+}

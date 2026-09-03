@@ -3,9 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import { fetchClient } from "../lib/api";
 import { STATUS_CHIP } from "./bookingsStore";
-import { VERIF_CHIP } from "./Clients";
+import { VERIF_CHIP } from "./clientsFormat";
 import { fmtDate, fmtRange, rentalDays } from "./bookingsStore";
 import { toast } from "./toastStore";
+import { getSeed } from "./recordSeeds";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -13,8 +14,12 @@ const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 export default function ClientDetails() {
   const { id } = useParams();
-  const [c, setC] = useState(null);
+  // The row from the clients list, if that is where this was opened from —
+  // name, phone and verification are enough to draw the header while the full
+  // record (bookings, spend) loads. See recordSeeds.
+  const [c, setC] = useState(() => getSeed("clients", id));
   const [loading, setLoading] = useState(true);
+  const seeded = c !== null && loading;
 
   const load = useCallback(async () => {
     try {
@@ -31,7 +36,8 @@ export default function ClientDetails() {
     load();
   }, [load]);
 
-  if (loading) return <PageSkeleton path={`/dashboard/clients/${id}`} />;
+  // A skeleton only when there is genuinely nothing to draw.
+  if (loading && !c) return <PageSkeleton path={`/dashboard/clients/${id}`} />;
 
   if (!c) {
     return (
@@ -53,7 +59,7 @@ export default function ClientDetails() {
 
   return (
     <>
-      <header className="head-card">
+      <header className="head-card" aria-busy={seeded || undefined}>
         <div className="head-left">
           <Link to="/dashboard/clients" className="back-link" aria-label="Back to clients">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -65,6 +71,8 @@ export default function ClientDetails() {
             <p>
               #{c.id} · {c.phone} ·{" "}
               <span className={`chip ${VERIF_CHIP[c.verification] || "pending"}`}>{c.verification}</span>
+              {/* Drawn from the list row while the full record loads. */}
+              {seeded && <span className="seed-note">Updating…</span>}
             </p>
           </div>
         </div>

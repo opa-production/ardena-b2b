@@ -7,6 +7,7 @@ import BookingsTrend from "./charts/BookingsTrend";
 import BookingCalendar from "./BookingCalendar";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { toast } from "./toastStore";
+import { seedRecords } from "./recordSeeds";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -45,7 +46,10 @@ export default function Bookings() {
       const params = {};
       if (status !== "All") params.status = status;
       const data = await fetchBookings(params);
-      setBookings(data.data || []);
+      const rows = data.data || [];
+      setBookings(rows);
+      // so opening one of these paints instantly — see recordSeeds
+      seedRecords("bookings", rows, (b) => b.ref);
     } catch (err) {
       toast(err.message || "Failed to load bookings", "danger");
     } finally {

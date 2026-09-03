@@ -11,10 +11,12 @@ import { resetFleet } from "../dashboard/fleetStore";
 import { resetVerification } from "../dashboard/verificationsStore";
 import { resetChauffeurs } from "../dashboard/chauffeursStore";
 import { resetTracking } from "../dashboard/trackingStore";
+import { resetSeeds } from "../dashboard/recordSeeds";
 
 // locally cached per-account state, wiped whenever the session changes hands
 function resetLocalCaches() {
   clearApiCache();
+  resetSeeds();
   resetBusiness();
   resetOnboarding();
   resetFleet();

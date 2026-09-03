@@ -3,18 +3,12 @@ import { Link, useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import { fetchClients, deleteClient } from "../lib/api";
 import { toast } from "./toastStore";
+import { seedRecords } from "./recordSeeds";
 import ConfirmDialog from "../components/ConfirmDialog";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
+import { VERIF_CHIP } from "./clientsFormat";
 import "./fleet.css";
 import "./bookings.css";
-
-export const VERIF_CHIP = {
-  Verified: "active",
-  Pending: "pending",
-  "Not found": "cancelled",
-  Mismatch: "cancelled",
-  Failed: "cancelled",
-};
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
@@ -28,7 +22,10 @@ export default function Clients() {
   const load = useCallback(async () => {
     try {
       const data = await fetchClients({ per_page: 100 });
-      setClients(data.data || []);
+      const rows = data.data || [];
+      setClients(rows);
+      // so opening one of these paints instantly — see recordSeeds
+      seedRecords("clients", rows, (c) => c.id);
     } catch (err) {
       toast(err.message || "Failed to load clients", "danger");
     } finally {

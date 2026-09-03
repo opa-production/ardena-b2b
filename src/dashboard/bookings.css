@@ -649,3 +649,31 @@
   margin-bottom: 14px;
   padding: 10px 14px;
 }
+
+
+/* A detail page drawn from the list row it was opened from, while the full
+   record is still in flight. Quiet on purpose: what is on screen is true, it
+   is simply not all of it yet. */
+.seed-note {
+  margin-left: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-mute);
+  animation: seed-breathe 1.6s ease-in-out infinite;
+}
+
+@keyframes seed-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seed-note {
+    animation: none;
+  }
+}

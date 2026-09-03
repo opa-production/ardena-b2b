@@ -22,6 +22,7 @@ import {
 import { STATUS_CHIP, PAY_CHIP, fmtDate, rentalDays } from "./bookingsStore";
 import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
+import { getSeed } from "./recordSeeds";
 import LoadingOverlay from "../components/LoadingOverlay";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
@@ -84,7 +85,9 @@ export default function BookingDetails() {
   const policy = useSyncExternalStore(subscribePolicy, getPolicy);
   const { can } = useRole();
   const { ref } = useParams();
-  const [b, setB] = useState(null);
+  // The row from the bookings list, if that is where this was opened from —
+  // enough to draw the page while the full record loads. See recordSeeds.
+  const [b, setB] = useState(() => getSeed("bookings", decodeURIComponent(ref)));
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -130,6 +133,14 @@ export default function BookingDetails() {
       setLoading(false);
     }
   }, [decodedRef]);
+
+  /* Arriving from the bookings list, the row that was clicked is already
+     known — customer, vehicle, dates, status — so draw it now and let the
+     full record fill in the rest. Only the headline fields are seeded, so
+     everything else renders empty for the moment the fetch takes; the page
+     is marked busy until it lands. Landing here from a link or a refresh
+     finds no seed and shows the skeleton, as before. */
+  const seeded = b !== null && loading;
 
   useEffect(() => {
     load();
@@ -209,7 +220,9 @@ export default function BookingDetails() {
     pollRef.current = setInterval(tick, 10000);
   }
 
-  if (loading) return <PageSkeleton path={`/dashboard/bookings/${ref}`} />;
+  // A skeleton only when there is genuinely nothing to show. With a seed the
+  // page is already drawable, and `seeded` marks it as still filling in.
+  if (loading && !b) return <PageSkeleton path={`/dashboard/bookings/${ref}`} />;
 
   if (!b) {
     return (
@@ -556,7 +569,7 @@ export default function BookingDetails() {
         />
       )}
 
-      <header className="head-card">
+      <header className="head-card" aria-busy={seeded || undefined}>
         <div className="head-left">
           <Link to="/dashboard/bookings" className="back-link" aria-label="Back to bookings">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -568,6 +581,9 @@ export default function BookingDetails() {
             <p>
               {b.ref} · {b.vehicle} ({b.plate}) ·{" "}
               <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
+              {/* Drawn from the list row while the full record loads, so say
+                  so rather than let a half-filled page pass for a whole one. */}
+              {seeded && <span className="seed-note">Updating…</span>}
               {fromApp && (
                 <>
                   {" "}

@@ -86,11 +86,11 @@ export default function ClientDetails() {
             </div>
             <div className="spec">
               <dt>Email</dt>
-              <dd>{c.email || "—"}</dd>
+              <dd>{c.email || "-"}</dd>
             </div>
             <div className="spec">
               <dt>ID document</dt>
-              <dd>{c.id_type || "—"}</dd>
+              <dd>{c.id_type || "-"}</dd>
             </div>
             <div className="spec">
               <dt>Client since</dt>

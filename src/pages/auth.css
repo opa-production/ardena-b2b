@@ -2,7 +2,13 @@
    Flat: plain white, 1px --line borders, sharp corners, matching the
    marketing pages. The shared .btn / .field rules from global.css are
    overridden under .auth at the bottom of this file so these two pages keep
-   real borders rather than the --edge hairline the dashboard uses. */
+   real borders rather than the --edge hairline the dashboard uses.
+
+   The page sits on home.jpg, a soft blue-on-white gradient. It is set as a
+   background rather than an <img> because it is decoration in three different
+   page shapes and never needs alt text, sizing or a load priority of its own.
+   The card stays opaque white on top: the artwork is atmosphere behind a form,
+   not something to read type against. */
 
 .auth {
   min-height: 100vh;
@@ -11,7 +17,17 @@
   place-items: center;
   padding: 96px clamp(20px, 5vw, 48px) 48px;
   position: relative;
-  background: var(--panel);
+  background-color: var(--panel);
+  background-image: url("../assets/home.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* The image is a light gradient built for the light theme; on graphite it
+   would be a bright slab behind a dark card. Drop it rather than tint it. */
+[data-theme="dark"] .auth {
+  background-image: none;
 }
 
 .auth-nav {
@@ -33,30 +49,6 @@
   height: 24px;
 }
 
-.auth-back {
-  position: absolute;
-  top: 32px;
-  left: clamp(20px, 5vw, 48px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  color: var(--ink-soft);
-  background: var(--panel);
-  border: 1px solid var(--line);
-  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
-}
-
-.auth-back:hover {
-  color: var(--ink);
-  border-color: var(--ink);
-}
-
-.auth-back:active {
-  background: var(--surface);
-}
-
 .auth-card {
   width: 100%;
   max-width: 420px;
@@ -76,6 +68,33 @@
   color: var(--ink-soft);
   font-size: 14.5px;
   margin-bottom: 32px;
+}
+
+/* A quiet way out, in place of the round back button that used to float in the
+   page corner. Sits with the other choices under the form rather than hovering
+   over the artwork, and says where it goes. */
+.auth-cancel {
+  margin-top: 14px;
+  font-size: 13.5px;
+}
+
+.auth-cancel a {
+  color: var(--ink-mute);
+  transition: color 0.15s var(--ease);
+}
+
+.auth-cancel a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* "optional" beside a field label, without the interpunct doing the work */
+.field-opt {
+  margin-left: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--ink-mute);
 }
 
 .auth-form {

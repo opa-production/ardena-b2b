@@ -44,10 +44,29 @@
   --edge-inv: 0 0 0 1px rgba(255, 255, 255, 0.22);
   --edge-inv-in: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 
+  /* The one KPI on a page that gates the rest of it — the verification wallet.
+     Cream is already the brand's third ground (see --ard-cream on the
+     marketing pages); this is that colour with an edge dark enough to hold the
+     card's shape against a near-white page. */
+  --kpi-cream: #f5f0e8;
+  --kpi-cream-edge: #e6ddcc;
+  --kpi-cream-ink: #6b6252;
+
   /* Status */
   --ok: #16a34a;
   --warn: #d97706;
   --danger: #dc2626;
+
+  /* A filled button for an action that is sensitive but not destructive:
+     changing a password, and anything else that alters access rather than
+     deleting something. Distinct from --danger, which is reserved for actions
+     that remove or end things (delete, log out) — using red for both would
+     teach people to read "irreversible" where none exists.
+     Deeper than --warn because it carries white text: 5.18:1 filled, where
+     --warn would give 3.19:1 and fail as a button label. */
+  --caution: #c2410c;
+  --caution-hover: #9a3412;
+  --on-caution: #ffffff;
 
   /* Inverted surface: a dark chip/button with light text in the light theme,
      flipped to a light chip with dark text in the dark theme. Lets the shared
@@ -142,6 +161,19 @@
   --ink-inv: #e9ecf1;
   --ink-inv-hover: #ffffff;
   --on-ink: #23252b;
+
+  /* Cream on graphite is a warm dark, not a light card: inverting it to a
+     pale slab would make this the brightest thing on the screen. */
+  --kpi-cream: #332f27;
+  --kpi-cream-edge: #45402f;
+  --kpi-cream-ink: #b8ae99;
+
+  /* Inverted on graphite: a deep burnt orange barely separates from the card
+     it sits on (2.55:1), so the fill lightens and the label goes dark.
+     6.77:1 on the label, 5.84:1 for the button against its card. */
+  --caution: #fb923c;
+  --caution-hover: #fdba74;
+  --on-caution: #23252b;
 
   /* Status colours brightened for contrast against graphite */
   --ok: #34d399;
@@ -323,6 +355,24 @@ h3 {
 .btn-ghost:active {
   transform: translateY(0);
   box-shadow: var(--edge-in);
+}
+
+/* Sensitive, not destructive — see --caution. */
+.btn-caution {
+  background: var(--caution);
+  color: var(--on-caution);
+  box-shadow: var(--edge);
+}
+
+.btn-caution:hover {
+  background: var(--caution-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--edge-strong);
+}
+
+.btn-caution:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 /* Inverted variants for black sections */

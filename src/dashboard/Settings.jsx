@@ -407,9 +407,14 @@ export default function Settings() {
               We&apos;ll email you a one-time code to confirm it&apos;s you, then
               you set the new password.
             </p>
+            {/* Coloured because it is the one control on this page that
+                changes how you get in, and it sits among a column of ordinary
+                save buttons that all look alike. Orange rather than red: red
+                is what Log out and Remove wear, and a password change is
+                sensitive, not destructive. */}
             <button
               type="button"
-              className="btn btn-ghost pay-btn"
+              className="btn btn-caution pay-btn"
               onClick={openPasswordModal}
               disabled={pwBusy}
             >

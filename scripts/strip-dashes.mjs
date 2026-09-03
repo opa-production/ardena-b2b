@@ -1,196 +1,227 @@
 #!/usr/bin/env node
 /**
- * Replace em and en dashes in user-facing dashboard copy.
+ * Remove em and en dashes from everything a user can read.
  *
- *   node scripts/strip-dashes.mjs          # report only, changes nothing
- *   node scripts/strip-dashes.mjs --write  # apply
- *   node scripts/strip-dashes.mjs --write --all   # marketing pages too
+ *   node scripts/strip-dashes.mjs           # report, changes nothing
+ *   node scripts/strip-dashes.mjs --write   # apply
+ *   node scripts/strip-dashes.mjs --write --comments   # code comments too
  *
- * Why a script and not a find-and-replace: an em dash is punctuation in prose
- * but it is also a legitimate character in code — inside a comment explaining
- * a decision, in a URL, in a data value. A blind sweep rewrites all of them and
- * you find out in review. This one only touches text a user can actually read:
+ * Why not a find-and-replace: an em dash is punctuation in prose, but the same
+ * character sits in code comments explaining a decision, and a lone "—" is a
+ * table cell meaning "no value" rather than a sentence. A blind sweep mangles
+ * both.
  *
- *   · JSX text nodes            <p>fitted in person — the hardware…</p>
- *   · string and template props  title="No checks yet — look one up"
+ * This inverts the earlier approach. Rather than trying to identify which
+ * ranges are user-facing text — which meant guessing at JSX and giving up on
+ * anything containing an expression, so "your whole team — no card required"
+ * survived three passes — it identifies what to SKIP and rewrites the rest:
  *
- * and deliberately skips:
+ *   skipped   line and block comments (not shipped to a reader)
+ *             import paths, URLs, and the SVG data: URIs in the heroes
+ *   rewritten everything else, which in a JS/JSX/HTML file is string
+ *             literals, template literals and JSX text
  *
- *   · // and block comments, which are for us, not for customers
- *   · import paths and anything inside a URL
- *   · the marketing pages under src/pages (unless --all), whose voice is set
- *     by ardena.co.ke rather than by the dashboard
+ * CSS is scanned for reporting but never written: a dash outside a comment
+ * there would be inside a content: property, and there are none.
  *
- * Replacement rules, in order:
- *   "word — word"  → "word, word"     a parenthetical mid-sentence
- *   "word —"       → "word."           a dash used as a full stop before a clause
- *   "— word"       → "word"            a leading dash
- *   "5 — 9" / "5–9" → "5 to 9"         a numeric range
+ * Replacements, in order:
+ *   "5 – 9" / "5–9"    → "5 to 9"      a numeric or date range
+ *   "word — word"      → "word, word"  a parenthetical mid-sentence
+ *   "word— "           → "word, "      a dash doing a full stop's job
+ *   leading "— word"   → "word"        a dash opening a line
+ *   a lone "—"         → "-"           a placeholder cell, see below
+ *
+ * The placeholder is the one judgement call. `{value || "—"}` renders an empty
+ * cell as a dash; emptying it leaves a blank that reads as a bug, so it becomes
+ * an ASCII hyphen. It is no longer an em dash, which is the character being
+ * objected to, and the cell still says "nothing here".
+ *
+ * Opting out: a dash that is data rather than prose — an API enum value, say —
+ * is protected by wrapping it in
+ *
+ *     // strip-dashes: keep-start
+ *     ...
+ *     // strip-dashes: keep-end
+ *
+ * There is one such region today, the fleet_size map in Signup.jsx, whose
+ * values the backend defines. Rewriting those would have sent "3 to 10" to an
+ * endpoint expecting "3–10" and failed every access request. Prefer changing
+ * the data over adding a marker; use this only when the value is not ours.
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { readdirSync, statSync } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, extname, sep } from "node:path";
 
 const ROOT = process.cwd();
 const WRITE = process.argv.includes("--write");
-const ALL = process.argv.includes("--all");
+const COMMENTS = process.argv.includes("--comments");
 
-const DIRS = ALL ? ["src"] : ["src/dashboard", "src/components", "src/hooks"];
-const EXT = /\.(jsx?|mjs)$/;
+const ROOTS = ["src", "index.html"];
+const CODE = new Set([".js", ".jsx", ".mjs"]);
+const MARKUP = new Set([".html"]);
+const REPORT_ONLY = new Set([".css"]);
 
-/* ---- Which parts of a file are user-facing text ----------------------------
-   A tiny scanner rather than a parser: walk the file once, tracking whether we
-   are inside a line comment, a block comment, a quoted string, a template, or
-   JSX text. Only the last three are copy. This is not a JS parser and does not
-   need to be — it only has to be right about where text begins and ends. */
-function textRanges(src) {
-  const ranges = [];
-  let i = 0;
-  let jsxTextStart = -1;
+const DASH = /[—–]/;
 
-  const pushJsxText = (end) => {
-    if (jsxTextStart >= 0 && end > jsxTextStart) {
-      ranges.push([jsxTextStart, end]);
-    }
-    jsxTextStart = -1;
-  };
+/* ---- Rules -------------------------------------------------------------- */
 
-  while (i < src.length) {
-    const c = src[i];
-    const next = src[i + 1];
-
-    if (c === "/" && next === "/") {
-      pushJsxText(i);
-      while (i < src.length && src[i] !== "\n") i++;
-      continue;
-    }
-    if (c === "/" && next === "*") {
-      pushJsxText(i);
-      i += 2;
-      while (i < src.length && !(src[i] === "*" && src[i + 1] === "/")) i++;
-      i += 2;
-      continue;
-    }
-    if (c === '"' || c === "'" || c === "`") {
-      pushJsxText(i);
-      const quote = c;
-      const start = ++i;
-      while (i < src.length) {
-        if (src[i] === "\\") i += 2;
-        else if (src[i] === quote) break;
-        else i++;
-      }
-      ranges.push([start, i]);
-      i++;
-      continue;
-    }
-    // A '>' opens JSX text; the next '<' closes it. Crude, and enough: the
-    // only false positives are comparison operators, and a stray range that
-    // contains no dash is harmless because nothing matches inside it.
-    if (c === ">") {
-      pushJsxText(i);
-      jsxTextStart = i + 1;
-      i++;
-      continue;
-    }
-    if (c === "<" || c === "{") {
-      pushJsxText(i);
-      i++;
-      continue;
-    }
-    i++;
-  }
-  pushJsxText(src.length);
-  return ranges;
-}
-
-/* The two dashes do different jobs, so they get different replacements.
-   An en dash (–) is almost always a range: "Mon – Sat", "Jul 2 – Jul 6",
-   "8am – 8pm". Turning those into commas reads as a list of two things, which
-   is wrong and occasionally misleading. An em dash (—) is punctuation. */
 const RULES = [
-  // en dash: a range, in words
-  [/(\S)\s*–\s*(\S)/g, "$1 to $2"],
-  // em dash between two words: a parenthetical, so a comma
+  // An en dash is a range wherever it appears, including between template
+  // expressions where neither side is a word character: `${from} – ${to}`.
+  // Commafying those reads as a list of two dates rather than a span.
+  [/\s*–\s*/g, " to "],
+  // em dash spaced between two words: a parenthetical
   [/(\S)\s+—\s+(\S)/g, "$1, $2"],
-  // em dash hard against the previous word, then a space
+  // em dash tight against the previous word, then a space
   [/(\w)—\s+/g, "$1, "],
-  // leading em dash on its own line
-  [/(^|\n)\s*—\s*/g, "$1"],
-  // anything left
+  // em dash opening a line or following a quote
+  [/(^|\n|["'`>])\s*—\s+/g, "$1"],
+  // anything left with space on at least one side
   [/\s*—\s*/g, ", "],
+  // bare leftovers
+  [/[—–]/g, ", "],
 ];
 
-function fixText(text) {
-  let out = text;
+function fixProse(text) {
+  // A quoted string that is nothing but a dash is a placeholder, whatever else
+  // is on the line: `{c.phone || "—"}` renders an empty cell. Handle these
+  // before the prose rules, which would otherwise turn it into a stray comma.
+  let out = text
+    .replace(/"\s*[—–]\s*"/g, '"-"')
+    .replace(/'\s*[—–]\s*'/g, "'-'")
+    .replace(/`\s*[—–]\s*`/g, '`-`');
   for (const [re, to] of RULES) out = out.replace(re, to);
-  // never leave a doubled comma behind
-  return out.replace(/,\s*,/g, ",").replace(/,\s*\./g, ".");
+  return out
+    .replace(/,\s*,/g, ",")
+    .replace(/,\s*([.!?])/g, "$1")
+    .replace(/\(\s*,\s*/g, "(")
+    .replace(/\s+,/g, ",");
 }
 
-function walk(dir, acc = []) {
-  let entries;
+/* ---- Masking: blank out what must not be touched ------------------------
+   Each skipped region is replaced by spaces of the same length, so every
+   offset in the masked copy still matches the original. Rewrites are computed
+   against the mask and applied to the original by index. */
+function mask(src, ext) {
+  const out = src.split("");
+  const blank = (a, b) => {
+    for (let i = a; i < b && i < out.length; i++) {
+      if (out[i] !== "\n") out[i] = " ";
+    }
+  };
+
+  if (MARKUP.has(ext)) {
+    for (const m of src.matchAll(/<!--[\s\S]*?-->/g)) {
+      blank(m.index, m.index + m[0].length);
+    }
+  } else {
+    // line comments, but not the // inside an http:// or a data: URI
+    for (const m of src.matchAll(/(^|[^:"'`\\])\/\/[^\n]*/g)) {
+      const at = m.index + m[1].length;
+      blank(at, at + m[0].length - m[1].length);
+    }
+    for (const m of src.matchAll(/\/\*[\s\S]*?\*\//g)) {
+      blank(m.index, m.index + m[0].length);
+    }
+  }
+
+  // explicitly protected regions: data that happens to contain a dash
+  const keepStart = /strip-dashes:\s*keep-start/g;
+  for (const m of src.matchAll(keepStart)) {
+    const endMatch = /strip-dashes:\s*keep-end/g;
+    endMatch.lastIndex = m.index;
+    const e = endMatch.exec(src);
+    blank(m.index, e ? e.index + e[0].length : src.length);
+  }
+
+  // import/export specifiers, URLs, and the inline SVG data URIs in the heroes
+  for (const m of src.matchAll(/from\s+["'][^"']+["']/g)) {
+    blank(m.index, m.index + m[0].length);
+  }
+  for (const m of src.matchAll(/https?:\/\/\S+/g)) {
+    blank(m.index, m.index + m[0].length);
+  }
+  for (const m of src.matchAll(/data:[a-z/+]+[;,][^"')]+/gi)) {
+    blank(m.index, m.index + m[0].length);
+  }
+
+  return out.join("");
+}
+
+/* ---- Walk ---------------------------------------------------------------- */
+
+function walk(target, acc = []) {
+  let st;
   try {
-    entries = readdirSync(dir);
+    st = statSync(target);
   } catch {
     return acc;
   }
-  for (const name of entries) {
+  if (st.isFile()) {
+    acc.push(target);
+    return acc;
+  }
+  for (const name of readdirSync(target)) {
     if (name === "node_modules" || name.startsWith(".")) continue;
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) walk(full, acc);
-    else if (EXT.test(name)) acc.push(full);
+    walk(join(target, name), acc);
   }
   return acc;
 }
 
-let filesTouched = 0;
-let replacements = 0;
+let filesChanged = 0;
+let replaced = 0;
+let skippedComments = 0;
+let skippedCss = 0;
 const report = [];
 
-for (const dir of DIRS) {
-  for (const file of walk(join(ROOT, dir))) {
-    const src = readFileSync(file, "utf8");
-    if (!/[—–]/.test(src)) continue;
+for (const root of ROOTS) {
+  for (const file of walk(join(ROOT, root))) {
+    const ext = extname(file);
+    if (!CODE.has(ext) && !MARKUP.has(ext) && !REPORT_ONLY.has(ext)) continue;
 
-    const ranges = textRanges(src);
+    const src = readFileSync(file, "utf8");
+    if (!DASH.test(src)) continue;
+
+    if (REPORT_ONLY.has(ext)) {
+      skippedCss += (src.match(/[—–]/g) || []).length;
+      continue;
+    }
+
+    const masked = COMMENTS ? src : mask(src, ext);
     let out = "";
     let cursor = 0;
-    let changedHere = 0;
+    let hits = 0;
 
-    for (const [start, end] of ranges) {
-      if (start < cursor) continue; // overlapping range, already consumed
+    // Rewrite one contiguous run of non-skipped text at a time, so a comment
+    // sitting between two sentences does not merge them.
+    for (const m of masked.matchAll(/[^\s][^\n]*/g)) {
+      const start = m.index;
+      const end = start + m[0].length;
+      const maskedChunk = masked.slice(start, end);
+      if (!DASH.test(maskedChunk)) continue;
+      if (start < cursor) continue;
+
       const chunk = src.slice(start, end);
-      if (!/[—–]/.test(chunk)) continue;
-      // an import path or URL is not prose
-      if (/^[./]|https?:\/\//.test(chunk.trim())) continue;
-      // A lone dash is a placeholder for "no value" in a table cell, not
-      // punctuation. Emptying it leaves a blank cell that reads as a bug.
-      if (/^[\s—–]*$/.test(chunk)) continue;
-      // Markup or an expression inside the range means the scanner lost track
-      // — an apostrophe in JSX text ("we've") reads as a string delimiter and
-      // runs the range on. Refuse to rewrite anything that isn't clean prose;
-      // a missed dash is cheap, a mangled component is not.
-      if (/[<>{}]/.test(chunk)) continue;
-
-      const fixed = fixText(chunk);
+      const fixed = fixProse(chunk);
       if (fixed === chunk) continue;
 
       out += src.slice(cursor, start) + fixed;
       cursor = end;
-      changedHere += (chunk.match(/[—–]/g) || []).length;
+      hits += (chunk.match(/[—–]/g) || []).length;
       report.push({
         file: relative(ROOT, file).split(sep).join("/"),
-        before: chunk.trim().replace(/\s+/g, " ").slice(0, 78),
-        after: fixed.trim().replace(/\s+/g, " ").slice(0, 78),
+        before: chunk.trim().replace(/\s+/g, " ").slice(0, 76),
+        after: fixed.trim().replace(/\s+/g, " ").slice(0, 76),
       });
     }
-    if (!changedHere) continue;
-    out += src.slice(cursor);
 
-    filesTouched++;
-    replacements += changedHere;
+    const inComments = (src.match(/[—–]/g) || []).length - hits;
+    skippedComments += Math.max(0, inComments);
+    if (!hits) continue;
+
+    out += src.slice(cursor);
+    filesChanged++;
+    replaced += hits;
     if (WRITE) writeFileSync(file, out, "utf8");
   }
 }
@@ -202,7 +233,13 @@ for (const r of report) {
 }
 
 console.log(
-  `\n${replacements} dash${replacements === 1 ? "" : "es"} in ${filesTouched} file${
-    filesTouched === 1 ? "" : "s"
-  }${WRITE ? " rewritten." : ". Dry run — pass --write to apply."}`
+  `\n${replaced} dash${replaced === 1 ? "" : "es"} in ${filesChanged} file${
+    filesChanged === 1 ? "" : "s"
+  }${WRITE ? " rewritten." : ". Dry run, pass --write to apply."}`
 );
+if (!COMMENTS && skippedComments) {
+  console.log(
+    `${skippedComments} left in code comments (not shipped; --comments includes them).`
+  );
+}
+if (skippedCss) console.log(`${skippedCss} left in CSS comments.`);

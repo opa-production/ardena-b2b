@@ -178,7 +178,7 @@ export default function Claims() {
                 <div className="claim-row-head">
                   <strong>
                     {CLAIM_LABEL[c.claim_type] || c.claim_type} ·{" "}
-                    {c.plate || c.booking_ref || "—"}
+                    {c.plate || c.booking_ref || "-"}
                   </strong>
                   <span className={`chip ${CLAIM_CHIP[c.status] || ""}`}>{c.status}</span>
                 </div>

@@ -221,19 +221,19 @@ export default function VehicleDetails() {
             </div>
             <div className="spec">
               <dt>Added to fleet</dt>
-              <dd>{v.added || "—"}</dd>
+              <dd>{v.added || "-"}</dd>
             </div>
             <div className="spec">
               <dt>Insurance expiry</dt>
               <dd>
-                {v.ins || "—"}
+                {v.ins || "-"}
                 {insSoon !== null && <span className="ins-soon"> · in {insSoon} days</span>}
               </dd>
             </div>
             <div className="spec">
               <dt>Inspection due</dt>
               <dd>
-                {v.inspection || "—"}
+                {v.inspection || "-"}
                 {inspSoon !== null && <span className="ins-soon"> · in {inspSoon} days</span>}
               </dd>
             </div>

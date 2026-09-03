@@ -112,7 +112,7 @@ export default function HostLinkPanel() {
               {needsPlates > 0 && (
                 <p className="hostlink-plates">
                   {needsPlates} imported vehicle{needsPlates > 1 ? "s" : ""} still
-                  need{needsPlates > 1 ? "" : "s"} a real number plate —{" "}
+                  need{needsPlates > 1 ? "" : "s"} a real number plate, {" "}
                   <Link to="/dashboard/fleet">open Fleet</Link> to set{" "}
                   {needsPlates > 1 ? "them" : "it"}.
                 </p>

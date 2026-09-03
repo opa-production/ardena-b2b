@@ -126,7 +126,7 @@ export async function unassignChauffeur(id) {
 const FMT = new Intl.DateTimeFormat("en-KE", { day: "numeric", month: "short", year: "numeric" });
 
 export function fmtDay(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso.length > 10 ? iso : `${iso}T00:00:00`);
   return Number.isNaN(d.getTime()) ? iso : FMT.format(d);
 }

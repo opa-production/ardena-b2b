@@ -84,7 +84,7 @@ function accountLine(m) {
   if (m.method_type === "bank") {
     return [m.bank_name, m.account_number].filter(Boolean).join(" · ");
   }
-  return m.mpesa_number || m.till_number || "—";
+  return m.mpesa_number || m.till_number || "-";
 }
 
 /* "d***@ardena.co.ke and 07** *** 678" — where the code went. Both values are

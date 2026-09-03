@@ -80,7 +80,7 @@ export function inviteStaff({ name, email, role }) {
       email,
       role,
       status: "Invited",
-      lastActive: "—",
+      lastActive: "-",
     },
   ];
   rebuild();

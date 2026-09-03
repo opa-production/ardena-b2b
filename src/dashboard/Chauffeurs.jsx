@@ -102,7 +102,7 @@ export default function Chauffeurs() {
         </article>
         <article className="stat-card">
           <p className="stat-label">Average rating</p>
-          <p className="stat-value">{stats.avg ? stats.avg.toFixed(1) : "—"}</p>
+          <p className="stat-value">{stats.avg ? stats.avg.toFixed(1) : "-"}</p>
           <p className="stat-note">across rated trips</p>
         </article>
       </div>
@@ -164,7 +164,7 @@ export default function Chauffeurs() {
                     </td>
                     <td>
                       <p>{c.phone}</p>
-                      <p className="cell-sub">{c.email || "—"}</p>
+                      <p className="cell-sub">{c.email || "-"}</p>
                     </td>
                     <td>
                       <p className="mono">{c.licence_no}</p>

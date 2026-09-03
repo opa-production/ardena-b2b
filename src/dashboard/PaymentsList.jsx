@@ -149,7 +149,7 @@ export default function PaymentsList() {
                 <tr key={p.id}>
                   <td>
                     <p className="strong">{p.reference}</p>
-                    <p className="cell-sub">{p.paystack_reference || "—"}</p>
+                    <p className="cell-sub">{p.paystack_reference || "-"}</p>
                   </td>
                   <td>
                     <Link
@@ -159,9 +159,9 @@ export default function PaymentsList() {
                       {p.booking_ref}
                     </Link>
                   </td>
-                  <td>{p.customer || "—"}</td>
+                  <td>{p.customer || "-"}</td>
                   <td className="num">{fmtAmount(p.amount)}</td>
-                  <td>{p.receipt || "—"}</td>
+                  <td>{p.receipt || "-"}</td>
                   <td>
                     <span className={`chip ${p.type === "refund" ? "cancelled" : "active"}`}>
                       {p.type}

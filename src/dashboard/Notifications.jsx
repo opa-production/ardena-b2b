@@ -38,7 +38,7 @@ const KIND_CLASS = {
 };
 
 function relatedLabel(to) {
-  if (!to) return "—";
+  if (!to) return "-";
   const seg = decodeURIComponent(to.split("/").filter(Boolean).pop());
   const pages = {
     verification: "Verification",
@@ -51,9 +51,9 @@ function relatedLabel(to) {
 }
 
 function fmtTime(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
-  if (isNaN(d)) return "—";
+  if (isNaN(d)) return "-";
   const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 2) return "Just now";
@@ -212,7 +212,7 @@ export default function Notifications() {
                         {relatedLabel(n.to)}
                       </Link>
                     ) : (
-                      <span className="cell-sub">—</span>
+                      <span className="cell-sub">, </span>
                     )}
                   </td>
                   <td className="notif-when">{fmtTime(n.time)}</td>

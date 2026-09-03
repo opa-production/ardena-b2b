@@ -75,7 +75,7 @@ export default function Ratings() {
             <article className="stat-card">
               <p className="stat-label">Business rating</p>
               <p className="stat-value">
-                {s.business_rating != null ? s.business_rating.toFixed(1) : "—"}
+                {s.business_rating != null ? s.business_rating.toFixed(1) : "-"}
               </p>
               <p className="stat-note">
                 {s.business_rating_count} review
@@ -85,7 +85,7 @@ export default function Ratings() {
             <article className="stat-card">
               <p className="stat-label">Vehicle rating</p>
               <p className="stat-value">
-                {s.car_rating != null ? s.car_rating.toFixed(1) : "—"}
+                {s.car_rating != null ? s.car_rating.toFixed(1) : "-"}
               </p>
               <p className="stat-note">
                 {s.car_rating_count} review{s.car_rating_count === 1 ? "" : "s"}

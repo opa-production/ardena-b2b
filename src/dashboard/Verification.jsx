@@ -33,7 +33,7 @@ const fmtDob = (iso) =>
         month: "short",
         year: "numeric",
       })
-    : "—";
+    : "-";
 
 export default function Verification() {
   const { wallet, lookups, walletLoaded } = useSyncExternalStore(subscribe, getState);
@@ -41,6 +41,7 @@ export default function Verification() {
   const [number, setNumber] = useState("");
   const [checking, setChecking] = useState(false);
   const [result, setResult] = useState(null); // { entity, fullName, number } | { error }
+  const [lookupOpen, setLookupOpen] = useState(false);
 
   useEffect(() => {
     hydrateVerification();
@@ -190,11 +191,28 @@ export default function Verification() {
     setResult(null);
   }
 
+  function openLookup() {
+    reset();
+    setLookupOpen(true);
+  }
+
+  /* The check is already recorded server-side by the time the result renders —
+     `runLookup` refreshes the store — so closing is just dismissing the
+     receipt. Clearing here means the next open starts on an empty form rather
+     than the last person's result. */
+  function closeLookup() {
+    if (checking) return;
+    setLookupOpen(false);
+    reset();
+  }
+
   const recent = lookups.slice(0, 7);
 
   return (
     <>
-      {/* Top-right page action, the same control as "New booking". */}
+      {/* Both page actions, top right like every other page. Running a check
+          leads: it is what the page is for, and topping up is the errand you
+          only do because of it. */}
       <div className="page-actions">
         {topupWaiting ? (
           <button
@@ -208,21 +226,30 @@ export default function Verification() {
         ) : (
           <button
             type="button"
-            className="btn btn-primary page-action-btn"
+            className="btn btn-ghost page-action-btn"
             onClick={openTopupModal}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
             Top up wallet
           </button>
         )}
+        <button
+          type="button"
+          className="btn btn-primary page-action-btn"
+          onClick={openLookup}
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          New verification
+        </button>
       </div>
 
-      {/* The wallet is the card that gates everything else here, so it is the
-          one that carries colour — the other two only report. */}
+      {/* Four figures. The wallet leads and carries colour because it is the
+          one that stops the work when it runs out; the rest only report. Cream
+          rather than ink: this sits above a white table all day, and a black
+          slab in that position reads as an alert rather than a balance. */}
       <div className="stat-grid verify-stats">
-        <article className="stat-card stat-card--brand">
+        <article className="stat-card stat-card--cream">
           <p className="stat-label">KYC wallet</p>
           <p className="stat-value">
             {walletLoaded ? `KES ${wallet.balance.toLocaleString("en-KE")}` : "…"}
@@ -236,99 +263,25 @@ export default function Verification() {
         <article className="stat-card">
           <p className="stat-label">Total checks</p>
           <p className="stat-value">{stats.total}</p>
-          <p className="stat-note">{stats.thisMonth} this month</p>
+          <p className="stat-note">all time</p>
+        </article>
+        <article className="stat-card">
+          <p className="stat-label">This month</p>
+          <p className="stat-value">{stats.thisMonth}</p>
+          <p className="stat-note">
+            KES {(stats.thisMonth * checkPrice).toLocaleString("en-KE")} spent
+          </p>
         </article>
         <article className="stat-card">
           <p className="stat-label">Verified</p>
           <p className="stat-value">{stats.verified}</p>
           <p className="stat-note">
-            {stats.total ? `${Math.round((stats.verified / stats.total) * 100)}% pass rate` : "no checks yet"}
+            {stats.total
+              ? `${Math.round((stats.verified / stats.total) * 100)}% pass rate`
+              : "no checks yet"}
           </p>
         </article>
       </div>
-
-      <section className="panel-card lookup-card">
-        <header className="card-head">
-          <h2>Verify a renter</h2>
-          <p>Enter their ID or licence number to check it against the national registry.</p>
-        </header>
-
-        <form className="lookup-form" onSubmit={runCheck}>
-          <div className="lookup-type">
-            <Dropdown value={type} onChange={setType} options={LOOKUP_TYPES} />
-          </div>
-          <input
-            className="lookup-input"
-            type="text"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-            placeholder={PLACEHOLDER[type]}
-            aria-label="ID or licence number"
-          />
-          <button type="submit" className="btn btn-primary lookup-btn" disabled={checking || !number.trim()}>
-            {checking ? "Checking…" : "Run check"}
-          </button>
-        </form>
-        <p className="lookup-cost">KES {checkPrice} per check, drawn from your wallet.</p>
-
-        {checking && (
-          <div className="lookup-result">
-            <div className="result-checking">
-              <span className="result-spinner" />
-              Checking {type}…
-            </div>
-          </div>
-        )}
-
-        {!checking && result?.entity && (
-          <div className="lookup-result">
-            <div className="lookup-result-head">
-              <span className="lookup-verified">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-                Verified against the registry
-              </span>
-              <button type="button" className="lookup-new" onClick={reset}>
-                New check
-              </button>
-            </div>
-            <dl className="lookup-fields">
-              <div>
-                <dt>Full name</dt>
-                <dd>{result.fullName}</dd>
-              </div>
-              <div>
-                <dt>Date of birth</dt>
-                <dd>{fmtDob(result.entity.dob)}</dd>
-              </div>
-              <div>
-                <dt>Gender</dt>
-                <dd>{result.entity.gender || "—"}</dd>
-              </div>
-              <div>
-                <dt>{type}</dt>
-                <dd className="mono">{result.number}</dd>
-              </div>
-            </dl>
-          </div>
-        )}
-
-        {!checking && result?.error && (
-          <div className="lookup-result is-error">
-            <span className="lookup-failed">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M15 9l-6 6M9 9l6 6" />
-              </svg>
-              {result.error}
-            </span>
-            <button type="button" className="lookup-new" onClick={reset}>
-              Try again
-            </button>
-          </div>
-        )}
-      </section>
 
       <section className="panel-card">
         <div className="fleet-toolbar">
@@ -383,6 +336,118 @@ export default function Verification() {
           </table>
         )}
       </section>
+
+      {/* ---- New verification ----
+           A modal, because running a check is a discrete errand with a result
+           to read, not a permanent fixture of the page. It stays open on the
+           result so the name can be read against the person standing there,
+           and closing it is what files the check into the list below. */}
+      {lookupOpen && (
+        <div className="modal-overlay" onClick={() => !checking && closeLookup()}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+            <header className="modal-head">
+              <h3>{result?.entity ? "Renter verified" : "New verification"}</h3>
+              <button
+                type="button"
+                className="icon-btn"
+                disabled={checking}
+                onClick={closeLookup}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </header>
+
+            {/* Result first once there is one — the form has done its job. */}
+            {result?.entity ? (
+              <div className="modal-body">
+                <div className="verify-success">
+                  <span className="verify-success-mark" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                  </span>
+                  <p className="verify-success-name">{result.fullName}</p>
+                  <p className="verify-success-note">Matched against the national registry</p>
+                </div>
+
+                <dl className="lookup-fields">
+                  <div>
+                    <dt>Date of birth</dt>
+                    <dd>{fmtDob(result.entity.dob)}</dd>
+                  </div>
+                  <div>
+                    <dt>Gender</dt>
+                    <dd>{result.entity.gender || "-"}</dd>
+                  </div>
+                  <div>
+                    <dt>{type}</dt>
+                    <dd className="mono">{result.number}</dd>
+                  </div>
+                </dl>
+
+                <div className="modal-actions">
+                  <button type="button" className="btn btn-ghost" onClick={reset}>
+                    Check another
+                  </button>
+                  <button type="button" className="btn btn-primary" onClick={closeLookup}>
+                    Done
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form className="modal-body" onSubmit={runCheck}>
+                <label className="field-label">
+                  Document type
+                  <Dropdown value={type} onChange={setType} options={LOOKUP_TYPES} />
+                </label>
+
+                <label className="field-label">
+                  Number
+                  <input
+                    className="field-input"
+                    type="text"
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                    placeholder={PLACEHOLDER[type]}
+                    disabled={checking}
+                    required
+                    autoFocus
+                  />
+                </label>
+
+                {result?.error && (
+                  <p className="verify-failed" role="alert">
+                    {result.error}
+                  </p>
+                )}
+
+                <p className="side-hint" style={{ marginTop: 0 }}>
+                  KES {checkPrice} per check, drawn from your wallet.
+                </p>
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    disabled={checking}
+                    onClick={closeLookup}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={checking || !number.trim()}
+                  >
+                    {checking ? "Checking…" : "Run check"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ---- Top-up modal ---- */}
       {topupModal && (

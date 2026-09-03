@@ -177,7 +177,7 @@ export async function downloadVehicleStatement(vehicle, bookings, monthLabel, mo
       doc.setTextColor(SOFT);
       doc.text(`${b.ref} · ${b.customer}`, 16, y);
       doc.setTextColor(MUTE);
-      doc.text(`${fmtDate(b.pickup)} – ${fmtDate(b.dropoff)} (${days}d)`, 96, y);
+      doc.text(`${fmtDate(b.pickup)} to ${fmtDate(b.dropoff)} (${days}d)`, 96, y);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(INK);
       doc.text(kes(amount), 194, y, { align: "right" });

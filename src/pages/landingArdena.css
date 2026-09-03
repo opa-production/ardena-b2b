@@ -27,6 +27,8 @@
   --ard-cream: #f5f0e8;
   --ard-cream-dark: #e8e2d8;
   --ard-blue: #007ffa;
+  /* the hero's ground, matched to als.ardena.co.ke */
+  --ard-night: #05100f;
   --ard-font: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --ard-t: all 0.3s ease;
@@ -355,125 +357,149 @@
 
 /* ---- Hero --------------------------------------------------------------- */
 
+/* Follows als.ardena.co.ke: a full-viewport near-black field, the headline hard
+   left and held short so it stacks, and one big organic mass bleeding off the
+   bottom-right corner. Two overlapping blobs rotating against each other at
+   different speeds, so the silhouette breathes rather than spins.
+
+   Departs from the reference on one point, deliberately: als draws the mass in
+   white, and this draws it in brand blue. #007FFA is Ardena for Business's one
+   accent, and this is the single place on the site with room to state it at
+   scale. */
+
 .ard-hero {
   position: relative;
-  min-height: 100vh;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  text-align: left;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 9rem 5% 7rem;
   overflow: hidden;
-  /* base wash: cream at the top-left, cooling to white on the right */
-  background: linear-gradient(
-    115deg,
-    var(--ard-cream) 0%,
-    #faf7f2 32%,
-    var(--ard-bg-light) 68%,
-    var(--ard-white) 100%
-  );
-  color: var(--ard-ink);
-  border-bottom: 1px solid var(--ard-line);
+  background: var(--ard-night);
+  color: var(--ard-white);
+  text-align: left;
 }
 
-/* Decorative colour shades stand in for the old photo: three soft blocks of
-   the palette, blue kept faint so it stays an accent rather than a field. */
+/* The mass: both blobs are brand blue, overlapping at different opacities so
+   the crossing gives a denser core. A single flat shape reads as a sticker. */
 .ard-hero-shades {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
 }
 
 .ard-hero-shade {
   position: absolute;
   display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  will-change: transform;
 }
 
-.ard-hero-shade--cream {
-  top: -12%;
-  right: -6%;
-  width: 46%;
-  height: 78%;
-  background: linear-gradient(
-    160deg,
-    var(--ard-cream) 0%,
-    var(--ard-cream-dark) 100%
-  );
-  opacity: 0.75;
+.ard-hero-shade--blob-a {
+  width: 118vh;
+  height: 118vh;
+  right: -62vh;
+  bottom: -45vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%23007ffa' d='M461.6 250C452.2 279.8 425.5 304.2 407.5 325.8C389.5 347.5 373.2 363.7 353.6 379.9C333.9 396.1 313.5 415 289.5 423C265.5 431 235.1 432.7 209.4 427.9C183.7 423 158.8 409 135.2 394C111.6 378.9 86.4 361.6 68 337.6C49.6 313.7 27.1 280.3 24.9 250C22.7 219.7 35.3 178.4 55.1 156.1C74.8 133.8 116 123 143.3 116.2C170.7 109.4 195.6 119.1 219.3 115.4C243 111.7 258.3 99.5 285.6 94.1C312.9 88.7 353.3 74.3 383.1 83.1C412.8 91.9 450.9 119.1 464 146.9C477.1 174.7 471 220.2 461.6 250Z'/%3E%3C/svg%3E");
+  animation: ard-turn-a 120s linear infinite;
 }
 
-.ard-hero-shade--slate {
-  right: 8%;
-  bottom: -14%;
-  width: 34%;
-  height: 62%;
-  background: linear-gradient(180deg, #eef2f7 0%, #dfe6ee 100%);
-  opacity: 0.9;
+.ard-hero-shade--blob-b {
+  width: 90vh;
+  height: 90vh;
+  right: -29vh;
+  bottom: -49vh;
+  opacity: 0.62;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Cpath fill='%233d9bff' d='M424.2 250C412.4 272.6 371 283.8 355.5 300.8C340 317.8 342.6 333 331.3 351.9C319.9 370.8 308.8 396.8 287.4 414C266.1 431.2 233 452.8 203.2 455.1C173.3 457.4 124.3 450.5 108.2 427.8C92.2 405.1 103.4 348.5 107 318.9C110.6 289.2 128.2 272.2 129.8 250C131.3 227.8 112.8 206.4 116.3 185.6C119.8 164.9 135.1 144.1 150.7 125.5C166.3 106.9 186.3 83.9 209.9 74.1C233.4 64.3 267.1 60.2 291.8 66.9C316.5 73.7 335.7 98 358.2 114.4C380.6 130.7 415.6 142.4 426.6 165C437.6 187.6 436.1 227.4 424.2 250Z'/%3E%3C/svg%3E");
+  animation: ard-turn-b 88s linear infinite;
 }
 
-/* the one blue note on the page besides the nav CTA — a thin bar, not a wash */
-.ard-hero-shade--blue {
-  left: 0;
-  top: 32%;
-  width: 4px;
-  height: 34%;
-  background: var(--ard-blue);
+@keyframes ard-turn-a {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-@media (max-width: 768px) {
-  .ard-hero-shade--cream {
-    width: 62%;
-    height: 34%;
+@keyframes ard-turn-b {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+/* Below 900px the mass drops into the corner and the hero takes bottom padding
+   to clear it. Sized on width but capped against height, so a short phone does
+   not get a shape taller than its own hero. */
+@media (max-width: 899px) {
+  .ard-hero {
+    padding-bottom: 34vh;
   }
 
-  .ard-hero-shade--slate {
-    width: 48%;
-    height: 26%;
+  .ard-hero-shade--blob-a {
+    width: min(110vw, 52vh);
+    height: min(110vw, 52vh);
+    right: -25vw;
+    bottom: -45vw;
   }
 
-  .ard-hero-shade--blue {
-    top: auto;
-    bottom: 12%;
-    height: 22%;
+  .ard-hero-shade--blob-b {
+    width: min(85vw, 45vh);
+    height: min(85vw, 45vh);
+    right: -10vw;
+    bottom: -40vw;
+  }
+}
+
+/* A slow rotation is decoration; anyone who asked for less motion gets the
+   composition without the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .ard-hero-shade {
+    animation: none !important;
   }
 }
 
 .ard-hero-inner {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   width: 100%;
-  padding-left: 5%;
-  padding-right: 5%;
-  display: flex;
-  align-items: center;
+  max-width: 1240px;
+  margin: 0 auto;
 }
 
 .ard-hero-content {
-  max-width: 640px;
-  padding: 7rem 0 2rem;
+  max-width: none;
+  padding: 0;
 }
 
+/* Held to 15ch, as on the reference: the headline has to clear the mass on the
+   right, and a short line stacked against a big form is the composition. */
 .ard-hero-title {
-  font-size: 3.5rem;
+  font-size: clamp(2.5rem, 6vw, 4.4rem);
   font-weight: 300;
-  margin-bottom: 1.5rem;
-  line-height: 1.3;
-  letter-spacing: -0.02em;
+  margin-bottom: 0;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  max-width: 15ch;
+  color: var(--ard-white);
 }
 
 .ard-hero-sub {
-  font-size: 1.25rem;
-  line-height: 1.6;
+  margin: 24px 0 0;
+  max-width: 56ch;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.62;
   font-weight: 400;
-  color: var(--ard-text);
-  max-width: 34em;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .ard-hero-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 2.5rem;
+  margin-top: 40px;
 }
 
 .ard-hero-buttons .ard-btn {
@@ -481,10 +507,25 @@
   padding: 0.8rem 2rem;
 }
 
-@media (max-width: 1024px) {
-  .ard-hero-title {
-    font-size: 2.75rem;
-  }
+/* The hero is the one dark section on the site, so its buttons invert. The
+   shared --ard-ink fill would be near-black on near-black. */
+.ard-hero .ard-btn--ink {
+  background: var(--ard-white);
+  color: var(--ard-ink-dark);
+}
+
+.ard-hero .ard-btn--ink:hover {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.ard-hero .ard-btn--outline {
+  color: var(--ard-white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ard-hero .ard-btn--outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 @media (max-width: 768px) {
@@ -774,71 +815,120 @@
 /* The hero owns the viewport: nothing else is visible until you scroll, and
    the copy sits on the same 5% left inset as the home page hero rather than
    inside the centred container. */
+/* Follows als.ardena.co.ke's interior-page hero (.hero--page): a near-black
+   field with two white swells running along the bottom edge, scrolling in
+   opposite directions at different speeds so the crest never repeats.
+
+   Waves rather than the home page's corner blobs, because this is the same
+   distinction the reference draws — the landing page announces, an interior
+   page introduces. They are white rather than brand blue here on purpose: the
+   swell has to hand off to the white cards directly beneath it, so it reads as
+   the page surface rising rather than a shape sitting on top of one. */
+
 .pr-hero {
   position: relative;
-  min-height: 100vh;
-  min-height: 100dvh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 7rem 5% 6rem;
+  align-items: center;
+  /* Owns the viewport, like the landing and contact heroes: the cards are a
+     deliberate scroll away rather than half-visible under the fold, which
+     otherwise reads as the page having started badly. */
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 10.5rem 5% clamp(150px, 24vh, 250px);
   overflow: hidden;
+  background: var(--ard-night);
+  color: var(--ard-white);
+}
 
-  /* not a white page — soft violet / blue / teal washes in the corners pick up
-     the three card gradients, so the hero reads as coloured from across the
-     room while the type stays on near-white */
-  background:
-    radial-gradient(58% 62% at 88% 12%, rgba(99, 102, 241, 0.24), transparent 70%),
-    radial-gradient(52% 58% at 6% 88%, rgba(167, 82, 245, 0.2), transparent 72%),
-    radial-gradient(46% 52% at 78% 96%, rgba(20, 184, 166, 0.22), transparent 70%),
-    linear-gradient(180deg, #fdfdff 0%, #f6f7fb 100%);
+/* Both swells are wider than the viewport by exactly one tile (720px) and
+   repeat horizontally, so translating by that tile loops seamlessly. */
+.pr-hero::before,
+.pr-hero::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: auto auto 0 0;
+  width: calc(100% + 720px);
+  height: clamp(110px, 20vh, 200px);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 720px 100%;
+  will-change: transform;
+}
+
+.pr-hero::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 300' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 100C90 160 270 160 360 100C450 40 630 40 720 100L720 300L0 300Z'/%3E%3C/svg%3E");
+  animation: ard-swell-a 34s linear infinite;
+}
+
+.pr-hero::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 300' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' d='M0 105C45 180 135 180 180 105C225 30 315 30 360 105C405 180 495 180 540 105C585 30 675 30 720 105L720 300L0 300Z'/%3E%3C/svg%3E");
+  animation: ard-swell-b 23s linear infinite;
+}
+
+@keyframes ard-swell-a {
+  to {
+    transform: translateX(-720px);
+  }
+}
+
+@keyframes ard-swell-b {
+  from {
+    transform: translateX(-720px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pr-hero::before,
+  .pr-hero::after {
+    animation: none !important;
+  }
 }
 
 .pr-hero-inner {
   position: relative;
-  max-width: 760px;
+  z-index: 1;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
 }
 
 .pr-title {
-  font-size: 3.25rem;
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.035em;
-  color: var(--ard-ink-dark);
-  margin-bottom: 1.15rem;
+  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ard-white);
+  max-width: 22ch;
+  margin-bottom: 0;
 }
 
-/* the second line drops back to grey, as on the reference */
+/* the second line drops back, as on the reference */
 .pr-title-soft {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .pr-sub {
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: var(--ard-text);
-  max-width: 34em;
+  margin: 24px 0 0;
+  max-width: 56ch;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.62;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 @media (max-width: 900px) {
   .pr-hero {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-
-  .pr-title {
-    font-size: 2.25rem;
+    padding: 8rem 1.5rem clamp(120px, 20vh, 190px);
   }
 }
 
-@media (max-width: 420px) {
-  .pr-title {
-    font-size: 1.9rem;
-  }
-}
-
+/* The swell already carries the eye down into this section, so it does not
+   need the full section lead-in on top of it. */
 .pr-cards {
-  padding: 3.5rem 0 4.5rem;
+  padding: 1.5rem 0 4.5rem;
   background: var(--ard-white);
 }
 

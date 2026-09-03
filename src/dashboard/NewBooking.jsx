@@ -203,7 +203,7 @@ export default function NewBooking() {
               ? `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`
               : "Pick a vehicle and dates to see the total"}
           </p>
-          <strong>{total !== null ? `KES ${fmtAmount(total)}` : "—"}</strong>
+          <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>
         </div>
 
         {error && <p className="form-error">{error}</p>}

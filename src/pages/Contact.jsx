@@ -63,7 +63,7 @@ export default function Contact() {
                 <p className="ard-label">▪ SEND A MESSAGE</p>
                 <h2 className="ard-heading">Drop us an email</h2>
                 <p className="ard-desc">
-                  Fill in the form and it lands straight in our inbox — no
+                  Fill in the form and it lands straight in our inbox, no
                   ticket numbers, no bots. A real person replies within one
                   business day.
                 </p>

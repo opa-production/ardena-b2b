@@ -6,13 +6,18 @@ import usePageTitle from "../hooks/usePageTitle";
 import { requestAccess } from "../lib/api";
 import "./auth.css";
 
-// Display labels mapped to the API's fleet_size values
+/* Display labels mapped to the API's fleet_size values.
+   The values on the right are the backend's enum (see api.js), not ours to
+   restyle — "3 to 10" would be rejected. The labels on the left are what the
+   user reads and are swept like any other copy.
+   strip-dashes: keep-start */
 const FLEET_SIZES = {
-  "3 – 10 vehicles": "3–10",
-  "11 – 30 vehicles": "11–30",
-  "31 – 100 vehicles": "31–100",
+  "3 to 10 vehicles": "3–10",
+  "11 to 30 vehicles": "11–30",
+  "31 to 100 vehicles": "31–100",
   "100+ vehicles": "100+",
 };
+// strip-dashes: keep-end
 const FLEET_LABELS = Object.keys(FLEET_SIZES);
 
 /* Access is by request: every business is verified before logins are sent. */
@@ -70,8 +75,7 @@ export default function Signup() {
           </span>
           <h1>Request received.</h1>
           <p>
-            We verify every business before opening an account: registration,
-            KRA PIN and director identity. Expect your logins by email or
+            We verify every business first. Your logins arrive by email or
             WhatsApp within 24 hours.
           </p>
           {sent.reference && (
@@ -87,11 +91,6 @@ export default function Signup() {
 
   return (
     <div className="auth">
-      <Link to="/" className="auth-back" aria-label="Back to home">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
       <header className="auth-nav">
         <Logo />
       </header>
@@ -100,15 +99,14 @@ export default function Signup() {
         <div className="request-intro">
           <h1>Request access</h1>
           <p>
-            Ardena for Business is for verified rental businesses only. Tell us
-            about yours and we'll send your logins within 24 hours.
-          </p>
-          <p className="request-note">
-            Every business on Ardena is verified before any logins go out, so
-            renters and partners know your fleet is real.
+            For verified rental businesses. We&apos;ll send your logins within
+            24 hours.
           </p>
           <p className="auth-switch">
             Already have logins? <Link to="/login">Sign in</Link>
+          </p>
+          <p className="auth-cancel">
+            <Link to="/">Cancel</Link>
           </p>
         </div>
 
@@ -149,7 +147,7 @@ export default function Signup() {
             </div>
           </div>
           <div className="field">
-            <label htmlFor="r-web">Website or Instagram · optional</label>
+            <label htmlFor="r-web">Website or Instagram <span className="field-opt">optional</span></label>
             <input id="r-web" type="text" placeholder="acmecarhire.co.ke" value={form.website} onChange={set("website")} />
           </div>
 

@@ -139,7 +139,7 @@ export const TRACK_CHIP = {
 };
 
 export function relativeTime(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const secs = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 1000));
   if (secs < 10) return "just now";
   if (secs < 60) return `${secs}s ago`;
@@ -157,6 +157,6 @@ export function mapsUrl(lat, lng) {
 
 // null-safe: a freshly connected tracker has no fix until its first ping
 export function fmtCoord(lat, lng) {
-  if (lat == null || lng == null) return "—";
+  if (lat == null || lng == null) return "-";
   return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }

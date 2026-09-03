@@ -356,7 +356,7 @@ export default function Payments() {
                   {processed.map((p) => (
                     <tr key={p.id}>
                       <td>
-                        <p className="strong">{p.receipt || "—"}</p>
+                        <p className="strong">{p.receipt || "-"}</p>
                         <p className="cell-sub">{p.reference}</p>
                       </td>
                       <td>

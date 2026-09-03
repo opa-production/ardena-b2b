@@ -143,19 +143,19 @@ export default function ChauffeurDetails() {
             <dl className="spec-grid">
               <div className="spec">
                 <dt>Phone (M-Pesa)</dt>
-                <dd>{c.phone || "—"}</dd>
+                <dd>{c.phone || "-"}</dd>
               </div>
               <div className="spec">
                 <dt>Email</dt>
-                <dd>{c.email || "—"}</dd>
+                <dd>{c.email || "-"}</dd>
               </div>
               <div className="spec">
                 <dt>National ID</dt>
-                <dd className="mono">{c.id_no || "—"}</dd>
+                <dd className="mono">{c.id_no || "-"}</dd>
               </div>
               <div className="spec">
                 <dt>Driving licence</dt>
-                <dd className="mono">{c.licence_no || "—"}</dd>
+                <dd className="mono">{c.licence_no || "-"}</dd>
               </div>
               <div className="spec">
                 <dt>Licence expiry</dt>

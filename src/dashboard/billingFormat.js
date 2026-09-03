@@ -6,7 +6,7 @@
 export const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
 
 export function fmtDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   if (isNaN(d)) return iso;
   return d.toLocaleDateString("en-KE", { dateStyle: "medium" });

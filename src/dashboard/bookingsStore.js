@@ -111,13 +111,13 @@ const DAY_MONTH = new Intl.DateTimeFormat("en-KE", { day: "numeric", month: "sho
 const FULL = new Intl.DateTimeFormat("en-KE", { day: "numeric", month: "short", year: "numeric" });
 
 export function fmtDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   return FULL.format(new Date(`${iso}T00:00:00`));
 }
 
 // "2 Jul – 6 Jul 2026"
 export function fmtRange(a, b) {
-  return `${DAY_MONTH.format(new Date(`${a}T00:00:00`))} – ${FULL.format(new Date(`${b}T00:00:00`))}`;
+  return `${DAY_MONTH.format(new Date(`${a}T00:00:00`))} to ${FULL.format(new Date(`${b}T00:00:00`))}`;
 }
 
 export function rentalDays(a, b) {

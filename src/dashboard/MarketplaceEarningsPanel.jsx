@@ -319,7 +319,7 @@ export default function MarketplaceEarningsPanel({
                     {t.car_name}
                     {t.plate && <span className="cell-sub">{t.plate}</span>}
                   </td>
-                  <td>{t.customer_name || "—"}</td>
+                  <td>{t.customer_name || "-"}</td>
                   <td className="num">{fmtAmount(t.amount)}</td>
                   <td className="num">−{fmtAmount(t.commission_amount)}</td>
                   <td className="num strong">{fmtAmount(t.net_amount)}</td>

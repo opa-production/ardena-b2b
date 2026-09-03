@@ -209,15 +209,15 @@ export default function Tracking() {
                         <p className="cell-sub mono">
                           {t.lat != null && t.lng != null
                             ? `${t.lat.toFixed(4)}, ${t.lng.toFixed(4)}`
-                            : "—"}
+                            : "-"}
                         </p>
                       </>
                     ) : (
-                      <span className="cell-sub">—</span>
+                      <span className="cell-sub">, </span>
                     )}
                   </td>
-                  <td className="num">{t && t.lat != null ? `${t.speed} km/h` : "—"}</td>
-                  <td>{t ? relativeTime(t.lastPing) : "—"}</td>
+                  <td className="num">{t && t.lat != null ? `${t.speed} km/h` : "-"}</td>
+                  <td>{t ? relativeTime(t.lastPing) : "-"}</td>
                   <td className="actions-cell">
                     {t ? (
                       <Link className="icon-btn" to={`/dashboard/tracking/${encodeURIComponent(v.plate)}`}>

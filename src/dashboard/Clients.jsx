@@ -158,7 +158,7 @@ export default function Clients() {
                     </td>
                     <td>
                       <p>{c.phone}</p>
-                      <p className="cell-sub">{c.email || "—"}</p>
+                      <p className="cell-sub">{c.email || "-"}</p>
                     </td>
                     <td>
                       <span className={`chip ${verified ? "active" : "completed"}`}>

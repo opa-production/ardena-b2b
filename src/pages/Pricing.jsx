@@ -29,11 +29,11 @@ const PRICING_FAQS = [
   },
   {
     q: "What happens after the free months?",
-    a: `We will announce pricing well before your free months run out, and every workspace already signed up hears it from us first — by email and in the dashboard. Nobody gets moved onto a paid plan by surprise, and nobody is charged without agreeing to the price.`,
+    a: `We will announce pricing well before your free months run out, and every workspace already signed up hears it from us first, by email and in the dashboard. Nobody gets moved onto a paid plan by surprise, and nobody is charged without agreeing to the price.`,
   },
   {
     q: "Is renter verification free too?",
-    a: `No — checks are the one thing billed during the free months, at KES ${fmtKES(CHECK_PRICE)} each, paid from a prepaid wallet you top up like airtime. Each check costs us money at the registry, so it is a genuine pass-through rather than something we can give away. You only pay for checks you actually run.`,
+    a: `No, checks are the one thing billed during the free months, at KES ${fmtKES(CHECK_PRICE)} each, paid from a prepaid wallet you top up like airtime. Each check costs us money at the registry, so it is a genuine pass-through rather than something we can give away. You only pay for checks you actually run.`,
   },
   {
     q: "Is there a limit on vehicles or staff during the free months?",
@@ -45,7 +45,7 @@ const PRICING_FAQS = [
   },
   {
     q: "Do you take commission on my own direct bookings?",
-    a: "Never. Bookings you bring in yourself — walk-ins, phone, your repeat corporate clients — are yours in full. We only take a cut of business the Ardena app sends you, because that is business you did not have.",
+    a: "Never. Bookings you bring in yourself, walk-ins, phone, your repeat corporate clients, are yours in full. We only take a cut of business the Ardena app sends you, because that is business you did not have.",
   },
   {
     q: "Am I tied into a contract?",
@@ -72,7 +72,7 @@ export default function Pricing() {
               <span className="pr-title-soft">first {FREE_MONTHS} months.</span>
             </h1>
             <p className="pr-sub">
-              Every module, every vehicle, your whole team — no card required.
+              Every module, every vehicle, your whole team, no card required.
               We&apos;re still setting what comes after, and we&apos;ll announce
               it well before it starts.
             </p>
@@ -103,7 +103,7 @@ export default function Pricing() {
               </p>
               <p className="pr-explain-lead">
                 When it lands it will be competitive for the Kenyan market,
-                monthly, and cancellable — the same terms we would want. Your
+                monthly, and cancellable, the same terms we would want. Your
                 data is yours to export either way.
               </p>
               <p className="pr-explain-foot">
@@ -157,7 +157,7 @@ export default function Pricing() {
                 <p className="ard-cta-text">
                   {FREE_MONTHS} months, every module, no card. If it
                   isn&apos;t running your business by the end of them, walk
-                  away — and if it is, you&apos;ll know the price before you
+                  away, and if it is, you&apos;ll know the price before you
                   ever pay it.
                 </p>
               </div>

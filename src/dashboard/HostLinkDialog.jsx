@@ -92,7 +92,7 @@ export default function HostLinkDialog({ suggestion, onClose, onLinked }) {
                           suggestion.suggested_car_count > 1 ? "s" : ""
                         }`
                       : ""
-                  }. Link it and everything comes across — vehicles, reviews, messages and earnings.`
+                  }. Link it and everything comes across, vehicles, reviews, messages and earnings.`
                 : "Link it and everything comes across, your vehicles, reviews, messages and earnings. Nothing is re-listed and no bookings are interrupted."}
             </p>
             <form onSubmit={handleRequest} className="hostlink-form">

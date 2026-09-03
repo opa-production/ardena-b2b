@@ -138,7 +138,7 @@ export default function WorkspaceSettings() {
             </header>
             <div className="pay-row">
               <span>Tenant ID</span>
-              <span className="mini-amount">{business.id ?? "—"}</span>
+              <span className="mini-amount">{business.id ?? "-"}</span>
             </div>
             <div className="pay-row">
               <span>Region</span>
@@ -146,7 +146,7 @@ export default function WorkspaceSettings() {
             </div>
             <div className="pay-row">
               <span>Verified since</span>
-              <span className="mini-amount">{business.verifiedSince || "—"}</span>
+              <span className="mini-amount">{business.verifiedSince || "-"}</span>
             </div>
             <p className="side-hint">
               Data export and workspace transfer arrive with the platform admin console.

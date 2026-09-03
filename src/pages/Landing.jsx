@@ -39,7 +39,7 @@ const TRUST = [
   },
   {
     title: "Roles and an audit trail",
-    desc: "Give each person the access their job needs — admin, booking agent, finance — and see every action they take recorded in an activity log.",
+    desc: "Give each person the access their job needs, admin, booking agent, finance, and see every action they take recorded in an activity log.",
   },
 ];
 
@@ -53,7 +53,7 @@ const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `Your first ${FREE_MONTHS} months are free — every module, every vehicle, your whole team, no card required. We are still setting the prices that follow, and we will announce them well before your free months end; every workspace already signed up hears it from us first. Renter checks are the one thing billed from day one, at KES ${fmtKES(CHECK_PRICE)} each.`,
+    a: `Your first ${FREE_MONTHS} months are free, every module, every vehicle, your whole team, no card required. We are still setting the prices that follow, and we will announce them well before your free months end; every workspace already signed up hears it from us first. Renter checks are the one thing billed from day one, at KES ${fmtKES(CHECK_PRICE)} each.`,
   },
   {
     q: "Do I need my own identity verification account?",
@@ -88,11 +88,11 @@ export default function Landing() {
       <main>
         {/* ---- Hero ---- */}
         <section className="ard-hero">
-          {/* purely decorative colour shades — no photo, no text over an image */}
+          {/* Two rotating organic masses in brand blue, bleeding off the
+              bottom-right corner. Decoration only, no text sits on them. */}
           <div className="ard-hero-shades" aria-hidden="true">
-            <span className="ard-hero-shade ard-hero-shade--cream" />
-            <span className="ard-hero-shade ard-hero-shade--slate" />
-            <span className="ard-hero-shade ard-hero-shade--blue" />
+            <span className="ard-hero-shade ard-hero-shade--blob-a" />
+            <span className="ard-hero-shade ard-hero-shade--blob-b" />
           </div>
 
           <div className="ard-hero-inner">

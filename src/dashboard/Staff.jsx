@@ -27,9 +27,9 @@ export const ROLE_NOTES = [
 ];
 
 function fmtLastActive(iso) {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
-  if (isNaN(d)) return "—";
+  if (isNaN(d)) return "-";
   const diff = Date.now() - d.getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 2) return "Just now";

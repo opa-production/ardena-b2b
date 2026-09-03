@@ -1,229 +1,36 @@
-/* Three cards across, always: the wallet that gates the page, and two figures
-   about what it has bought. The default auto-fit grid reflows them 2 + 1 at
-   awkward widths and orphans the odd one. */
+/* Four across, always. The default auto-fit grid reflows them 3 + 1 at awkward
+   widths and orphans the odd one; four halves cleanly to 2 + 2 instead. */
 .verify-stats {
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 
-/* The wallet card carries colour because it is the one that stops work when it
-   runs out — the other two only report. Ink ground rather than brand blue: the
-   blue stays an accent, and white figures on near-black read at a glance
-   across the room, which is where a counter screen usually is. */
-.stat-card--brand {
-  background: var(--ink-inv);
-  color: var(--on-ink);
-  box-shadow: none;
+/* The wallet card carries colour because it is the one that stops the work
+   when it runs out; the others only report. Cream, not ink: this row sits
+   above a white table all day and a black slab in that position reads as an
+   alert. Ink on cream is 17:1, so nothing is traded for the warmth.
+
+   The fill alone is only 1.06:1 against the page, which is not an edge — the
+   hairline is what makes it a card rather than a stain. */
+.stat-card--cream {
+  background: var(--kpi-cream);
+  box-shadow: inset 0 0 0 1px var(--kpi-cream-edge);
 }
 
-.stat-card--brand .stat-label,
-.stat-card--brand .stat-note {
-  color: rgba(255, 255, 255, 0.66);
+.stat-card--cream .stat-label,
+.stat-card--cream .stat-note {
+  color: var(--kpi-cream-ink);
 }
 
-[data-theme="dark"] .stat-card--brand .stat-label,
-[data-theme="dark"] .stat-card--brand .stat-note {
-  color: rgba(0, 0, 0, 0.6);
+@media (max-width: 1100px) {
+  .verify-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.stat-card--brand .stat-value {
-  color: var(--on-ink);
-}
-
-/* label left, action right, on the label's own line */
-.stat-card-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.stat-card-head .stat-label {
-  margin-bottom: 0;
-}
-
-.add-btn--on-brand {
-  color: var(--on-ink);
-  background: rgba(255, 255, 255, 0.12);
-  box-shadow: none;
-}
-
-.add-btn--on-brand:hover {
-  background: rgba(255, 255, 255, 0.22);
-  color: var(--on-ink);
-}
-
-[data-theme="dark"] .add-btn--on-brand {
-  background: rgba(0, 0, 0, 0.14);
-}
-
-[data-theme="dark"] .add-btn--on-brand:hover {
-  background: rgba(0, 0, 0, 0.24);
-}
-
-/* mid top-up: the + becomes a pulsing dot that cancels the wait */
-.add-btn--on-brand.is-waiting {
-  padding: 11px;
-}
-
-@media (max-width: 820px) {
+@media (max-width: 620px) {
   .verify-stats {
     grid-template-columns: 1fr;
   }
-}
-
-
-/* ---- Verification page: walk-in registry lookup ---- */
-
-/* card-head used inside a toolbar row shouldn't add bottom margin */
-.card-head.no-gap {
-  margin-bottom: 0;
-}
-
-.mono {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-}
-
-/* form + result live in one card; the list follows with an even gap */
-.lookup-card {
-  margin-bottom: 20px;
-  /* sit above the recent-checks card so the open type dropdown, which
-     extends past this card's bottom, is never covered by it */
-  position: relative;
-  z-index: 2;
-}
-
-/* ---- Lookup form ---- */
-
-.lookup-form {
-  display: grid;
-  grid-template-columns: 190px 1fr auto;
-  gap: 12px;
-  align-items: stretch;
-}
-
-@media (max-width: 640px) {
-  .lookup-form {
-    grid-template-columns: 1fr;
-  }
-}
-
-.lookup-input {
-  width: 100%;
-  min-width: 0;
-  padding: 11px 14px;
-  font-size: 14.5px;
-  color: var(--ink);
-  background: var(--bg);
-  box-shadow: var(--edge-in);
-  border: none;
-  outline: none;
-  font-variant-numeric: tabular-nums;
-  transition: box-shadow 0.15s var(--ease);
-}
-
-.lookup-input:focus {
-  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
-}
-
-.lookup-input::placeholder {
-  color: var(--ink-mute);
-}
-
-.btn.lookup-btn {
-  padding: 11px 22px;
-}
-
-.btn.lookup-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.lookup-cost {
-  font-size: 12.5px;
-  color: var(--ink-mute);
-  margin-top: 10px;
-}
-
-/* ---- Result card (right column) ---- */
-
-.lookup-result {
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  animation: rise 0.3s var(--ease) both;
-}
-
-.lookup-result.is-error {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.lookup-result-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
-}
-
-/* checking state */
-.result-checking {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 22px 0;
-  font-size: 14px;
-  color: var(--ink-soft);
-}
-
-.result-spinner {
-  width: 18px;
-  height: 18px;
-  border: 2.5px solid var(--line);
-  border-top-color: var(--brand);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.lookup-verified {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #0b7a37;
-}
-
-.lookup-failed {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--danger);
-}
-
-.lookup-new {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--brand-dark);
-  transition: color 0.15s var(--ease);
-}
-
-.lookup-new:hover {
-  color: var(--brand);
 }
 
 .lookup-fields {
@@ -247,3 +54,55 @@
   color: var(--ink);
 }
 
+/* ---- New verification modal ---- */
+
+/* The result, read against the person standing at the counter — so the name is
+   the largest thing in the dialog, not a row in a definition list. */
+.verify-success {
+  text-align: center;
+  padding: 4px 0 18px;
+}
+
+.verify-success-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--ok);
+  margin-bottom: 12px;
+}
+
+.verify-success-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.verify-success-note {
+  margin-top: 3px;
+  font-size: 13px;
+  color: var(--ink-mute);
+}
+
+/* A failed check is not an error in the app — the wallet was still charged and
+   the number simply did not match. Stated, not alarmed. */
+.verify-failed {
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--danger);
+  background: var(--bg);
+  box-shadow: inset 2px 0 0 var(--danger);
+}
+
+/* inside the dialog the fields stack rather than sit in the page-width grid */
+.modal-body .lookup-fields {
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+  margin: 0 0 4px;
+}

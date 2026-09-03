@@ -30,11 +30,6 @@ export default function Login() {
 
   return (
     <div className="auth">
-      <Link to="/" className="auth-back" aria-label="Back to home">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
       <header className="auth-nav">
         <Logo />
       </header>
@@ -82,6 +77,12 @@ export default function Login() {
 
         <p className="auth-switch">
           New to Ardena? <Link to="/signup">Request access</Link>
+        </p>
+        {/* Replaces a floating round back button in the page corner. A word is
+            clearer than an arrow about where it goes, and it sits with the
+            other choices instead of hovering over the artwork. */}
+        <p className="auth-cancel">
+          <Link to="/">Cancel</Link>
         </p>
       </main>
     </div>

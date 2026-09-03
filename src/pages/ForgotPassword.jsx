@@ -54,11 +54,6 @@ export default function ForgotPassword({ startAtReset = false }) {
 
   return (
     <div className="auth">
-      <Link to="/login" className="auth-back" aria-label="Back to sign in">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-      </Link>
       <header className="auth-nav">
         <Logo />
       </header>
@@ -111,6 +106,9 @@ export default function ForgotPassword({ startAtReset = false }) {
             <button type="button" className="auth-linkish" onClick={() => setStage("reset")}>
               Enter it here
             </button>
+          </p>
+          <p className="auth-cancel">
+            <Link to="/login">Cancel</Link>
           </p>
         </main>
       ) : (
@@ -187,6 +185,9 @@ export default function ForgotPassword({ startAtReset = false }) {
             <button type="button" className="auth-linkish" onClick={() => setStage("email")}>
               Send another code
             </button>
+          </p>
+          <p className="auth-cancel">
+            <Link to="/login">Cancel</Link>
           </p>
         </main>
       )}

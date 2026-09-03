@@ -150,51 +150,6 @@
   gap: 9px;
 }
 
-/* three-dot typing indicator */
-.assist-typing {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 12px 14px;
-  background: var(--surface);
-  box-shadow: var(--edge-in);
-  width: fit-content;
-}
-
-.assist-typing i {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ink-mute);
-  animation: assist-blink 1.2s var(--ease) infinite;
-}
-
-.assist-typing i:nth-child(2) {
-  animation-delay: 0.18s;
-}
-
-.assist-typing i:nth-child(3) {
-  animation-delay: 0.36s;
-}
-
-@keyframes assist-blink {
-  0%,
-  60%,
-  100% {
-    opacity: 0.28;
-  }
-  30% {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .assist-typing i {
-    animation: none;
-    opacity: 0.5;
-  }
-}
-
 /* starter prompts, shown only on an untouched thread */
 .assist-suggestions {
   display: flex;
@@ -248,14 +203,19 @@
   gap: 8px;
 }
 
-/* A named lookup in progress, in place of the typing dots. Reads as the
-   assistant working rather than stalling — the wait before the first token is
-   a real round trip to the workspace's own data. */
+/* The turn in progress: a named lookup while a tool is running, otherwise a
+   cycling one-word status. Reads as the assistant working rather than
+   stalling — the wait before the first token is a real round trip to the
+   workspace's own data. */
 .assist-checking {
   align-self: flex-start;
   padding: 6px 2px;
   font-size: 12.5px;
-  color: var(--ink-mute);
+  font-weight: 500;
+  /* Amber, not the muted grey the rest of the thread uses: this is the one
+     line that says the assistant is mid-turn, and it should be the thing the
+     eye lands on while waiting. */
+  color: var(--warn);
   animation: assist-breathe 1.6s ease-in-out infinite;
 }
 

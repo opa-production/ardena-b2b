@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getState, sendMessage, cancelTurn } from "./assistantStore";
 import { SUGGESTIONS } from "./assistantKnowledge";
+import { cleanReply } from "./assistantFormat";
 import { AttachIcon, BotIcon, MicIcon, SendIcon } from "./supportArt";
 import useDictation from "../hooks/useDictation";
 import { toast } from "./toastStore";
@@ -10,19 +11,43 @@ import { toast } from "./toastStore";
    unlisted one falls back to a plain "Checking…" — the list is allowed to go
    stale without the UI showing a raw identifier. */
 const TOOL_LABELS = {
-  look_up_help: "Checking the handbook…",
-  get_booking: "Looking up that booking…",
-  find_bookings: "Searching bookings…",
-  get_today: "Checking today…",
-  get_fleet: "Checking your fleet…",
-  get_chauffeurs: "Checking the roster…",
-  find_client: "Looking up that client…",
-  get_finances: "Checking your finances…",
-  get_billing: "Checking your billing…",
-  get_wallet: "Checking your wallet…",
-  get_settlement_accounts: "Checking settlement accounts…",
-  hand_off_to_human: "Passing this to a person…",
+  look_up_help: "Checking the handbook",
+  get_booking: "Looking up that booking",
+  find_bookings: "Searching bookings",
+  get_today: "Checking today",
+  get_fleet: "Checking your fleet",
+  get_chauffeurs: "Checking the roster",
+  find_client: "Looking up that client",
+  get_finances: "Checking your finances",
+  get_billing: "Checking your billing",
+  get_wallet: "Checking your wallet",
+  get_settlement_accounts: "Checking settlement accounts",
+  hand_off_to_human: "Passing this to a person",
 };
+
+/* What the wait is called while no tool has been named. One word each, in the
+   assistant's own voice — it cycles so a long pause reads as work in progress
+   rather than a frozen label. */
+const THINKING_WORDS = [
+  "Thinking",
+  "Marinating",
+  "Pondering",
+  "Mulling",
+  "Working",
+  "Percolating",
+];
+
+/* Walks THINKING_WORDS while a turn is in flight, starting over on each turn
+   so every question opens on "Thinking". */
+function useThinkingWord(active) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (!active) return setI(0);
+    const id = setInterval(() => setI((n) => (n + 1) % THINKING_WORDS.length), 2400);
+    return () => clearInterval(id);
+  }, [active]);
+  return THINKING_WORDS[i];
+}
 
 function fmtTime(iso) {
   const d = new Date(iso);
@@ -41,6 +66,7 @@ export default function AssistantPanel({ onNavigate }) {
     getState
   );
   const [draft, setDraft] = useState("");
+  const thinkingWord = useThinkingWord(thinking && !checking);
   const threadRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -104,7 +130,12 @@ export default function AssistantPanel({ onNavigate }) {
         )}
         {messages.map((m) => (
           <div key={m.id} className={`msg ${m.from === "user" ? "user" : "support"}`}>
-            <p>{m.text}</p>
+            {/* The reply is plain text in a plain bubble, so markdown the
+                model emits out of habit is stripped rather than shown as
+                literal asterisks and dashes — see assistantFormat. */}
+            {m.from === "agent"
+              ? cleanReply(m.text).map((line, i) => <p key={i}>{line || " "}</p>)
+              : <p>{m.text}</p>}
             {m.to && (
               <Link className="assist-jump" to={m.to.path} onClick={onNavigate}>
                 {m.to.label}
@@ -124,13 +155,11 @@ export default function AssistantPanel({ onNavigate }) {
             before the first token is real, so name it rather than leave three
             dots to stand for an unexplained wait. */}
         {thinking && checking && (
-          <span className="assist-checking">{TOOL_LABELS[checking] || "Checking…"}</span>
+          <span className="assist-checking">{TOOL_LABELS[checking] || "Checking"}…</span>
         )}
         {thinking && !checking && (
-          <span className="typing assist-typing" aria-label="Assistant is typing">
-            <i />
-            <i />
-            <i />
+          <span className="assist-checking" aria-label="Assistant is thinking">
+            {thinkingWord}…
           </span>
         )}
       </div>

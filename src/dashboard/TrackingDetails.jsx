@@ -22,6 +22,7 @@ import { VEHICLE_TRACKING } from "../lib/features";
 import "./fleet.css";
 import "./bookings.css";
 import "./tracking.css";
+import PageLoader from "../components/PageLoader";
 
 const STATUS_LABEL = { moving: "Moving", parked: "Parked", offline: "Offline" };
 
@@ -56,7 +57,7 @@ export default function TrackingDetails() {
   );
 
   if (!loaded) {
-    return <>{back}<div className="empty-block fleet-empty"><p>Loading…</p></div></>;
+    return <>{back}<PageLoader message="Connecting to this tracker for its latest position…" /></>;
   }
 
   if (!tracker) {

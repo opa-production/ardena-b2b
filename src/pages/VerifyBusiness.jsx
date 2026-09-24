@@ -5,6 +5,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import { fetchTrust } from "../lib/api";
 import "./auth.css";
 import "./trust.css";
+import PageLoader from "../components/PageLoader";
 
 /* Public trust pages, served by GET /trust/{slug}. The slug is what a
    verified business shares with customers. */
@@ -43,7 +44,7 @@ export default function VerifyBusiness() {
           <Logo />
         </header>
         <main className="trust-card">
-          <h1>Checking this link…</h1>
+          <PageLoader message="Confirming this business's verification with Ardena. One moment…" />
         </main>
       </div>
     );

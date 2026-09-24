@@ -5,6 +5,7 @@ import { subscribe, getState, hydrateLookups, STATUS_CHIP } from "./verification
 import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
+import PageLoader from "../components/PageLoader";
 
 const FILTERS = ["All", "Verified", "Not found", "Mismatch"];
 
@@ -109,15 +110,14 @@ export default function VerificationsList() {
           </tbody>
         </table>
 
-        {filtered.length === 0 && (
-          <div className="empty-block fleet-empty">
-            <p>
-              {!lookupsLoaded && lookups.length === 0
-                ? "Loading checks…"
-                : "No checks match your search."}
-            </p>
-          </div>
-        )}
+        {filtered.length === 0 &&
+          (!lookupsLoaded && lookups.length === 0 ? (
+            <PageLoader compact message="Fetching your verification checks…" />
+          ) : (
+            <div className="empty-block fleet-empty">
+              <p>No checks match your search.</p>
+            </div>
+          ))}
       </section>
     </>
   );

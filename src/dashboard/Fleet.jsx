@@ -6,6 +6,7 @@ import { MARKETPLACE_LISTINGS } from "../lib/features";
 import MarketplaceToggle from "./MarketplaceToggle";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
+import PageLoader from "../components/PageLoader";
 
 const STATUSES = ["All", "Available", "On booking", "In maintenance"];
 
@@ -77,9 +78,7 @@ export default function Fleet() {
 
       {!loaded && vehicles.length === 0 ? (
         <section className="panel-card">
-          <div className="empty-block fleet-empty">
-            <p>Loading your fleet…</p>
-          </div>
+          <PageLoader message="Bringing up your vehicles. This only takes a moment." />
         </section>
       ) : vehicles.length === 0 ? (
         <section className="panel-card">

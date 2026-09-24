@@ -18,6 +18,7 @@ import { MARKETPLACE_LISTINGS } from "../lib/features";
 import MarketplaceToggle from "./MarketplaceToggle";
 import "./fleet.css";
 import "./hostlink.css";
+import PageLoader from "../components/PageLoader";
 
 const MONTHS = [
   { label: "July 2026", prefix: "2026-07" },
@@ -64,9 +65,13 @@ export default function VehicleDetails() {
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </Link>
-        <div className="empty-block fleet-empty">
-          <p>{loaded ? "This vehicle is no longer in your fleet." : "Loading vehicle…"}</p>
-        </div>
+        {loaded ? (
+          <div className="empty-block fleet-empty">
+            <p>This vehicle is no longer in your fleet.</p>
+          </div>
+        ) : (
+          <PageLoader message="Opening this vehicle's record and documents…" />
+        )}
       </>
     );
   }
@@ -133,13 +138,24 @@ export default function VehicleDetails() {
           {MARKETPLACE_LISTINGS && (
             <Link
               to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
-              className="btn btn-ghost"
+              className="btn btn-market"
             >
               Marketplace
             </Link>
           )}
-          <button type="button" className="btn btn-ghost" disabled title="Editing is coming soon">
+          {/* Not `disabled`: browsers swallow the hover title on disabled
+              buttons, so the reason would never reach anyone. Clicking says it. */}
+          <button
+            type="button"
+            className="btn btn-edit is-soon"
+            aria-disabled="true"
+            title="Editing vehicle details is coming soon"
+            onClick={() =>
+              toast("Editing vehicle details is coming soon. Documents can already be uploaded below.")
+            }
+          >
             Edit
+            <span className="soon-tag">Soon</span>
           </button>
           {confirming ? (
             <span className="confirm-inline">
@@ -262,7 +278,7 @@ export default function VehicleDetails() {
                     )}
                     <button
                       type="button"
-                      className="icon-btn"
+                      className="icon-btn doc-upload-btn"
                       disabled={docBusy === kind}
                       onClick={() => docInputs.current[kind]?.click()}
                     >

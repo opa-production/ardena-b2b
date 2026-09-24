@@ -19,6 +19,7 @@ import {
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import LoadingOverlay from "../components/LoadingOverlay";
+import PageLoader from "../components/PageLoader";
 import { fmtAmount, fmtDate } from "./billingFormat";
 import { FREE_MONTHS } from "../pages/pricingData";
 import "./billing.css";
@@ -163,7 +164,7 @@ export default function InvoicesPanel() {
 
         <div className="invoice-list">
           {loading ? (
-            <p className="side-hint" style={{ marginTop: 0 }}>Loading invoices…</p>
+            <PageLoader compact message="Pulling together your invoices…" />
           ) : invoices.length === 0 ? (
             <EmptyState minimal title={`Nothing billed, you're in your first ${FREE_MONTHS} free months`} />
           ) : (

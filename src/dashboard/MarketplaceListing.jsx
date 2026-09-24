@@ -19,6 +19,7 @@ import {
 import Dropdown from "../components/Dropdown";
 import "./fleet.css";
 import "./marketplace.css";
+import PageLoader from "../components/PageLoader";
 
 // Module-level cache: plate → listing data. Avoids re-fetching on back-navigation.
 const _cache = new Map();
@@ -445,9 +446,7 @@ export default function MarketplaceListing() {
 
   if (loading) {
     return (
-      <div className="empty-block fleet-empty">
-        <p>Loading marketplace listing…</p>
-      </div>
+      <PageLoader message="Opening this car's Ardena app listing, photos and pricing included." />
     );
   }
 

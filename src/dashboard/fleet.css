@@ -789,3 +789,77 @@ a.icon-btn + .icon-btn {
     grid-template-columns: 1fr;
   }
 }
+
+/* .vehicle-specs .spec dd (above) makes every value a wrapping row, which
+   out-ranked .doc-row's column and put the two documents side by side at
+   different widths. Re-assert the column at matching specificity. */
+.vehicle-specs .spec dd.doc-row {
+  flex-direction: column;
+  align-items: stretch;
+  flex-wrap: nowrap;
+}
+
+.vehicle-specs .doc-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* Same width whether it says Upload, Replace or Uploading… */
+.doc-upload-btn {
+  min-width: 96px;
+  flex-shrink: 0;
+  color: #0f4d3f;
+  background: #bfe8dc;
+  box-shadow: none;
+}
+
+.doc-upload-btn:hover:not(:disabled) {
+  background: #a7dccd;
+}
+
+/* ---- Coloured header actions ----
+   Pastel fills with dark ink of the same hue: enough colour to tell the
+   actions apart at a glance, and they hold on both light and graphite. */
+.btn.btn-market {
+  color: #231a4f;
+  background: rgb(183, 172, 232);
+  box-shadow: none;
+}
+
+.btn.btn-market:hover {
+  background: rgb(166, 153, 224);
+  transform: translateY(-1px);
+}
+
+.btn.btn-edit {
+  color: #5c3d00;
+  background: #ffe2b0;
+  box-shadow: none;
+}
+
+.btn.btn-edit:hover {
+  background: #ffd58c;
+}
+
+/* Present but not available yet: muted, no lift, tagged so the reason is
+   visible before anyone clicks. */
+.btn.btn-edit.is-soon {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btn.btn-edit.is-soon:hover {
+  background: #ffe2b0;
+  transform: none;
+}
+
+.soon-tag {
+  padding: 1px 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe2b0;
+  background: #5c3d00;
+}

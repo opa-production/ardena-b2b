@@ -1,0 +1,77 @@
+.page-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  min-height: 320px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.page-loader--compact {
+  min-height: 0;
+  padding: 28px 16px;
+  gap: 22px;
+}
+
+.page-loader-msg {
+  max-width: 340px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* Diamond loader */
+.loader {
+  --color-1: rgba(0, 0, 0, 0.5);
+  --color-2: #222b32;
+  --color-3: rgba(24, 80, 220, 1);
+  --size: 1px;
+
+  position: relative;
+  width: calc(64 * var(--size));
+  height: calc(64 * var(--size));
+  background-color: var(--color-1);
+  transform: rotate(45deg);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.loader:after {
+  content: "";
+  position: absolute;
+  inset: calc(8 * var(--size));
+  margin: auto;
+  background: var(--color-2);
+}
+
+.loader:before {
+  content: "";
+  position: absolute;
+  inset: calc(-15 * var(--size));
+  margin: auto;
+  background: var(--color-3);
+  animation: diamondLoader 2s linear infinite;
+}
+
+.page-loader--compact .loader {
+  --size: 0.6px;
+}
+
+@keyframes diamondLoader {
+  0%,
+  10% {
+    transform: translate(calc(-64 * var(--size)), calc(-64 * var(--size))) rotate(-45deg);
+  }
+  90%,
+  100% {
+    transform: translate(0, 0) rotate(-45deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader:before {
+    animation-duration: 6s;
+  }
+}

@@ -146,138 +146,144 @@ export default function RenterInbox() {
   const unreadTotal = conversations.reduce((n, c) => n + (c.unread_count || 0), 0);
   const title = newTo ? newTo.client_name || "Renter" : thread?.client_name || "Conversation";
 
-  return (
-    <>
-      <h1 className="sr-only">Direct messages</h1>
-
-      <div className="page-refresh">
-        <RefreshButton onRefresh={loadList} />
-      </div>
-
-      {conversations.length === 0 && renters.length === 0 ? (
+  if (conversations.length === 0 && renters.length === 0) {
+    return (
+      <>
+        <h1 className="sr-only">Direct messages</h1>
+        <div className="page-refresh">
+          <RefreshButton onRefresh={loadList} />
+        </div>
         <EmptyState
           minimal
           title="No messages yet"
           message="Renters with a confirmed or active trip appear here, so you can message them first."
         />
-      ) : (
-        <div className="inbox-grid">
-          <section className="panel-card inbox-list">
-            {renters.length > 0 && (
-              <>
-                <header className="card-head">
-                  <h2>Renters on a trip</h2>
-                  <p>Message them first about pickup or return</p>
-                </header>
-                {renters.map((r) => (
-                  <button
-                    type="button"
-                    key={r.client_id}
-                    className={
-                      "inbox-item" +
-                      (newTo?.client_id === r.client_id ||
-                      (r.conversation_id && r.conversation_id === activeId && !newTo)
-                        ? " active"
-                        : "")
-                    }
-                    onClick={() => openRenter(r)}
-                  >
-                    <div className="inbox-item-head">
-                      <strong>{r.client_name || "Renter"}</strong>
-                      <span className={`stage-chip stage-${r.stage}`}>
-                        {r.stage === "dropoff"
-                          ? `Returns ${fmtDay(r.end_date)}`
-                          : `Pickup ${fmtDay(r.start_date)}`}
-                      </span>
-                    </div>
-                    <p className="inbox-preview">
-                      {r.car_name || "Vehicle"} · {r.booking_ref}
-                      {!r.conversation_id && " · no messages yet"}
-                    </p>
-                  </button>
-                ))}
-              </>
-            )}
+      </>
+    );
+  }
 
-            <header className={"card-head" + (renters.length > 0 ? " card-head-second" : "")}>
-              <h2>Conversations</h2>
-              {unreadTotal > 0 && <p>{unreadTotal} unread</p>}
-            </header>
-            {conversations.length === 0 && (
-              <p className="inbox-preview inbox-none">None yet. Pick a renter above to start one.</p>
-            )}
-            {conversations.map((c) => (
-              <button
-                type="button"
-                key={c.id}
-                className={"inbox-item" + (c.id === activeId && !newTo ? " active" : "")}
-                onClick={() => openConversation(c.id)}
-              >
-                <div className="inbox-item-head">
-                  <strong>{c.client_name || "Renter"}</strong>
-                  <span className="inbox-time">{fmtTime(c.last_message_at)}</span>
-                </div>
-                <p className="inbox-preview">{c.last_message || "No messages yet"}</p>
-                {c.unread_count > 0 && (
-                  <span className="inbox-badge">{c.unread_count}</span>
-                )}
-              </button>
-            ))}
-          </section>
+  /* Same frame as Message support: edge to edge and full height. The list is
+     a panel down the left, not a card; the conversation takes the rest. */
+  return (
+    <div className="dm-page">
+      <h1 className="sr-only">Direct messages</h1>
 
-          <section className="panel-card chat-card">
-            <header className="card-head">
-              <h2>{title}</h2>
-              <p>
-                {newTo
-                  ? `${newTo.car_name || "Vehicle"} · ${newTo.booking_ref} · your first message opens the conversation`
-                  : "Replies go out under your business name"}
-              </p>
-            </header>
-
-            <div className="chat-thread" ref={threadRef}>
-              {!newTo &&
-                (thread?.messages || []).map((m) => (
-                  // The API's "host" side is us; "client" is the renter.
-                  <div key={m.id} className={`msg ${m.sender_type === "host" ? "user" : "support"}`}>
-                    <p>{m.message}</p>
-                    <span className="msg-time">{fmtTime(m.created_at)}</span>
-                  </div>
-                ))}
-              {newTo && (
-                <p className="typing">
-                  {newTo.stage === "dropoff"
-                    ? "They're on the trip now. A note about the return time or place is a good start."
-                    : "Say hello and confirm where and when they'll collect the car."}
-                </p>
-              )}
-              {!newTo && thread && (thread.messages || []).length === 0 && (
-                <p className="typing">No messages in this conversation yet.</p>
-              )}
-              {!newTo && !activeId && (
-                <p className="typing">Pick a renter or a conversation.</p>
-              )}
-            </div>
-
-            <form className="chat-composer" onSubmit={handleSend}>
-              <input
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                placeholder={newTo ? `Message ${newTo.client_name || "the renter"}…` : "Write a reply…"}
-                maxLength={2000}
-                disabled={!activeId && !newTo}
-              />
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={sending || !draft.trim() || (!activeId && !newTo)}
-              >
-                Send
-              </button>
-            </form>
-          </section>
+      <aside className="dm-list" aria-label="Renters and conversations">
+        <div className="dm-list-head">
+          <div>
+            <h2>Direct messages</h2>
+            <p>{unreadTotal > 0 ? `${unreadTotal} unread` : "Renters on the Ardena app"}</p>
+          </div>
+          <RefreshButton onRefresh={loadList} label={false} />
         </div>
-      )}
-    </>
+
+        <div className="dm-list-scroll">
+          {renters.length > 0 && (
+            <>
+              <p className="dm-section">Renters on a trip</p>
+              {renters.map((r) => (
+                <button
+                  type="button"
+                  key={r.client_id}
+                  className={
+                    "inbox-item" +
+                    (newTo?.client_id === r.client_id ||
+                    (r.conversation_id && r.conversation_id === activeId && !newTo)
+                      ? " active"
+                      : "")
+                  }
+                  onClick={() => openRenter(r)}
+                >
+                  <div className="inbox-item-head">
+                    <strong>{r.client_name || "Renter"}</strong>
+                    <span className={`stage-chip stage-${r.stage}`}>
+                      {r.stage === "dropoff"
+                        ? `Returns ${fmtDay(r.end_date)}`
+                        : `Pickup ${fmtDay(r.start_date)}`}
+                    </span>
+                  </div>
+                  <p className="inbox-preview">
+                    {r.car_name || "Vehicle"} · {r.booking_ref}
+                    {!r.conversation_id && " · no messages yet"}
+                  </p>
+                </button>
+              ))}
+            </>
+          )}
+
+          <p className="dm-section">Conversations</p>
+          {conversations.length === 0 && (
+            <p className="inbox-preview inbox-none">None yet. Pick a renter above to start one.</p>
+          )}
+          {conversations.map((c) => (
+            <button
+              type="button"
+              key={c.id}
+              className={"inbox-item" + (c.id === activeId && !newTo ? " active" : "")}
+              onClick={() => openConversation(c.id)}
+            >
+              <div className="inbox-item-head">
+                <strong>{c.client_name || "Renter"}</strong>
+                <span className="inbox-time">{fmtTime(c.last_message_at)}</span>
+              </div>
+              <p className="inbox-preview">{c.last_message || "No messages yet"}</p>
+              {c.unread_count > 0 && <span className="inbox-badge">{c.unread_count}</span>}
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      <section className="support-page dm-chat">
+        <header className="support-head">
+          <div>
+            <h2>{title}</h2>
+            <p>
+              {newTo
+                ? `${newTo.car_name || "Vehicle"} · ${newTo.booking_ref} · your first message opens the conversation`
+                : "Replies go out under your business name"}
+            </p>
+          </div>
+        </header>
+
+        <div className="chat-thread" ref={threadRef}>
+          {!newTo &&
+            (thread?.messages || []).map((m) => (
+              // The API's "host" side is us; "client" is the renter.
+              <div key={m.id} className={`msg ${m.sender_type === "host" ? "user" : "support"}`}>
+                <p>{m.message}</p>
+                <span className="msg-time">{fmtTime(m.created_at)}</span>
+              </div>
+            ))}
+          {newTo && (
+            <p className="typing">
+              {newTo.stage === "dropoff"
+                ? "They're on the trip now. A note about the return time or place is a good start."
+                : "Say hello and confirm where and when they'll collect the car."}
+            </p>
+          )}
+          {!newTo && thread && (thread.messages || []).length === 0 && (
+            <p className="typing">No messages in this conversation yet.</p>
+          )}
+          {!newTo && !activeId && <p className="typing">Pick a renter or a conversation.</p>}
+        </div>
+
+        <form className="chat-composer" onSubmit={handleSend}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={newTo ? `Message ${newTo.client_name || "the renter"}…` : "Write a reply…"}
+            maxLength={2000}
+            disabled={!activeId && !newTo}
+          />
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={sending || !draft.trim() || (!activeId && !newTo)}
+          >
+            Send
+          </button>
+        </form>
+      </section>
+    </div>
   );
 }

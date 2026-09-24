@@ -7,6 +7,7 @@ import "./bookings.css";
 import "./verification.css";
 import PageLoader from "../components/PageLoader";
 import RefreshButton from "../components/RefreshButton";
+import FilterDropdown from "../components/FilterDropdown";
 
 const FILTERS = ["All", "Verified", "Not found", "Mismatch"];
 
@@ -59,18 +60,13 @@ export default function VerificationsList() {
               aria-label="Search checks"
             />
           </div>
-          <div className="seg" role="group" aria-label="Filter by result">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={f === filter ? "active" : ""}
-                onClick={() => setFilter(f)}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+          <FilterDropdown
+            id="ver-result"
+            label="Result"
+            value={filter}
+            onChange={setFilter}
+            options={FILTERS.map((f) => (f === "All" ? { value: f, label: "All results" } : f))}
+          />
           <RefreshButton onRefresh={hydrateLookups} />
         </div>
 

@@ -206,3 +206,12 @@
     height: 70dvh;
   }
 }
+
+/* Sent, not yet confirmed: slightly lighter, settling in place on delivery. */
+.dm-page .msg {
+  transition: opacity 0.2s var(--ease);
+}
+
+.dm-page .msg.is-pending {
+  opacity: 0.72;
+}

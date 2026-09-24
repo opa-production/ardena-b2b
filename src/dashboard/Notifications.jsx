@@ -20,6 +20,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
 import RefreshButton from "../components/RefreshButton";
+import FilterDropdown from "../components/FilterDropdown";
 
 const FILTERS = ["All", "Unread", "Bookings", "Payments"];
 
@@ -150,18 +151,13 @@ export default function Notifications() {
     <>
       <section className="panel-card">
         <div className="fleet-toolbar">
-          <div className="seg" role="group" aria-label="Filter notifications">
-            {FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={f === filter ? "active" : ""}
-                onClick={() => setFilter(f)}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+          <FilterDropdown
+            id="notif-filter"
+            label="Show"
+            value={filter}
+            onChange={setFilter}
+            options={FILTERS}
+          />
           <div className="toolbar-actions">
             <button
               type="button"

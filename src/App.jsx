@@ -23,6 +23,7 @@ const AddVehicle = lazy(load.addVehicle);
 const VehicleDetails = lazy(load.vehicleDetails);
 const MarketplaceListing = lazy(load.marketplaceListing);
 const Bookings = lazy(load.bookings);
+const AllBookings = lazy(load.allBookings);
 const NewBooking = lazy(load.newBooking);
 const BookingDetails = lazy(load.bookingDetails);
 const Clients = lazy(load.clients);
@@ -109,6 +110,7 @@ export default function App() {
           path="bookings/new"
           element={<RequireRole capability="manageBookings"><NewBooking /></RequireRole>}
         />
+        <Route path="bookings/all" element={<AllBookings />} />
         <Route path="bookings/:ref" element={<BookingDetails />} />
         <Route
           path="claims"

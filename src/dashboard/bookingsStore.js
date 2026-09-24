@@ -150,3 +150,19 @@ export const PAY_CHIP = {
   Refunded: "cancelled",
   Failed: "cancelled",
 };
+
+/* Row numbers as the API lists bookings, so a booking keeps the same number on
+   the overview and on All bookings. */
+export function bookingNumbers(list) {
+  const m = new Map();
+  list.forEach((b, i) => m.set(b.ref, i + 1));
+  return m;
+}
+
+/* Newest booking first, by creation date; same-day bookings keep API order. */
+export function latestFirst(list) {
+  return list
+    .map((b, i) => [b, i])
+    .sort(([a, ai], [b, bi]) => String(b.created || "").localeCompare(String(a.created || "")) || ai - bi)
+    .map(([b]) => b);
+}

@@ -221,7 +221,7 @@ export default function VehicleDetails() {
             <h2>Vehicle information</h2>
             <p>Registry record</p>
           </header>
-          <dl className="spec-grid vehicle-specs">
+          <dl className="spec-grid record-specs">
             <div className="spec">
               <dt>Number plate</dt>
               <dd>{v.plate}</dd>

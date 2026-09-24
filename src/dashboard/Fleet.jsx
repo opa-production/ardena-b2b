@@ -8,6 +8,7 @@ import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
 import PageLoader from "../components/PageLoader";
 import RefreshButton from "../components/RefreshButton";
+import FilterDropdown from "../components/FilterDropdown";
 
 const STATUSES = ["All", "Available", "On booking", "In maintenance"];
 
@@ -110,18 +111,13 @@ export default function Fleet() {
               aria-label="Search fleet"
             />
           </div>
-          <div className="seg" role="group" aria-label="Filter by status">
-            {STATUSES.map((s) => (
-              <button
-                key={s}
-                type="button"
-                className={s === status ? "active" : ""}
-                onClick={() => setStatus(s)}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
+          <FilterDropdown
+            id="fleet-status"
+            label="Status"
+            value={status}
+            onChange={setStatus}
+            options={STATUSES.map((s) => (s === "All" ? { value: s, label: "All vehicles" } : s))}
+          />
           {vehicles.length >= 100 ? (
             <Link to="/dashboard/support" className="btn toolbar-btn" style={{ background: "var(--warning-bg,#fef3c7)", color: "#92400e", border: "1px solid #fcd34d" }}>
               Fleet at capacity, contact sales

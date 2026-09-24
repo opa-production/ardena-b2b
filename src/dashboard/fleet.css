@@ -708,22 +708,22 @@ a.icon-btn + .icon-btn {
    scannable facts without adding lines. Scoped so booking details, which share
    .spec-grid, keep their compact layout. */
 
-.vehicle-specs {
+.record-specs {
   gap: 10px;
 }
 
-.vehicle-specs .spec {
+.record-specs .spec {
   padding: 12px 14px;
   background: var(--surface);
   box-shadow: var(--edge-in);
 }
 
-.vehicle-specs .spec dt {
+.record-specs .spec dt {
   font-size: 11px;
   margin-bottom: 6px;
 }
 
-.vehicle-specs .spec dd {
+.record-specs .spec dd {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -732,14 +732,14 @@ a.icon-btn + .icon-btn {
 }
 
 /* The figure a fleet manager looks for first. */
-.vehicle-specs .spec-key dd {
+.record-specs .spec-key dd {
   font-family: var(--font-display);
   font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 
-.vehicle-specs .ins-soon {
+.record-specs .ins-soon {
   margin-left: 0;
   padding: 2px 8px;
   font-size: 11.5px;
@@ -749,14 +749,14 @@ a.icon-btn + .icon-btn {
 }
 
 /* Documents: one row each, marked by whether the file is on record. */
-.vehicle-specs .doc-row {
+.record-specs .doc-row {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
 }
 
-.vehicle-specs .doc-item {
+.record-specs .doc-item {
   justify-content: space-between;
   padding: 8px 10px 8px 12px;
   background: var(--panel);
@@ -765,19 +765,19 @@ a.icon-btn + .icon-btn {
   font-weight: 400;
 }
 
-.vehicle-specs .doc-item.doc-missing {
+.record-specs .doc-item.doc-missing {
   border-left-color: var(--warn);
 }
 
-.vehicle-specs .doc-item.doc-ok {
+.record-specs .doc-item.doc-ok {
   border-left-color: var(--ok);
 }
 
-.vehicle-specs .doc-item .cell-sub {
+.record-specs .doc-item .cell-sub {
   color: var(--ink-soft);
 }
 
-.vehicle-specs .spec-notes dd {
+.record-specs .spec-notes dd {
   display: block;
   font-weight: 400;
   line-height: 1.6;
@@ -785,21 +785,21 @@ a.icon-btn + .icon-btn {
 }
 
 @media (max-width: 560px) {
-  .vehicle-specs {
+  .record-specs {
     grid-template-columns: 1fr;
   }
 }
 
-/* .vehicle-specs .spec dd (above) makes every value a wrapping row, which
+/* .record-specs .spec dd (above) makes every value a wrapping row, which
    out-ranked .doc-row's column and put the two documents side by side at
    different widths. Re-assert the column at matching specificity. */
-.vehicle-specs .spec dd.doc-row {
+.record-specs .spec dd.doc-row {
   flex-direction: column;
   align-items: stretch;
   flex-wrap: nowrap;
 }
 
-.vehicle-specs .doc-item {
+.record-specs .doc-item {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;

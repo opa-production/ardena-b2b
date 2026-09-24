@@ -8,6 +8,7 @@ import { toast } from "./toastStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./payments.css";
+import FilterDropdown from "../components/FilterDropdown";
 
 const TYPE_FILTERS = ["All", "payment", "refund"];
 const STATUS_FILTERS = ["All", "completed", "pending", "failed"];
@@ -96,30 +97,20 @@ export default function PaymentsList() {
               aria-label="Search payments"
             />
           </div>
-          <div className="seg" role="group" aria-label="Filter by type">
-            {TYPE_FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={f === typeFilter ? "active" : ""}
-                onClick={() => setTypeFilter(f)}
-              >
-                {f === "All" ? "All types" : f.charAt(0).toUpperCase() + f.slice(1) + "s"}
-              </button>
-            ))}
-          </div>
-          <div className="seg" role="group" aria-label="Filter by status">
-            {STATUS_FILTERS.map((f) => (
-              <button
-                key={f}
-                type="button"
-                className={f === statusFilter ? "active" : ""}
-                onClick={() => setStatusFilter(f)}
-              >
-                {f === "All" ? "All statuses" : f.charAt(0).toUpperCase() + f.slice(1)}
-              </button>
-            ))}
-          </div>
+          <FilterDropdown
+            id="pay-type"
+            label="Type"
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={TYPE_FILTERS.map((f) => ({ value: f, label: f === "All" ? "All types" : f.charAt(0).toUpperCase() + f.slice(1) + "s" }))}
+          />
+          <FilterDropdown
+            id="pay-status"
+            label="Status"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            options={STATUS_FILTERS.map((f) => ({ value: f, label: f === "All" ? "All statuses" : f.charAt(0).toUpperCase() + f.slice(1) }))}
+          />
         </div>
 
         {loading ? (

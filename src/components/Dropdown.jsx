@@ -16,6 +16,9 @@ export default function Dropdown({
   options,
   placeholder = "Select",
   ariaLabel,
+  // Optional: how the closed trigger shows the selection (the panel always
+  // lists plain labels). Toolbar filters use it to read "Status · Active".
+  formatValue,
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -54,7 +57,7 @@ export default function Dropdown({
         onClick={() => setOpen((o) => !o)}
       >
         {selected ? (
-          <span className="dd-value">{selected.label}</span>
+          <span className="dd-value">{formatValue ? formatValue(selected) : selected.label}</span>
         ) : (
           <span className="dd-placeholder">{placeholder}</span>
         )}

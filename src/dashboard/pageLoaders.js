@@ -27,6 +27,7 @@ export const load = {
   vehicleDetails: () => import("./VehicleDetails"),
   marketplaceListing: () => import("./MarketplaceListing"),
   bookings: () => import("./Bookings"),
+  allBookings: () => import("./AllBookings"),
   newBooking: () => import("./NewBooking"),
   bookingDetails: () => import("./BookingDetails"),
   clients: () => import("./Clients"),

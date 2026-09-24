@@ -222,6 +222,16 @@ export default function PageSkeleton({ path = "" }) {
   }
 
   // ---- Detail pages: header card + info card stack + side cards
+  // ---- Full lists behind an overview (bookings/all): back link + table
+  if (sub === "all") {
+    return (
+      <div aria-hidden="true">
+        <BackLine />
+        <TableCard rows={8} />
+      </div>
+    );
+  }
+
   if (sub && ["fleet", "bookings", "clients", "chauffeurs"].includes(section)) {
     return (
       <div aria-hidden="true">

@@ -4,6 +4,8 @@ import PageSkeleton from "./PageSkeleton";
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
+import useDictation from "../hooks/useDictation";
+import { MicIcon, SendIcon } from "./supportArt";
 import RefreshButton from "../components/RefreshButton";
 import {
   fetchRenterConversations,
@@ -38,7 +40,9 @@ const fmtDay = (v) =>
    morning-of-pickup "we're at the gate" message is one click away. */
 export default function RenterInbox() {
   usePageTitle("Direct messages");
-  const { pathname } = useLocation();
+  const { pathname, state: navState } = useLocation();
+  // Arriving from a booking's "Message" button: open that renter once loaded.
+  const openClientRef = useRef(navState?.clientId ?? null);
 
   const [conversations, setConversations] = useState([]);
   const [renters, setRenters] = useState([]);
@@ -47,9 +51,23 @@ export default function RenterInbox() {
   const [newTo, setNewTo] = useState(null);
   const [thread, setThread] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
   const [draft, setDraft] = useState("");
   const threadRef = useRef(null);
+  // A thread we just created locally: its first load would only replace the
+  // optimistic bubble with the same message, so it's skipped (no flicker).
+  const skipLoadRef = useRef(null);
+
+  const { supported: canDictate, listening, toggle: toggleDictation } = useDictation({
+    value: draft,
+    onChange: setDraft,
+    onError: (kind) =>
+      toast(
+        kind === "blocked"
+          ? "Microphone blocked. Allow it in your browser to dictate."
+          : "Couldn't hear that. Try again or type it.",
+        "warn"
+      ),
+  });
 
   const loadList = useCallback(async () => {
     try {
@@ -60,7 +78,22 @@ export default function RenterInbox() {
       ]);
       const list = data?.conversations || [];
       setConversations(list);
-      setRenters(contactable?.renters || []);
+      const trip = contactable?.renters || [];
+      setRenters(trip);
+      const wanted = openClientRef.current;
+      if (wanted != null) {
+        openClientRef.current = null;
+        const r = trip.find((x) => x.client_id === wanted);
+        const c = list.find((x) => x.client_id === wanted);
+        if (r && !r.conversation_id) {
+          setNewTo(r);
+          return;
+        }
+        if (c || r) {
+          setActiveId(c?.id ?? r.conversation_id);
+          return;
+        }
+      }
       // Open the newest thread by default so the page isn't a dead end.
       setActiveId((current) => current ?? list[0]?.id ?? null);
     } catch (err) {
@@ -90,6 +123,10 @@ export default function RenterInbox() {
   }, []);
 
   useEffect(() => {
+    if (activeId && skipLoadRef.current === activeId) {
+      skipLoadRef.current = null;
+      return;
+    }
     loadThread(activeId);
   }, [activeId, loadThread]);
 
@@ -113,31 +150,64 @@ export default function RenterInbox() {
     setNewTo(r);
   }
 
+  /* Optimistic: the bubble appears the moment Send is pressed, marked
+     "Sending…", and the request runs behind it. On success the bubble is
+     swapped for the saved message in place — same position, no reload — and a
+     toast confirms delivery. On failure it's removed and the text handed back. */
   async function handleSend(e) {
     e.preventDefault();
     const text = draft.trim();
-    if (!text || sending || (!activeId && !newTo)) return;
-    setSending(true);
+    const to = newTo;
+    const convId = activeId;
+    if (!text || (!convId && !to)) return;
+
+    const tempId = `opt-${Date.now()}`;
+    const optimistic = {
+      id: tempId,
+      sender_type: "host",
+      message: text,
+      created_at: new Date().toISOString(),
+      pending: true,
+    };
+    setDraft("");
+    setThread((t) =>
+      to
+        ? { client_name: to.client_name, messages: [...(t?.messages || []), optimistic] }
+        : t ? { ...t, messages: [...(t.messages || []), optimistic] } : t
+    );
+    const swap = (saved) =>
+      setThread((t) =>
+        t ? { ...t, messages: t.messages.map((m) => (m.id === tempId ? saved : m)) } : t
+      );
+    const name = (to?.client_name || thread?.client_name || "the renter").split(" ")[0];
+
     try {
-      if (newTo) {
-        const res = await messageRenterFirst(newTo.client_id, text);
-        setDraft("");
+      if (to) {
+        const res = await messageRenterFirst(to.client_id, text);
+        skipLoadRef.current = res.conversation_id;
+        swap(res.message);
         setNewTo(null);
         setActiveId(res.conversation_id);
-        toast(`Message sent to ${newTo.client_name || "the renter"}.`);
+        // The new conversation and the renter's link to it come from the server.
+        loadList();
       } else {
-        const msg = await sendRenterMessage(activeId, text);
-        setDraft("");
-        setThread((t) =>
-          t ? { ...t, messages: [...(t.messages || []), msg] } : t
-        );
+        const saved = await sendRenterMessage(convId, text);
+        swap(saved);
+        // Move this conversation to the top with its new preview, locally.
+        setConversations((cs) => {
+          const hit = cs.find((c) => c.id === convId);
+          if (!hit) return cs;
+          const updated = { ...hit, last_message: text, last_message_at: saved.created_at };
+          return [updated, ...cs.filter((c) => c.id !== convId)];
+        });
       }
-      // Reordering by latest activity is the list's whole job.
-      loadList();
+      toast(`Delivered to ${name}.`);
     } catch (err) {
+      setThread((t) =>
+        t ? { ...t, messages: t.messages.filter((m) => m.id !== tempId) } : t
+      );
+      setDraft((d) => d || text);
       toast(err.message || "Message not sent", "danger");
-    } finally {
-      setSending(false);
     }
   }
 
@@ -246,15 +316,17 @@ export default function RenterInbox() {
         </header>
 
         <div className="chat-thread" ref={threadRef}>
-          {!newTo &&
-            (thread?.messages || []).map((m) => (
+          {(thread?.messages || []).map((m) => (
               // The API's "host" side is us; "client" is the renter.
-              <div key={m.id} className={`msg ${m.sender_type === "host" ? "user" : "support"}`}>
+              <div
+                key={m.id}
+                className={`msg ${m.sender_type === "host" ? "user" : "support"}${m.pending ? " is-pending" : ""}`}
+              >
                 <p>{m.message}</p>
-                <span className="msg-time">{fmtTime(m.created_at)}</span>
+                <span className="msg-time">{m.pending ? "Sending…" : fmtTime(m.created_at)}</span>
               </div>
             ))}
-          {newTo && (
+          {newTo && !(thread?.messages || []).length && (
             <p className="typing">
               {newTo.stage === "dropoff"
                 ? "They're on the trip now. A note about the return time or place is a good start."
@@ -269,18 +341,43 @@ export default function RenterInbox() {
 
         <form className="chat-composer" onSubmit={handleSend}>
           <input
+            type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            placeholder={newTo ? `Message ${newTo.client_name || "the renter"}…` : "Write a reply…"}
+            placeholder={
+              listening
+                ? "Listening…"
+                : newTo
+                  ? `Message ${newTo.client_name || "the renter"}…`
+                  : "Write a reply…"
+            }
             maxLength={2000}
             disabled={!activeId && !newTo}
+            aria-label="Message the renter"
           />
+
+          {canDictate && (
+            <button
+              type="button"
+              className={"composer-btn" + (listening ? " is-live" : "")}
+              onClick={toggleDictation}
+              disabled={!activeId && !newTo}
+              aria-label={listening ? "Stop dictating" : "Dictate your message"}
+              aria-pressed={listening}
+              title={listening ? "Stop dictating" : "Speak instead of typing"}
+            >
+              <MicIcon />
+            </button>
+          )}
+
           <button
             type="submit"
-            className="btn btn-primary"
-            disabled={sending || !draft.trim() || (!activeId && !newTo)}
+            className="composer-btn composer-send"
+            disabled={!draft.trim() || (!activeId && !newTo)}
+            aria-label="Send message"
+            title="Send"
           >
-            Send
+            <SendIcon />
           </button>
         </form>
       </section>

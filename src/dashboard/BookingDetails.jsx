@@ -25,6 +25,7 @@ import { toast } from "./toastStore";
 import { getSeed } from "./recordSeeds";
 import LoadingOverlay from "../components/LoadingOverlay";
 import HandoverCodeField from "./HandoverCodeField";
+import RenterProfileCard from "./RenterProfileCard";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
 import { compressImage } from "./handoverPhotosStore";
@@ -693,19 +694,49 @@ export default function BookingDetails() {
 
       <div className="details-grid">
         <div className="settings-main">
+          <RenterProfileCard renter={b.renter} />
+
           <section className="panel-card">
             <header className="card-head">
               <h2>Booking information</h2>
               <p>Reservation record</p>
             </header>
-            <dl className="spec-grid">
+            {/* The trip as a line: when it starts, how long, when it ends.
+                Dates are what a desk is asked about most, so they lead. */}
+            <div className="trip-line">
+              <div className="trip-end">
+                <span className="trip-tag">Pickup</span>
+                <strong>{fmtDate(b.pickup)}</strong>
+                <em>{b.location || "Location not set"}</em>
+              </div>
+              <div className="trip-mid" aria-hidden="true">
+                <span>
+                  {days} day{days > 1 ? "s" : ""}
+                </span>
+              </div>
+              <div className="trip-end trip-end-right">
+                <span className="trip-tag">Return</span>
+                <strong>{fmtDate(b.dropoff)}</strong>
+                <em>by {RETURN_HOUR}:00 AM</em>
+              </div>
+            </div>
+
+            <dl className="spec-grid record-specs">
               <div className="spec">
                 <dt>Customer</dt>
                 <dd>{b.customer}</dd>
               </div>
               <div className="spec">
                 <dt>Phone</dt>
-                <dd>{b.phone}</dd>
+                <dd>
+                  {b.phone ? (
+                    <a className="spec-link" href={`tel:${String(b.phone).replace(/\s/g, "")}`}>
+                      {b.phone}
+                    </a>
+                  ) : (
+                    "-"
+                  )}
+                </dd>
               </div>
               <div className="spec">
                 <dt>Vehicle</dt>
@@ -715,36 +746,20 @@ export default function BookingDetails() {
                   </Link>
                 </dd>
               </div>
-              <div className="spec">
+              <div className="spec spec-key">
                 <dt>Day rate</dt>
                 <dd>KES {fmtAmount(b.rate)}</dd>
               </div>
               <div className="spec">
-                <dt>Pickup</dt>
-                <dd>{fmtDate(b.pickup)}</dd>
-              </div>
-              <div className="spec">
-                <dt>Return</dt>
-                <dd>
-                  {fmtDate(b.dropoff)} · by {RETURN_HOUR}:00 AM
-                </dd>
-              </div>
-              <div className="spec">
-                <dt>Duration</dt>
-                <dd>
-                  {days} day{days > 1 ? "s" : ""}
-                </dd>
-              </div>
-              <div className="spec">
-                <dt>Pickup location</dt>
-                <dd>{b.location}</dd>
+                <dt>Booked via</dt>
+                <dd>{b.source === "marketplace" ? "Ardena app" : "Dashboard"}</dd>
               </div>
               <div className="spec">
                 <dt>Created</dt>
                 <dd>{fmtDate(b.created)}</dd>
               </div>
               {b.notes && (
-                <div className="spec spec-full">
+                <div className="spec spec-full spec-notes">
                   <dt>Notes</dt>
                   <dd>{b.notes}</dd>
                 </div>

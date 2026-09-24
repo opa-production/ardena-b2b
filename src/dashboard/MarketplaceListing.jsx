@@ -576,9 +576,8 @@ export default function MarketplaceListing() {
 
               <div className="form-row">
                 <div className="field field-full">
-                  <div className="ai-assist-head">
-                    <label htmlFor="mkt-desc">Description</label>
-                    {/* Unsaved form values go along so the draft matches
+                  <label htmlFor="mkt-desc">Description</label>
+                  {/* Unsaved form values go along so the draft matches
                         what's on screen, not what was last saved. */}
                     <DescriptionAssist
                       plate={decodedPlate}
@@ -595,15 +594,15 @@ export default function MarketplaceListing() {
                         setDescription(text);
                         toast("Description added. Save the listing to keep it.");
                       }}
+                  >
+                    <textarea
+                      id="mkt-desc"
+                      rows={4}
+                      placeholder="Describe the vehicle, comfort, condition, what makes it great for a trip…"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                     />
-                  </div>
-                  <textarea
-                    id="mkt-desc"
-                    rows={4}
-                    placeholder="Describe the vehicle, comfort, condition, what makes it great for a trip…"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
+                  </DescriptionAssist>
                 </div>
               </div>
 

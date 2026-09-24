@@ -3,6 +3,9 @@ import { generateListingDescription } from "../lib/api";
 
 /* "Write it for me" on the listing's description card.
 
+   The button sits inside the field's bottom-right corner (the textarea is
+   passed as `children`) so it's seen where the writing happens.
+
    The user gives a few words of direction first. Without that the model can
    only restate the spec sheet, and every fleet car would read the same. The
    draft is shown beside the field rather than written into it, so an existing
@@ -20,7 +23,7 @@ function SparkleIcon() {
   );
 }
 
-export default function DescriptionAssist({ plate, context, onAccept }) {
+export default function DescriptionAssist({ plate, context, onAccept, children }) {
   const [open, setOpen] = useState(false);
   const [hint, setHint] = useState("");
   const [draft, setDraft] = useState("");
@@ -56,16 +59,17 @@ export default function DescriptionAssist({ plate, context, onAccept }) {
   }
 
   return (
-    <>
+    <div className="ai-assist-field">
+      {children}
       <button
         type="button"
         className={`ai-assist-btn${open ? " is-open" : ""}`}
         onClick={() => (open ? close() : setOpen(true))}
         title="Write the description with AI"
-        aria-label="Write the description with AI"
         aria-expanded={open}
       >
         <SparkleIcon />
+        <span>AI enhance</span>
       </button>
 
       {open && (
@@ -111,6 +115,6 @@ export default function DescriptionAssist({ plate, context, onAccept }) {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -618,8 +618,13 @@
 
 /* ── Pickup location ───────────────────────────────────────────────── */
 
+/* Same box as the location input above it: full width, same padding and
+   type size, so the two read as one control. */
 .loc-btn {
-  margin-top: 12px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 13px 15px;
+  font-size: 15px;
   gap: 8px;
 }
 
@@ -632,4 +637,137 @@
   margin-top: 10px;
   font-size: 12.5px;
   color: var(--ok);
+}
+
+/* ── Not-verified banner with its Verify button ────────────────────── */
+
+.mkt-banner-action {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mkt-banner-action .btn {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .mkt-banner-action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ── Readiness: progress ring, what's left, commission tick, submit ── */
+
+.ready-card .ready-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ready-card h2 {
+  font-size: 15px;
+  margin-bottom: 3px;
+}
+
+.ready-card .ready-top p {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-mute);
+}
+
+.ready-ring {
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+
+.ready-track {
+  fill: none;
+  stroke: var(--surface);
+  stroke-width: 7;
+}
+
+.ready-fill {
+  fill: none;
+  stroke: #7b6cd0;
+  stroke-width: 7;
+  transition: stroke-dashoffset 0.4s var(--ease), stroke 0.3s var(--ease);
+}
+
+.ready-card.is-ready .ready-fill {
+  stroke: var(--ok);
+}
+
+/* The ring is rotated so it fills from 12 o'clock; turn the label back. */
+.ready-pct {
+  transform: rotate(90deg);
+  transform-origin: 38px 38px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+
+.ready-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ready-list li {
+  position: relative;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.ready-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 3px;
+  width: 11px;
+  height: 11px;
+  box-shadow: inset 0 0 0 1.5px var(--ink-mute);
+}
+
+.commission-check {
+  align-items: flex-start;
+  margin: 16px 0 14px;
+  padding: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--surface);
+  box-shadow: var(--edge-in);
+}
+
+.commission-check input[type="checkbox"] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: #4b3ca8;
+}
+
+.link-btn {
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--brand-dark);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ready-submit {
+  width: 100%;
+}
+
+.ready-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }

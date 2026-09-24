@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   fetchSupportThread,
   sendSupportMessage,
@@ -42,7 +43,10 @@ function fmtTime(iso) {
    a column reserved for something switched off is just a hole in the page. */
 export default function Support() {
   const [messages, setMessages] = useState([]);
-  const [draft, setDraft] = useState("");
+  // Other pages can open support with a message already written (e.g. the
+  // "Verify business" button on a marketplace listing).
+  const { state: navState } = useLocation();
+  const [draft, setDraft] = useState(navState?.draft || "");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const threadRef = useRef(null);

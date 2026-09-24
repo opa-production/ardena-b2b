@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   fetchMarketplaceListing,
   saveMarketplaceListing,
@@ -80,7 +80,7 @@ const TIER_NOTES = {
   strict: "Least refundable. Best for in-demand vehicles and peak season, the default for fleets.",
 };
 
-function CommissionModal({ onAccept, onClose }) {
+function CommissionModal({ onAccept, onClose, acceptLabel = "I understand, submit for review" }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-box commission-modal" onClick={(e) => e.stopPropagation()}>
@@ -98,7 +98,8 @@ function CommissionModal({ onAccept, onClose }) {
             <li>You can hide or remove your listing at any time.</li>
           </ul>
           <p className="commission-note">
-            By publishing, you agree to Ardena's marketplace commission terms.
+            By submitting, you agree to Ardena's marketplace commission terms.
+            Every listing is reviewed by Ardena before renters can book it.
           </p>
         </div>
         <footer className="modal-foot">
@@ -106,11 +107,82 @@ function CommissionModal({ onAccept, onClose }) {
             Cancel
           </button>
           <button type="button" className="btn btn-primary" onClick={onAccept}>
-            I understand, publish listing
+            {acceptLabel}
           </button>
         </footer>
       </div>
     </div>
+  );
+}
+
+/* How close the listing is to submittable, live from the form rather than
+   the last save, so the ring moves as fields are filled. Mirrors the server's
+   missing_for_publish() plus the two gates publish checks on top of it. */
+function needsYearFor(plate) {
+  const v = getVehicle(plate);
+  return Boolean(v) && !v.year;
+}
+
+function ReadinessCard({ checks, saving, submitLabel, onSubmit, commission, onCommission, onReadTerms }) {
+  const done = checks.filter((c) => c.ok).length;
+  const pct = Math.round((done / checks.length) * 100);
+  const ready = done === checks.length;
+  const left = checks.filter((c) => !c.ok);
+  const R = 30;
+  const C = 2 * Math.PI * R;
+
+  return (
+    <section className={`panel-card ready-card${ready ? " is-ready" : ""}`}>
+      <div className="ready-top">
+        <svg className="ready-ring" width="76" height="76" viewBox="0 0 76 76" aria-hidden="true">
+          <circle cx="38" cy="38" r={R} className="ready-track" />
+          <circle
+            cx="38"
+            cy="38"
+            r={R}
+            className="ready-fill"
+            strokeDasharray={C}
+            strokeDashoffset={C * (1 - done / checks.length)}
+          />
+          <text x="38" y="43" textAnchor="middle" className="ready-pct">{pct}%</text>
+        </svg>
+        <div>
+          <h2>{ready ? "Ready to submit" : "Listing progress"}</h2>
+          <p>
+            {ready
+              ? "Ardena reviews every listing before renters can book it, usually within a day."
+              : `${done} of ${checks.length} done · ${left.length} to go`}
+          </p>
+        </div>
+      </div>
+
+      {!ready && (
+        <ul className="ready-list">
+          {left.map((c) => (
+            <li key={c.key}>{c.label}</li>
+          ))}
+        </ul>
+      )}
+
+      <label className="checkbox-row commission-check">
+        <input type="checkbox" checked={commission} onChange={(e) => onCommission(e.target.checked)} />
+        <span>
+          I accept Ardena&apos;s marketplace commission terms.{" "}
+          <button type="button" className="link-btn" onClick={onReadTerms}>
+            Read the terms
+          </button>
+        </span>
+      </label>
+
+      <button
+        type="button"
+        className="btn btn-primary ready-submit"
+        disabled={saving || !ready}
+        onClick={onSubmit}
+      >
+        {saving ? "Submitting…" : submitLabel}
+      </button>
+    </section>
   );
 }
 
@@ -125,6 +197,9 @@ export default function MarketplaceListing() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showCommission, setShowCommission] = useState(false);
+  // "read" opens the terms from the checkbox; "submit" is the publish gate.
+  const [commissionMode, setCommissionMode] = useState("submit");
+  const navigate = useNavigate();
 
   // file input refs
   const coverInputRef = useRef(null);
@@ -427,6 +502,7 @@ export default function MarketplaceListing() {
 
   async function handlePublish() {
     if (!commissionAcknowledged) {
+      setCommissionMode("submit");
       setShowCommission(true);
       return;
     }
@@ -511,6 +587,29 @@ export default function MarketplaceListing() {
   const rules = joinRules(pickedRules, customRules);
   const missing = listing?.missing_fields || [];
   const status = listing?.status || "draft";
+  const verified = Boolean(business.verifiedSince);
+  const checks = [
+    ["description", description.trim()],
+    ["year", !needsYearFor(decodedPlate) || Number(yearInput) >= 1900],
+    ["photos", coverImage || carImages.length],
+    ["seats", seats !== ""],
+    ["fuel_type", fuelType],
+    ["transmission", transmission],
+    ["color", color],
+    ["mileage", mileage !== ""],
+    ["weekly_rate", Number(weeklyRate) > 0],
+    ["monthly_rate", Number(monthlyRate) > 0],
+    ["min_rental_days", Number(minDays) >= 1],
+    ["min_age_requirement", Number(minAge) >= 18],
+    ["rules", rules.trim()],
+    ["location", locationName.trim() || coords],
+    ["deposit_amount", !depositRequired || Number(depositAmount) > 0],
+  ]
+    .map(([key, ok]) => ({ key, label: REQUIREMENT_LABELS[key], ok: Boolean(ok) }))
+    .concat([
+      { key: "commission", label: "Accept the commission terms", ok: commissionAcknowledged },
+      { key: "kyb", label: "Business verified by Ardena", ok: verified },
+    ]);
   // Vehicles added before the fleet carried a model year can't be listed until
   // one is set, and there is no vehicle edit screen to set it on.
   const vehicle = getVehicle(decodedPlate);
@@ -521,6 +620,15 @@ export default function MarketplaceListing() {
   // businesses their car was on the app when it was still in the queue.
   const review = listing?.review || "not_submitted";
   const live = Boolean(listing?.live_on_marketplace);
+  // Every new car goes through Ardena's review (the backend creates it as
+  // awaiting verification and hidden). Only a car Ardena already approved goes
+  // straight back on the app when re-published, so only that one says so.
+  const submitLabel =
+    review === "approved"
+      ? "Put back on the app"
+      : review === "rejected"
+        ? "Resubmit for review"
+        : "Submit for review";
   const badge = live
     ? { cls: "mkt-live", label: "Live on Ardena" }
     : review === "pending_review"
@@ -543,7 +651,15 @@ export default function MarketplaceListing() {
     <>
       {showCommission && (
         <CommissionModal
-          onAccept={handleCommissionAccepted}
+          acceptLabel={commissionMode === "read" ? "I accept" : undefined}
+          onAccept={
+            commissionMode === "read"
+              ? () => {
+                  setCommissionAcknowledged(true);
+                  setShowCommission(false);
+                }
+              : handleCommissionAccepted
+          }
           onClose={() => setShowCommission(false)}
         />
       )}
@@ -584,7 +700,7 @@ export default function MarketplaceListing() {
               onClick={handlePublish}
               disabled={saving}
             >
-              {status === "draft" ? "Publish to marketplace" : "Re-publish"}
+              {submitLabel}
             </button>
           )}
         </div>
@@ -613,12 +729,31 @@ export default function MarketplaceListing() {
       {/* Publishing is refused until Ardena has verified the business. Saying so
           here means a business finds out before filling in the whole listing,
           rather than from a 400 on the publish button. */}
-      {!business.verifiedSince && (
-        <div className="mkt-banner mkt-banner-review">
-          <strong>Your business isn&apos;t verified yet.</strong> You can fill this
-          in and save it now, but listings only go live on the Ardena app once
-          Ardena has confirmed your registration and director ID. Direct bookings
-          are unaffected. <Link to="/dashboard/support">Request verification</Link>.
+      {!verified && (
+        <div className="mkt-banner mkt-banner-review mkt-banner-action">
+          <div>
+            <strong>Your business isn&apos;t verified yet.</strong> You can fill this
+            in and save it now, but listings only go live on the Ardena app once
+            Ardena has confirmed your registration and director ID. Direct bookings
+            are unaffected.
+          </div>
+          {/* KYB is handled by Ardena through support today, so this opens the
+              support thread with the request already written. */}
+          <button
+            type="button"
+            className="btn btn-market"
+            onClick={() =>
+              navigate("/dashboard/support", {
+                state: {
+                  draft:
+                    "Hi Ardena, please verify our business so we can list vehicles on the Ardena app. " +
+                    "We're ready to share our registration certificate, KRA PIN and director ID.",
+                },
+              })
+            }
+          >
+            Verify business
+          </button>
         </div>
       )}
 
@@ -942,6 +1077,21 @@ export default function MarketplaceListing() {
 
           {/* ── Right column ─── */}
           <div className="details-side">
+
+            {status !== "visible" && (
+              <ReadinessCard
+                checks={checks}
+                saving={saving}
+                submitLabel={submitLabel}
+                onSubmit={handlePublish}
+                commission={commissionAcknowledged}
+                onCommission={setCommissionAcknowledged}
+                onReadTerms={() => {
+                  setCommissionMode("read");
+                  setShowCommission(true);
+                }}
+              />
+            )}
 
             <section className="panel-card">
               <header className="card-head">

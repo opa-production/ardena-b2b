@@ -8,10 +8,10 @@ import "./marketplace.css";
 
 /* The "On Ardena app" switch for one fleet vehicle.
 
-   The switch shows the business's intent (listing.status === "visible"); the
-   chip beside it shows what renters actually see, because Ardena reviews every
-   new car first — "on" and "live" are different things for about a day, and a
-   switch alone would claim the car is bookable when it isn't.
+   The switch is on only when renters can actually book the car
+   (live_on_marketplace). Every new car is reviewed by Ardena first; while it
+   waits the switch stays off and locked, and the chip says "In review" — an
+   "on" switch beside "In review" told businesses two different things.
 
    Turning it on only publishes directly when the listing is already complete.
    Otherwise it opens the editor: there's no useful error to show from a switch,
@@ -31,7 +31,9 @@ export default function MarketplaceToggle({ vehicle, showLabel = false }) {
   const { can } = useRole();
   const [busy, setBusy] = useState(false);
   const m = vehicle.marketplace;
-  const on = m?.status === "visible";
+  const on = Boolean(m?.live);
+  // Submitted and waiting on Ardena: nothing to switch until the review lands.
+  const inReview = m?.status === "visible" && !m?.live && m?.review !== "rejected";
   const editor = `/dashboard/fleet/${encodeURIComponent(vehicle.plate)}/marketplace`;
   const chip = chipFor(m);
 
@@ -70,7 +72,9 @@ export default function MarketplaceToggle({ vehicle, showLabel = false }) {
         <label
           className="switch"
           title={
-            on
+            inReview
+              ? "Ardena is reviewing this car. It switches on once approved."
+              : on
               ? "Take off the Ardena app"
               : m?.ready_to_publish
                 ? "List on the Ardena app"
@@ -80,7 +84,7 @@ export default function MarketplaceToggle({ vehicle, showLabel = false }) {
           <input
             type="checkbox"
             checked={on}
-            disabled={busy}
+            disabled={busy || inReview}
             onChange={(e) => flip(e.target.checked)}
             aria-label={`List ${vehicle.plate} on the Ardena app`}
           />

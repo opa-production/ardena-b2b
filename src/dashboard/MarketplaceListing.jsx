@@ -222,6 +222,10 @@ export default function MarketplaceListing() {
   const [dailyRate, setDailyRate] = useState("");
   const [weeklyRate, setWeeklyRate] = useState("");
   const [monthlyRate, setMonthlyRate] = useState("");
+  // Weekly/monthly follow the daily rate (x7, x30) until the host types their
+  // own. Clearing a field hands it back to the calculation.
+  const [weeklyAuto, setWeeklyAuto] = useState(true);
+  const [monthlyAuto, setMonthlyAuto] = useState(true);
   const [minDays, setMinDays] = useState("");
   const [maxDays, setMaxDays] = useState("");
   const [minAge, setMinAge] = useState("");
@@ -258,6 +262,9 @@ export default function MarketplaceListing() {
     setDailyRate(data.daily_rate ?? "");
     setWeeklyRate(data.weekly_rate ?? "");
     setMonthlyRate(data.monthly_rate ?? "");
+    // A saved rate is the host's own figure; don't recalculate over it.
+    setWeeklyAuto(!data.weekly_rate);
+    setMonthlyAuto(!data.monthly_rate);
     setMinDays(data.min_rental_days ?? "");
     setMaxDays(data.max_rental_days ?? "");
     setMinAge(data.min_age_requirement ?? "");
@@ -572,7 +579,11 @@ export default function MarketplaceListing() {
     try {
       const updated = await hideMarketplaceListing(decodedPlate);
       _updateCache(updated);
-      toast(`${decodedPlate} hidden from the Ardena Marketplace.`);
+      toast(
+        live
+          ? `${decodedPlate} taken off the Ardena app.`
+          : `${decodedPlate} withdrawn from review. Submit again whenever you're ready.`
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -684,14 +695,27 @@ export default function MarketplaceListing() {
           </div>
         </div>
         <div className="details-actions">
-          {status === "visible" ? (
+          {/* Three states, one action each: live can be taken off; submitted
+              and waiting can be withdrawn (not a red "hide" — nothing is
+              showing yet); anything else can be submitted. */}
+          {live ? (
             <button
               type="button"
               className="btn btn-ghost danger-btn"
               onClick={handleHide}
               disabled={saving}
             >
-              Hide from marketplace
+              Take off the app
+            </button>
+          ) : status === "visible" && review !== "rejected" ? (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={handleHide}
+              disabled={saving}
+              title="Pull this car out of Ardena's review queue"
+            >
+              Withdraw submission
             </button>
           ) : (
             <button
@@ -1107,31 +1131,47 @@ export default function MarketplaceListing() {
                     min={0}
                     placeholder="8000"
                     value={dailyRate}
-                    onChange={(e) => setDailyRate(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setDailyRate(v);
+                      const d = Number(v);
+                      if (weeklyAuto) setWeeklyRate(d > 0 ? String(Math.round(d * 7)) : "");
+                      if (monthlyAuto) setMonthlyRate(d > 0 ? String(Math.round(d * 30)) : "");
+                    }}
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="mkt-weekly">Weekly rate</label>
+                  <label htmlFor="mkt-weekly">
+                    Weekly rate{weeklyAuto && weeklyRate !== "" && <span className="hint-text"> (7 × daily)</span>}
+                  </label>
                   <input
                     id="mkt-weekly"
                     type="number"
                     min={0}
                     placeholder="50000"
                     value={weeklyRate}
-                    onChange={(e) => setWeeklyRate(e.target.value)}
+                    onChange={(e) => {
+                      setWeeklyRate(e.target.value);
+                      setWeeklyAuto(e.target.value === "");
+                    }}
                   />
                 </div>
               </div>
               <div className="form-row form-row-2">
                 <div className="field">
-                  <label htmlFor="mkt-monthly">Monthly rate</label>
+                  <label htmlFor="mkt-monthly">
+                    Monthly rate{monthlyAuto && monthlyRate !== "" && <span className="hint-text"> (30 × daily)</span>}
+                  </label>
                   <input
                     id="mkt-monthly"
                     type="number"
                     min={0}
                     placeholder="180000"
                     value={monthlyRate}
-                    onChange={(e) => setMonthlyRate(e.target.value)}
+                    onChange={(e) => {
+                      setMonthlyRate(e.target.value);
+                      setMonthlyAuto(e.target.value === "");
+                    }}
                   />
                 </div>
                 <div className="field">

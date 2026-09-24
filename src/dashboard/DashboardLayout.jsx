@@ -57,11 +57,9 @@ import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
 import "./dashboard.css";
 
-/* The dark theme is built and working, but the toggle is parked while the
-   light palette settles. Flip this back to true to return "Dark mode" to the
-   tenant menu — themeStore and every [data-theme="dark"] rule stay live, so
-   nothing else has to change. */
-const SHOW_THEME_TOGGLE = false;
+/* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again —
+   themeStore and every [data-theme="dark"] rule stay live either way. */
+const SHOW_THEME_TOGGLE = true;
 
 function PaymentWall({ gate }) {
   const navigate = useNavigate();

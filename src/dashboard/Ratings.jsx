@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
-import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import { fetchMarketplaceRatings, fetchVehicleRatings } from "../lib/api";
@@ -9,6 +8,8 @@ import "./fleet.css";
 import "./bookings.css";
 import "./ratings.css";
 import RefreshButton from "../components/RefreshButton";
+import reviewsArt from "../assets/reviews.svg";
+import "./coming.css";
 
 function Stars({ value }) {
   const filled = Math.round(value || 0);
@@ -72,7 +73,14 @@ export default function Ratings() {
       </div>
 
       {!hasAny ? (
-        <EmptyState minimal title="No reviews yet" />
+        <div className="coming">
+          <img className="coming-art" src={reviewsArt} alt="" />
+          <h2 className="coming-title">No reviews yet</h2>
+          <p className="coming-note">
+            When renters rate a trip on the Ardena app, their stars and comments
+            show up here, for your business and for each car.
+          </p>
+        </div>
       ) : (
         <>
           <div className="stat-grid finance-stats">

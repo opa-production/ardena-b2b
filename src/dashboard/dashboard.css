@@ -29,13 +29,47 @@
   --ink-inv-hover: #ffffff;
   --on-ink: #0d1117;
   --pop-shadow: 0 16px 42px rgba(0, 0, 0, 0.55);
+  /* Row fills: the row lights up on hover and when current. */
+  --nav-hover: rgba(255, 255, 255, 0.055);
+  --nav-active: rgba(255, 255, 255, 0.1);
+  --nav-active-hover: rgba(255, 255, 255, 0.13);
+  --nav-badge: #fbbf24;
   color: var(--ink-soft);
+}
+
+/* Light theme: the chrome is a white panel too, a shade apart from the grey
+   page by tone and a single hairline, with the same ink as the content. The
+   tokens above are simply re-pointed; no rule below needs to know. */
+[data-theme="light"] .sidebar,
+[data-theme="light"] .dash-topbar {
+  --sidebar: #ffffff;
+  --sidebar-raised: #ffffff;
+  --ink: #0a0d12;
+  --ink-soft: #545c68;
+  --ink-mute: #8b929d;
+  --line: #e3e6eb;
+  --ink-inv: #0a0d12;
+  --ink-inv-hover: #000000;
+  --on-ink: #ffffff;
+  --pop-shadow: 0 14px 40px rgba(163, 174, 192, 0.5);
+  --nav-hover: rgba(10, 13, 18, 0.045);
+  --nav-active: rgba(10, 13, 18, 0.07);
+  --nav-active-hover: rgba(10, 13, 18, 0.09);
+  --nav-badge: #b45309;
+}
+
+[data-theme="light"] .sidebar {
+  box-shadow: 1px 0 0 var(--line);
+}
+
+[data-theme="light"] .dash-topbar {
+  box-shadow: 0 1px 0 var(--line);
 }
 
 /* the hardcoded amber counters need the brighter step on near-black */
 .sidebar .nav-badge,
 .dash-topbar .topbar-badge {
-  color: #fbbf24;
+  color: var(--nav-badge);
 }
 
 .sidebar {
@@ -108,7 +142,7 @@
    drawn around. */
 .nav-item:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--nav-hover);
 }
 
 /* The current page: a brighter fill, bolder text, and the one place the brand
@@ -116,12 +150,12 @@
 .nav-item.active {
   color: var(--ink);
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--nav-active);
   box-shadow: inset 2px 0 0 var(--brand);
 }
 
 .nav-item.active:hover {
-  background: rgba(255, 255, 255, 0.13);
+  background: var(--nav-active-hover);
 }
 
 .nav-item.active svg {
@@ -263,12 +297,12 @@
 }
 
 .tenant-chip:hover {
-  background: rgba(255, 255, 255, 0.055);
+  background: var(--nav-hover);
 }
 
 .tenant-chip.open,
 .tenant-chip:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--nav-active);
 }
 
 .tenant-caret {
@@ -349,12 +383,12 @@
 .tenant-menu button:hover,
 .tenant-menu a:hover {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.07);
+  background: var(--nav-hover);
 }
 
 .tenant-menu button:active,
 .tenant-menu a:active {
-  background: rgba(255, 255, 255, 0.12);
+  background: var(--nav-active);
 }
 
 /* ---- Mobile top bar (hidden on desktop) ---- */
@@ -533,7 +567,7 @@
 
   .nav-toggle:active {
     color: var(--ink);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--nav-active);
   }
 
   /* drawer: off-canvas, slides in from the left */

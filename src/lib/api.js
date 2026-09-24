@@ -411,6 +411,15 @@ export function setBookingStatus(ref, bookingStatus) {
   });
 }
 
+// Checks the renter's pickup/return code without recording the handover.
+// A wrong code counts toward the same five-try lockout as the real thing.
+export function verifyHandoverCode(ref, phase, code) {
+  return request(`/bookings/${encodeURIComponent(ref)}/handover/${phase}/verify-code`, {
+    method: "POST",
+    body: { code },
+  });
+}
+
 // { odometer, fuel, notes? }
 export function recordHandoverOut(ref, payload) {
   return request(`/bookings/${encodeURIComponent(ref)}/handover/out`, {
@@ -1119,6 +1128,20 @@ export function fetchRenterThread(conversationId, params = {}) {
 // sent them to the activity log.
 export function sendRenterMessage(conversationId, message) {
   return request(`/marketplace/conversations/${conversationId}/messages`, {
+    method: "POST",
+    body: { message },
+  });
+}
+
+// Renters with a confirmed (awaiting pickup) or active (awaiting drop-off) trip
+// on this workspace's cars: the ones the business may message first.
+export function fetchContactableRenters() {
+  return request("/marketplace/renters");
+}
+
+// Opens the thread if there isn't one. → { conversation_id, message }
+export function messageRenterFirst(clientId, message) {
+  return request(`/marketplace/renters/${clientId}/messages`, {
     method: "POST",
     body: { message },
   });

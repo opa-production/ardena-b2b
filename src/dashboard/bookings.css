@@ -677,3 +677,48 @@
     animation: none;
   }
 }
+
+/* Code + Verify on one row: check the renter before filling the rest. */
+.ho-code-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.ho-code-row input {
+  flex: 0 1 200px;
+  min-width: 0;
+}
+
+.btn.ho-verify-btn {
+  padding: 0 18px;
+  color: #231a4f;
+  background: rgb(183, 172, 232);
+  box-shadow: none;
+}
+
+.btn.ho-verify-btn:hover:not(:disabled) {
+  background: rgb(166, 153, 224);
+}
+
+.btn.ho-verify-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn.ho-verify-btn.is-ok,
+.btn.ho-verify-btn.is-ok:disabled {
+  opacity: 1;
+  color: #fff;
+  background: var(--ok);
+}
+
+.ho-code-status.is-ok {
+  color: var(--ok);
+  font-weight: 500;
+}
+
+.ho-code-status.is-error {
+  color: var(--danger);
+}

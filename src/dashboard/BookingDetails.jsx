@@ -24,6 +24,7 @@ import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import { getSeed } from "./recordSeeds";
 import LoadingOverlay from "../components/LoadingOverlay";
+import HandoverCodeField from "./HandoverCodeField";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
 import { compressImage } from "./handoverPhotosStore";
@@ -775,23 +776,14 @@ export default function BookingDetails() {
               <form className="ho-form" onSubmit={handleCheckOut}>
                 <p className="ho-step">Check-out · record before handing over keys</p>
                 {needsCode && (
-                  <div className="field ho-code-field">
-                    <label htmlFor="ho-code">Renter&apos;s pickup code</label>
-                    <input
-                      id="ho-code"
-                      name="pickup_code"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={6}
-                      autoComplete="off"
-                      placeholder="6 digits"
-                      required
-                    />
-                    <p className="field-note">
-                      Ask the renter to read the code from their Ardena app. Five wrong
-                      entries locks this booking for 15 minutes.
-                    </p>
-                  </div>
+                  <HandoverCodeField
+                    id="ho-code"
+                    name="pickup_code"
+                    label="Renter's pickup code"
+                    bookingRef={b.ref}
+                    phase="pickup"
+                    note="Ask the renter to read the code from their Ardena app. Five wrong entries locks this booking for 15 minutes."
+                  />
                 )}
                 <div className="form-grid">
                   <div className="field">
@@ -842,22 +834,14 @@ export default function BookingDetails() {
                   {fmtAmount(policy.lateFeePerHour)} per started hour
                 </p>
                 {needsCode && (
-                  <div className="field ho-code-field">
-                    <label htmlFor="hi-code">Renter&apos;s return code</label>
-                    <input
-                      id="hi-code"
-                      name="return_code"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={6}
-                      autoComplete="off"
-                      placeholder="6 digits"
-                      required
-                    />
-                    <p className="field-note">
-                      The renter&apos;s app shows this once the trip is under way.
-                    </p>
-                  </div>
+                  <HandoverCodeField
+                    id="hi-code"
+                    name="return_code"
+                    label="Renter's return code"
+                    bookingRef={b.ref}
+                    phase="return"
+                    note="The renter's app shows this once the trip is under way."
+                  />
                 )}
                 <div className="form-grid">
                   <div className="field">

@@ -93,3 +93,36 @@
 .details-side .inbox-preview {
   padding-right: 26px;
 }
+
+/* Renters with a live trip: when they collect or return, at a glance. */
+.stage-chip {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stage-chip.stage-pickup {
+  color: #4b3ca8;
+  background: rgba(183, 172, 232, 0.35);
+}
+
+.stage-chip.stage-dropoff {
+  color: #0f4d3f;
+  background: #bfe8dc;
+}
+
+[data-theme="dark"] .stage-chip.stage-pickup {
+  color: rgb(183, 172, 232);
+  background: rgba(183, 172, 232, 0.16);
+}
+
+[data-theme="dark"] .stage-chip.stage-dropoff {
+  color: #8fe9cf;
+  background: rgba(143, 233, 207, 0.14);
+}
+
+.inbox-none {
+  padding: 4px 14px 10px;
+}

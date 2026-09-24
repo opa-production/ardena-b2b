@@ -11,7 +11,22 @@ const DEFAULTS = {
   verify: false,
   team: false,
   dismissed: false,
+  // From the server: null until the workspace first sees the checklist.
+  // `undefined` means not loaded yet, so nothing shows before we know.
+  seenAt: undefined,
 };
+
+/* The checklist shows in the session where it is first seen, and never after.
+   Held in memory, so it lasts while this tab is open and ends with it. */
+let shownThisSession = false;
+
+export function isShownThisSession() {
+  return shownThisSession;
+}
+
+export function markShownThisSession() {
+  shownThisSession = true;
+}
 
 function load() {
   try {
@@ -52,6 +67,7 @@ export function getOnboarding() {
 // never leaks into another's session).
 export function resetOnboarding() {
   state = { ...DEFAULTS };
+  shownThisSession = false;
   try {
     localStorage.removeItem(KEY);
   } catch {
@@ -70,6 +86,7 @@ export function hydrateOnboarding(server) {
     if (typeof server[key] === "boolean") next[key] = server[key];
   }
   if (typeof server.staff === "boolean") next.team = server.staff;
+  next.seenAt = server.seen_at ?? null;
   state = next;
   persist();
   emit();

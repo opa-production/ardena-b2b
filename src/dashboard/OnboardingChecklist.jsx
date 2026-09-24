@@ -1,10 +1,13 @@
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import {
   subscribe,
   getOnboarding,
   dismissOnboarding,
+  isShownThisSession,
+  markShownThisSession,
 } from "./onboardingStore";
+import { markOnboardingSeen } from "../lib/api";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribeBookings, getBookings } from "./bookingsStore";
 import { subscribe as subscribeBusiness, getBusiness } from "./businessStore";
@@ -48,7 +51,20 @@ export default function OnboardingChecklist() {
   const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
   const bookings = useSyncExternalStore(subscribeBookings, getBookings);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
-  if (state.dismissed) return null;
+  /* New workspaces only, and only once: it shows in the first session that
+     sees it (the server records when) and stays out of every session after.
+     Closing it hides it straight away. */
+  const firstSighting = state.seenAt === null;
+  const visible = !state.dismissed && (firstSighting || isShownThisSession());
+
+  useEffect(() => {
+    if (firstSighting && !state.dismissed) {
+      markShownThisSession();
+      markOnboardingSeen().catch(() => {});
+    }
+  }, [firstSighting, state.dismissed]);
+
+  if (!visible) return null;
 
   // fleet/booking steps track real data so the checklist stays truthful on a
   // brand-new workspace; the rest are flag-based

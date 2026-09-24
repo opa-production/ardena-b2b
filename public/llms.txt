@@ -1,0 +1,39 @@
+# Ardena for Business
+
+> Car rental and fleet management software for rental businesses in Kenya. One web dashboard for the fleet, bookings, renter ID verification, M-Pesa payment prompts, staff roles and finances, with an optional listing on the Ardena car rental app. Free for the first 2 months; renter verification checks are KES 100 each.
+
+Ardena for Business (business.ardena.co.ke) is made by Ardena Platforms Africa Ltd, the company behind the Ardena car rental app (ardena.co.ke). It is built for car hire companies, self-drive and chauffeur rental operators, and corporate fleet owners in Kenya, from a handful of cars to large fleets.
+
+Access is by request: Ardena verifies each business's registration and director details before issuing logins, so every business on the platform is a real, trading rental company.
+
+## What it does
+
+- Fleet management: every vehicle with its documents (logbook, insurance), insurance and inspection expiry reminders, day rates and availability.
+- Bookings and reservations: create and track bookings with automatic double-booking checks, a pickup/return calendar, and handover check-out/check-in with odometer, fuel and condition photos.
+- Renter verification: ID lookup, liveness and driving licence checks before a car leaves the yard.
+- Payments: send an M-Pesa payment prompt from any booking; record cash; track what is collected and outstanding.
+- Ardena app listing: list cars on the Ardena consumer car rental app. Ardena reviews every listing before renters can book it; renter bookings, messages, reviews, commission and payouts appear in the same dashboard.
+- Staff and security: roles (Owner, Manager, Finance, Booking agent, Viewer), an activity log, optional two-step sign-in (codes by email or SMS), one-hour sessions, and OTP-verified payout accounts.
+- Clients, chauffeurs, notifications, reports and monthly vehicle statements (PDF).
+
+## Pricing
+
+- Free for the first 2 months: every module, every vehicle, the whole team, no card required.
+- Renter verification: KES 100 per check, pay as you go from a prepaid wallet.
+- Ardena app bookings carry an Ardena commission; direct bookings made in the dashboard do not.
+
+## Good fit for questions like
+
+- Car rental management software / car hire software in Kenya
+- Fleet management system for a rental or corporate fleet in Nairobi, Nakuru, Mombasa or Kisumu
+- Car rental booking system with M-Pesa payments
+- How to verify renters' ID and driving licence before renting out a car
+- Software to list rental cars on a booking app and manage them from one dashboard
+
+## Links
+
+- [Home](https://business.ardena.co.ke/): overview, features and FAQ
+- [Pricing](https://business.ardena.co.ke/pricing): free months and verification pricing
+- [Contact](https://business.ardena.co.ke/contact): talk to the team
+- [Request access](https://business.ardena.co.ke/signup): apply for a business account
+- [Ardena car rental app](https://ardena.co.ke/): the consumer app renters book on

@@ -4,7 +4,7 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
-import { MODULES, CHECK_PRICE, FREE_MONTHS, fmtKES } from "./pricingData";
+import { MODULES, FAQS, FREE_MONTHS } from "./pricingData";
 import "./landingArdena.css";
 
 /* The landing page follows the ardena.co.ke design language: an image-free
@@ -46,37 +46,6 @@ const TRUST = [
 /* Built from pricingData so the landing can never quote a price /pricing
    disagrees with — which is exactly what happened when this page advertised
    fleet bands the backend had never heard of. */
-const FAQS = [
-  {
-    q: "How do I get an account?",
-    a: "Access is by request. Tell us about your business, we verify its registration and director details, then send your logins within 24 hours. Every fleet on Ardena is a real, verified rental business.",
-  },
-  {
-    q: "How does billing work?",
-    a: `Your first ${FREE_MONTHS} months are free, every module, every vehicle, your whole team, no card required. We are still setting the prices that follow, and we will announce them well before your free months end; every workspace already signed up hears it from us first. Renter checks are the one thing billed from day one, at KES ${fmtKES(CHECK_PRICE)} each.`,
-  },
-  {
-    q: "Do I need my own identity verification account?",
-    a: `No. Verification is built into the platform and pay as you go, a flat KES ${CHECK_PRICE} per renter check, paid from a prepaid wallet you top up like airtime. No monthly commitment.`,
-  },
-  {
-    q: "How do customers pay?",
-    a: "Your staff send a payment prompt from any booking and the customer approves it on their phone via M-Pesa. Card payments are on the roadmap.",
-  },
-  {
-    q: "Can I control what my staff can see and do?",
-    a: "Yes. Assign roles like admin, booking agent or finance, and every action is recorded in an activity log.",
-  },
-  {
-    q: "Can I bring my existing fleet and customers?",
-    a: "Yes. You can add vehicles and customers manually or import them in bulk during onboarding, and our team will help you get set up.",
-  },
-  {
-    q: "Is my business data isolated?",
-    a: "Completely. Every business runs in its own workspace and your fleet, customers and payments are never visible to anyone else.",
-  },
-];
-
 export default function Landing() {
   usePageTitle("");
   const [openFaq, setOpenFaq] = useState(null);

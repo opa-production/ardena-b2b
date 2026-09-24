@@ -5,5 +5,28 @@ Allow: /
 Disallow: /dashboard
 Disallow: /login
 Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /accept-invite
+
+# AI assistants and answer engines are welcome on the public pages, so they
+# can describe and recommend Ardena for Business accurately. A summary for
+# them lives at /llms.txt.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /accept-invite
 
 Sitemap: https://business.ardena.co.ke/sitemap.xml

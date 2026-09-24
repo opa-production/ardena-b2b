@@ -420,6 +420,11 @@ export function fetchOnboarding() {
   return request("/onboarding");
 }
 
+// Records the first time the "Get set up" checklist was shown (idempotent).
+export function markOnboardingSeen() {
+  return request("/onboarding/seen", { method: "POST" });
+}
+
 /* ---- Identity verification (KYC) ---- */
 
 // { type: "national_id" | "drivers_licence" | "kra_pin", number, client_id?,

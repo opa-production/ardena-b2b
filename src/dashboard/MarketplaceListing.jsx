@@ -17,6 +17,7 @@ import {
   getBusiness,
 } from "./businessStore";
 import Dropdown from "../components/Dropdown";
+import DescriptionAssist from "./DescriptionAssist";
 import "./fleet.css";
 import "./marketplace.css";
 import PageLoader from "../components/PageLoader";
@@ -575,7 +576,27 @@ export default function MarketplaceListing() {
 
               <div className="form-row">
                 <div className="field field-full">
-                  <label htmlFor="mkt-desc">Description</label>
+                  <div className="ai-assist-head">
+                    <label htmlFor="mkt-desc">Description</label>
+                    {/* Unsaved form values go along so the draft matches
+                        what's on screen, not what was last saved. */}
+                    <DescriptionAssist
+                      plate={decodedPlate}
+                      context={{
+                        seats: seats !== "" ? Number(seats) : undefined,
+                        fuel_type: fuelType || undefined,
+                        transmission: transmission || undefined,
+                        color: color || undefined,
+                        features: featureList.length ? featureList.slice(0, MAX_FEATURES) : undefined,
+                        location: locationName || undefined,
+                        drive_setting: driveSetting,
+                      }}
+                      onAccept={(text) => {
+                        setDescription(text);
+                        toast("Description added. Save the listing to keep it.");
+                      }}
+                    />
+                  </div>
                   <textarea
                     id="mkt-desc"
                     rows={4}

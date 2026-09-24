@@ -984,6 +984,17 @@ export function uploadMarketplaceCover(plate, file) {
   });
 }
 
+// Ask the AI for a draft description. `payload.hint` (a few words from the
+// user) is required; any other form values (seats, fuel_type, features…)
+// sharpen the draft. Nothing is saved — returns { description } to accept or
+// discard. 503 means AI isn't configured, 502 means try again.
+export function generateListingDescription(plate, payload) {
+  return request(`/fleet/${encodeURIComponent(plate)}/marketplace/generate-description`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
 // Upload a walkaround video (MP4/MOV, ≤100 MB), replacing any existing one. Returns { url }.
 export function uploadMarketplaceVideo(plate, file) {
   const form = new FormData();

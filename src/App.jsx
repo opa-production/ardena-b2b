@@ -10,6 +10,7 @@ import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
+import { MARKETPLACE_LISTINGS } from "./lib/features";
 
 /* Dashboard screens are code-split — see dashboard/pageLoaders.js for why, and
    for the idle preload that keeps the split from costing a pause on the first
@@ -97,7 +98,11 @@ export default function App() {
         <Route path="fleet/:plate" element={<VehicleDetails />} />
         <Route
           path="fleet/:plate/marketplace"
-          element={<RequireAppLink><RequireRole capability="manageListing"><MarketplaceListing /></RequireRole></RequireAppLink>}
+          element={
+            MARKETPLACE_LISTINGS
+              ? <RequireRole capability="manageListing"><MarketplaceListing /></RequireRole>
+              : <NotFound />
+          }
         />
         <Route path="bookings" element={<Bookings />} />
         <Route

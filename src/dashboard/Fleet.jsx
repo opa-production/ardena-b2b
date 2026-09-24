@@ -2,11 +2,8 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { subscribe, getVehicles, removeVehicle, isFleetLoaded } from "./fleetStore";
 import { toast } from "./toastStore";
-import { B2C_MARKETPLACE } from "../lib/features";
-import {
-  subscribe as subscribeBusiness,
-  getBusiness,
-} from "./businessStore";
+import { MARKETPLACE_LISTINGS } from "../lib/features";
+import MarketplaceToggle from "./MarketplaceToggle";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
 
@@ -23,9 +20,6 @@ const fmtRate = (r) => r.toLocaleString("en-KE");
 export default function Fleet() {
   const vehicles = useSyncExternalStore(subscribe, getVehicles);
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
-  // No Ardena app account linked means no marketplace, so the per-vehicle
-  // listing shortcut would lead to a page that refuses to do anything.
-  const { appLinked } = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [confirming, setConfirming] = useState(null);
@@ -149,6 +143,7 @@ export default function Fleet() {
               <th>Plate</th>
               <th className="num rate-col">Day rate</th>
               <th>Status</th>
+              {MARKETPLACE_LISTINGS && <th className="app-col">Ardena app</th>}
               <th className="actions-col">Actions</th>
             </tr>
           </thead>
@@ -167,6 +162,11 @@ export default function Fleet() {
                   <td>
                     <span className={`chip ${CHIP_CLASS[v.status]}`}>{v.status}</span>
                   </td>
+                  {MARKETPLACE_LISTINGS && (
+                    <td className="app-col">
+                      <MarketplaceToggle vehicle={v} />
+                    </td>
+                  )}
                   <td className="actions-cell">
                     {confirming === v.plate ? (
                       <span className="confirm-inline">
@@ -208,7 +208,7 @@ export default function Fleet() {
                             whole message — a "Soon" badge beside it said the
                             same thing twice and pushed the actions cell wider
                             than the column it sits in. */}
-                        {B2C_MARKETPLACE && appLinked ? (
+                        {MARKETPLACE_LISTINGS ? (
                           <Link
                             className="icon-btn"
                             to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}

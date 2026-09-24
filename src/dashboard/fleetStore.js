@@ -6,8 +6,11 @@ import {
   fetchVehicles,
   createVehicle,
   deleteVehicle as apiDeleteVehicle,
+  publishMarketplaceListing,
+  hideMarketplaceListing,
 } from "../lib/api";
 import { markStep } from "./onboardingStore";
+import { setBusiness } from "./businessStore";
 
 let vehicles = [];
 let loaded = false; // first successful GET /vehicles has landed
@@ -85,6 +88,42 @@ export async function removeVehicle(plate) {
   await apiDeleteVehicle(plate);
   vehicles = vehicles.filter((v) => v.plate !== plate);
   emit();
+}
+
+/* ---- Ardena app listing ---- */
+
+// The fleet row's `marketplace` summary, from a full listing response.
+export function summarizeListing(listing) {
+  if (!listing) return null;
+  return {
+    status: listing.status,
+    review: listing.review,
+    live: Boolean(listing.live_on_marketplace),
+    ready_to_publish: Boolean(listing.ready_to_publish),
+    missing_fields: listing.missing_fields || [],
+  };
+}
+
+// Keep a vehicle's row in step after the listing editor saves or publishes.
+export function setVehicleListing(plate, listing) {
+  const summary = summarizeListing(listing);
+  vehicles = vehicles.map((v) => (v.plate === plate ? { ...v, marketplace: summary } : v));
+  if (listing?.status === "visible") {
+    // The first publish is what puts a workspace on the app; the server flips
+    // app_linked at the same moment, so mirror it rather than refetching.
+    setBusiness({ appLinked: true });
+  }
+  emit();
+}
+
+// The "On Ardena app" toggle. Callers only turn it on once the row says
+// ready_to_publish — otherwise they send the user to the editor instead.
+export async function setOnApp(plate, on) {
+  const listing = on
+    ? await publishMarketplaceListing(plate)
+    : await hideMarketplaceListing(plate);
+  setVehicleListing(plate, listing);
+  return listing;
 }
 
 /* ---- date helpers ---- */

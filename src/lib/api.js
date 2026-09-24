@@ -951,8 +951,9 @@ export function saveMarketplaceListing(plate, payload) {
   });
 }
 
-// Publish the vehicle to the Ardena marketplace.
-// Requires commission_acknowledged=true, description, and cover_image to be set.
+// Publish the vehicle to the Ardena marketplace. Refused (400, naming what's
+// missing) until the listing meets the host-app bar — the response's
+// `missing_fields` / `ready_to_publish` say in advance whether it will pass.
 export function publishMarketplaceListing(plate) {
   return request(`/fleet/${encodeURIComponent(plate)}/marketplace/publish`, {
     method: "POST",
@@ -983,7 +984,18 @@ export function uploadMarketplaceCover(plate, file) {
   });
 }
 
-// Upload one or more gallery images. Returns { urls } — the full merged list.
+// Upload a walkaround video (MP4/MOV, ≤100 MB), replacing any existing one. Returns { url }.
+export function uploadMarketplaceVideo(plate, file) {
+  const form = new FormData();
+  form.append("file", file);
+  return request(`/fleet/${encodeURIComponent(plate)}/marketplace/upload-video`, {
+    method: "POST",
+    body: form,
+  });
+}
+
+// Upload gallery images (≤12 per listing in total). Returns { urls } — the full
+// merged list. Starts a draft listing if the vehicle doesn't have one yet.
 export function uploadMarketplaceImages(plate, files) {
   const form = new FormData();
   for (const f of files) form.append("files", f);

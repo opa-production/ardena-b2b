@@ -7,10 +7,11 @@ import {
   hideMarketplaceListing,
   uploadMarketplaceCover,
   uploadMarketplaceImages,
+  uploadMarketplaceVideo,
   updateVehicle,
 } from "../lib/api";
 import { toast } from "./toastStore";
-import { getVehicle } from "./fleetStore";
+import { getVehicle, setVehicleListing } from "./fleetStore";
 import {
   subscribe as subscribeBusiness,
   getBusiness,
@@ -24,11 +25,37 @@ const _cache = new Map();
 
 const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric"];
 const TRANSMISSIONS = ["Automatic", "Manual"];
+// Values are the consumer app's DriveSettingEnum. This used to send "both",
+// which the app doesn't know and silently treated as self-drive only.
 const DRIVE_SETTINGS = [
   { value: "self_only", label: "Self-drive only" },
   { value: "chauffeur_only", label: "Chauffeur-driven only" },
-  { value: "both", label: "Self-drive & chauffeur" },
+  { value: "self_and_chauffeur", label: "Self-drive & chauffeur" },
 ];
+
+// Same caps as the host app's car upload.
+const MAX_PHOTOS = 12;
+const MAX_FEATURES = 12;
+
+// Labels for the server's `missing_fields` keys (PUBLISH_REQUIREMENTS in
+// app/b2b/marketplace_listings.py) — what a host-app car must have too.
+const REQUIREMENT_LABELS = {
+  description: "Description",
+  year: "Model year",
+  photos: "At least one photo",
+  seats: "Seats",
+  fuel_type: "Fuel type",
+  transmission: "Transmission",
+  color: "Colour",
+  mileage: "Mileage",
+  weekly_rate: "Weekly rate",
+  monthly_rate: "Monthly rate",
+  min_rental_days: "Minimum rental days",
+  min_age_requirement: "Minimum driver age",
+  rules: "Rental rules",
+  location: "Pickup location",
+  deposit_amount: "Deposit amount",
+};
 
 const CANCELLATION_TIERS = [
   { value: "flexible", label: "Flexible" },
@@ -92,6 +119,7 @@ export default function MarketplaceListing() {
   // file input refs
   const coverInputRef = useRef(null);
   const galleryInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   // form state
   const [description, setDescription] = useState("");
@@ -142,7 +170,7 @@ export default function MarketplaceListing() {
     setLocationName(data.location_name || "");
     setCoverImage(data.cover_image || "");
     setCarImages(data.car_images || []);
-    setDriveSetting(data.drive_setting || "self_only");
+    setDriveSetting(data.drive_setting === "both" ? "self_and_chauffeur" : data.drive_setting || "self_only");
     setCancellationTier(data.cancellation_tier || "strict");
     setCarVideo(data.car_video || "");
     setDepositRequired(data.deposit_required || false);
@@ -183,9 +211,7 @@ export default function MarketplaceListing() {
       transmission: transmission || null,
       color: color || null,
       mileage: mileage !== "" ? Number(mileage) : null,
-      features: features
-        ? features.split(",").map((f) => f.trim()).filter(Boolean)
-        : null,
+      features: featureList.length ? featureList : null,
       daily_rate: dailyRate !== "" ? Number(dailyRate) : null,
       weekly_rate: weeklyRate !== "" ? Number(weeklyRate) : null,
       monthly_rate: monthlyRate !== "" ? Number(monthlyRate) : null,
@@ -195,12 +221,13 @@ export default function MarketplaceListing() {
       rules: rules || null,
       location_name: locationName || null,
       cover_image: coverImage || null,
-      car_images: carImages.length > 0 ? carImages : null,
+      // [] clears the gallery; the server used to ignore it and keep the photos.
+      car_images: carImages,
       drive_setting: driveSetting,
       cancellation_tier: cancellationTier,
       car_video: carVideo.trim() || null,
       deposit_required: depositRequired,
-      deposit_amount: depositAmount !== "" ? Number(depositAmount) : null,
+      deposit_amount: depositRequired && depositAmount !== "" ? Number(depositAmount) : null,
       commission_acknowledged: commissionAcknowledged,
     };
   }
@@ -208,6 +235,17 @@ export default function MarketplaceListing() {
   function _updateCache(data) {
     _cache.set(decodedPlate, data);
     setListing(data);
+    setVehicleListing(decodedPlate, data); // keeps the Fleet toggle in step
+  }
+
+  // Uploads start a draft on the server if there wasn't one, and change what's
+  // missing — refetch so the checklist and the Fleet toggle reflect it.
+  async function _refreshAfterUpload() {
+    try {
+      _updateCache(await fetchMarketplaceListing(decodedPlate));
+    } catch {
+      /* the upload itself succeeded; the checklist catches up on next save */
+    }
   }
 
   async function handleCoverUpload(e) {
@@ -218,7 +256,7 @@ export default function MarketplaceListing() {
     try {
       const res = await uploadMarketplaceCover(decodedPlate, file);
       setCoverImage(res.url);
-      _cache.set(decodedPlate, { ..._cache.get(decodedPlate), cover_image: res.url });
+      await _refreshAfterUpload();
       toast("Cover image uploaded.");
     } catch (err) {
       setError(err.message);
@@ -231,13 +269,42 @@ export default function MarketplaceListing() {
   async function handleGalleryUpload(e) {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
+    const room = MAX_PHOTOS - carImages.length;
+    if (files.length > room) {
+      setError(`A listing can have up to ${MAX_PHOTOS} photos — you can add ${room} more.`);
+      e.target.value = "";
+      return;
+    }
     setUploading(true);
     setError("");
     try {
       const res = await uploadMarketplaceImages(decodedPlate, files);
       setCarImages(res.urls);
-      _cache.set(decodedPlate, { ..._cache.get(decodedPlate), car_images: res.urls });
+      await _refreshAfterUpload();
       toast(`${files.length} image${files.length > 1 ? "s" : ""} uploaded.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleVideoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) {
+      setError("Video must be 100 MB or smaller.");
+      e.target.value = "";
+      return;
+    }
+    setUploading(true);
+    setError("");
+    try {
+      const res = await uploadMarketplaceVideo(decodedPlate, file);
+      setCarVideo(res.url);
+      await _refreshAfterUpload();
+      toast("Video uploaded.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -253,6 +320,10 @@ export default function MarketplaceListing() {
 
   async function handleSave(e) {
     e.preventDefault();
+    if (featureList.length > MAX_FEATURES) {
+      setError(`List at most ${MAX_FEATURES} features.`);
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -302,8 +373,20 @@ export default function MarketplaceListing() {
       // Save current field values then publish in one sequence.
       // handleCommissionAccepted already saved before calling here, but we
       // save again to pick up any unsaved edits when publishing directly.
+      if (featureList.length > MAX_FEATURES) {
+        setError(`List at most ${MAX_FEATURES} features.`);
+        setSaving(false);
+        return;
+      }
       const saved = await saveMarketplaceListing(decodedPlate, buildPayload());
       _updateCache(saved);
+      // The checklist above the form already names what's missing; publishing
+      // would only come back with the same list as a 400.
+      if (saved?.missing_fields?.length) {
+        setError("Complete the items listed above before publishing.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        return;
+      }
       const updated = await publishMarketplaceListing(decodedPlate);
       _updateCache(updated);
       // Deliberately not "now visible" — an admin still has to approve it.
@@ -333,6 +416,10 @@ export default function MarketplaceListing() {
     }
   }
 
+  const featureList = features
+    ? features.split(",").map((f) => f.trim()).filter(Boolean)
+    : [];
+  const missing = listing?.missing_fields || [];
   const status = listing?.status || "draft";
   // Vehicles added before the fleet carried a model year can't be listed until
   // one is set, and there is no vehicle edit screen to set it on.
@@ -416,6 +503,20 @@ export default function MarketplaceListing() {
       </header>
 
       {error && <p className="form-error">{error}</p>}
+
+      {/* Same bar as a car uploaded from the host app. Listed up front so a
+          business fills the form once instead of meeting each gap as a
+          separate publish error. Keys come from the server's missing_fields. */}
+      {listing && missing.length > 0 && status !== "visible" && (
+        <div className="mkt-banner mkt-banner-review mkt-missing">
+          <strong>Before this can go on the Ardena app, add:</strong>
+          <ul>
+            {missing.map((k) => (
+              <li key={k}>{REQUIREMENT_LABELS[k] || k}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Publishing submits the vehicle; an Ardena admin still has to approve it,
           exactly as an individual host's car is approved. Without saying so, a
@@ -566,7 +667,9 @@ export default function MarketplaceListing() {
 
               <div className="form-row">
                 <div className="field field-full">
-                  <label htmlFor="mkt-features">Features <span className="hint-text">(comma-separated)</span></label>
+                  <label htmlFor="mkt-features">
+                    Features <span className="hint-text">(comma-separated, up to {MAX_FEATURES})</span>
+                  </label>
                   <input
                     id="mkt-features"
                     type="text"
@@ -599,7 +702,9 @@ export default function MarketplaceListing() {
 
               {/* Cover image */}
               <div className="field">
-                <label>Cover image</label>
+                <label>
+                  Cover image <span className="hint-text">optional, defaults to the first gallery photo</span>
+                </label>
                 {coverImage && (
                   <img
                     src={coverImage}
@@ -627,7 +732,12 @@ export default function MarketplaceListing() {
 
               {/* Gallery images */}
               <div className="field" style={{ marginTop: "1rem" }}>
-                <label>Gallery images</label>
+                <label>
+                  Gallery images{" "}
+                  <span className="mkt-count">
+                    {carImages.length}/{MAX_PHOTOS}
+                  </span>
+                </label>
                 {carImages.length > 0 && (
                   <div className="mkt-gallery-grid">
                     {carImages.map((url) => (
@@ -660,7 +770,7 @@ export default function MarketplaceListing() {
                 <button
                   type="button"
                   className="btn btn-ghost"
-                  disabled={uploading}
+                  disabled={uploading || carImages.length >= MAX_PHOTOS}
                   onClick={() => galleryInputRef.current?.click()}
                   style={{ marginTop: carImages.length > 0 ? "0.5rem" : 0 }}
                 >
@@ -668,20 +778,47 @@ export default function MarketplaceListing() {
                 </button>
               </div>
 
-              {/* A walkaround clip converts better than photos alone. Hosted
-                  elsewhere and linked, rather than uploaded — video storage
-                  isn't part of the listing upload endpoints. */}
-              <div className="field">
-                <label htmlFor="mkt-video">
-                  Video link <span className="hint-text">optional</span>
+              {/* A walkaround clip converts better than photos alone. Uploaded
+                  like a host-app listing's video, not linked from elsewhere. */}
+              <div className="field" style={{ marginTop: "1rem" }}>
+                <label>
+                  Video <span className="hint-text">optional, MP4 or MOV up to 100 MB</span>
                 </label>
+                {carVideo && (
+                  <video
+                    src={carVideo}
+                    className="mkt-cover-preview"
+                    controls
+                    preload="metadata"
+                  />
+                )}
                 <input
-                  id="mkt-video"
-                  type="url"
-                  value={carVideo}
-                  onChange={(e) => setCarVideo(e.target.value)}
-                  placeholder="https://…"
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/mp4,video/quicktime"
+                  style={{ display: "none" }}
+                  onChange={handleVideoUpload}
                 />
+                <div className="mkt-actions">
+                  <button
+                    type="button"
+                    className="btn btn-ghost"
+                    disabled={uploading}
+                    onClick={() => videoInputRef.current?.click()}
+                  >
+                    {carVideo ? "Replace video" : "Upload video"}
+                  </button>
+                  {carVideo && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost danger-btn"
+                      disabled={uploading}
+                      onClick={() => setCarVideo("")}
+                    >
+                      Remove video
+                    </button>
+                  )}
+                </div>
               </div>
             </section>
 

@@ -217,3 +217,41 @@
 .mkt-year-field input {
   max-width: 160px;
 }
+
+/* ── "On Ardena app" toggle (Fleet rows, vehicle page) ─────────────── */
+
+.mkt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.mkt-toggle .switch input:disabled {
+  cursor: progress;
+}
+
+.mkt-toggle-label {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* What still stands between the listing and the app, above the form. */
+.mkt-missing ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+.mkt-missing li {
+  margin: 2px 0;
+}
+
+.field-invalid input,
+.field-invalid textarea {
+  box-shadow: var(--edge-in), 0 0 0 1px var(--warn);
+}
+
+.mkt-count {
+  font-weight: 400;
+  color: var(--ink-mute);
+}

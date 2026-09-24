@@ -38,6 +38,18 @@ export const HOST_ACCOUNT_LINKING = false;
 export const B2C_MARKETPLACE = false;
 
 /**
+ * Listing fleet vehicles on the Ardena app — the editor, and the per-vehicle
+ * "On Ardena app" toggle in Fleet and on the vehicle page.
+ *
+ * Split out of B2C_MARKETPLACE so a workspace can put cars on the app before
+ * the rest of the B2C surface (renter inbox, reviews, claims, app earnings)
+ * ships. Deliberately NOT gated on `appLinked`: that only turns true when a
+ * workspace's first car is published, so gating the editor on it meant a new
+ * workspace could never reach the page that publishes its first car.
+ */
+export const MARKETPLACE_LISTINGS = true;
+
+/**
  * Live vehicle tracking.
  *
  * The screens are built and read from `trackingStore`, but no GPS hardware is

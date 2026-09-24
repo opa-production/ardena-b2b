@@ -10,15 +10,12 @@ import {
   hydrateFleet,
 } from "./fleetStore";
 import { getBookings } from "./bookingsStore";
-import {
-  subscribe as subscribeBusiness,
-  getBusiness,
-} from "./businessStore";
 import { setVehiclePlate, uploadVehicleDocument } from "../lib/api";
 import { downloadVehicleStatement } from "./pdf";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
-import { B2C_MARKETPLACE } from "../lib/features";
+import { MARKETPLACE_LISTINGS } from "../lib/features";
+import MarketplaceToggle from "./MarketplaceToggle";
 import "./fleet.css";
 import "./hostlink.css";
 
@@ -50,7 +47,6 @@ export default function VehicleDetails() {
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
   const { plate } = useParams();
   const navigate = useNavigate();
-  const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [confirming, setConfirming] = useState(false);
   const [month, setMonth] = useState(MONTHS[1].prefix); // June has the history
   const [newPlate, setNewPlate] = useState("");
@@ -133,7 +129,8 @@ export default function VehicleDetails() {
           </div>
         </div>
         <div className="details-actions">
-          {B2C_MARKETPLACE && business.appLinked && (
+          {MARKETPLACE_LISTINGS && <MarketplaceToggle vehicle={v} showLabel />}
+          {MARKETPLACE_LISTINGS && (
             <Link
               to={`/dashboard/fleet/${encodeURIComponent(v.plate)}/marketplace`}
               className="btn btn-ghost"

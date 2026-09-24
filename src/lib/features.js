@@ -35,7 +35,7 @@ export const HOST_ACCOUNT_LINKING = false;
  *   · Finances  — the app-earnings tab, commission figures and withdrawals
  *   · Support   — the renter-messages cross-links
  */
-export const B2C_MARKETPLACE = false;
+export const B2C_MARKETPLACE = true;
 
 /**
  * Listing fleet vehicles on the Ardena app — the editor, and the per-vehicle

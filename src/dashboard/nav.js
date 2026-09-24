@@ -17,7 +17,24 @@ export const NAV_SECTIONS = [
     items: [
       { to: "/dashboard", key: "overview", name: "Overview", end: true },
       { to: "/dashboard/fleet", key: "fleet", name: "Fleet" },
-      { to: "/dashboard/bookings", key: "bookings", name: "Bookings" },
+      // A group once renters can message the business from the app: the
+      // booking list and the renter conversations are the same job. A
+      // workspace not on the app keeps a plain Bookings link (see
+      // visibleSections — a group left with one child collapses to it).
+      {
+        key: "bookings",
+        name: "Bookings",
+        children: [
+          { to: "/dashboard/bookings", key: "bookings-overview", name: "Overview" },
+          {
+            to: "/dashboard/renter-messages",
+            key: "renter-messages",
+            name: "Direct messages",
+            requires: "renterInbox",
+            appOnly: true,
+          },
+        ],
+      },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
       // `soon` renders a muted tag in the sidebar — the page is a coming-soon
@@ -108,13 +125,21 @@ export function visibleSections(can, appLinked = false) {
           ? { ...item, children: item.children.filter((c) => allowed(c, can, appLinked)) }
           : item
       )
-      .filter((item) => !item.children || item.children.length > 0),
+      .filter((item) => !item.children || item.children.length > 0)
+      // A disclosure row hiding a single link is a click for nothing: show the
+      // link itself, under the group's name and icon.
+      .map((item) =>
+        item.children?.length === 1
+          ? { ...item.children[0], key: item.key, name: item.name, children: undefined }
+          : item
+      ),
   })).filter((section) => section.items.length > 0);
 }
 
 export const SECTION_TITLES = {
   fleet: "Fleet",
   bookings: "Bookings",
+  "renter-messages": "Direct messages",
   clients: "Clients",
   chauffeurs: "Chauffeurs",
   tracking: "Tracking",

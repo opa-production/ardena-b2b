@@ -208,27 +208,30 @@ export default function Payments() {
         </div>
       )}
 
-      {/* ---- KPI row: the whole money picture in four numbers ---- */}
-      {canSeeApp ? (
+      {/* ---- KPI row: the whole money picture in four numbers ----
+          The app tab gets its own four: what renters paid, what Ardena kept,
+          what's the business's, and what can be paid out now. */}
+      {canSeeApp && tab === "app" ? (
         <div className="stat-grid finance-stats">
           <article className="stat-card">
-            <p className="stat-label">Total money in</p>
-            <p className="stat-value">KES {fmtAmount(totalIn)}</p>
-            <p className="stat-note">direct bookings + app, after fees</p>
-          </article>
-          <article className="stat-card is-clickable" onClick={() => switchTab("direct")}>
-            <p className="stat-label">From direct bookings</p>
-            <p className="stat-value">KES {fmtAmount(collected + cashCollected)}</p>
+            <p className="stat-label">App bookings value</p>
+            <p className="stat-value">KES {fmtAmount(earn.total_gross)}</p>
             <p className="stat-note">
-              {stats.paid_count || 0} payments · KES {fmtAmount(outstanding)} still owed
+              {earn.paid_bookings_count || 0} paid booking
+              {(earn.paid_bookings_count || 0) === 1 ? "" : "s"} on the Ardena app
             </p>
           </article>
-          <article className="stat-card is-clickable" onClick={() => switchTab("app")}>
-            <p className="stat-label">From the Ardena app</p>
+          <article className="stat-card">
+            <p className="stat-label">Ardena commission</p>
+            <p className="stat-value">KES {fmtAmount(earn.commission_amount)}</p>
+            <p className="stat-note">
+              {Math.round((Number(earn.commission_rate) || 0) * 1000) / 10}% of app bookings
+            </p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Net app earnings</p>
             <p className="stat-value">KES {fmtAmount(earn.net_earnings)}</p>
-            <p className="stat-note">
-              {earn.paid_bookings_count || 0} app bookings, after commission
-            </p>
+            <p className="stat-note">yours, after commission</p>
           </article>
           <article className="stat-card stat-card-action">
             <p className="stat-label">Available to withdraw</p>
@@ -238,10 +241,7 @@ export default function Payments() {
                 ? `KES ${fmtAmount(earn.pending_withdrawals_total)} pending payout`
                 : "nothing pending"}
             </p>
-            {/* Only on the app tab: offering a payout while someone is
-                reading direct-booking figures is the wrong context, and the
-                form it jumps to isn't on screen there anyway. */}
-            {tab === "app" && Number(earn.withdrawable) > 0 && (
+            {Number(earn.withdrawable) > 0 && (
               <button
                 type="button"
                 className="btn btn-primary stat-action"
@@ -254,6 +254,36 @@ export default function Payments() {
                 Withdraw
               </button>
             )}
+          </article>
+        </div>
+      ) : canSeeApp ? (
+        <div className="stat-grid finance-stats">
+          <article className="stat-card">
+            <p className="stat-label">Net collections</p>
+            <p className="stat-value">KES {fmtAmount(totalIn)}</p>
+            <p className="stat-note">
+              direct bookings + Ardena app, after commission
+              {refunded > 0 ? ` · KES ${fmtAmount(refunded)} refunded` : ""}
+            </p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">From direct bookings</p>
+            <p className="stat-value">KES {fmtAmount(collected + cashCollected)}</p>
+            <p className="stat-note">
+              {stats.paid_count || 0} payments · cash and Ardena
+            </p>
+          </article>
+          <article className="stat-card is-clickable" onClick={() => switchTab("app")}>
+            <p className="stat-label">From the Ardena app</p>
+            <p className="stat-value">KES {fmtAmount(earn.net_earnings)}</p>
+            <p className="stat-note">
+              {earn.paid_bookings_count || 0} app bookings, after commission · details
+            </p>
+          </article>
+          <article className="stat-card">
+            <p className="stat-label">Outstanding</p>
+            <p className="stat-value">KES {fmtAmount(outstanding)}</p>
+            <p className="stat-note">still owed on direct bookings</p>
           </article>
         </div>
       ) : (

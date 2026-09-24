@@ -18,6 +18,14 @@ import {
 } from "./businessStore";
 import Dropdown from "../components/Dropdown";
 import DescriptionAssist from "./DescriptionAssist";
+import {
+  FeaturePicker,
+  RulePicker,
+  splitFeatures,
+  splitRules,
+  joinRules,
+} from "./ListingPickers";
+import { getMapboxToken, hydrateConfig } from "./configStore";
 import "./fleet.css";
 import "./marketplace.css";
 import PageLoader from "../components/PageLoader";
@@ -133,15 +141,22 @@ export default function MarketplaceListing() {
   const [transmission, setTransmission] = useState("");
   const [color, setColor] = useState("");
   const [mileage, setMileage] = useState("");
-  const [features, setFeatures] = useState(""); // comma-separated
+  const [pickedFeatures, setPickedFeatures] = useState([]); // preset labels
+  const [otherFeatures, setOtherFeatures] = useState(""); // comma-separated extras
+  const [otherOpen, setOtherOpen] = useState(false);
   const [dailyRate, setDailyRate] = useState("");
   const [weeklyRate, setWeeklyRate] = useState("");
   const [monthlyRate, setMonthlyRate] = useState("");
   const [minDays, setMinDays] = useState("");
   const [maxDays, setMaxDays] = useState("");
   const [minAge, setMinAge] = useState("");
-  const [rules, setRules] = useState("");
+  const [pickedRules, setPickedRules] = useState([]);
+  const [customRules, setCustomRules] = useState("");
   const [locationName, setLocationName] = useState("");
+  // The pin behind the name. Cleared when the name is retyped, so the server
+  // looks the new address up instead of keeping a pin for the old one.
+  const [coords, setCoords] = useState(null);
+  const [locating, setLocating] = useState(false);
   const [coverImage, setCoverImage] = useState("");
   const [carImages, setCarImages] = useState([]); // array of URLs
   const [driveSetting, setDriveSetting] = useState("self_only");
@@ -161,15 +176,25 @@ export default function MarketplaceListing() {
     setTransmission(data.transmission || "");
     setColor(data.color || "");
     setMileage(data.mileage ?? "");
-    setFeatures((data.features || []).join(", "));
+    const f = splitFeatures(data.features);
+    setPickedFeatures(f.picked);
+    setOtherFeatures(f.other);
+    setOtherOpen(Boolean(f.other));
     setDailyRate(data.daily_rate ?? "");
     setWeeklyRate(data.weekly_rate ?? "");
     setMonthlyRate(data.monthly_rate ?? "");
     setMinDays(data.min_rental_days ?? "");
     setMaxDays(data.max_rental_days ?? "");
     setMinAge(data.min_age_requirement ?? "");
-    setRules(data.rules || "");
+    const rl = splitRules(data.rules);
+    setPickedRules(rl.picked);
+    setCustomRules(rl.custom);
     setLocationName(data.location_name || "");
+    setCoords(
+      data.latitude != null && data.longitude != null
+        ? { lat: data.latitude, lng: data.longitude }
+        : null
+    );
     setCoverImage(data.cover_image || "");
     setCarImages(data.car_images || []);
     setDriveSetting(data.drive_setting === "both" ? "self_and_chauffeur" : data.drive_setting || "self_only");
@@ -222,6 +247,7 @@ export default function MarketplaceListing() {
       min_age_requirement: minAge !== "" ? Number(minAge) : null,
       rules: rules || null,
       location_name: locationName || null,
+      ...(coords ? { latitude: coords.lat, longitude: coords.lng } : {}),
       cover_image: coverImage || null,
       // [] clears the gallery; the server used to ignore it and keep the photos.
       car_images: carImages,
@@ -232,6 +258,66 @@ export default function MarketplaceListing() {
       deposit_amount: depositRequired && depositAmount !== "" ? Number(depositAmount) : null,
       commission_acknowledged: commissionAcknowledged,
     };
+  }
+
+  /* Browser position -> a readable area name (Mapbox, via the token GET /config
+     serves) -> saved to the listing straight away. The save is the
+     confirmation: the page only says "pinned" once the backend has the
+     coordinates, not when the browser does. */
+  async function pinCurrentLocation() {
+    if (locating) return;
+    if (!("geolocation" in navigator)) {
+      toast("This browser can't share its location. Type the area instead.", "danger");
+      return;
+    }
+    setLocating(true);
+    try {
+      const pos = await new Promise((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 60000,
+        })
+      );
+      const lat = Number(pos.coords.latitude.toFixed(6));
+      const lng = Number(pos.coords.longitude.toFixed(6));
+
+      let name = "";
+      try {
+        await hydrateConfig();
+        const token = getMapboxToken();
+        if (token) {
+          const res = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json` +
+              `?types=neighborhood,locality,place&limit=1&access_token=${encodeURIComponent(token)}`
+          );
+          if (res.ok) name = (await res.json()).features?.[0]?.place_name || "";
+        }
+      } catch {
+        /* no name is fine: the pin is what the app maps */
+      }
+      name = name.replace(/, Kenya$/, "") || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+
+      const saved = await saveMarketplaceListing(decodedPlate, {
+        location_name: name,
+        latitude: lat,
+        longitude: lng,
+      });
+      _updateCache(saved);
+      setLocationName(saved.location_name || name);
+      setCoords({ lat: saved.latitude ?? lat, lng: saved.longitude ?? lng });
+      toast(`Pickup location saved: ${saved.location_name || name}`);
+    } catch (err) {
+      const msg =
+        err?.code === 1
+          ? "Location access is blocked. Allow it for this site in your browser, or type the area instead."
+          : err?.code === 2 || err?.code === 3
+            ? "Couldn't get a location fix. Try again near a window, or type the area instead."
+            : err?.message || "Couldn't save that location";
+      toast(msg, "danger");
+    } finally {
+      setLocating(false);
+    }
   }
 
   function _updateCache(data) {
@@ -418,9 +504,11 @@ export default function MarketplaceListing() {
     }
   }
 
-  const featureList = features
-    ? features.split(",").map((f) => f.trim()).filter(Boolean)
-    : [];
+  const featureList = [
+    ...pickedFeatures,
+    ...(otherOpen ? otherFeatures.split(",").map((f) => f.trim()).filter(Boolean) : []),
+  ];
+  const rules = joinRules(pickedRules, customRules);
   const missing = listing?.missing_fields || [];
   const status = listing?.status || "draft";
   // Vehicles added before the fleet carried a model year can't be listed until
@@ -686,28 +774,37 @@ export default function MarketplaceListing() {
 
               <div className="form-row">
                 <div className="field field-full">
-                  <label htmlFor="mkt-features">
-                    Features <span className="hint-text">(comma-separated, up to {MAX_FEATURES})</span>
+                  <label>
+                    Features{" "}
+                    <span className="hint-text">
+                      (tap to select, {featureList.length} of {MAX_FEATURES})
+                    </span>
                   </label>
-                  <input
-                    id="mkt-features"
-                    type="text"
-                    placeholder="Air conditioning, Bluetooth, Roof rack, GPS"
-                    value={features}
-                    onChange={(e) => setFeatures(e.target.value)}
+                  <FeaturePicker
+                    picked={pickedFeatures}
+                    onPicked={setPickedFeatures}
+                    other={otherFeatures}
+                    onOther={setOtherFeatures}
+                    otherOpen={otherOpen}
+                    onOtherOpen={setOtherOpen}
+                    total={featureList.length}
+                    max={MAX_FEATURES}
                   />
                 </div>
               </div>
 
               <div className="form-row">
                 <div className="field field-full">
-                  <label htmlFor="mkt-rules">Rental rules</label>
+                  <label htmlFor="mkt-rules">
+                    Rental rules <span className="hint-text">(tap the common ones, add your own below)</span>
+                  </label>
+                  <RulePicker picked={pickedRules} onPicked={setPickedRules} />
                   <textarea
                     id="mkt-rules"
-                    rows={3}
-                    placeholder="No smoking inside the vehicle. Security deposit required at pickup…"
-                    value={rules}
-                    onChange={(e) => setRules(e.target.value)}
+                    rows={2}
+                    placeholder="Any other rule, one per line"
+                    value={customRules}
+                    onChange={(e) => setCustomRules(e.target.value)}
                   />
                 </div>
               </div>
@@ -989,9 +1086,31 @@ export default function MarketplaceListing() {
                   type="text"
                   placeholder="Westlands, Nairobi"
                   value={locationName}
-                  onChange={(e) => setLocationName(e.target.value)}
+                  onChange={(e) => {
+                    setLocationName(e.target.value);
+                    setCoords(null);
+                  }}
                 />
               </div>
+              <button
+                type="button"
+                className="btn btn-ghost loc-btn"
+                onClick={pinCurrentLocation}
+                disabled={locating}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="3" />
+                  <circle cx="12" cy="12" r="7" />
+                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                </svg>
+                {locating ? "Finding you…" : "Use current location"}
+              </button>
+              {coords && listing?.latitude != null && (
+                <p className="loc-pinned">
+                  <span aria-hidden="true">✓</span> Pinned on the map at{" "}
+                  {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+                </p>
+              )}
             </section>
 
             <div className="mkt-actions">

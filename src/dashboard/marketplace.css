@@ -431,3 +431,205 @@
     flex-direction: column;
   }
 }
+
+/* ── Feature tiles: 14 presets + Other, 5 across ───────────────────── */
+
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.feat-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 92px;
+  padding: 14px 8px 12px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 0;
+  box-shadow: var(--edge-in);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease),
+    box-shadow 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.feat-tile:hover:not(:disabled) {
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
+  transform: translateY(-1px);
+}
+
+.feat-tile:focus-visible {
+  outline: none;
+  box-shadow: var(--edge-strong), 0 0 0 3px var(--brand-soft);
+}
+
+.feat-tile:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.feat-icon {
+  display: grid;
+  place-items: center;
+  color: var(--ink-mute);
+  transition: color 0.15s var(--ease);
+}
+
+/* The checkbox in the corner: empty square, ticked when chosen. */
+.feat-check {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 15px;
+  height: 15px;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1.5px var(--ink-mute);
+}
+
+.feat-tile.is-on {
+  color: #231a4f;
+  background: rgba(183, 172, 232, 0.45);
+  box-shadow: inset 0 0 0 1.5px rgb(143, 128, 214);
+}
+
+.feat-tile.is-on .feat-icon {
+  color: #4b3ca8;
+}
+
+.feat-tile.is-on .feat-check {
+  background: #4b3ca8;
+  box-shadow: none;
+}
+
+.feat-tile.is-on .feat-check::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+[data-theme="dark"] .feat-tile.is-on {
+  color: #ece8ff;
+  background: rgba(183, 172, 232, 0.18);
+}
+
+[data-theme="dark"] .feat-tile.is-on .feat-icon {
+  color: rgb(183, 172, 232);
+}
+
+.feat-other-input {
+  margin-top: 10px;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .feat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .feat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Rule chips: tap to add a common rule ──────────────────────────── */
+
+.rule-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.rule-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px 7px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--surface);
+  border: 0;
+  border-radius: var(--radius-round);
+  box-shadow: var(--edge-in);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease),
+    box-shadow 0.15s var(--ease);
+}
+
+.rule-chip:hover {
+  color: var(--ink);
+  box-shadow: var(--edge-strong);
+}
+
+.rule-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--edge-strong), 0 0 0 3px var(--brand-soft);
+}
+
+.rule-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.rule-chip.is-on {
+  color: #231a4f;
+  background: rgba(183, 172, 232, 0.45);
+  box-shadow: inset 0 0 0 1.5px rgb(143, 128, 214);
+  font-weight: 500;
+}
+
+.rule-chip.is-on .rule-mark {
+  color: #fff;
+  background: #4b3ca8;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .rule-chip.is-on {
+  color: #ece8ff;
+  background: rgba(183, 172, 232, 0.18);
+}
+
+/* ── Pickup location ───────────────────────────────────────────────── */
+
+.loc-btn {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.loc-btn:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.loc-pinned {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--ok);
+}

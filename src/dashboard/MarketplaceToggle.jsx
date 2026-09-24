@@ -61,7 +61,11 @@ export default function MarketplaceToggle({ vehicle, showLabel = false }) {
   }
 
   return (
-    <span className="mkt-toggle">
+    <span
+      className={`mkt-toggle${showLabel ? " mkt-toggle-feature" : ""}${
+        m?.live ? " is-live" : on ? " is-on" : ""
+      }`}
+    >
       {can("manageListing") && (
         <label
           className="switch"

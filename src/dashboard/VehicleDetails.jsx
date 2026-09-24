@@ -203,7 +203,7 @@ export default function VehicleDetails() {
             <h2>Vehicle information</h2>
             <p>Registry record</p>
           </header>
-          <dl className="spec-grid">
+          <dl className="spec-grid vehicle-specs">
             <div className="spec">
               <dt>Number plate</dt>
               <dd>{v.plate}</dd>
@@ -212,7 +212,7 @@ export default function VehicleDetails() {
               <dt>Category</dt>
               <dd>{v.cat}</dd>
             </div>
-            <div className="spec">
+            <div className="spec spec-key">
               <dt>Day rate</dt>
               <dd>KES {v.rate.toLocaleString("en-KE")}</dd>
             </div>
@@ -224,14 +224,14 @@ export default function VehicleDetails() {
               <dt>Insurance expiry</dt>
               <dd>
                 {v.ins || "-"}
-                {insSoon !== null && <span className="ins-soon"> · in {insSoon} days</span>}
+                {insSoon !== null && <span className="ins-soon">in {insSoon} days</span>}
               </dd>
             </div>
             <div className="spec">
               <dt>Inspection due</dt>
               <dd>
                 {v.inspection || "-"}
-                {inspSoon !== null && <span className="ins-soon"> · in {inspSoon} days</span>}
+                {inspSoon !== null && <span className="ins-soon">in {inspSoon} days</span>}
               </dd>
             </div>
             {v.year && (
@@ -252,7 +252,7 @@ export default function VehicleDetails() {
               <dt>Documents</dt>
               <dd className="doc-row">
                 {DOC_KINDS.map(({ kind, label, urlKey }) => (
-                  <span className="doc-item" key={kind}>
+                  <span className={`doc-item ${v[urlKey] ? "doc-ok" : "doc-missing"}`} key={kind}>
                     {v[urlKey] ? (
                       <a href={v[urlKey]} target="_blank" rel="noreferrer">
                         {label}
@@ -280,7 +280,7 @@ export default function VehicleDetails() {
               </dd>
             </div>
             {v.notes && (
-              <div className="spec spec-full">
+              <div className="spec spec-full spec-notes">
                 <dt>Notes</dt>
                 <dd>{v.notes}</dd>
               </div>

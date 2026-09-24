@@ -255,3 +255,33 @@
   font-weight: 400;
   color: var(--ink-mute);
 }
+
+/* On the vehicle page the switch is the main thing a manager comes to change,
+   so it gets a tinted panel instead of sitting as bare text among the buttons.
+   The tint follows state: brand while off/in review, green once renters can
+   actually book it. */
+.mkt-toggle-feature {
+  padding: 8px 12px;
+  background: var(--brand-soft);
+  box-shadow: 0 0 0 1px var(--kpi-edge);
+  transition: background 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.mkt-toggle-feature .mkt-toggle-label {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.mkt-toggle-feature .chip {
+  padding: 2px 8px;
+  background: var(--panel);
+}
+
+.mkt-toggle-feature.is-live {
+  background: color-mix(in srgb, var(--ok) 12%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ok) 45%, transparent);
+}
+
+.mkt-toggle-feature.is-live .switch input:checked + i {
+  background: var(--ok);
+}

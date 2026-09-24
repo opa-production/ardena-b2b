@@ -1,0 +1,107 @@
+/* ---- Password & security: compact rows, 2FA setup, code prompts ---- */
+
+.sec-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.sec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.sec-row + .sec-row {
+  box-shadow: 0 -1px 0 var(--line);
+}
+
+.sec-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sec-row-text strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.sec-row-text span {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sec-row .btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.sec-on {
+  color: var(--ok) !important;
+  font-weight: 600;
+}
+
+.btn.btn-2fa {
+  color: #231a4f;
+  background: rgb(183, 172, 232);
+  box-shadow: none;
+}
+
+.btn.btn-2fa:hover {
+  background: rgb(166, 153, 224);
+}
+
+/* Channel choice in the setup dialog */
+.channel-opts {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.channel-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: var(--surface);
+  box-shadow: var(--edge-in);
+}
+
+.channel-opt.is-on {
+  background: rgba(183, 172, 232, 0.25);
+  box-shadow: inset 0 0 0 1.5px rgb(143, 128, 214);
+}
+
+.channel-opt input {
+  margin-top: 3px;
+  accent-color: #4b3ca8;
+}
+
+.channel-opt strong {
+  display: block;
+  font-size: 14px;
+}
+
+.channel-opt span {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}
+
+.otp-input {
+  width: 100%;
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+.stepup-card {
+  max-width: 400px;
+}

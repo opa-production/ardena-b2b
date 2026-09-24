@@ -55,6 +55,7 @@ import HostLinkDialog from "./HostLinkDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
 import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
+import StepUpDialog from "./StepUpDialog";
 import "./dashboard.css";
 
 /* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again —
@@ -446,6 +447,7 @@ export default function DashboardLayout() {
 
       <AssistantLauncher />
       <Toasts />
+      <StepUpDialog />
     </div>
   );
 }

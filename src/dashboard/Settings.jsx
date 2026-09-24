@@ -20,6 +20,7 @@ import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
 import HostLinkPanel from "./HostLinkPanel";
 import QuickLinks from "./QuickLinks";
+import TwoFactorRow from "./TwoFactorRow";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -401,25 +402,29 @@ export default function Settings() {
           <section className="panel-card">
             <header className="card-head">
               <h2>Password &amp; security</h2>
-              <p>Change the password for {accountEmail || "your account"}</p>
+              <p>{accountEmail || "Your account"}</p>
             </header>
-            <p className="side-hint">
-              We&apos;ll email you a one-time code to confirm it&apos;s you, then
-              you set the new password.
-            </p>
-            {/* Coloured because it is the one control on this page that
-                changes how you get in, and it sits among a column of ordinary
-                save buttons that all look alike. Orange rather than red: red
-                is what Log out and Remove wear, and a password change is
-                sensitive, not destructive. */}
-            <button
-              type="button"
-              className="btn btn-caution pay-btn"
-              onClick={openPasswordModal}
-              disabled={pwBusy}
-            >
-              {pwBusy && pwStage === "idle" ? "Sending…" : "Change password"}
-            </button>
+            {/* Two rows, not paragraphs: what it is, where it stands, one
+                button each. */}
+            <div className="sec-rows">
+              <div className="sec-row">
+                <div className="sec-row-text">
+                  <strong>Password</strong>
+                  <span>Confirmed with a one-time code by email</span>
+                </div>
+                {/* Orange: it changes how you get in. Sensitive, not
+                    destructive, so not red. */}
+                <button
+                  type="button"
+                  className="btn btn-caution"
+                  onClick={openPasswordModal}
+                  disabled={pwBusy}
+                >
+                  {pwBusy && pwStage === "idle" ? "Sending…" : "Change"}
+                </button>
+              </div>
+              <TwoFactorRow />
+            </div>
           </section>
 
         </div>

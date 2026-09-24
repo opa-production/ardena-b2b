@@ -89,6 +89,44 @@ export function clearApiCache() {
   cached.clear();
 }
 
+/* ---- Step-up (2FA) for sensitive actions ----
+ *
+ * With two-step sign-in on, the backend answers a sensitive request (staff
+ * changes, deleting a vehicle…) with 428 until it carries a fresh code in
+ * X-2FA-Code. The dashboard registers one handler (StepUpDialog) that sends a
+ * code and asks for it; `send` then replays the request with the code. Callers
+ * don't change at all. Cancelling the prompt rejects the original call.
+ */
+let stepUpHandler = null;
+
+export function setStepUpHandler(fn) {
+  stepUpHandler = fn;
+  return () => {
+    if (stepUpHandler === fn) stepUpHandler = null;
+  };
+}
+
+// For actions that take the code in their body rather than the header
+// (turning 2FA off). Resolves to the code, or rejects if cancelled.
+export function askForStepUpCode(reason) {
+  if (!stepUpHandler) return Promise.reject(new ApiError("Confirmation isn't available here.", 0, null));
+  return stepUpHandler(reason);
+}
+
+/* Set when a session ends on its own (the one-hour limit), so the sign-in page
+   can say why instead of silently appearing. Read-and-clear. */
+const EXPIRED_KEY = "ardena-session-expired";
+
+export function takeSessionExpiredNotice() {
+  try {
+    const v = sessionStorage.getItem(EXPIRED_KEY);
+    sessionStorage.removeItem(EXPIRED_KEY);
+    return Boolean(v);
+  } catch {
+    return false;
+  }
+}
+
 // One refresh at a time; concurrent 401s all wait on the same attempt.
 let refreshing = null;
 
@@ -151,7 +189,7 @@ async function request(path, opts = {}, retried = false) {
   return send(path, opts, retried);
 }
 
-async function send(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false) {
+async function send(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false, steppedUp = false) {
   const headers = { ...extra };
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -171,10 +209,24 @@ async function send(path, { method = "GET", body, auth = true, headers: extra } 
 
   if (res.status === 401 && auth) {
     if (!retried && (await refreshSession())) {
-      return send(path, { method, body, auth, headers: extra }, true);
+      return send(path, { method, body, auth, headers: extra }, true, steppedUp);
+    }
+    if (getSession().token) {
+      try {
+        sessionStorage.setItem(EXPIRED_KEY, "1");
+      } catch {
+        /* ignore */
+      }
     }
     clearSession(); // bounces the app back to /login via RequireAuth
     clearApiCache(); // never let the next session read this one's lists
+  }
+
+  // Needs a 2FA code: ask for one, then replay this exact request with it.
+  if (res.status === 428 && auth && !steppedUp && stepUpHandler) {
+    const data = await res.json().catch(() => null);
+    const code = await stepUpHandler(messageFrom(data, 428));
+    return send(path, { method, body, auth, headers: { ...extra, "X-2FA-Code": code } }, retried, true);
   }
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);
@@ -184,12 +236,7 @@ async function send(path, { method = "GET", body, auth = true, headers: extra } 
 
 /* ---- Auth ---- */
 
-export async function login(email, password) {
-  const data = await request("/auth/login", {
-    method: "POST",
-    body: { email, password },
-    auth: false,
-  });
+function startSession(data) {
   resetLocalCaches(); // a fresh sign-in starts from this account's data only
   setSession({
     token: data.access_token || data.token,
@@ -197,7 +244,58 @@ export async function login(email, password) {
     user: data.user || null,
     business: data.business || null,
   });
+}
+
+// → the session, or { two_factor_required, challenge, channel, sent_to } when
+// the account has two-step sign-in on; finish with verifyLoginCode.
+export async function login(email, password) {
+  const data = await request("/auth/login", {
+    method: "POST",
+    body: { email, password },
+    auth: false,
+  });
+  if (data?.two_factor_required) return data;
+  startSession(data);
   return data;
+}
+
+export async function verifyLoginCode(challenge, code) {
+  const data = await request("/auth/login/2fa", {
+    method: "POST",
+    body: { challenge, code },
+    auth: false,
+  });
+  startSession(data);
+  return data;
+}
+
+export function resendLoginCode(challenge) {
+  return request("/auth/login/2fa/resend", { method: "POST", body: { challenge }, auth: false });
+}
+
+/* ---- Two-step sign-in (Settings) ---- */
+
+// → { enabled, channel, sent_to, email, phone }
+export function fetchTwoFactor() {
+  return request("/auth/2fa");
+}
+
+// channel: "email" | "sms" (with phone). → { sent_to }
+export function startTwoFactorSetup(channel, phone) {
+  return request("/auth/2fa/setup", { method: "POST", body: { channel, phone: phone || null } });
+}
+
+export function confirmTwoFactorSetup(code) {
+  return request("/auth/2fa/setup/confirm", { method: "POST", body: { code } });
+}
+
+// Sends a step-up code. → { required, channel, sent_to }
+export function sendStepUpCode() {
+  return request("/auth/2fa/challenge", { method: "POST" });
+}
+
+export function disableTwoFactor(code) {
+  return request("/auth/2fa/disable", { method: "POST", body: { code } });
 }
 
 // { business_name, contact_name, email, phone, fleet_size, town?, website? }

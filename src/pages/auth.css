@@ -401,3 +401,21 @@
   transform: none;
   box-shadow: none;
 }
+
+/* Session ended on its own (one-hour limit) — informational, not an error. */
+.auth-notice {
+  margin-top: 14px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #3b2f8a;
+  background: rgba(183, 172, 232, 0.28);
+}
+
+/* The sign-in code: big, spaced digits. */
+.auth-otp {
+  text-align: center;
+  letter-spacing: 0.5em;
+  font-size: 22px;
+  font-weight: 600;
+}

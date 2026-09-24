@@ -9,6 +9,7 @@ import EmptyState from "./EmptyState";
 import { fetchOverview, exportReport } from "../lib/api";
 import { toast } from "./toastStore";
 import "./overview.css";
+import RefreshButton from "../components/RefreshButton";
 
 const fmtKES = (n) => `KES ${Number(n).toLocaleString("en-KE")}`;
 
@@ -106,6 +107,9 @@ export default function Overview() {
 
   return (
     <>
+      <div className="page-refresh">
+        <RefreshButton onRefresh={load} />
+      </div>
       <OnboardingChecklist />
 
       {/* ---- KPI row ---- */}

@@ -19,6 +19,7 @@ import { setUnread as setUnreadBadge } from "./unreadStore";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
+import RefreshButton from "../components/RefreshButton";
 
 const FILTERS = ["All", "Unread", "Bookings", "Payments"];
 
@@ -182,6 +183,7 @@ export default function Notifications() {
               {ICONS.settings}
             </button>
           </div>
+          <RefreshButton onRefresh={load} />
         </div>
 
         {filtered.length > 0 ? (

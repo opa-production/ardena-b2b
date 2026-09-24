@@ -24,6 +24,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./payments.css";
 import "./earnings.css";
+import RefreshButton from "../components/RefreshButton";
 
 export const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
 
@@ -176,8 +177,14 @@ export default function Payments() {
     <>
       {/* Source switch sits top-right, above the numbers it reshapes.
           Only Owner/Finance have a second side to switch to. */}
+      {!canSeeApp && (
+        <div className="page-refresh">
+          <RefreshButton onRefresh={load} />
+        </div>
+      )}
       {canSeeApp && (
         <div className="finance-bar">
+          <RefreshButton onRefresh={load} />
           <div className="money-tabs" role="tablist" aria-label="Money source">
             <button
               type="button"

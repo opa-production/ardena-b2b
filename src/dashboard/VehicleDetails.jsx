@@ -19,6 +19,7 @@ import MarketplaceToggle from "./MarketplaceToggle";
 import "./fleet.css";
 import "./hostlink.css";
 import PageLoader from "../components/PageLoader";
+import RefreshButton from "../components/RefreshButton";
 
 const MONTHS = [
   { label: "July 2026", prefix: "2026-07" },
@@ -134,6 +135,7 @@ export default function VehicleDetails() {
           </div>
         </div>
         <div className="details-actions">
+          <RefreshButton onRefresh={hydrateFleet} label={false} />
           {MARKETPLACE_LISTINGS && <MarketplaceToggle vehicle={v} showLabel />}
           {MARKETPLACE_LISTINGS && (
             <Link

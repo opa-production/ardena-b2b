@@ -4,6 +4,7 @@ import {
   subscribe as subscribeFleet,
   getVehicles,
   isFleetLoaded,
+  hydrateFleet,
 } from "./fleetStore";
 import {
   subscribe as subscribeTrackers,
@@ -12,6 +13,7 @@ import {
   PROVIDERS,
   TRACK_CHIP,
   relativeTime,
+  hydrateTracking,
 } from "./trackingStore";
 import Dropdown from "../components/Dropdown";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
@@ -23,6 +25,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./tracking.css";
 import PageLoader from "../components/PageLoader";
+import RefreshButton from "../components/RefreshButton";
 
 const STATUS_LABEL = { moving: "Moving", parked: "Parked", offline: "Offline" };
 
@@ -174,6 +177,7 @@ export default function Tracking() {
                 aria-label="Search vehicles"
               />
             </div>
+            <RefreshButton onRefresh={() => Promise.all([hydrateFleet(), hydrateTracking()])} />
           </div>
 
           <table className="data-table">

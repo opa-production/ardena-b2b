@@ -10,6 +10,7 @@ import { toast } from "./toastStore";
 import { seedRecords } from "./recordSeeds";
 import "./fleet.css";
 import "./bookings.css";
+import RefreshButton from "../components/RefreshButton";
 
 const pad = (n) => String(n).padStart(2, "0");
 function todayLocalISO() {
@@ -207,6 +208,7 @@ export default function Bookings() {
               </button>
             ))}
           </div>
+          <RefreshButton onRefresh={load} />
         </div>
 
         <table className="data-table">

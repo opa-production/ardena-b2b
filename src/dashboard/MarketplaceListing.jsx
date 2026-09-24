@@ -29,6 +29,7 @@ import { getMapboxToken, hydrateConfig } from "./configStore";
 import "./fleet.css";
 import "./marketplace.css";
 import PageLoader from "../components/PageLoader";
+import RefreshButton from "../components/RefreshButton";
 
 // Module-level cache: plate → listing data. Avoids re-fetching on back-navigation.
 const _cache = new Map();
@@ -695,6 +696,17 @@ export default function MarketplaceListing() {
           </div>
         </div>
         <div className="details-actions">
+          {/* Picks up Ardena's review decision without reloading the form over
+              unsaved edits: only the listing's status fields are replaced. */}
+          <RefreshButton
+            onRefresh={async () => {
+              try {
+                _updateCache(await fetchMarketplaceListing(decodedPlate));
+              } catch (err) {
+                toast(err.message || "Couldn't refresh this listing", "danger");
+              }
+            }}
+          />
           {/* Three states, one action each: live can be taken off; submitted
               and waiting can be withdrawn (not a red "hide" — nothing is
               showing yet); anything else can be submitted. */}

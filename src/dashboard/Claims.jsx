@@ -13,6 +13,7 @@ import {
 import "./fleet.css";
 import "./bookings.css";
 import "./claims.css";
+import RefreshButton from "../components/RefreshButton";
 
 const CLAIM_CHIP = {
   pending: "claim-pending",
@@ -107,6 +108,9 @@ export default function Claims() {
   return (
     <>
       <h1 className="sr-only">Claims &amp; requests</h1>
+      <div className="page-refresh">
+        <RefreshButton onRefresh={load} />
+      </div>
 
       <div className="claims-grid">
         <section className="panel-card">

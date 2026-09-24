@@ -9,6 +9,7 @@ import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import { VERIF_CHIP } from "./clientsFormat";
 import "./fleet.css";
 import "./bookings.css";
+import RefreshButton from "../components/RefreshButton";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
@@ -130,6 +131,7 @@ export default function Clients() {
                 aria-label="Search clients"
               />
             </div>
+            <RefreshButton onRefresh={load} />
           </div>
 
           <table className="data-table">

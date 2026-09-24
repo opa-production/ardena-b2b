@@ -1,0 +1,52 @@
+.btn.refresh-btn {
+  gap: 7px;
+  padding: 9px 14px;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.btn.refresh-btn.icon-only {
+  padding: 9px 10px;
+}
+
+.btn.refresh-btn:disabled {
+  cursor: progress;
+  transform: none;
+}
+
+.refresh-btn svg {
+  color: #4b3ca8;
+}
+
+[data-theme="dark"] .refresh-btn svg {
+  color: rgb(183, 172, 232);
+}
+
+.refresh-btn svg.is-spinning {
+  animation: refresh-spin 0.8s linear infinite;
+}
+
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh-btn svg.is-spinning {
+    animation-duration: 2.4s;
+  }
+}
+
+/* Pages with no toolbar of their own: a right-aligned row above the content. */
+.page-refresh {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+/* Beside the Direct / Ardena app switch on Finances. */
+.finance-bar {
+  gap: 10px;
+  align-items: center;
+}

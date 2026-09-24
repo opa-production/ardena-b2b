@@ -1,12 +1,13 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { subscribe, getVehicles, removeVehicle, isFleetLoaded } from "./fleetStore";
+import { subscribe, getVehicles, removeVehicle, isFleetLoaded, hydrateFleet } from "./fleetStore";
 import { toast } from "./toastStore";
 import { MARKETPLACE_LISTINGS } from "../lib/features";
 import MarketplaceToggle from "./MarketplaceToggle";
 import EmptyState, { EMPTY_ICONS } from "./EmptyState";
 import "./fleet.css";
 import PageLoader from "../components/PageLoader";
+import RefreshButton from "../components/RefreshButton";
 
 const STATUSES = ["All", "Available", "On booking", "In maintenance"];
 
@@ -133,6 +134,7 @@ export default function Fleet() {
               Add vehicle
             </Link>
           )}
+          <RefreshButton onRefresh={hydrateFleet} />
         </div>
 
         <table className="data-table">

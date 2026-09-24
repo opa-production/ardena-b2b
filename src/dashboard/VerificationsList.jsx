@@ -6,6 +6,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
 import PageLoader from "../components/PageLoader";
+import RefreshButton from "../components/RefreshButton";
 
 const FILTERS = ["All", "Verified", "Not found", "Mismatch"];
 
@@ -70,6 +71,7 @@ export default function VerificationsList() {
               </button>
             ))}
           </div>
+          <RefreshButton onRefresh={hydrateLookups} />
         </div>
 
         <table className="data-table">

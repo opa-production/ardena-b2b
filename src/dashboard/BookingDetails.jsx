@@ -38,6 +38,7 @@ import DepositClaimDialog from "./DepositClaimDialog";
 import useRole from "../hooks/useRole";
 import "./fleet.css";
 import "./bookings.css";
+import RefreshButton from "../components/RefreshButton";
 
 const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
 
@@ -596,6 +597,7 @@ export default function BookingDetails() {
           </div>
         </div>
         <div className="details-actions">
+          <RefreshButton onRefresh={load} label={false} />
           <button
             type="button"
             className="icon-btn icon-only"

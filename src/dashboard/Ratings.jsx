@@ -8,6 +8,7 @@ import { fetchMarketplaceRatings, fetchVehicleRatings } from "../lib/api";
 import "./fleet.css";
 import "./bookings.css";
 import "./ratings.css";
+import RefreshButton from "../components/RefreshButton";
 
 function Stars({ value }) {
   const filled = Math.round(value || 0);
@@ -66,6 +67,9 @@ export default function Ratings() {
   return (
     <>
       <h1 className="sr-only">Reviews</h1>
+      <div className="page-refresh">
+        <RefreshButton onRefresh={load} />
+      </div>
 
       {!hasAny ? (
         <EmptyState minimal title="No reviews yet" />

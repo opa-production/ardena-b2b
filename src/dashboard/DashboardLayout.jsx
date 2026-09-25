@@ -56,6 +56,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import AssistantLauncher from "./AssistantLauncher";
 import Toasts from "./Toasts";
 import StepUpDialog from "./StepUpDialog";
+import ErrorBoundary from "../components/ErrorBoundary";
 import "./dashboard.css";
 
 /* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again —
@@ -430,9 +431,13 @@ export default function DashboardLayout() {
         ) : (
           /* A page's chunk still arriving looks the same as its data still
              arriving — the skeleton it was going to show anyway. */
-          <Suspense fallback={<PageSkeleton path={location.pathname} />}>
-            <Outlet />
-          </Suspense>
+          /* Inside the content area, so a page that fails keeps the sidebar
+             and nav; moving to another page clears it. */
+          <ErrorBoundary resetKey={location.pathname}>
+            <Suspense fallback={<PageSkeleton path={location.pathname} />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         )}
       </main>
 

@@ -538,3 +538,32 @@ h3 {
     transform: none;
   }
 }
+
+/* ---- Error boundary fallback (components/ErrorBoundary.jsx) ---- */
+.crash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 50vh;
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--ink);
+}
+
+.crash h2 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.crash p {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.crash .btn {
+  margin-top: 6px;
+}

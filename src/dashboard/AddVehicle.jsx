@@ -198,15 +198,8 @@ export default function AddVehicle() {
             </div>
           </div>
 
-          <div className="upload-box" aria-disabled="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
-            Vehicle photos coming soon
-          </div>
-
+          {/* No photos here: they belong to the Ardena app listing, which has
+              its own uploader (Marketplace on the vehicle page). */}
           {error && <p className="form-error">{error}</p>}
         </form>
 

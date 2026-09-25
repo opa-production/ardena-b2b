@@ -57,7 +57,7 @@
       "destination": "/car-hire-management-system-nakuru.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ]

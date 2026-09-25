@@ -67,7 +67,7 @@ export default function Landing() {
           <div className="ard-hero-inner">
             <div className="ard-hero-content">
               <h1 className="ard-hero-title">
-                Run your entire rental business from one place
+                Run your entire car rental business from one place
               </h1>
               <p className="ard-hero-sub">
                 Fleet, bookings, verified customers and payments. The

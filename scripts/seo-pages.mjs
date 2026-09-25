@@ -11,9 +11,10 @@
        visually hidden until then so nothing flashes for people)
      - structured data (SoftwareApplication everywhere, FAQPage on the home page)
 
-   and regenerates sitemap.xml with today's date. Vercel serves /pricing from
-   pricing.html via `cleanUrls` (vercel.json); every other path still falls
-   through to index.html. The copy comes from src/pages/pricingData.js, the same
+   and regenerates sitemap.xml with today's date. Vercel rewrites /pricing and
+   /contact to their files (vercel.json, listed before the catch-all); every
+   other path falls through to index.html. Not `cleanUrls`: it redirects any
+   .html URL, which breaks Google's verification file. The copy comes from src/pages/pricingData.js, the same
    source the pages render from, so the two can't drift. */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";

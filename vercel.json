@@ -1,6 +1,13 @@
 {
-  "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/pricing",
+      "destination": "/pricing.html"
+    },
+    {
+      "source": "/contact",
+      "destination": "/contact.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

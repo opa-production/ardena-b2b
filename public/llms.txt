@@ -35,5 +35,9 @@ Access is by request: Ardena verifies each business's registration and director 
 - [Home](https://business.ardena.co.ke/): overview, features and FAQ
 - [Pricing](https://business.ardena.co.ke/pricing): free months and verification pricing
 - [Contact](https://business.ardena.co.ke/contact): talk to the team
+- [Car rental management software for Kenya](https://business.ardena.co.ke/car-rental-software-kenya)
+- [Fleet management software for rental fleets](https://business.ardena.co.ke/fleet-management-software)
+- [Car hire booking system with M-Pesa](https://business.ardena.co.ke/car-hire-booking-system)
+- [Renter ID and licence verification](https://business.ardena.co.ke/renter-verification)
 - [Request access](https://business.ardena.co.ke/signup): apply for a business account
 - [Ardena car rental app](https://ardena.co.ke/): the consumer app renters book on

@@ -9,6 +9,22 @@
       "destination": "/contact.html"
     },
     {
+      "source": "/car-rental-software-kenya",
+      "destination": "/car-rental-software-kenya.html"
+    },
+    {
+      "source": "/fleet-management-software",
+      "destination": "/fleet-management-software.html"
+    },
+    {
+      "source": "/car-hire-booking-system",
+      "destination": "/car-hire-booking-system.html"
+    },
+    {
+      "source": "/renter-verification",
+      "destination": "/renter-verification.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

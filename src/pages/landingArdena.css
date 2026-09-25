@@ -1379,3 +1379,76 @@
   color: var(--ard-ink-dark);
   white-space: nowrap;
 }
+
+/* ---- Footer additions: contact lines, legal links in the bottom bar ---- */
+
+.ard-footer-contact {
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: var(--ard-text);
+}
+
+.ard-footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+}
+
+.ard-footer-legal a {
+  color: inherit;
+  transition: var(--ard-t);
+}
+
+.ard-footer-legal a:hover {
+  color: var(--ard-ink);
+}
+
+/* ---- Search landing pages (SeoPage.jsx) ---- */
+
+/* On a desktop each section fills the screen: one idea in view, scroll for
+   the next. Phones keep natural height — a forced full-screen band there is
+   mostly empty space. */
+@media (min-width: 900px) {
+  .ard-section--screen {
+    display: flex;
+    align-items: center;
+    min-height: 100vh;
+    min-height: 100svh;
+  }
+
+  .ard-section--screen > .ard-container {
+    width: 100%;
+  }
+}
+
+/* Search headlines run longer than the home page's; give them room. */
+.seo-hero-title {
+  max-width: 20ch;
+}
+
+.seo-cta {
+  margin-top: 4rem;
+}
+
+.seo-related {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  margin-top: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.seo-related span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ard-text);
+}
+
+.seo-related a {
+  color: var(--ard-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

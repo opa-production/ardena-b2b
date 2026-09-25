@@ -20,6 +20,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { MODULES, FAQS, FREE_MONTHS, CHECK_PRICE } from "../src/pages/pricingData.js";
+import { SEO_PAGES } from "../src/pages/seoPagesData.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = join(ROOT, "dist");
@@ -108,6 +109,41 @@ const PAGES = [
   },
 ];
 
+// Search landing pages (src/pages/seoPagesData.js): same copy the React page shows.
+for (const p of SEO_PAGES) {
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: p.faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+  const sections = p.sections
+    .map(
+      (s) =>
+        `<h2>${esc(s.heading)}</h2><p>${esc(s.desc)}</p><ul>${s.points
+          .map((pt) => `<li><strong>${esc(pt.title)}</strong>: ${esc(pt.desc)}</li>`)
+          .join("")}</ul>`
+    )
+    .join("");
+  const related = SEO_PAGES.filter((o) => o.slug !== p.slug)
+    .map((o) => `<a href="/${o.slug}">${esc(o.nav)}</a>`)
+    .join(" · ");
+  PAGES.push({
+    file: `${p.slug}.html`,
+    path: `/${p.slug}`,
+    title: p.title,
+    description: p.description,
+    ld: [SOFTWARE, faqLd],
+    body: `
+      <h1>${esc(p.h1)}</h1><p>${esc(p.lead)}</p>${sections}
+      <h2>Questions</h2>${p.faq.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join("")}
+      <p><a href="/pricing">Pricing</a> · <a href="/signup">Request access</a> · ${related}</p>`,
+  });
+}
+
 const template = readFileSync(join(DIST, "index.html"), "utf8");
 
 function render(page) {
@@ -138,7 +174,8 @@ for (const page of PAGES) {
 }
 
 const today = new Date().toISOString().slice(0, 10);
-const priority = { "/": "1.0", "/pricing": "0.9", "/contact": "0.7" };
+const priority = { "/": "1.0", "/pricing": "0.9", "/contact": "0.6" };
+for (const p of SEO_PAGES) priority[`/${p.slug}`] = "0.8";
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${PAGES.map(

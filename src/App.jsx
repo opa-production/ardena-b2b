@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
 import { MARKETPLACE_LISTINGS } from "./lib/features";
+import { SEO_PAGES } from "./pages/seoPagesData";
 
 /* Dashboard screens are code-split — see dashboard/pageLoaders.js for why, and
    for the idle preload that keeps the split from costing a pause on the first
@@ -56,6 +57,7 @@ const Placeholder = lazy(load.placeholder);
    first paint. */
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Contact = lazy(() => import("./pages/Contact"));
+const SeoPage = lazy(() => import("./pages/SeoPage"));
 const VerifyBusiness = lazy(() => import("./pages/VerifyBusiness"));
 
 // Gate the dashboard behind a session; reacts to the session being
@@ -76,6 +78,9 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/contact" element={<Contact />} />
+      {SEO_PAGES.map((p) => (
+        <Route key={p.slug} path={`/${p.slug}`} element={<SeoPage page={p} />} />
+      ))}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

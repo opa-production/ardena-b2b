@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import Logo from "./Logo";
 import { SOCIALS } from "./socials";
-import { SEO_PAGES } from "../pages/seoPagesData";
 
 /* Marketing footer in the ardena.co.ke language: brand row, hairline, then a
    four-column link grid on the light gradient. Styles live in
    pages/landingArdena.css, so render this inside an `.ard` wrapper.
 
-   Public pages only — no sign-in or dashboard links (the nav has those).
+   Public pages only — no sign-in or dashboard links (the nav has those), and
+   no search landing pages (they link to each other and live in the sitemap).
    Company and legal links point at ardena.co.ke, which owns them for every
    Ardena product, so there is one set of terms and one privacy policy. */
 const MAIN = "https://ardena.co.ke";
@@ -44,17 +44,6 @@ export default function ArdFooter() {
         <hr className="ard-footer-divider" />
 
         <div className="ard-footer-main">
-          <div>
-            <p className="ard-footer-col-title">Solutions</p>
-            <ul className="ard-footer-links">
-              {SEO_PAGES.map((p) => (
-                <li key={p.slug}>
-                  <Link to={`/${p.slug}`}>{p.nav}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           <div>
             <p className="ard-footer-col-title">Product</p>
             <ul className="ard-footer-links">
@@ -108,7 +97,7 @@ export default function ArdFooter() {
         </div>
 
         <div className="ard-footer-bar">
-          <span>© {new Date().getFullYear()} Ardena. All rights reserved.</span>
+          <span>© {new Date().getFullYear()} Ardena Platforms Africa Ltd. All rights reserved.</span>
           <nav className="ard-footer-legal" aria-label="Legal">
             {LEGAL.map((l) => (
               <a key={l.label} href={l.href} {...ext}>

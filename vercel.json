@@ -13,16 +13,48 @@
       "destination": "/car-rental-software-kenya.html"
     },
     {
-      "source": "/fleet-management-software",
-      "destination": "/fleet-management-software.html"
+      "source": "/fleet-management-system-kenya",
+      "destination": "/fleet-management-system-kenya.html"
     },
     {
-      "source": "/car-hire-booking-system",
-      "destination": "/car-hire-booking-system.html"
+      "source": "/car-hire-booking-system-kenya",
+      "destination": "/car-hire-booking-system-kenya.html"
     },
     {
       "source": "/renter-verification",
       "destination": "/renter-verification.html"
+    },
+    {
+      "source": "/car-hire-management-system-kenya",
+      "destination": "/car-hire-management-system-kenya.html"
+    },
+    {
+      "source": "/car-rental-management-system-kenya",
+      "destination": "/car-rental-management-system-kenya.html"
+    },
+    {
+      "source": "/car-hire-software-kenya",
+      "destination": "/car-hire-software-kenya.html"
+    },
+    {
+      "source": "/car-rental-booking-system-kenya",
+      "destination": "/car-rental-booking-system-kenya.html"
+    },
+    {
+      "source": "/car-hire-business-management-system",
+      "destination": "/car-hire-business-management-system.html"
+    },
+    {
+      "source": "/vehicle-rental-management-system-kenya",
+      "destination": "/vehicle-rental-management-system-kenya.html"
+    },
+    {
+      "source": "/car-hire-management-system-nairobi",
+      "destination": "/car-hire-management-system-nairobi.html"
+    },
+    {
+      "source": "/car-hire-management-system-nakuru",
+      "destination": "/car-hire-management-system-nakuru.html"
     },
     {
       "source": "/(.*)",

@@ -144,6 +144,15 @@ for (const p of SEO_PAGES) {
   });
 }
 
+// Every static page needs a rewrite ahead of vercel.json's catch-all, or
+// Vercel serves the SPA shell instead. Fail the build rather than ship that.
+const vercel = JSON.parse(readFileSync(join(ROOT, "vercel.json"), "utf8"));
+const routed = new Set((vercel.rewrites || []).map((r) => r.source));
+const unrouted = PAGES.filter((p) => p.path !== "/" && !routed.has(p.path)).map((p) => p.path);
+if (unrouted.length) {
+  throw new Error(`vercel.json has no rewrite for: ${unrouted.join(", ")}`);
+}
+
 const template = readFileSync(join(DIST, "index.html"), "utf8");
 
 function render(page) {

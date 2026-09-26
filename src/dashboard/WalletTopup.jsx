@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { startTopup, verifyTopup, hydrateWallet } from "./verificationsStore";
 import Dropdown from "../components/Dropdown";
 import LoadingOverlay from "../components/LoadingOverlay";
@@ -139,7 +140,11 @@ export default function WalletTopup({ className = "btn btn-ghost page-action-btn
         </button>
       )}
 
-      {open && (
+      {/* Portalled to <body>: this button sits inside a page section, and every
+          top-level section of .dash-content runs a fade-in animation, which makes
+          it its own stacking context. Rendered in place, the modal was trapped in
+          that layer and painted under the sections that follow it. */}
+      {open && createPortal(
         <div className="modal-overlay" onClick={() => !busy && setOpen(false)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <header className="modal-head">
@@ -216,15 +221,17 @@ export default function WalletTopup({ className = "btn btn-ghost page-action-btn
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {waiting && (
+      {waiting && createPortal(
         <LoadingOverlay
           label="Waiting for payment…"
           note="Approve the prompt on your phone. This closes on its own once it clears."
           onCancel={stopPolling}
-        />
+        />,
+        document.body
       )}
     </>
   );

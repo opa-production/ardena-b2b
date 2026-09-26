@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Logo from "../components/Logo";
 import PageLoader from "../components/PageLoader";
 import usePageTitle from "../hooks/usePageTitle";
-import { fetchReviewRequest, submitReview } from "../lib/reviewRequestsMock";
+import { fetchReviewRequest, submitReview } from "../lib/api";
 import "./auth.css";
 import "./trust.css";
 import "./review.css";
@@ -18,8 +18,9 @@ function fmtRange(start, end) {
 }
 
 /* Public page a renter opens from the review-request SMS (/r/:token). One
-   screen: the car and dates, five stars, an optional comment. Mocked for now,
-   see lib/reviewRequestsMock.js. */
+   screen: the car and dates, five stars, an optional comment. The token in
+   the URL is the only credential; the API answers 404/410 once it's unknown,
+   used, replaced by a newer request, or 30 days old. */
 export default function LeaveReview() {
   usePageTitle("Rate your trip");
   const { token } = useParams();
@@ -36,6 +37,7 @@ export default function LeaveReview() {
     let alive = true;
     fetchReviewRequest(token)
       .then((t) => alive && setTrip(t))
+      .catch(() => {}) // 404 / 410 → the "expired" card
       .finally(() => alive && setLoading(false));
     return () => {
       alive = false;

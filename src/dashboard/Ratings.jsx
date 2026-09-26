@@ -3,12 +3,14 @@ import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
+import useRole from "../hooks/useRole";
 import { fetchMarketplaceRatings, fetchVehicleRatings } from "../lib/api";
 import "./fleet.css";
 import "./bookings.css";
 import "./ratings.css";
 import RefreshButton from "../components/RefreshButton";
 import RequestReviewDialog from "./RequestReviewDialog";
+import { REVIEW_REQUESTS } from "../lib/features";
 import reviewsArt from "../assets/reviews.svg";
 import "./coming.css";
 
@@ -37,6 +39,7 @@ function fmtDay(value) {
 export default function Ratings() {
   usePageTitle("Reviews");
   const { pathname } = useLocation();
+  const { can } = useRole();
 
   const [summary, setSummary] = useState(null);
   const [vehicles, setVehicles] = useState([]);
@@ -71,29 +74,34 @@ export default function Ratings() {
     <>
       <h1 className="sr-only">Reviews</h1>
       <div className="page-refresh ratings-bar">
-        <button
-          type="button"
-          className="btn btn-ghost refresh-btn"
-          onClick={() => setRequesting(true)}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-            <path d="M12 7l1.2 2.4 2.6.4-1.9 1.8.5 2.6L12 13l-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" />
-          </svg>
-          <span>Request review</span>
-        </button>
+        {can("sendMarketing") && (
+          <button
+            type="button"
+            className="btn btn-ghost refresh-btn"
+            onClick={() => setRequesting(true)}
+            disabled={!REVIEW_REQUESTS}
+            title={REVIEW_REQUESTS ? "Text a past renter a link to review their trip" : "Coming soon"}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+              <path d="M12 7l1.2 2.4 2.6.4-1.9 1.8.5 2.6L12 13l-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" />
+            </svg>
+            <span>Request review</span>
+          </button>
+        )}
         <RefreshButton onRefresh={load} />
       </div>
-      {requesting && <RequestReviewDialog onClose={() => setRequesting(false)} />}
+      {REVIEW_REQUESTS && requesting && <RequestReviewDialog onClose={() => setRequesting(false)} />}
 
       {!hasAny ? (
         <div className="coming">
           <img className="coming-art" src={reviewsArt} alt="" />
           <h2 className="coming-title">No reviews yet</h2>
           <p className="coming-note">
-            When renters rate a trip on the Ardena app, their stars and comments
-            show up here, for your business and for each car.
+            Ask a renter to rate a finished trip and their stars and comments
+            show up here, for your business and for each car, along with any
+            reviews from the Ardena app.
           </p>
         </div>
       ) : (
@@ -135,8 +143,16 @@ export default function Ratings() {
                       <Stars value={r.rating} />
                       <span className="cell-sub">
                         {r.kind === "car" ? r.vehicle || r.plate || "Vehicle" : "Your business"}
+                        {r.source === "direct" && r.client_name ? ` · ${r.client_name}` : ""}
                         {r.created_at ? ` · ${fmtDay(r.created_at)}` : ""}
                       </span>
+                      {/* Badged like an app booking: direct reviews are the
+                          default here, the app is the exception. */}
+                      {r.source !== "direct" && (
+                        <span className="chip source-app" title="Left by a renter on the Ardena app">
+                          Ardena app
+                        </span>
+                      )}
                     </div>
                     {r.review && <p className="review-text">{r.review}</p>}
                   </div>

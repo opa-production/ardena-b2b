@@ -482,6 +482,23 @@ export function fetchWalletTransactions(params = {}) {
   return request(`/verification/wallet/transactions${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
+/* ---- Wallet center ----
+   One prepaid balance pays for ID checks and SMS (and, later, the plan).
+   Top-ups still go through the /verification/wallet endpoints above. */
+
+// -> { balance, prices: { verification_check, sms }, this_month: { topup, verification, sms, subscription } }
+export function fetchWalletCenter() {
+  return request("/wallet");
+}
+
+// params: { category: "topup" | "verification" | "sms" | "subscription", page, per_page }
+export function fetchWalletLedger(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/wallet/transactions${qs ? `?${qs}` : ""}`);
+}
+
 /* ---- Bookings (§4) ---- */
 
 // params: { status, payment, from, to, plate, client_id, page, per_page }
@@ -812,14 +829,47 @@ export function sendMarketingCampaign(payload) {
   return request("/marketing/campaigns", { method: "POST", body: payload });
 }
 
+/* ---- Review requests ----
+   A finished dashboard trip, a "rate your trip" SMS (and email when the client
+   has one), and a public page at /r/:token. The SMS is KES 1 from the wallet. */
+
+// Completed trips with no review yet: [{ ref, customer, phone, email, vehicle,
+// plate, start, end, request_count, can_request, blocked_reason }]
+export function fetchPendingReviews(limit = 50) {
+  return request(`/reviews/pending?limit=${limit}`);
+}
+
+// -> { sms: { to, text, segments } | null, email: { to, subject } | null,
+//      sms_cost, wallet_balance, can_request, blocked_reason }
+export function fetchReviewRequestPreview(bookingRef) {
+  return request(`/reviews/requests/preview?booking_ref=${encodeURIComponent(bookingRef)}`);
+}
+
 /* Ask one client to rate the rental they just finished.
    Per booking rather than per batch: the request names the vehicle and the
    dates, and the person sending it is looking at the booking when they decide
-   it went well enough to ask. */
+   it went well enough to ask.
+   -> { request_id, link, expires_at, channels: [{ channel, sent_to, status }],
+        sms_cost, wallet_balance } */
 export function requestBookingRating(bookingRef) {
   return request("/marketing/rating-requests", {
     method: "POST",
     body: { booking_ref: bookingRef },
+  });
+}
+
+/* The public page a renter opens from the review-request link. No account:
+   the token is the only credential. 404 unknown, 410 expired or used. */
+export function fetchReviewRequest(token) {
+  return request(`/public/reviews/${encodeURIComponent(token)}`, { auth: false });
+}
+
+// { rating: 1–5, review: string | null } → 201
+export function submitReview(token, payload) {
+  return request(`/public/reviews/${encodeURIComponent(token)}`, {
+    method: "POST",
+    body: payload,
+    auth: false,
   });
 }
 

@@ -30,6 +30,7 @@ const KIND_LABEL = {
   verification: "Verification",
   fleet: "Fleet",
   staff: "Staff",
+  review: "Review",
 };
 
 const KIND_CLASS = {
@@ -38,6 +39,7 @@ const KIND_CLASS = {
   verification: "amber",
   fleet: "amber",
   staff: "gray",
+  review: "green",
 };
 
 function relatedLabel(to) {
@@ -49,6 +51,7 @@ function relatedLabel(to) {
     payments: "Payments",
     bookings: "Bookings",
     fleet: "Fleet",
+    reviews: "Reviews",
   };
   return pages[seg] || seg;
 }

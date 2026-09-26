@@ -1,31 +1,23 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
 import { fmtDate } from "./bookingsStore";
 import {
   subscribe,
   getState,
   hydrateVerification,
-  hydrateWallet,
   runLookup,
-  startTopup,
-  verifyTopup,
   LOOKUP_TYPES,
   STATUS_CHIP,
   CHECK_PRICE,
 } from "./verificationsStore";
 import Dropdown from "../components/Dropdown";
 import LoadingOverlay from "../components/LoadingOverlay";
+import WalletTopup from "./WalletTopup";
 import { toast } from "./toastStore";
 import EmptyState from "./EmptyState";
 import "./fleet.css";
 import "./bookings.css";
 import "./verification.css";
-
-/* Value is what the API takes; label is what the person reads. */
-const PAYMENT_METHODS = [
-  { value: "mpesa", label: "M-Pesa" },
-  { value: "card", label: "Card" },
-];
 
 const PLACEHOLDER = {
   "National ID": "e.g. 29845112",
@@ -55,6 +47,7 @@ export default function Verification() {
   }, []);
 
   const checkPrice = wallet.checkPrice || CHECK_PRICE;
+  const [topupWaiting, setTopupWaiting] = useState(false);
 
   const stats = useMemo(() => {
     const monthPrefix = new Date().toISOString().slice(0, 7);
@@ -62,110 +55,6 @@ export default function Verification() {
     const verified = lookups.filter((c) => c.status === "Verified").length;
     return { total: lookups.length, thisMonth, verified };
   }, [lookups]);
-
-  /* ---- Top up the check wallet ----
-     This lived on the Usage page until Usage became the chart and nothing
-     else. It belongs here: this is the only screen that spends the wallet,
-     so it should also be the one that fills it. */
-  const [topupModal, setTopupModal] = useState(false);
-  const [topupAmount, setTopupAmount] = useState("");
-  const [topupMethod, setTopupMethod] = useState("mpesa");
-  const [topupPhone, setTopupPhone] = useState("");
-  const [topupBusy, setTopupBusy] = useState(false);
-  const [topupWaiting, setTopupWaiting] = useState(false);
-  const pollRef = useRef(null);
-  const pollDeadlineRef = useRef(null);
-
-  // stop polling if the user leaves mid-payment
-  useEffect(() => {
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
-  }, []);
-
-  function stopTopupPolling() {
-    if (pollRef.current) {
-      clearInterval(pollRef.current);
-      pollRef.current = null;
-    }
-    setTopupWaiting(false);
-  }
-
-  // Poll until Paystack confirms, then refresh the balance. 3-minute cap —
-  // STK prompts expire on-device well before then.
-  function startTopupPolling(reference) {
-    setTopupWaiting(true);
-    pollDeadlineRef.current = Date.now() + 3 * 60 * 1000;
-    let inFlight = false;
-
-    async function tick() {
-      if (inFlight) return;
-      inFlight = true;
-      try {
-        const res = await verifyTopup(reference);
-        const status = String(res?.status || "");
-        if (/success|paid|complete/i.test(status)) {
-          stopTopupPolling();
-          toast("Wallet topped up.");
-        } else if (
-          /fail|cancel|declin|timeout|expire/i.test(status) ||
-          Date.now() > pollDeadlineRef.current
-        ) {
-          stopTopupPolling();
-          await hydrateWallet().catch(() => {});
-          toast("Top-up wasn't confirmed, the prompt may have expired. Try again.", "warn");
-        }
-        // still pending — retry next tick
-      } catch {
-        // network hiccup — retry next tick
-      } finally {
-        inFlight = false;
-      }
-    }
-
-    pollRef.current = setInterval(tick, 6000);
-  }
-
-  function openTopupModal() {
-    setTopupAmount("");
-    setTopupMethod("mpesa");
-    setTopupModal(true);
-  }
-
-  async function handleTopup(e) {
-    e.preventDefault();
-    if (topupBusy) return;
-    const amount = Number(topupAmount);
-    if (!amount || amount <= 0) {
-      toast("Enter a top-up amount.", "danger");
-      return;
-    }
-    if (topupMethod === "mpesa" && !topupPhone.trim()) {
-      toast("Enter the M-Pesa phone number.", "danger");
-      return;
-    }
-    setTopupBusy(true);
-    try {
-      const res = await startTopup({
-        amount,
-        method: topupMethod,
-        phone: topupMethod === "mpesa" ? topupPhone.trim() : undefined,
-      });
-      const reference = res.reference || res.paystack_reference;
-      if (topupMethod === "card" && res.checkout_url) {
-        window.open(res.checkout_url, "_blank", "noopener,noreferrer");
-        toast("Paystack checkout opened, complete your payment there.");
-      } else {
-        toast("STK push sent, enter your M-Pesa PIN to complete the top-up.");
-      }
-      setTopupModal(false);
-      if (reference) startTopupPolling(reference);
-    } catch (err) {
-      toast(err.message || "Failed to start top-up", "danger");
-    } finally {
-      setTopupBusy(false);
-    }
-  }
 
   async function runCheck(e) {
     e.preventDefault();
@@ -221,23 +110,8 @@ export default function Verification() {
           leads: it is what the page is for, and topping up is the errand you
           only do because of it. */}
       <div className="page-actions">
-        {topupWaiting ? (
-          <button
-            type="button"
-            className="btn btn-ghost page-action-btn"
-            onClick={stopTopupPolling}
-          >
-            Waiting for payment
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="btn btn-ghost page-action-btn"
-            onClick={openTopupModal}
-          >
-            Top up wallet
-          </button>
-        )}
+        {/* Shared with the Wallet page: one wallet pays for checks and SMS. */}
+        <WalletTopup onWaitingChange={setTopupWaiting} />
         <button
           type="button"
           className="btn btn-primary page-action-btn"
@@ -455,86 +329,6 @@ export default function Verification() {
         </div>
       )}
 
-      {/* ---- Top-up modal ---- */}
-      {topupModal && (
-        <div className="modal-overlay" onClick={() => !topupBusy && setTopupModal(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <header className="modal-head">
-              <h3>Top up check wallet</h3>
-              <button
-                type="button"
-                className="icon-btn"
-                disabled={topupBusy}
-                onClick={() => setTopupModal(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </header>
-            <form onSubmit={handleTopup} className="modal-body">
-              <label className="field-label">
-                Amount (KES)
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  className="field-input"
-                  value={topupAmount}
-                  onChange={(e) => setTopupAmount(e.target.value)}
-                  placeholder="e.g. 1000"
-                  required
-                  autoFocus
-                />
-              </label>
-              {/* A dropdown rather than two radio pills: there are only two
-                  today but card is about to grow siblings, and a pill row
-                  stops scaling at three. */}
-              <label className="field-label">
-                Payment method
-                <Dropdown
-                  id="topup-method"
-                  name="topup-method"
-                  value={topupMethod}
-                  onChange={setTopupMethod}
-                  options={PAYMENT_METHODS}
-                />
-              </label>
-
-              {topupMethod === "mpesa" && (
-                <label className="field-label">
-                  M-Pesa phone
-                  <input
-                    type="tel"
-                    className="field-input"
-                    value={topupPhone}
-                    onChange={(e) => setTopupPhone(e.target.value)}
-                    placeholder="07XXXXXXXX"
-                    required
-                  />
-                </label>
-              )}
-              <p className="side-hint" style={{ marginTop: 0 }}>
-                {topupMethod === "mpesa"
-                  ? "An STK push goes to this phone, enter the PIN to complete."
-                  : "A Paystack checkout opens in a new tab."}
-              </p>
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  disabled={topupBusy}
-                  onClick={() => setTopupModal(false)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn mpesa-btn" disabled={topupBusy}>
-                  {topupBusy ? "Starting…" : "Top up"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
       {/* One centred wait for both slow paths on this page. The registry
           lookup and the STK push are the two things a person actually stands
           and waits for, so the loader goes where the eye already is rather
@@ -546,13 +340,6 @@ export default function Verification() {
         />
       )}
 
-      {topupWaiting && (
-        <LoadingOverlay
-          label="Waiting for payment…"
-          note="Approve the prompt on your phone. This closes on its own once it clears."
-          onCancel={stopTopupPolling}
-        />
-      )}
 
     </>
   );

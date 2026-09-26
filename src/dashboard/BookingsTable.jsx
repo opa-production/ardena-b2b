@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { requestBookingRating } from "../lib/api";
 import { fmtRange, rentalDays, STATUS_CHIP } from "./bookingsStore";
-import { toast } from "./toastStore";
+import useRole from "../hooks/useRole";
+import { REVIEW_REQUESTS } from "../lib/features";
+import RequestReviewDialog from "./RequestReviewDialog";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
@@ -19,92 +20,92 @@ const StarIcon = () => (
    All bookings page (everything, filtered). `numberOf` maps a ref to its
    running number so a row keeps the same number on both pages. */
 export default function BookingsTable({ rows, numberOf }) {
+  const { can } = useRole();
   // Bookings already asked this session. The backend is the real guard against
-  // asking twice; this is so the button doesn't invite a second click.
+  // asking twice (3 days apart, 3 at most); this is so the button doesn't
+  // invite a second click.
   const [asked, setAsked] = useState(() => new Set());
   const [asking, setAsking] = useState(null);
 
-  /* One message to the client who rented, asking them to rate it. Sent
-     straight from the row: there is nothing to fill in, and a dialog in front
-     of a one-line SMS would be more ceremony than the act deserves. */
-  async function askForRating(b) {
-    if (asking || asked.has(b.ref)) return;
-    setAsking(b.ref);
-    try {
-      await requestBookingRating(b.ref);
-      setAsked((prev) => new Set(prev).add(b.ref));
-      toast(`Asked ${b.customer} to rate this rental.`);
-    } catch (err) {
-      toast(err.message || "Couldn't send the rating request.", "danger");
-    } finally {
-      setAsking(null);
-    }
-  }
+  /* Asking a client to rate their rental opens the review dialog on that
+     booking. It used to send straight from the row, but the SMS now costs the
+     business from its wallet, so the message and the price are shown first. */
+  const canAsk = (b) =>
+    REVIEW_REQUESTS && can("sendMarketing") && b.status === "Completed" && b.source !== "marketplace";
 
   return (
-    <table className="data-table">
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Vehicle</th>
-          <th>Dates</th>
-          <th className="num rate-col">Amount</th>
-          <th>Status</th>
-          <th className="actions-col">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((b) => {
-          const days = rentalDays(b.pickup, b.dropoff);
-          const askLabel = asked.has(b.ref)
-            ? `${b.customer} has been asked to rate this rental`
-            : `Ask ${b.customer} to rate this rental`;
-          return (
-            <tr key={b.ref}>
-              <td>
-                <div className="row-name">
-                  <span className="row-no">{numberOf?.get(b.ref)}</span>
-                  <span className="strong">{b.customer}</span>
-                </div>
-              </td>
-              <td>
-                <p className="strong">{b.vehicle}</p>
-                <p className="cell-sub">{b.plate}</p>
-              </td>
-              <td>
-                <p>{fmtRange(b.pickup, b.dropoff)}</p>
-                <p className="cell-sub">
-                  {days} day{days > 1 ? "s" : ""}
-                </p>
-              </td>
-              <td className="num rate-col">{fmtAmount(days * b.rate)}</td>
-              <td>
-                <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
-              </td>
-              <td className="actions-cell">
-                {/* A finished rental is the moment to ask — the client still
-                    has the vehicle in mind, and this is the row that knows
-                    which vehicle it was. */}
-                {b.status === "Completed" && (
-                  <button
-                    type="button"
-                    className={"icon-btn icon-only" + (asked.has(b.ref) ? " is-done" : "")}
-                    disabled={asking === b.ref || asked.has(b.ref)}
-                    title={askLabel}
-                    aria-label={askLabel}
-                    onClick={() => askForRating(b)}
-                  >
-                    <StarIcon />
-                  </button>
-                )}
-                <Link className="icon-btn" to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}>
-                  View
-                </Link>
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+    <>
+      <table className="data-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Vehicle</th>
+            <th>Dates</th>
+            <th className="num rate-col">Amount</th>
+            <th>Status</th>
+            <th className="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((b) => {
+            const days = rentalDays(b.pickup, b.dropoff);
+            const askLabel = asked.has(b.ref)
+              ? `${b.customer} has been asked to rate this rental`
+              : `Ask ${b.customer} to rate this rental`;
+            return (
+              <tr key={b.ref}>
+                <td>
+                  <div className="row-name">
+                    <span className="row-no">{numberOf?.get(b.ref)}</span>
+                    <span className="strong">{b.customer}</span>
+                  </div>
+                </td>
+                <td>
+                  <p className="strong">{b.vehicle}</p>
+                  <p className="cell-sub">{b.plate}</p>
+                </td>
+                <td>
+                  <p>{fmtRange(b.pickup, b.dropoff)}</p>
+                  <p className="cell-sub">
+                    {days} day{days > 1 ? "s" : ""}
+                  </p>
+                </td>
+                <td className="num rate-col">{fmtAmount(days * b.rate)}</td>
+                <td>
+                  <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
+                </td>
+                <td className="actions-cell">
+                  {/* A finished rental is the moment to ask — the client still
+                      has the vehicle in mind, and this is the row that knows
+                      which vehicle it was. */}
+                  {canAsk(b) && (
+                    <button
+                      type="button"
+                      className={"icon-btn icon-only" + (asked.has(b.ref) ? " is-done" : "")}
+                      disabled={asked.has(b.ref)}
+                      title={askLabel}
+                      aria-label={askLabel}
+                      onClick={() => setAsking(b.ref)}
+                    >
+                      <StarIcon />
+                    </button>
+                  )}
+                  <Link className="icon-btn" to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}>
+                    View
+                  </Link>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {asking && (
+        <RequestReviewDialog
+          bookingRef={asking}
+          onClose={() => setAsking(null)}
+          onSent={(ref) => setAsked((prev) => new Set(prev).add(ref))}
+        />
+      )}
+    </>
   );
 }

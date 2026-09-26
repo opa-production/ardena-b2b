@@ -40,7 +40,9 @@ export const NAV_SECTIONS = [
       // `soon` renders a muted tag in the sidebar — the page is a coming-soon
       // state until VEHICLE_TRACKING flips (see lib/features.js).
       { to: "/dashboard/tracking", key: "tracking", name: "Tracking", soon: !VEHICLE_TRACKING },
-      { to: "/dashboard/reviews", key: "reviews", name: "Reviews", appOnly: true },
+      // Not app-only: renters of any dashboard booking can be asked for a
+      // review by SMS, so every workspace has reviews to read.
+      { to: "/dashboard/reviews", key: "reviews", name: "Reviews" },
       {
         to: "/dashboard/claims",
         key: "claims",
@@ -78,6 +80,8 @@ export const NAV_SECTIONS = [
         children: [
           { to: "/dashboard/usage", key: "usage", name: "Usage & billing" },
           { to: "/dashboard/settlements", key: "settlements", name: "Settlements" },
+          // One prepaid balance for ID checks and SMS (subscriptions later).
+          { to: "/dashboard/wallet", key: "wallet", name: "Wallet", requires: "manageWallet" },
         ],
       },
       // Last in the section, under the Account group: reaching clients is the
@@ -149,6 +153,7 @@ export const SECTION_TITLES = {
   payments: "Finances",
   usage: "Usage & billing",
   settlements: "Settlements",
+  wallet: "Wallet",
   staff: "Staff & roles",
   marketing: "Marketing",
   // Not a sidebar item — it lives in the profile menu — but the page still

@@ -70,3 +70,14 @@ export const VEHICLE_TRACKING = false;
  * Flip to `true` to bring the page back; nothing else needs changing.
  */
 export const MARKETING = false;
+
+/**
+ * Asking a past renter for a review: the "Request review" button on Reviews,
+ * the star on a finished booking, and the public /r/:token page the SMS/email
+ * link opens.
+ *
+ * Needs the backend's /reviews, /public/reviews and /marketing/rating-requests
+ * endpoints. Flip to `false` to hide it again (the button shows disabled and
+ * the link resolves to the 404 page); nothing else needs changing.
+ */
+export const REVIEW_REQUESTS = true;

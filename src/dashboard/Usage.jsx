@@ -63,7 +63,8 @@ function dailySeries(usage, txns, days = 60) {
     if (t.isTopup || !t.date) continue;
     const cur = byDay.get(t.date) || { value: 0, checks: 0 };
     cur.value += t.amount;
-    cur.checks += 1;
+    // Spend includes SMS; the count is ID checks only.
+    if (t.category === "verification") cur.checks += 1;
     byDay.set(t.date, cur);
   }
 

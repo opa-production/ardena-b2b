@@ -10,7 +10,7 @@ import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
-import { MARKETPLACE_LISTINGS } from "./lib/features";
+import { MARKETPLACE_LISTINGS, REVIEW_REQUESTS } from "./lib/features";
 import { SEO_PAGES } from "./pages/seoPagesData";
 
 /* Dashboard screens are code-split — see dashboard/pageLoaders.js for why, and
@@ -41,6 +41,7 @@ const PaymentsList = lazy(load.paymentsList);
 const Staff = lazy(load.staff);
 const Usage = lazy(load.usage);
 const Settlements = lazy(load.settlements);
+const Wallet = lazy(load.wallet);
 const Marketing = lazy(load.marketing);
 const FeatureRequest = lazy(load.featureRequest);
 const Support = lazy(load.support);
@@ -87,7 +88,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ForgotPassword startAtReset />} />
       <Route path="/v/:slug" element={<VerifyBusiness />} />
-      <Route path="/r/:token" element={<LeaveReview />} />
+      <Route path="/r/:token" element={REVIEW_REQUESTS ? <LeaveReview /> : <NotFound />} />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route
         path="/dashboard"
@@ -130,7 +131,7 @@ export default function App() {
           path="renter-messages"
           element={<RequireAppLink><RequireRole capability="renterInbox"><RenterInbox /></RequireRole></RequireAppLink>}
         />
-        <Route path="reviews" element={<RequireAppLink><Ratings /></RequireAppLink>} />
+        <Route path="reviews" element={<Ratings />} />
         <Route path="clients" element={<Clients />} />
         <Route path="clients/:id" element={<ClientDetails />} />
         <Route path="chauffeurs" element={<Chauffeurs />} />
@@ -178,6 +179,10 @@ export default function App() {
         <Route
           path="settlements"
           element={<RequireRole capability="manageBilling"><Settlements /></RequireRole>}
+        />
+        <Route
+          path="wallet"
+          element={<RequireRole capability="manageWallet"><Wallet /></RequireRole>}
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />

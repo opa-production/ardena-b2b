@@ -42,6 +42,8 @@ export function normalizeTxn(t) {
     isTopup,
     status: String(t.status || "completed").toLowerCase(),
     method: t.method || t.channel || t.description || (isTopup ? "Top-up" : "Renter check"),
+    // topup | verification | sms | subscription (older rows have no category)
+    category: t.category || (isTopup ? "topup" : "verification"),
     date: (t.date || t.created_at || "").slice(0, 10),
   };
 }

@@ -44,6 +44,7 @@ export const load = {
   staff: () => import("./Staff"),
   usage: () => import("./Usage"),
   settlements: () => import("./Settlements"),
+  wallet: () => import("./Wallet"),
   marketing: () => import("./Marketing"),
   featureRequest: () => import("./FeatureRequest"),
   support: () => import("./Support"),

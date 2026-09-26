@@ -982,10 +982,13 @@ export default function BookingDetails() {
                     </button>
                   ))}
                 </div>
-                <input
+                <textarea
+                  className="field-input rate-note"
+                  rows={3}
                   value={renterNote}
                   onChange={(e) => setRenterNote(e.target.value)}
                   placeholder="Anything other hosts should know? (optional)"
+                  aria-label={`Review of ${b.customer}`}
                   maxLength={2000}
                 />
                 <button

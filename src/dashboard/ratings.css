@@ -78,11 +78,16 @@
 
 .rr-steps li::before {
   content: counter(rr);
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
   font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
   box-shadow: inset 0 0 0 1px var(--line);
 }
 

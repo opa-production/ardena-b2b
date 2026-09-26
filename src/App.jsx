@@ -59,6 +59,7 @@ const Pricing = lazy(() => import("./pages/Pricing"));
 const Contact = lazy(() => import("./pages/Contact"));
 const SeoPage = lazy(() => import("./pages/SeoPage"));
 const VerifyBusiness = lazy(() => import("./pages/VerifyBusiness"));
+const LeaveReview = lazy(() => import("./pages/LeaveReview"));
 
 // Gate the dashboard behind a session; reacts to the session being
 // cleared (e.g. an expired token) by bouncing back to sign-in.
@@ -86,6 +87,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ForgotPassword startAtReset />} />
       <Route path="/v/:slug" element={<VerifyBusiness />} />
+      <Route path="/r/:token" element={<LeaveReview />} />
       <Route path="/accept-invite" element={<AcceptInvite />} />
       <Route
         path="/dashboard"

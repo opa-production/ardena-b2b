@@ -8,6 +8,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./ratings.css";
 import RefreshButton from "../components/RefreshButton";
+import RequestReviewDialog from "./RequestReviewDialog";
 import reviewsArt from "../assets/reviews.svg";
 import "./coming.css";
 
@@ -40,6 +41,7 @@ export default function Ratings() {
   const [summary, setSummary] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [requesting, setRequesting] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -68,9 +70,22 @@ export default function Ratings() {
   return (
     <>
       <h1 className="sr-only">Reviews</h1>
-      <div className="page-refresh">
+      <div className="page-refresh ratings-bar">
+        <button
+          type="button"
+          className="btn btn-ghost refresh-btn"
+          onClick={() => setRequesting(true)}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            <path d="M12 7l1.2 2.4 2.6.4-1.9 1.8.5 2.6L12 13l-2.4 1.2.5-2.6-1.9-1.8 2.6-.4z" />
+          </svg>
+          <span>Request review</span>
+        </button>
         <RefreshButton onRefresh={load} />
       </div>
+      {requesting && <RequestReviewDialog onClose={() => setRequesting(false)} />}
 
       {!hasAny ? (
         <div className="coming">

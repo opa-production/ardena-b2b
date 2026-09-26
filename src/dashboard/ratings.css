@@ -46,3 +46,149 @@
   line-height: 1.55;
   color: var(--ink-soft);
 }
+
+/* ── Request a review ─────────────────────────────────────────────── */
+
+.ratings-bar {
+  gap: 10px;
+}
+
+.modal-card.rr-card {
+  max-width: 480px;
+}
+
+.rr-steps {
+  display: flex;
+  gap: 18px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+  counter-reset: rr;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-mute);
+}
+
+.rr-steps li {
+  counter-increment: rr;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rr-steps li::before {
+  content: counter(rr);
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.rr-steps li.on {
+  color: var(--ink);
+}
+
+.rr-steps li.on::before {
+  background: var(--ink-inv);
+  color: var(--on-ink);
+  box-shadow: none;
+}
+
+.rr-steps li.done::before {
+  content: "✓";
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+
+.rr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.rr-option {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.rr-option:hover {
+  box-shadow: inset 0 0 0 1px var(--ink-mute);
+}
+
+.rr-option.on {
+  box-shadow: inset 0 0 0 2px var(--brand);
+}
+
+.rr-option-main,
+.rr-option-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rr-option-side {
+  text-align: right;
+}
+
+.rr-sms {
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  background: var(--bg);
+  border-radius: var(--radius-soft);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.rr-sms + .field-note {
+  margin-bottom: 22px;
+}
+
+.rr-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding: 8px 8px 8px 14px;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 13px;
+}
+
+.rr-link span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 520px) {
+  .rr-option {
+    flex-direction: column;
+  }
+
+  .rr-option-side {
+    text-align: left;
+  }
+}

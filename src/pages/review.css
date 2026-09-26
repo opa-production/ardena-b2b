@@ -1,0 +1,131 @@
+/* ---- Public review page (/r/:token) ---- */
+
+.trust-card.rv-card {
+  max-width: 460px;
+}
+
+.rv-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rv-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 10px;
+}
+
+.trust-card h1.rv-car {
+  margin-bottom: 6px;
+}
+
+.trust-sub.rv-dates {
+  margin-bottom: 26px;
+}
+
+.rv-stars {
+  display: flex;
+  gap: 6px;
+}
+
+.rv-star {
+  padding: 2px 4px;
+  border: none;
+  background: none;
+  font-size: 40px;
+  line-height: 1;
+  color: var(--line);
+  cursor: pointer;
+  transition: color 0.12s var(--ease), transform 0.12s var(--ease);
+}
+
+.rv-star.on {
+  color: var(--accent);
+}
+
+.rv-star:hover {
+  transform: scale(1.08);
+}
+
+.rv-star:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.rv-label {
+  min-height: 20px;
+  margin: 8px 0 24px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.rv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rv-field textarea {
+  width: 100%;
+  min-height: 104px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s var(--ease);
+}
+
+.rv-field textarea::placeholder {
+  color: var(--ink-mute);
+}
+
+.rv-field textarea:focus {
+  border-color: var(--ink);
+}
+
+.rv-form .form-error {
+  align-self: stretch;
+  margin-top: 12px;
+  text-align: left;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--danger);
+}
+
+.btn.rv-submit {
+  width: 100%;
+  margin-top: 20px;
+  padding: 13px 20px;
+}
+
+.btn.rv-submit:disabled {
+  opacity: 0.65;
+  cursor: default;
+  transform: none;
+}
+
+.rv-done {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 18px;
+  color: var(--brand);
+  box-shadow: inset 0 0 0 2px var(--brand);
+}

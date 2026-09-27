@@ -27,11 +27,18 @@ export default function DateRangePicker({
   onChange,
   minDate,
   isDisabled = () => false,
+  // The left-hand month on open (default: this month). Reports open on last
+  // month so the two months shown are the recent past, not the future.
+  initialMonth,
+  hints = {
+    start: "Pick the pickup date",
+    end: "Now pick the return date",
+    done: "Booked, blocked and past dates are crossed out",
+  },
 }) {
-  const today = new Date();
-  const [view, setView] = useState({
-    y: today.getFullYear(),
-    m: today.getMonth(),
+  const [view, setView] = useState(() => {
+    const d = initialMonth || new Date();
+    return { y: d.getFullYear(), m: d.getMonth() };
   });
   const [hover, setHover] = useState(null);
 
@@ -142,11 +149,7 @@ export default function DateRangePicker({
         <Month y={next.getFullYear()} m={next.getMonth()} />
       </div>
       <p className="drp-hint">
-        {!start
-          ? "Pick the pickup date"
-          : !end
-            ? "Now pick the return date"
-            : "Booked, blocked and past dates are crossed out"}
+        {!start ? hints.start : !end ? hints.end : hints.done}
       </p>
     </div>
   );

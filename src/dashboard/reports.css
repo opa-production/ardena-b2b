@@ -23,7 +23,9 @@
 /* The card and row holding an open period menu sit above their neighbours,
    so the menu is never painted under the next card or row. */
 .rp-group:has(.dd.open),
-.rp-row:has(.dd.open) {
+.rp-row:has(.dd.open),
+.rp-group:has(.rp-custom.open),
+.rp-row:has(.rp-custom.open) {
   z-index: 5;
 }
 
@@ -95,25 +97,40 @@
 }
 
 .rp-custom {
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
 }
 
-.rp-custom input {
-  padding: 9px 10px;
-  border: none;
-  border-radius: var(--radius-sm);
-  font: inherit;
-  font-size: 13px;
-  color: var(--ink);
-  background: var(--bg);
-  box-shadow: var(--edge-in);
-  outline: none;
+.drp-trigger.rp-custom-trigger {
+  width: auto;
+  padding: 10px 13px;
+  gap: 8px;
+  font-size: 13.5px;
+  white-space: nowrap;
 }
 
-.rp-custom input:focus {
-  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
+.drp-trigger.rp-custom-trigger.is-bad {
+  box-shadow: var(--edge-in), 0 0 0 2px var(--danger);
+}
+
+.rp-custom-err {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+/* Two months side by side, anchored to the row's right edge. */
+.drp-pop.rp-custom-pop {
+  left: auto;
+  right: 0;
+  width: min(600px, calc(100vw - 32px));
+}
+
+.drp-pop.rp-custom-pop.up {
+  top: auto;
+  bottom: calc(100% + 10px);
 }
 
 .btn.rp-generate {
@@ -195,11 +212,16 @@
   .rp-custom {
     order: 3;
     width: 100%;
+    align-items: stretch;
   }
 
-  .rp-custom input {
-    flex: 1;
-    min-width: 0;
+  .drp-trigger.rp-custom-trigger {
+    width: 100%;
+  }
+
+  .drp-pop.rp-custom-pop {
+    left: 0;
+    right: auto;
   }
 }
 

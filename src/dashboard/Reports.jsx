@@ -15,6 +15,7 @@ import PageSkeleton from "./PageSkeleton";
 import RefreshButton from "../components/RefreshButton";
 import Dropdown from "../components/Dropdown";
 import ConfirmDialog from "../components/ConfirmDialog";
+import DateRangePicker from "./DateRangePicker";
 import {
   deleteReport,
   emailReport,
@@ -29,6 +30,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import "../components/confirm.css";
 import "./bookings.css";
 import "./fleet.css";
+import "./daterange.css";
 import "./reports.css";
 
 const GROUPS = ["Business", "Money", "Fleet", "Customers", "Operations"];
@@ -80,11 +82,86 @@ const fmtWhen = (iso) =>
 const fmtSize = (b) =>
   !b ? "" : b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
+// The backend caps a report at 366 days.
+const MAX_DAYS = 366;
+
+const spanDays = (a, b) =>
+  Math.round((Date.parse(`${b}T00:00:00`) - Date.parse(`${a}T00:00:00`)) / 86400000) + 1;
+
+const fmtShort = (iso) =>
+  new Date(`${iso}T00:00:00`).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" });
+
+/* Custom dates: the dashboard's own range calendar in a popover, past dates
+   only. Opens down on a group's first row and up on the rest, like the
+   period menu beside it. */
+function CustomRange({ value, onChange, placement }) {
+  const [open, setOpen] = useState(true);
+  const ref = useRef(null);
+  const today = isoLocal(new Date());
+  const lastMonth = new Date();
+  lastMonth.setDate(1);
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const tooLong = value.from && value.to && spanDays(value.from, value.to) > MAX_DAYS;
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e) => !ref.current?.contains(e.target) && setOpen(false);
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className={"rp-custom" + (open ? " open" : "")} ref={ref}>
+      <button
+        type="button"
+        className={"drp-trigger rp-custom-trigger" + (open ? " open" : "") + (tooLong ? " is-bad" : "")}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label="Custom dates"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="17" rx="2" />
+          <path d="M8 2v4M16 2v4M3 9h18" />
+        </svg>
+        {value.from ? fmtShort(value.from) : <span className="placeholder">Start</span>}
+        <span className="drp-arrow">→</span>
+        {value.to ? fmtShort(value.to) : <span className="placeholder">End</span>}
+      </button>
+      {tooLong && <span className="rp-custom-err">Up to 12 months per report</span>}
+      {open && (
+        <div className={"drp-pop rp-custom-pop" + (placement === "up" ? " up" : "")}>
+          <DateRangePicker
+            start={value.from || null}
+            end={value.to || null}
+            initialMonth={lastMonth}
+            isDisabled={(iso) => iso > today}
+            hints={{
+              start: "Pick the first day of the report",
+              end: "Now pick the last day",
+              done: "Up to 12 months. Future dates are crossed out.",
+            }}
+            onChange={({ start, end }) => {
+              onChange({ from: start || "", to: end || "" });
+              if (start && end) setTimeout(() => setOpen(false), 250);
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
 // A period choice -> { from, to }, or null when custom dates are incomplete.
 function resolvePeriod(period, custom) {
   const today = new Date();
   if (period === "custom") {
     if (!custom.from || !custom.to || custom.from > custom.to) return null;
+    if (spanDays(custom.from, custom.to) > MAX_DAYS) return null;
     return { from: custom.from, to: custom.to };
   }
   if (period === "last-month") {
@@ -279,11 +356,10 @@ function FileActions({ report, onView, onDownload, onEmail, busy }) {
   );
 }
 
-function ReportRow({ cat, latest, generating, onGenerate, actions }) {
+function ReportRow({ cat, latest, generating, onGenerate, actions, placement }) {
   const [period, setPeriod] = useState("30");
   const [custom, setCustom] = useState({ from: "", to: "" });
   const range = resolvePeriod(period, custom);
-  const today = isoLocal(new Date());
 
   return (
     <li className="rp-row">
@@ -306,29 +382,12 @@ function ReportRow({ cat, latest, generating, onGenerate, actions }) {
             value={period}
             onChange={setPeriod}
             options={PERIODS}
-            placement="up"
+            placement={placement}
             ariaLabel={`Period for ${cat.title}`}
           />
         </div>
         {period === "custom" && (
-          <div className="rp-custom">
-            <input
-              type="date"
-              aria-label="From"
-              max={custom.to || today}
-              value={custom.from}
-              onChange={(e) => setCustom((c) => ({ ...c, from: e.target.value }))}
-            />
-            <span className="cell-sub">to</span>
-            <input
-              type="date"
-              aria-label="To"
-              min={custom.from || undefined}
-              max={today}
-              value={custom.to}
-              onChange={(e) => setCustom((c) => ({ ...c, to: e.target.value }))}
-            />
-          </div>
+          <CustomRange value={custom} onChange={setCustom} placement={placement} />
         )}
         <button
           type="button"
@@ -452,9 +511,10 @@ export default function Reports() {
             <h2>{group}</h2>
           </header>
           <ul className="rp-list">
-            {items.map((cat) => (
+            {items.map((cat, i) => (
               <ReportRow
                 key={cat.type}
+                placement={i === 0 ? "down" : "up"}
                 cat={cat}
                 latest={latestByType[cat.type]}
                 generating={generating === cat.type}

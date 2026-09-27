@@ -5,11 +5,10 @@
    dropped on /pricing and on the landing without either page's wrapper class
    having to be present.
 
-   Three plans, three colours: Starter plain, Fleet in the brand blue, and
-   Enterprise in the lavender accent. Each card is a coloured top band (name,
-   price, button) over a white panel for the reading text. White on the brand
-   blue is 3.9:1: enough for the large price, not for small copy, so the small
-   copy lives on white. Corners stay near-sharp (3px), per the brand.
+   Three plans, three colours: Starter white, Fleet a fully blue card, and
+   Enterprise a fully lavender one. The blue is #0068D6, a shade deeper than
+   the brand #007FFA, so white small copy passes contrast (5.2:1 vs 3.9:1).
+   The button sits at the foot of every card. Corners stay near-sharp (3px).
    ========================================================================= */
 
 .pc-founding {
@@ -59,37 +58,42 @@
 }
 
 .pc-card {
-  --pc-band: #f1f5f9;
-  --pc-band-ink: #0f172a;
+  --pc-bg: #fff;
+  --pc-ink: #0f172a;
+  --pc-text: var(--ard-text, #475569);
+  --pc-line: var(--ard-line, #e2e8f0);
   display: flex;
   flex-direction: column;
   border-radius: 3px;
   overflow: hidden;
-  background: #fff;
+  background: var(--pc-bg);
+  color: var(--pc-ink);
   box-shadow: 0 0 0 1px var(--ard-line, #e2e8f0), 0 12px 30px -18px rgba(15, 23, 42, 0.25);
 }
 
 .pc-card--brand {
-  --pc-band: #007ffa;
-  --pc-band-ink: #fff;
-  box-shadow: 0 0 0 1px #007ffa, 0 18px 40px -18px rgba(0, 127, 250, 0.55);
+  --pc-bg: #0068d6;
+  --pc-ink: #fff;
+  --pc-text: rgba(255, 255, 255, 0.92);
+  --pc-line: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 18px 40px -18px rgba(0, 104, 214, 0.6);
 }
 
 .pc-card--accent {
-  --pc-band: rgb(183, 172, 232);
-  --pc-band-ink: #0f172a;
-  box-shadow: 0 0 0 1px rgb(183, 172, 232), 0 12px 30px -18px rgba(76, 58, 167, 0.35);
+  --pc-bg: rgb(183, 172, 232);
+  --pc-ink: #0f172a;
+  --pc-text: #2e2657;
+  --pc-line: rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 30px -18px rgba(76, 58, 167, 0.45);
 }
 
-/* ---- Coloured band ---- */
+/* ---- Name and price ---- */
 
 .pc-top {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1.6rem 1.6rem 1.5rem;
-  background: var(--pc-band);
-  color: var(--pc-band-ink);
+  padding: 1.6rem 1.6rem 0;
 }
 
 /* The name sits on a white chip on every band, so it reads at any size. */
@@ -118,7 +122,7 @@
   font-weight: 600;
   line-height: 1;
   letter-spacing: -0.03em;
-  color: var(--pc-band-ink);
+  color: var(--pc-ink);
 }
 
 .pc-cur {
@@ -126,20 +130,17 @@
   font-weight: 500;
 }
 
-/* "per car, per month" is small text, so it gets the white chip treatment
-   too rather than sitting in white-on-blue. */
+/* "/ car / month", "forever": plain text beside the price. */
 .pc-per {
-  padding: 3px 9px;
-  border-radius: 3px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #0f172a;
-  background: rgba(255, 255, 255, 0.92);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--pc-text);
 }
 
 /* ---- Call to action ---- */
 
 .pc-cta {
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -167,27 +168,28 @@
   background: #000;
 }
 
-/* ---- White reading panel ---- */
+/* ---- Reading text, then the button at the foot ---- */
 
 .pc-body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  padding: 1.35rem 1.6rem 1.7rem;
+  gap: 1.6rem;
+  padding: 1.35rem 1.6rem 1.6rem;
 }
 
 .pc-range {
-  margin: 0 0 1.2rem;
+  margin: 0 0 -0.4rem;
   font-size: 0.9rem;
   line-height: 1.55;
-  color: var(--ard-text, #475569);
+  color: var(--pc-text);
 }
 
 .pc-features {
   list-style: none;
   margin: 0;
   padding: 1.2rem 0 0;
-  border-top: 1px solid var(--ard-line, #e2e8f0);
+  border-top: 1px solid var(--pc-line);
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -199,7 +201,7 @@
   gap: 0.6rem;
   font-size: 0.86rem;
   line-height: 1.45;
-  color: var(--ard-text, #475569);
+  color: var(--pc-text);
 }
 
 .pc-feature--muted {
@@ -220,7 +222,21 @@
 }
 
 .pc-card--brand .pc-tick:not(.pc-tick--muted) {
-  background: #007ffa;
+  color: #0068d6;
+  background: #fff;
+}
+
+.pc-card--brand .pc-feature--muted {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pc-card--brand .pc-tick--muted {
+  background: rgba(255, 255, 255, 0.3);
+  color: #0068d6;
+}
+
+.pc-card--accent .pc-feature--muted {
+  color: rgba(15, 23, 42, 0.55);
 }
 
 .pc-card--accent .pc-tick:not(.pc-tick--muted) {

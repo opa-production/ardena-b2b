@@ -107,7 +107,7 @@ export const TIERS = [
     name: "Fleet",
     tone: "brand",
     price: FLEET_PRICE,
-    per: "per car, per month",
+    per: "/ car / month",
     blurb: `Everything, for a growing fleet. From ${FLEET_MIN_CARS} cars, and never more than KES ${FLEET_CAP.toLocaleString("en-KE")} a month.`,
     cta: { label: "Start with Fleet", to: "/signup", solid: true },
     features: [
@@ -125,7 +125,7 @@ export const TIERS = [
     name: "Enterprise",
     tone: "accent",
     price: null,
-    per: "custom terms",
+    per: "pricing",
     blurb: "For large fleets, several branches and terms of your own.",
     cta: { label: "Talk to us", to: "/contact" },
     features: [

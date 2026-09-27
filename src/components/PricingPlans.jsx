@@ -33,10 +33,10 @@ function Price({ price }) {
 /**
  * The plan grid: Starter, Fleet and Enterprise, each in its own colour.
  *
- * Every card has a coloured top band (name, price, the one button) and a white
- * lower panel for the reading text. White on the brand blue is only 3.9:1, fine
- * for the large price but not for small copy, so the small copy sits on white
- * where it is easy to read on every card.
+ * Fleet is a fully blue card and Enterprise a fully lavender one; Starter stays
+ * white. The button sits at the foot of every card so the three line up. The
+ * blue is a shade deeper than the brand #007FFA because white small text on
+ * #007FFA is only 3.9:1; on #0068D6 it passes at 5.2:1.
  *
  * The founding line reads the live number of spots left from the backend
  * (GET /public/plans) and simply leaves the count out if that call fails, so
@@ -80,9 +80,6 @@ export default function PricingPlans() {
                 <Price price={t.price} />
                 <span className="pc-per">{t.per}</span>
               </p>
-              <Link to={t.cta.to} className={`pc-cta${t.cta.solid ? " pc-cta--solid" : ""}`}>
-                {t.cta.label}
-              </Link>
             </div>
 
             <div className="pc-body">
@@ -101,6 +98,9 @@ export default function PricingPlans() {
                   </li>
                 ))}
               </ul>
+              <Link to={t.cta.to} className={`pc-cta${t.cta.solid ? " pc-cta--solid" : ""}`}>
+                {t.cta.label}
+              </Link>
             </div>
           </article>
         ))}

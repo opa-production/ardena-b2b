@@ -19,6 +19,8 @@ export default function Dropdown({
   // Optional: how the closed trigger shows the selection (the panel always
   // lists plain labels). Toolbar filters use it to read "Status · Active".
   formatValue,
+  // "up" opens the panel above the trigger, for rows near the bottom of a list.
+  placement = "down",
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -45,7 +47,7 @@ export default function Dropdown({
   }, [open]);
 
   return (
-    <div className={"dd" + (open ? " open" : "")} ref={ref}>
+    <div className={"dd" + (placement === "up" ? " dd-up" : "") + (open ? " open" : "")} ref={ref}>
       {name && <input type="hidden" name={name} value={value ?? ""} />}
       <button
         type="button"

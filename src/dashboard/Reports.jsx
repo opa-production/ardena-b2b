@@ -306,6 +306,7 @@ function ReportRow({ cat, latest, generating, onGenerate, actions }) {
             value={period}
             onChange={setPeriod}
             options={PERIODS}
+            placement="up"
             ariaLabel={`Period for ${cat.title}`}
           />
         </div>

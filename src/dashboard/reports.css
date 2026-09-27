@@ -16,7 +16,19 @@
 }
 
 .rp-group {
+  position: relative;
   margin-bottom: 20px;
+}
+
+/* The card and row holding an open period menu sit above their neighbours,
+   so the menu is never painted under the next card or row. */
+.rp-group:has(.dd.open),
+.rp-row:has(.dd.open) {
+  z-index: 5;
+}
+
+.rp-row {
+  position: relative;
 }
 
 /* One row per report: what it is on the left, period + Generate on the right. */

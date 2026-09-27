@@ -60,6 +60,11 @@
   animation: rise 0.18s var(--ease) both;
 }
 
+.dd-up .dd-panel {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+
 .dd-option {
   display: flex;
   align-items: center;

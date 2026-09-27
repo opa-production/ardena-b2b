@@ -45,7 +45,7 @@ function CardLines({ rows = 5 }) {
 }
 
 /* The minimal back link that replaced the header card on form, full-list and
-   settings pages — one short muted row, not a card. */
+   settings pages, one short muted row, not a card. */
 function BackLine() {
   return (
     <div className="page-back">
@@ -165,7 +165,7 @@ function SideCards({ cards = [3, 2] }) {
 }
 
 /* `path` decides which skeleton shape to draw. It defaults to "" so a caller
-   that forgets it falls through to the generic list skeleton — a missing prop
+   that forgets it falls through to the generic list skeleton, a missing prop
    should never throw and take the whole dashboard down with it. */
 export default function PageSkeleton({ path = "" }) {
   const parts = path.split("/").filter(Boolean); // ["dashboard", ...]

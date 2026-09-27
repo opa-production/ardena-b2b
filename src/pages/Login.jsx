@@ -5,6 +5,7 @@ import { login, verifyLoginCode, resendLoginCode, takeSessionExpiredNotice } fro
 import usePageTitle from "../hooks/usePageTitle";
 import AuthWaves from "./AuthWaves";
 import "./auth.css";
+import { submitWhenComplete } from "../lib/autoSubmit";
 
 export default function Login() {
   usePageTitle("Sign in");
@@ -85,7 +86,10 @@ export default function Login() {
                 maxLength={6}
                 placeholder="••••••"
                 value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => {
+                  setCode(e.target.value.replace(/\D/g, ""));
+                  submitWhenComplete(e);
+                }}
                 autoFocus
                 required
               />

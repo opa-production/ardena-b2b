@@ -88,8 +88,7 @@ export default function BookingDetails() {
   const policy = useSyncExternalStore(subscribePolicy, getPolicy);
   const { can } = useRole();
   const { ref } = useParams();
-  // The row from the bookings list, if that is where this was opened from —
-  // enough to draw the page while the full record loads. See recordSeeds.
+  // The row from the bookings list, if that is where this was opened from, // enough to draw the page while the full record loads. See recordSeeds.
   const [b, setB] = useState(() => getSeed("bookings", decodeURIComponent(ref)));
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
@@ -138,7 +137,7 @@ export default function BookingDetails() {
   }, [decodedRef]);
 
   /* Arriving from the bookings list, the row that was clicked is already
-     known — customer, vehicle, dates, status — so draw it now and let the
+     known, customer, vehicle, dates, status, so draw it now and let the
      full record fill in the rest. Only the headline fields are seeded, so
      everything else renders empty for the moment the fetch takes; the page
      is marked busy until it lands. Landing here from a link or a refresh
@@ -168,7 +167,7 @@ export default function BookingDetails() {
     pollPsRef.current = paystackRef;
     setPayWaiting(true);
     // Paystack docs: wait at least 10 s before first check, then poll every 10 s.
-    // 3-minute hard cap (18 ticks) — Paystack STK pushes expire after ~2 min on-device.
+    // 3-minute hard cap (18 ticks), Paystack STK pushes expire after ~2 min on-device.
     pollDeadlineRef.current = Date.now() + 3 * 60 * 1000;
     let inFlight = false;
 
@@ -180,7 +179,7 @@ export default function BookingDetails() {
         if (!psRef) { stopPolling(); return; }
 
         if (Date.now() > pollDeadlineRef.current) {
-          // Hard timeout — do one final check then give up
+          // Hard timeout, do one final check then give up
           try {
             const res = await checkChargeStatus(psRef);
             if (res.charge_status === "success") {
@@ -211,15 +210,15 @@ export default function BookingDetails() {
           stopPolling();
           toast(res.message || "Payment was declined or timed out. You can resend the request.", "danger");
         }
-        // "pending" or "error" — silent, will retry next tick
+        // "pending" or "error", silent, will retry next tick
       } catch {
-        // network hiccup — retry next tick
+        // network hiccup, retry next tick
       } finally {
         inFlight = false;
       }
     }
 
-    // First tick after 10 s (per Paystack recommendation — don't call too early)
+    // First tick after 10 s (per Paystack recommendation, don't call too early)
     pollRef.current = setInterval(tick, 10000);
   }
 
@@ -248,7 +247,7 @@ export default function BookingDetails() {
      arrange it (take the money, put a driver on it), then hand the car over.
      Showing both at once buried the two controls that matter on the day the
      booking is made under a condition form nobody can fill in yet. Handover
-     stays closed until the money is settled — cash counts, see the cash
+     stays closed until the money is settled, cash counts, see the cash
      recording action on the payment card. */
   const settled = b.payment === "Paid" || b.payment === "Refunded";
   const next = NEXT_STEP[b.status];
@@ -367,7 +366,7 @@ export default function BookingDetails() {
         fuel: outFuel,
         notes: f.get("notes").trim() || null,
         // Bookings that came from the Ardena app can't be handed over without
-        // the renter's code — the request is rejected outright.
+        // the renter's code, the request is rejected outright.
         ...(needsCode ? { pickup_code: String(f.get("pickup_code") || "").trim() } : {}),
       });
       let finalBooking = updated;
@@ -1001,7 +1000,7 @@ export default function BookingDetails() {
               </form>
             )}
 
-            {/* Ardena collects and releases the deposit on an app booking — the
+            {/* Ardena collects and releases the deposit on an app booking, the
                 renter paid it at checkout, not to us. Settling it here would show
                 a deposit resolved while their money sat untouched, so the backend
                 refuses and we point at the claim process instead. */}

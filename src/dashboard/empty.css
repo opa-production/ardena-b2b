@@ -1,6 +1,6 @@
 /* ---- Fresh-business empty states ---- */
 
-/* One quiet line where a card has nothing to show yet — no icon, no sentence.
+/* One quiet line where a card has nothing to show yet, no icon, no sentence.
    `margin: auto` centres it in a chart card's flex column and is harmless in
    an ordinary block. */
 .empty-line {

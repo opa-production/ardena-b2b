@@ -34,7 +34,7 @@ export default function Bookings() {
       const data = await fetchBookings({});
       const rows = data.data || [];
       setBookings(rows);
-      // so opening one of these paints instantly — see recordSeeds
+      // so opening one of these paints instantly, see recordSeeds
       seedRecords("bookings", rows, (b) => b.ref);
     } catch (err) {
       toast(err.message || "Failed to load bookings", "danger");

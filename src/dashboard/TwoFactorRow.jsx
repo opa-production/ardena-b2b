@@ -8,12 +8,12 @@ import {
 } from "../lib/api";
 import { toast } from "./toastStore";
 import "./security.css";
+import { submitWhenComplete } from "../lib/autoSubmit";
 
 /* Two-step sign-in, as one row of the Password & security card.
 
    Setup is a small dialog: pick where codes go (the login email, or a mobile
-   number added here), receive a code there, type it back. Only then is it on —
-   so a mistyped number can't lock anyone out. Turning it off asks for a code
+   number added here), receive a code there, type it back. Only then is it on, so a mistyped number can't lock anyone out. Turning it off asks for a code
    too; otherwise it would be the easy way around it. */
 export default function TwoFactorRow() {
   const [status, setStatus] = useState(null);
@@ -182,7 +182,10 @@ export default function TwoFactorRow() {
                   maxLength={6}
                   placeholder="••••••"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => {
+                    setCode(e.target.value.replace(/\D/g, ""));
+                    submitWhenComplete(e);
+                  }}
                   aria-label="One-time code"
                   autoFocus
                 />

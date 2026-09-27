@@ -59,7 +59,7 @@ export default function RenterProfileCard({ renter }) {
         </div>
         <div>
           <span className="renter-stat-value">
-            {renter.rating_avg != null ? `${renter.rating_avg}★` : "–"}
+            {renter.rating_avg != null ? `${renter.rating_avg}★` : "-"}
           </span>
           <span className="renter-stat-label">
             {renter.rating_count

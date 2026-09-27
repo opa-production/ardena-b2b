@@ -5,7 +5,7 @@
    That keeps it convincing as vector art and crisp at any size.
 
    To swap in a 3D render or a photograph later, replace the <CarSilhouette />
-   in Landing.jsx with an <img className="stage-car" /> — the stage sizes and
+   in Landing.jsx with an <img className="stage-car" />, the stage sizes and
    lights whatever sits in that slot. */
 export default function CarSilhouette({ className = "" }) {
   return (

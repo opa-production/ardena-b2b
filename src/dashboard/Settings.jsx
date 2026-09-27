@@ -212,7 +212,7 @@ export default function Settings() {
 
   return (
     <>
-      {/* The gear is the whole of this page's chrome — no title card, the
+      {/* The gear is the whole of this page's chrome, no title card, the
           sidebar already says Profile. Everything you configure rather than
           fill in lives behind it. */}
       <div className="page-actions">
@@ -297,8 +297,7 @@ export default function Settings() {
 
           <QuickLinks />
 
-          {/* Renders only for workspaces that already linked an app account —
-              connecting is deferred, see lib/features.js */}
+          {/* Renders only for workspaces that already linked an app account, connecting is deferred, see lib/features.js */}
           <HostLinkPanel />
         </div>
 
@@ -432,7 +431,7 @@ export default function Settings() {
 
       {/* Changing a password is a task, not a panel: it takes over until it is
           done or abandoned. As a card it sat open mid-page in a half-finished
-          state — a code sent, three empty fields — while the rest of the
+          state, a code sent, three empty fields, while the rest of the
           profile stayed editable around it. */}
       {pwStage === "code" && (
         <div className="modal-overlay" onClick={() => !pwBusy && closePasswordModal()}>

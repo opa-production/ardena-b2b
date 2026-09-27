@@ -9,7 +9,7 @@ import "../dashboard/coming.css";
  * Two ways out rather than one, because the two people who land here need
  * different things: someone signed in mistyped a dashboard path and wants to
  * be back at work, and everyone else wants the site. The signed-in check is
- * read once at render — this page has nothing to keep in sync.
+ * read once at render, this page has nothing to keep in sync.
  *
  * The path is echoed back so a mistyped or truncated link is obvious at a
  * glance; it is rendered as text, never as a link. */

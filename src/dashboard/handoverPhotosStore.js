@@ -12,7 +12,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) return JSON.parse(raw);
   } catch {
-    /* private mode / corrupt — start empty */
+    /* private mode / corrupt, start empty */
   }
   return {};
 }

@@ -76,7 +76,7 @@
   box-shadow: var(--edge-in);
 }
 
-/* Claim status chips — colour only, matching fleet.css / bookings.css. */
+/* Claim status chips, colour only, matching fleet.css / bookings.css. */
 .chip.claim-pending  { color: var(--warn); }
 .chip.claim-approved { color: var(--ok); }
 .chip.claim-partial  { color: var(--warn); }

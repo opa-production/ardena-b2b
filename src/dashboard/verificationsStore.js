@@ -170,7 +170,7 @@ export async function runLookup({ type, number, clientId, bookingRef }) {
 }
 
 // Start a wallet top-up: { amount, method: "mpesa" | "card", phone? }.
-// Returns { reference, checkout_url, ... } — card gives a URL, M-Pesa an STK push.
+// Returns { reference, checkout_url, ... }, card gives a URL, M-Pesa an STK push.
 export function startTopup(payload) {
   return topupWallet(payload, uid());
 }

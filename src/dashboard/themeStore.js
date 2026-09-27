@@ -13,7 +13,7 @@ function readSaved() {
     const v = localStorage.getItem(KEY);
     if (v === "dark" || v === "light") return v;
   } catch {
-    /* storage blocked — fall through to default */
+    /* storage blocked, fall through to default */
   }
   return "light";
 }

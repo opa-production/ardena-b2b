@@ -74,7 +74,7 @@ export default function Support() {
   /* Poll the thread without redrawing it.
    *
    * The reply arrives by polling, so this runs every 15 seconds whether or not
-   * anything changed — and it used to replace the message array every time.
+   * anything changed, and it used to replace the message array every time.
    * Same content, new object identities: React rebuilt every bubble, the
    * scroll effect below fired, and the thread jumped. That was the flicker.
    *
@@ -108,8 +108,8 @@ export default function Support() {
 
   /* Initial load and mark-read, then a poll every 15 s.
    *
-   * Skipped while the tab is hidden — a background tab that keeps polling
-   * builds up nothing anyone is reading — and while a send is in flight, so a
+   * Skipped while the tab is hidden, a background tab that keeps polling
+   * builds up nothing anyone is reading, and while a send is in flight, so a
    * poll and the message it might clobber never race. The `sending` ref is
    * read inside the tick rather than closed over, so the interval is set up
    * once instead of being rebuilt whenever that state changes. */
@@ -132,7 +132,7 @@ export default function Support() {
     };
   }, [load]);
 
-  /* Keep the newest message in view — but only when there is a new message,
+  /* Keep the newest message in view, but only when there is a new message,
      and only if the reader is already at the foot of the thread. Yanking
      someone back down while they are reading their way up through a
      conversation was the other half of what felt broken here. */
@@ -193,8 +193,7 @@ export default function Support() {
      gutter around it reads as a widget; this reads as the thing you came for.
      Renter messages, when the B2C launch brings them back, get their own route
      rather than a column stealing a third of this one. */
-  /* Only a reply from a person is worth interrupting a screen reader for —
-     your own message was just typed, and you know it went. */
+  /* Only a reply from a person is worth interrupting a screen reader for, your own message was just typed, and you know it went. */
   const newest = messages[messages.length - 1];
   const announcement =
     newest && newest.from === "support" ? `Ardena support: ${newest.text}` : "";

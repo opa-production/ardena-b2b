@@ -9,7 +9,7 @@
    above a white table all day and a black slab in that position reads as an
    alert. Ink on cream is 17:1, so nothing is traded for the warmth.
 
-   The fill alone is only 1.06:1 against the page, which is not an edge — the
+   The fill alone is only 1.06:1 against the page, which is not an edge, the
    hairline is what makes it a card rather than a stain. */
 /* The wallet is the only card here with a coloured edge: it is the one that
    gates the page, and singling it out is the point. The other three keep the
@@ -59,7 +59,7 @@
 
 /* ---- New verification modal ---- */
 
-/* The result, read against the person standing at the counter — so the name is
+/* The result, read against the person standing at the counter, so the name is
    the largest thing in the dialog, not a row in a definition list. */
 .verify-success {
   text-align: center;
@@ -92,7 +92,7 @@
   color: var(--ink-mute);
 }
 
-/* A failed check is not an error in the app — the wallet was still charged and
+/* A failed check is not an error in the app, the wallet was still charged and
    the number simply did not match. Stated, not alarmed. */
 .verify-failed {
   padding: 10px 12px;

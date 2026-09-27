@@ -59,8 +59,7 @@ import StepUpDialog from "./StepUpDialog";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "./dashboard.css";
 
-/* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again —
-   themeStore and every [data-theme="dark"] rule stay live either way. */
+/* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again, themeStore and every [data-theme="dark"] rule stay live either way. */
 const SHOW_THEME_TOGGLE = true;
 
 function PaymentWall({ gate }) {
@@ -115,7 +114,7 @@ export default function DashboardLayout() {
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const theme = useSyncExternalStore(subscribeTheme, getTheme);
   const { can } = useRole();
-  // Recomputed when the session changes — a role change mid-session (staff page)
+  // Recomputed when the session changes, a role change mid-session (staff page)
   // should reshape the sidebar without a reload.
   const navSections = useMemo(
     () => visibleSections(can, business.appLinked),
@@ -132,15 +131,15 @@ export default function DashboardLayout() {
 
   // Offer to link an existing Ardena host account, once per session. Dismissing
   // it shouldn't nag on every navigation, so the answer is remembered for the
-  // browser session rather than forever — a business that says "not now" while
+  // browser session rather than forever, a business that says "not now" while
   // busy should still find it later.
   useEffect(() => {
-    if (!HOST_ACCOUNT_LINKING) return; // deferred phase — never offer it
+    if (!HOST_ACCOUNT_LINKING) return; // deferred phase, never offer it
     if (!can("linkHostAccount")) return;
     try {
       if (sessionStorage.getItem(HOST_LINK_DISMISSED) === "1") return;
     } catch {
-      /* private mode — just show it */
+      /* private mode, just show it */
     }
     let alive = true;
     fetchHostLinkSuggestion()
@@ -156,7 +155,7 @@ export default function DashboardLayout() {
   /* Hydrate the session: profile, business, policy, onboarding + fleet.
    *
    * All of it goes out at once. This used to await fetchMe and only then fire
-   * the other three, but none of them take anything from its response — they
+   * the other three, but none of them take anything from its response, they
    * are all "what is this workspace", answered from the bearer token. On a
    * backend answering in the better part of a second, that ordering cost a
    * whole round trip of blank dashboard for nothing.
@@ -194,12 +193,12 @@ export default function DashboardLayout() {
     };
   }, []);
 
-  // The shared 60 s badge poll — see unreadStore. Everything else that shows
+  // The shared 60 s badge poll, see unreadStore. Everything else that shows
   // a count reads the same store rather than asking again.
   useEffect(() => startUnreadPolling(), []);
 
   /* Confirmed, because signing out is one click from a menu that also holds
-     Profile — and on a shared counter machine the cost of a misclick is the
+     Profile, and on a shared counter machine the cost of a misclick is the
      next person having to find the password. */
   const [confirmLogout, setConfirmLogout] = useState(false);
 
@@ -211,7 +210,7 @@ export default function DashboardLayout() {
   }
 
   /* The subscription gate: checked once on entry, and again when the billing
-     page is opened — that is where it gets cleared, so that is the only
+     page is opened, that is where it gets cleared, so that is the only
      navigation whose outcome can change it. It used to re-check on every route
      change, which put an extra request in front of every click for an answer
      that changes at most once a month. */
@@ -224,8 +223,8 @@ export default function DashboardLayout() {
    *
    * There used to be an 80 ms skeleton here on every route change, meant as
    * instant feedback. It did the opposite: the Outlet was unmounted for the
-   * duration, so the page component didn't mount — and therefore didn't start
-   * its own fetch — until the timer expired. Every navigation paid 80 ms
+   * duration, so the page component didn't mount, and therefore didn't start
+   * its own fetch, until the timer expired. Every navigation paid 80 ms
    * before the first request even left the browser, and then showed the
    * page's own skeleton anyway. Pages render immediately now and manage their
    * own loading state, which is what they were already doing. */
@@ -234,7 +233,7 @@ export default function DashboardLayout() {
   }, [location.pathname]);
 
   // Fetch the screens people move between while the shell sits idle, so the
-  // code split never costs a wait on the first click — see pageLoaders.
+  // code split never costs a wait on the first click, see pageLoaders.
   useEffect(() => preloadCommonPages(), []);
 
   // mobile drawer: lock body scroll while open, close on Escape
@@ -270,7 +269,7 @@ export default function DashboardLayout() {
     try {
       sessionStorage.setItem(HOST_LINK_DISMISSED, "1");
     } catch {
-      /* private mode — it'll just offer again next navigation */
+      /* private mode, it'll just offer again next navigation */
     }
   }
 
@@ -430,7 +429,7 @@ export default function DashboardLayout() {
           <PaymentWall gate={gate} />
         ) : (
           /* A page's chunk still arriving looks the same as its data still
-             arriving — the skeleton it was going to show anyway. */
+             arriving, the skeleton it was going to show anyway. */
           /* Inside the content area, so a page that fails keeps the sidebar
              and nav; moving to another page clears it. */
           <ErrorBoundary resetKey={location.pathname}>

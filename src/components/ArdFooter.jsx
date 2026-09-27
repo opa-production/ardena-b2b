@@ -6,7 +6,7 @@ import { SOCIALS } from "./socials";
    four-column link grid on the light gradient. Styles live in
    pages/landingArdena.css, so render this inside an `.ard` wrapper.
 
-   Public pages only — no sign-in or dashboard links (the nav has those), and
+   Public pages only, no sign-in or dashboard links (the nav has those), and
    no search landing pages (they link to each other and live in the sitemap).
    Company and legal links point at ardena.co.ke, which owns them for every
    Ardena product, so there is one set of terms and one privacy policy. */

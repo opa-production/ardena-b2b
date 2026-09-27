@@ -15,159 +15,285 @@
   font-weight: 600;
 }
 
-.rp-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.rp-section {
+.rp-group {
   margin-bottom: 20px;
 }
 
-.rp-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 20px;
-}
-
-.rp-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-@media (max-width: 1000px) {
-  .rp-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Meters: one hue on a quiet track, the figure printed beside it. */
-.rp-meter-col {
-  width: 34%;
-}
-
-.rp-meter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.rp-meter {
-  position: relative;
-  flex: 1;
-  min-width: 60px;
-  height: 8px;
-  background: var(--surface);
-  box-shadow: var(--edge-in);
-}
-
-.rp-meter-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--usage-bar);
-  border-radius: 0 4px 4px 0;
-}
-
-/* Money owed by age: three figures; only the oldest warms up. */
-.rp-buckets {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.rp-bucket {
-  padding: 10px 12px;
-  background: var(--surface);
-  box-shadow: var(--edge-in);
-}
-
-.rp-bucket p {
+/* One row per report: what it is on the left, period + Generate on the right. */
+.rp-list {
+  list-style: none;
   margin: 0;
+  padding: 0;
 }
 
-.rp-bucket.is-late .strong {
-  color: var(--warn);
-}
-
-.rp-due {
-  color: var(--warn);
-}
-
-.rp-foot {
-  margin-top: 12px;
-}
-
-/* Column bars: one series, counts printed on top. */
-.rp-bars {
-  display: grid;
-  gap: 6px;
-  height: 170px;
-  margin-bottom: 8px;
-}
-
-.rp-bar-col {
+.rp-row {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  min-width: 0;
-  gap: 4px;
-}
-
-.rp-bar-value {
-  min-height: 16px;
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-soft);
-}
-
-.rp-bar-track {
-  position: relative;
-  flex: 1;
-  width: 100%;
-  max-width: 36px;
-  border-bottom: 1px solid var(--line);
-}
-
-.rp-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--usage-bar);
-  border-radius: 4px 4px 0 0;
-}
-
-.rp-bar-label {
-  font-size: 11.5px;
-  color: var(--ink-mute);
-  white-space: nowrap;
-}
-
-.rp-facts {
-  display: flex;
-  gap: 28px;
-  padding-top: 12px;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
   border-top: 1px solid var(--line);
 }
 
-.rp-facts p {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 0;
+.rp-row:first-child {
+  border-top: none;
+  padding-top: 4px;
 }
 
-@media (max-width: 520px) {
-  .rp-buckets {
-    grid-template-columns: 1fr;
+.rp-row-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.rp-row-title {
+  margin: 0 0 3px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rp-row-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 560px;
+}
+
+.rp-row-latest {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 8px 0 0;
+  font-size: 12.5px;
+}
+
+.rp-row-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.rp-period-pick {
+  width: 170px;
+}
+
+.rp-custom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rp-custom input {
+  padding: 9px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: var(--edge-in);
+  outline: none;
+}
+
+.rp-custom input:focus {
+  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
+}
+
+.btn.rp-generate {
+  padding: 10px 18px;
+  font-size: 13.5px;
+  min-width: 112px;
+}
+
+/* View / Download / Email: quiet text actions, not more buttons. */
+.rp-file-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rp-act {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s var(--ease);
+}
+
+.rp-act:hover {
+  text-decoration-color: currentColor;
+}
+
+.rp-act:disabled {
+  color: var(--ink-mute);
+  cursor: default;
+}
+
+.rp-act.rp-delete {
+  margin-left: 14px;
+  color: var(--ink-mute);
+}
+
+.rp-act.rp-delete:hover {
+  color: var(--danger);
+}
+
+.rp-failed {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.rp-table-wrap {
+  overflow-x: auto;
+}
+
+.rp-history td.num {
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .rp-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
   }
 
-  .rp-meter-col {
-    width: auto;
+  .rp-row-controls {
+    justify-content: flex-start;
   }
+
+  .rp-period-pick {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .rp-custom {
+    order: 3;
+    width: 100%;
+  }
+
+  .rp-custom input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* ── In-dashboard PDF viewer ───────────────────────────────────────── */
+
+.modal-overlay.rp-viewer-overlay {
+  padding: 24px;
+}
+
+.rp-viewer {
+  display: flex;
+  flex-direction: column;
+  width: min(1000px, 100%);
+  height: min(92vh, 1200px);
+  background: var(--panel);
+  box-shadow: 0 24px 60px rgba(10, 13, 18, 0.35);
+  animation: modal-rise 0.2s var(--ease) both;
+}
+
+.rp-viewer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 12px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rp-viewer-title {
+  min-width: 0;
+}
+
+.rp-viewer-title p {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rp-viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.rp-viewer-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.rp-viewer-close:hover {
+  color: var(--ink);
+}
+
+.rp-viewer-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  background: var(--bg);
+}
+
+.rp-viewer-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.rp-viewer-msg {
+  place-self: center;
+}
+
+@media (max-width: 640px) {
+  .modal-overlay.rp-viewer-overlay {
+    padding: 0;
+  }
+
+  .rp-viewer {
+    height: 100%;
+  }
+
+  .rp-viewer-bar .btn-ghost {
+    display: none;
+  }
+}
+
+/* ── Email dialog ──────────────────────────────────────────────────── */
+
+.modal-card.rp-email-card {
+  max-width: 460px;
+}
+
+.rp-email-card .field + .field {
+  margin-top: 14px;
+}
+
+.rp-email-card .form-error {
+  margin-top: 12px;
+}
+
+.rp-email-card .modal-actions {
+  margin-top: 20px;
 }

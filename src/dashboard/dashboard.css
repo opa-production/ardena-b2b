@@ -9,8 +9,7 @@
 
 /* ---- Sidebar ---- */
 
-/* The nav chrome — sidebar on desktop, the top bar and its drawer on mobile —
-   is a near-black panel in both themes. Rather than rewrite every rule inside
+/* The nav chrome, sidebar on desktop, the top bar and its drawer on mobile, is a near-black panel in both themes. Rather than rewrite every rule inside
    it, the ink tokens are re-pointed here and inherit down: .nav-item still
    says `color: var(--ink-soft)`, it just resolves to a light grey in here.
    --edge and --edge-in are defined in terms of --line, and custom properties
@@ -24,7 +23,7 @@
   --ink-soft: #b9c2ce;
   --ink-mute: #7e8796;
   --line: rgba(255, 255, 255, 0.14);
-  /* an inverted chip on a dark panel is light, not dark — the tenant avatar */
+  /* an inverted chip on a dark panel is light, not dark, the tenant avatar */
   --ink-inv: #ffffff;
   --ink-inv-hover: #ffffff;
   --on-ink: #0d1117;
@@ -146,7 +145,7 @@
 }
 
 /* The current page: a brighter fill, bolder text, and the one place the brand
-   blue appears in the nav — a 2px bar down the leading edge. */
+   blue appears in the nav, a 2px bar down the leading edge. */
 .nav-item.active {
   color: var(--ink);
   font-weight: 600;
@@ -185,7 +184,7 @@
   opacity: 0.9;
 }
 
-/* collapsed but holding the current page — mark the parent so the active
+/* collapsed but holding the current page, mark the parent so the active
    route isn't invisible when the group is shut */
 .nav-toggle-row.has-active {
   color: var(--ink);
@@ -208,7 +207,7 @@
 }
 
 /* the `hidden` attribute is how the group closes, and a class selector beats
-   the UA's [hidden] rule — so restate it here or the children never collapse */
+   the UA's [hidden] rule, so restate it here or the children never collapse */
 .nav-sub[hidden] {
   display: none;
 }
@@ -220,7 +219,7 @@
 }
 
 /* Log out is the one destructive item in the tenant menu, and it sits directly
-   under Profile — colour is what stops a misclick. #f05252 rather than the
+   under Profile, colour is what stops a misclick. #f05252 rather than the
    light theme's --danger: this menu is always on the near-black panel, where
    the deeper red drops to about 3:1. */
 .tenant-menu button.menu-danger {
@@ -286,7 +285,7 @@
   padding: 5px 8px;
   text-align: left;
   /* a <button> does not inherit colour from its parent, so the business name
-     inside would fall back to the UA's black — invisible on the dark panel */
+     inside would fall back to the UA's black, invisible on the dark panel */
   color: var(--ink);
   transition: background 0.15s var(--ease);
 }
@@ -399,7 +398,7 @@
 
 /* ---- Content ---- */
 
-/* The gutter is a variable so a page can deliberately break out of it — see
+/* The gutter is a variable so a page can deliberately break out of it, see
    .support-page, which runs the conversation edge to edge. */
 .dash-content {
   --content-pad: clamp(24px, 3.5vw, 44px);
@@ -408,11 +407,11 @@
   padding: var(--content-pad);
 }
 
-/* Opacity only, deliberately — no transform.
+/* Opacity only, deliberately, no transform.
  *
  * This used to be `rise`, which slides content up 22px. The catch is that an
  * animation with fill-mode `both` leaves its final value applied, and `to {
- * transform: none }` computes to matrix(1,0,0,1,0,0) — an identity transform,
+ * transform: none }` computes to matrix(1,0,0,1,0,0), an identity transform,
  * but a transform all the same. Any transform other than `none` makes the
  * element the containing block for every `position: fixed` descendant, so
  * modals opened from inside a page stopped being sized to the viewport and

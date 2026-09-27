@@ -59,7 +59,7 @@ export default function Claims() {
   const load = useCallback(async () => {
     try {
       // Either call can legitimately 403 depending on role, so they're settled
-      // independently — a Finance user should still see claims without the
+      // independently, a Finance user should still see claims without the
       // extensions call blanking the page.
       const [claimRes, extRes] = await Promise.allSettled([
         fetchDepositClaims(),

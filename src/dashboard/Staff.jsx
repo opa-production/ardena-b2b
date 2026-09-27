@@ -44,7 +44,7 @@ export default function Staff() {
   const { pathname } = useLocation();
   const [members, setMembers] = useState([]);
   // GET /staff is open to every role server-side, so the page stays readable
-  // for all of them — only the write controls are gated.
+  // for all of them, only the write controls are gated.
   const { can } = useRole();
   const canManage = can("manageStaff");
   const [invites, setInvites] = useState([]);

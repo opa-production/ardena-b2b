@@ -7,7 +7,7 @@
  * each one takes the colour of the button it sits in.
  *
  * They keep the original 0 -960 960 960 viewBox, which is Material's baseline
- * grid — the paths are unmodified, so they can be swapped for other Material
+ * grid, the paths are unmodified, so they can be swapped for other Material
  * icons without rescaling anything.
  */
 
@@ -42,7 +42,7 @@ export function AttachIcon({ size = 20 }) {
 }
 
 /* The assistant's mark: a chat bubble with a face in it. Reads as a bot at
-   22px on the launcher, which a generic speech bubble does not — the point of
+   22px on the launcher, which a generic speech bubble does not, the point of
    the button is that this is the machine, and Support is the person. */
 export function BotIcon({ size = 22 }) {
   return (

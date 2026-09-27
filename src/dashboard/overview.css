@@ -261,7 +261,7 @@
 }
 
 /* the arrow carries direction, so colour is reinforcement and never the
-   only channel — the pair is CVD-validated regardless */
+   only channel, the pair is CVD-validated regardless */
 .rr-delta {
   display: inline-flex;
   align-items: center;

@@ -202,7 +202,7 @@ export default function Fleet() {
                         {/* Shown but dead until the consumer app launches.
                             Hiding it entirely would mean a business never
                             learns the marketplace is coming. Disabled is the
-                            whole message — a "Soon" badge beside it said the
+                            whole message, a "Soon" badge beside it said the
                             same thing twice and pushed the actions cell wider
                             than the column it sits in. */}
                         {MARKETPLACE_LISTINGS ? (

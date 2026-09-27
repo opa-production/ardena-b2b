@@ -25,7 +25,7 @@ export default function Clients() {
       const data = await fetchClients({ per_page: 100 });
       const rows = data.data || [];
       setClients(rows);
-      // so opening one of these paints instantly — see recordSeeds
+      // so opening one of these paints instantly, see recordSeeds
       seedRecords("clients", rows, (c) => c.id);
     } catch (err) {
       toast(err.message || "Failed to load clients", "danger");

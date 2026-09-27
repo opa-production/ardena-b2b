@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-/* Cash collected per week — last 10 weeks.
+/* Cash collected per week, last 10 weeks.
    data: [{ week: "4 May", value: 78000 }]  (values in full KES) */
 
 const W = 680;

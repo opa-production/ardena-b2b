@@ -16,7 +16,7 @@ function lineGeoJSON(trail) {
 }
 
 // Schematic fallback: project the ping trail into a padded viewBox with a
-// pulsing marker. No tiles, no token — used when VITE_MAPBOX_TOKEN is unset.
+// pulsing marker. No tiles, no token, used when VITE_MAPBOX_TOKEN is unset.
 function Schematic({ trail }) {
   const pts = trail && trail.length ? trail : [];
   if (!pts.length) return <div className="map-face map-empty">Waiting for first ping…</div>;

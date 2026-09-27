@@ -49,7 +49,7 @@ const MAX_PHOTOS = 12;
 const MAX_FEATURES = 12;
 
 // Labels for the server's `missing_fields` keys (PUBLISH_REQUIREMENTS in
-// app/b2b/marketplace_listings.py) — what a host-app car must have too.
+// app/b2b/marketplace_listings.py), what a host-app car must have too.
 const REQUIREMENT_LABELS = {
   description: "Description",
   year: "Model year",
@@ -209,7 +209,7 @@ export default function MarketplaceListing() {
 
   // form state
   const [description, setDescription] = useState("");
-  // Lives on the vehicle, not the listing — surfaced here because publishing
+  // Lives on the vehicle, not the listing, surfaced here because publishing
   // needs it and there's nowhere else to enter it.
   const [yearInput, setYearInput] = useState("");
   const [seats, setSeats] = useState("");
@@ -291,7 +291,7 @@ export default function MarketplaceListing() {
   useEffect(() => {
     const cached = _cache.get(decodedPlate);
     if (cached !== undefined) {
-      // Serve from cache immediately — no spinner
+      // Serve from cache immediately, no spinner
       if (cached !== null) _applyData(cached);
       setLoading(false);
       return;
@@ -303,7 +303,7 @@ export default function MarketplaceListing() {
       })
       .catch((err) => {
         if (err.message?.includes("404") || err.status === 404) {
-          _cache.set(decodedPlate, null); // no listing — cache the absence too
+          _cache.set(decodedPlate, null); // no listing, cache the absence too
           setListing(null);
         } else {
           setError(err.message);
@@ -410,7 +410,7 @@ export default function MarketplaceListing() {
   }
 
   // Uploads start a draft on the server if there wasn't one, and change what's
-  // missing — refetch so the checklist and the Fleet toggle reflect it.
+  // missing, refetch so the checklist and the Fleet toggle reflect it.
   async function _refreshAfterUpload() {
     try {
       _updateCache(await fetchMarketplaceListing(decodedPlate));
@@ -442,7 +442,7 @@ export default function MarketplaceListing() {
     if (!files.length) return;
     const room = MAX_PHOTOS - carImages.length;
     if (files.length > room) {
-      setError(`A listing can have up to ${MAX_PHOTOS} photos — you can add ${room} more.`);
+      setError(`A listing can have up to ${MAX_PHOTOS} photos, you can add ${room} more.`);
       e.target.value = "";
       return;
     }
@@ -561,7 +561,7 @@ export default function MarketplaceListing() {
       }
       const updated = await publishMarketplaceListing(decodedPlate);
       _updateCache(updated);
-      // Deliberately not "now visible" — an admin still has to approve it.
+      // Deliberately not "now visible", an admin still has to approve it.
       toast(
         updated?.live_on_marketplace
           ? `${decodedPlate} is live on the Ardena Marketplace.`
@@ -628,7 +628,7 @@ export default function MarketplaceListing() {
   const needsYear = Boolean(vehicle) && !vehicle.year;
   // Publishing is the business's intent; Ardena's review is a separate gate.
   // A vehicle is only actually bookable when both are open, which is what
-  // `live_on_marketplace` reports — showing "Visible" off `status` alone told
+  // `live_on_marketplace` reports, showing "Visible" off `status` alone told
   // businesses their car was on the app when it was still in the queue.
   const review = listing?.review || "not_submitted";
   const live = Boolean(listing?.live_on_marketplace);
@@ -708,7 +708,7 @@ export default function MarketplaceListing() {
             }}
           />
           {/* Three states, one action each: live can be taken off; submitted
-              and waiting can be withdrawn (not a red "hide" — nothing is
+              and waiting can be withdrawn (not a red "hide", nothing is
               showing yet); anything else can be submitted. */}
           {live ? (
             <button

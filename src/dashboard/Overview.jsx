@@ -78,7 +78,7 @@ export default function Overview() {
           value: fmtKES(stats.monthly_revenue),
           // The total now spans both channels. Naming the split matters because
           // the business keeps all of a dashboard booking but pays commission on
-          // an app one — a single number hid which half was growing.
+          // an app one, a single number hid which half was growing.
           delta: stats.monthly_revenue
             ? stats.monthly_revenue_marketplace
               ? `${fmtKES(stats.monthly_revenue_marketplace)} from the Ardena app`

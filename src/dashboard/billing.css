@@ -40,7 +40,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Up is not automatically bad here — this is spend, and a business reading a
+/* Up is not automatically bad here, this is spend, and a business reading a
    rise wants it stated, not judged. Both directions wear the same muted chip;
    only the arrow differs. */
 .usage-delta {
@@ -67,7 +67,7 @@
 }
 
 /* Segmented window switch. One recessed group, the live segment lifted out of
-   it — the same treatment the filter rows elsewhere use. */
+   it, the same treatment the filter rows elsewhere use. */
 .usage-ranges {
   display: flex;
   flex-shrink: 0;
@@ -229,7 +229,7 @@
 }
 
 /* Past its due date: same fence, in red, and the row's text goes with it.
-   Only this row turns red — the next due row keeps its dark rule, and the
+   Only this row turns red, the next due row keeps its dark rule, and the
    boundary they share is already drawn by this row's bottom border. */
 .invoice-row.is-overdue {
   border-color: var(--danger);

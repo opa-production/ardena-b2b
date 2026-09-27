@@ -39,14 +39,13 @@
   padding: 20px clamp(20px, 3vw, 40px) 8px;
 }
 
-/* Bubbles, so rounded — with the corner nearest the speaker squared off, the
+/* Bubbles, so rounded, with the corner nearest the speaker squared off, the
    way every messaging app does it, so a run of messages reads as coming from
    one side rather than floating free.
 
    Wide on purpose: a sent message runs almost the full width and leaves only a
    short gap on the far side, which is what makes a thread feel like a
-   conversation rather than a column of cards. Short messages are unaffected —
-   this is a cap, not a width. */
+   conversation rather than a column of cards. Short messages are unaffected, this is a cap, not a width. */
 .msg {
   max-width: 88%;
   padding: 9px 13px;
@@ -226,7 +225,7 @@
   color: var(--ink);
 }
 
-/* Readable while inert, same reasoning as .icon-btn:disabled — attach is
+/* Readable while inert, same reasoning as .icon-btn:disabled, attach is
    permanently off until uploads ship, so it has to be legible enough for the
    tooltip to be worth reaching for. */
 .composer-btn:disabled {
@@ -303,7 +302,7 @@
 
 /* A message that has left the composer but not yet been acknowledged by the
    server. Held back slightly rather than spinner-ed: it is on screen, in
-   place, and about to settle — the only thing not yet true is the timestamp
+   place, and about to settle, the only thing not yet true is the timestamp
    under it. */
 .msg.is-sending {
   opacity: 0.62;

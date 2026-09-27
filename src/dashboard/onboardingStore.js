@@ -33,7 +33,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc. — run in-memory */
+    /* private mode etc., run in-memory */
   }
   return { ...DEFAULTS };
 }
@@ -78,7 +78,7 @@ export function resetOnboarding() {
 
 // Merge server state (GET /onboarding) into the checklist. Only known step
 // keys are taken; `dismissed` stays a local preference. The backend may call
-// the invite step "staff" — the UI calls it "team".
+// the invite step "staff", the UI calls it "team".
 export function hydrateOnboarding(server) {
   if (!server || typeof server !== "object") return;
   const next = { ...state };

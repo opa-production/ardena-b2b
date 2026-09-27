@@ -122,8 +122,7 @@ export default function AddVehicle() {
               <label htmlFor="v-plate">Number plate</label>
               <input id="v-plate" name="plate" type="text" placeholder="KDL 482A" required />
             </div>
-            {/* Required before the vehicle can be listed on the Ardena app —
-                collected here so nobody hits that wall at publish time. */}
+            {/* Required before the vehicle can be listed on the Ardena app, collected here so nobody hits that wall at publish time. */}
             <div className="field">
               <label htmlFor="v-year">Model year</label>
               <input

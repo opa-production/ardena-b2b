@@ -13,7 +13,7 @@ import RequireAppLink from "./dashboard/RequireAppLink";
 import { MARKETPLACE_LISTINGS, REVIEW_REQUESTS } from "./lib/features";
 import { SEO_PAGES } from "./pages/seoPagesData";
 
-/* Dashboard screens are code-split — see dashboard/pageLoaders.js for why, and
+/* Dashboard screens are code-split, see dashboard/pageLoaders.js for why, and
    for the idle preload that keeps the split from costing a pause on the first
    click. The Suspense boundary lives in DashboardLayout, around the Outlet, so
    a chunk still arriving shows the same skeleton that page's data shows. */
@@ -56,7 +56,7 @@ const Ratings = lazy(load.ratings);
 const Placeholder = lazy(load.placeholder);
 
 /* The public pages a signed-in user never opens. Landing, the auth forms and
-   the 404 stay eager — they are small, and every one of them is somebody's
+   the 404 stay eager, they are small, and every one of them is somebody's
    first paint. */
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -74,7 +74,7 @@ function RequireAuth({ children }) {
 export default function App() {
   /* Public routes need a boundary of their own: the dashboard's lives inside
      DashboardLayout, but a lazy /pricing has nothing above it. Deliberately an
-     empty fallback — these chunks are small and a flash of spinner on a
+     empty fallback, these chunks are small and a flash of spinner on a
      marketing page is worse than a beat of nothing. */
   return (
     <Suspense fallback={null}>
@@ -127,7 +127,7 @@ export default function App() {
           path="claims"
           element={<RequireAppLink><RequireRole capability="claimsOrExtensions"><Claims /></RequireRole></RequireAppLink>}
         />
-        {/* No longer in the sidebar — Support lists renter conversations and
+        {/* No longer in the sidebar, Support lists renter conversations and
             links here for the full thread. The page itself is still the place
             you read and reply, so it keeps its route and its guards. */}
         <Route
@@ -155,14 +155,14 @@ export default function App() {
           path="payments/all"
           element={<RequireRole capability="manageBilling"><PaymentsList /></RequireRole>}
         />
-        {/* Same Finances page, opened on the Ardena-app tab — keeps old links
+        {/* Same Finances page, opened on the Ardena-app tab, keeps old links
             and bookmarks working now that App earnings isn't its own page. */}
         <Route
           path="payments/marketplace"
           element={<RequireRole capability="viewMoney"><Payments /></RequireRole>}
         />
         <Route path="staff" element={<Staff />} />
-        {/* Reaching this workspace's own clients — a send costs the
+        {/* Reaching this workspace's own clients, a send costs the
             business and speaks in its name, hence its own capability. */}
         <Route
           path="marketing"
@@ -193,13 +193,13 @@ export default function App() {
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />
-        {/* Profile, and the gear on it — what the business IS, and how it's
+        {/* Profile, and the gear on it, what the business IS, and how it's
             set up. See WorkspaceSettings.jsx for the split. */}
         <Route path="settings" element={<Settings />} />
         <Route path="settings/preferences" element={<WorkspaceSettings />} />
         <Route path=":section" element={<Placeholder />} />
       </Route>
-      {/* Anything that is not a route at all — a typo, a dead link, an old
+      {/* Anything that is not a route at all, a typo, a dead link, an old
           bookmark. Dashboard sections keep their own coming-soon page above;
           this is for addresses that were never going to exist. */}
       <Route path="*" element={<NotFound />} />

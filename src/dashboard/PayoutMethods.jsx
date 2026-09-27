@@ -12,6 +12,7 @@ import {
   confirmSettlementVerification,
 } from "../lib/api";
 import "./earnings.css";
+import { submitWhenComplete } from "../lib/autoSubmit";
 
 // Each destination needs different details, and the backend rejects a method
 // that's missing any of them, so the form only asks for what applies.
@@ -62,8 +63,7 @@ const FIELD_PLACEHOLDERS = {
   account_name: "Acme Car Hire Ltd",
 };
 
-/* Which fields a type needs filled in. account_name is the one optional field
-   — a bank will settle without it, and businesses often don't know the exact
+/* Which fields a type needs filled in. account_name is the one optional field, a bank will settle without it, and businesses often don't know the exact
    registered string. */
 const OPTIONAL = new Set(["account_name"]);
 
@@ -74,7 +74,7 @@ const TYPE_LABEL = {
   bank: "Bank",
 };
 
-/* The destination itself, without the type — the table has a column for that.
+/* The destination itself, without the type, the table has a column for that.
    Paybill is the one that needs both its numbers: a paybill without an account
    number reaches Safaricom and stops. */
 function accountLine(m) {
@@ -87,7 +87,7 @@ function accountLine(m) {
   return m.mpesa_number || m.till_number || "-";
 }
 
-/* "d***@ardena.co.ke and 07** *** 678" — where the code went. Both values are
+/* "d***@ardena.co.ke and 07** *** 678", where the code went. Both values are
    masked by the server; this only joins them. Falls back to something true
    rather than empty if a channel is missing. */
 function sentToLine(sent) {
@@ -96,7 +96,7 @@ function sentToLine(sent) {
   return parts.join(" and ");
 }
 
-/* "mpesa · 0702248984" — the detail that tells two saved destinations apart.
+/* "mpesa · 0702248984", the detail that tells two saved destinations apart.
    Exported because the withdraw dropdown needs the same line. */
 export function methodDetail(m) {
   return [
@@ -186,7 +186,7 @@ export default function PayoutMethods() {
 
   /* Two steps, the same shape as changing a password: ask for a code, then
      send it back. The code goes to the signed-in user's registered email, not
-     to anything on the account being verified — the point is proving it is
+     to anything on the account being verified, the point is proving it is
      still them, not that the account exists. */
   async function startVerify(m) {
     if (verifyBusy) return;
@@ -244,7 +244,7 @@ export default function PayoutMethods() {
         onCancel={() => setRemoving(null)}
       />
 
-      {/* Top-right page action, the same control as "New booking" — adding a
+      {/* Top-right page action, the same control as "New booking", adding a
           settlement account is a page-level errand, not a card ornament. */}
       {canManage && (
         <div className="page-actions">
@@ -398,7 +398,7 @@ export default function PayoutMethods() {
               )}
 
               {/* "Other" is the escape hatch for the long tail of banks the
-                  list doesn't carry — picking it has to ask which one. */}
+                  list doesn't carry, picking it has to ask which one. */}
               {methodLabel === "Bank" && methodFields.bank_name === "Other" && (
                 <label className="field-label">
                   Bank name
@@ -475,7 +475,10 @@ export default function PayoutMethods() {
                   autoComplete="one-time-code"
                   placeholder="123456"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => {
+                    setOtp(e.target.value);
+                    submitWhenComplete(e);
+                  }}
                   required
                   autoFocus
                 />

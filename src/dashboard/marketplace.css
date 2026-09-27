@@ -12,7 +12,7 @@
 
 /* Status chips.
    These previously used --color-bg-alt / --color-text-muted, which don't exist
-   in global.css, plus literal hex for the rest — so they always fell back to
+   in global.css, plus literal hex for the rest, so they always fell back to
    light-theme colours and were unreadable in dark mode. Rewritten onto the real
    tokens, matching how fleet.css and bookings.css style their chips (colour
    only, no background). */
@@ -22,8 +22,7 @@
 .chip.mkt-rejected { color: var(--danger); }
 .chip.mkt-live     { color: var(--ok); font-weight: 600; }
 
-/* Review-state banners. The listing page can't just say "Visible" any more —
-   an admin has to approve a new listing before renters see it. */
+/* Review-state banners. The listing page can't just say "Visible" any more, an admin has to approve a new listing before renters see it. */
 .mkt-banner {
   margin-bottom: 18px;
   padding: 13px 16px;
@@ -129,7 +128,7 @@
 }
 
 /* Fleet list marketplace badge */
-/* Same token fix as the chips above — these carried literal light-theme hex. */
+/* Same token fix as the chips above, these carried literal light-theme hex. */
 .chip.mkt-badge-visible { color: var(--ok); font-size: 0.72rem; }
 .chip.mkt-badge-hidden  { color: var(--ink-soft); font-size: 0.72rem; }
 
@@ -209,7 +208,7 @@
 }
 
 /* Model year lives on the vehicle, but publishing needs it and there is no
-   vehicle edit screen — so it surfaces here for listings that lack one. */
+   vehicle edit screen, so it surfaces here for listings that lack one. */
 .mkt-year-field {
   margin-bottom: 16px;
 }

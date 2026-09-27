@@ -650,7 +650,7 @@
   flex-shrink: 0;
 }
 
-/* On a booking the note is an instruction, not a standing notice — it sits
+/* On a booking the note is an instruction, not a standing notice, it sits
    closer to the cards it is about. */
 .details-grid + .page-note,
 .head-card + .page-note {
@@ -783,7 +783,7 @@
   white-space: nowrap;
 }
 
-/* Dot, rule, dot — with the duration sitting on the rule. */
+/* Dot, rule, dot, with the duration sitting on the rule. */
 .trip-mid {
   position: relative;
   display: flex;

@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-/* Top earning vehicles — ranked bars, this month, with last month marked.
+/* Top earning vehicles, ranked bars, this month, with last month marked.
  *
  * This replaced a dumbbell chart. A dumbbell is the textbook form for
  * before → after per item, but it only works for readers who already know the
  * convention: two dots and a connecting line mean nothing on their own, and
- * the thing everyone actually wants from this card — "which cars make me the
- * most money" — was encoded as dot *position*, the hardest channel to read.
+ * the thing everyone actually wants from this card, "which cars make me the
+ * most money", was encoded as dot *position*, the hardest channel to read.
  *
  * Bar length is the one encoding nobody has to be taught, so this month is the
  * bar and the ranking is the sort. Last month stays on the same row as a thin
@@ -16,7 +16,7 @@ import { useState } from "react";
  * alone.
  *
  * Colours are validated (see the dataviz palette checks): one hue for the bars,
- * and a green/orange status pair that clears CVD separation — a red/green pair
+ * and a green/orange status pair that clears CVD separation, a red/green pair
  * does not.
  */
 
@@ -85,7 +85,7 @@ export default function RevenueRanking({ data = [] }) {
 
               <div className="rr-track">
                 <div className="rr-fill" style={{ width: pct(d.curr) }} />
-                {/* last month, on the same scale — behind the bar end means
+                {/* last month, on the same scale, behind the bar end means
                     it grew, ahead of it means it fell */}
                 <div
                   className="rr-mark"

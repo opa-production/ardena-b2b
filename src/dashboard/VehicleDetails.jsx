@@ -191,7 +191,7 @@ export default function VehicleDetails() {
       </header>
 
       {/* Vehicles imported from a linked host account arrive without a number
-          plate — the Ardena app never stored one — so they carry a temporary ID
+          plate, the Ardena app never stored one, so they carry a temporary ID
           until someone sets the real thing. This is the only place to do it. */}
       {isPlaceholderPlate && (
         <form className="plate-fix" onSubmit={handleSetPlate}>

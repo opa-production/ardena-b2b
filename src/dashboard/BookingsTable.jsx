@@ -75,7 +75,7 @@ export default function BookingsTable({ rows, numberOf }) {
                   <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
                 </td>
                 <td className="actions-cell">
-                  {/* A finished rental is the moment to ask — the client still
+                  {/* A finished rental is the moment to ask, the client still
                       has the vehicle in mind, and this is the row that knows
                       which vehicle it was. */}
                   {canAsk(b) && (

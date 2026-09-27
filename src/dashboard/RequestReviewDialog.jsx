@@ -13,7 +13,7 @@ function fmtRange(start, end) {
   const opts = { day: "numeric", month: "short" };
   const a = new Date(start).toLocaleDateString("en-KE", opts);
   const b = new Date(end).toLocaleDateString("en-KE", { ...opts, year: "numeric" });
-  return `${a} – ${b}`;
+  return `${a} to ${b}`;
 }
 
 const STEPS = ["pick", "preview", "sent"];
@@ -25,7 +25,7 @@ const STEPS = ["pick", "preview", "sent"];
  * Three steps: pick a finished booking that hasn't been reviewed, check the
  * message exactly as it will go out (and what it costs from the wallet), send.
  * The renter gets a link to /r/:token, a one-screen page with stars and a
- * comment box. Opened with `bookingRef` it skips the pick step — that's the
+ * comment box. Opened with `bookingRef` it skips the pick step, that's the
  * star on a bookings-table row.
  */
 export default function RequestReviewDialog({ onClose, onSent, bookingRef = null }) {

@@ -3,7 +3,7 @@
  *
  * Clicking a row in a list used to blank the screen: the detail page mounted
  * with nothing, showed a skeleton, and asked the server for a record whose
- * headline fields — the customer, the vehicle, the dates, the status — were
+ * headline fields, the customer, the vehicle, the dates, the status, were
  * already on the screen you just clicked. On a backend answering in the better
  * part of a second that is a second of staring at grey for data nobody
  * actually needed to wait for.
@@ -14,7 +14,7 @@
  *
  * Two things this deliberately is not:
  *
- *   · a cache. Nothing is served from here instead of fetching — the request
+ *   · a cache. Nothing is served from here instead of fetching, the request
  *     goes out either way, and what comes back always wins. A seed only
  *     decides what is on screen for the second in between.
  *   · a store. There are no subscribers and no invalidation rules: rows are

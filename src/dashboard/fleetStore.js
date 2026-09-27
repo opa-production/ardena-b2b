@@ -117,7 +117,7 @@ export function setVehicleListing(plate, listing) {
 }
 
 // The "On Ardena app" toggle. Callers only turn it on once the row says
-// ready_to_publish — otherwise they send the user to the editor instead.
+// ready_to_publish, otherwise they send the user to the editor instead.
 export async function setOnApp(plate, on) {
   const listing = on
     ? await publishMarketplaceListing(plate)

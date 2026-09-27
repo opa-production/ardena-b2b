@@ -205,7 +205,7 @@
 
 /* The turn in progress: a named lookup while a tool is running, otherwise a
    cycling one-word status. Reads as the assistant working rather than
-   stalling — the wait before the first token is a real round trip to the
+   stalling, the wait before the first token is a real round trip to the
    workspace's own data. */
 .assist-checking {
   align-self: flex-start;
@@ -236,7 +236,7 @@
 }
 
 /* Replaces the composer when the thread has gone to a person, or when the
-   assistant is offline — see AssistantPanel. */
+   assistant is offline, see AssistantPanel. */
 .assist-handoff {
   padding: 12px 14px;
   font-size: 13px;

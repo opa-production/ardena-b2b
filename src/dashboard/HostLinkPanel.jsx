@@ -18,7 +18,7 @@ import "./hostlink.css";
  * Link status for the Settings page.
  *
  * Unlinking is deliberately reversible and non-destructive: the person keeps
- * their cars, reviews, conversations and earnings — the workspace was only ever
+ * their cars, reviews, conversations and earnings, the workspace was only ever
  * pointing at them. The copy says so, because "unlink" otherwise sounds like it
  * deletes something.
  */
@@ -53,12 +53,12 @@ export default function HostLinkPanel() {
       const res = await unlinkHostAccount();
       toast(res?.message || "Host account released.");
       await hydrateFleet();
-      // appLinked drives every app-dependent surface — refresh it now so they
+      // appLinked drives every app-dependent surface, refresh it now so they
       // disappear immediately rather than on the next full page load.
       await fetchBusiness().then(hydrateBusiness).catch(() => {});
       await load();
     } catch (err) {
-      // 409 while a live app booking is running — unlinking mid-trip would
+      // 409 while a live app booking is running, unlinking mid-trip would
       // leave nobody managing the handover.
       toast(err.message || "Couldn't unlink that account", "danger");
     }
@@ -130,8 +130,7 @@ export default function HostLinkPanel() {
           <>
             <div>
               {/* There are two ways onto the app and this panel covers only one.
-                  A workspace that got there by publishing is already live —
-                  telling it "not connected" would contradict the app earnings
+                  A workspace that got there by publishing is already live, telling it "not connected" would contradict the app earnings
                   and reviews it can see everywhere else in the dashboard. */}
               <p className="strong">
                 {business.appLinked

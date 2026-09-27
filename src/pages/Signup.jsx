@@ -8,7 +8,7 @@ import "./auth.css";
 
 /* Display labels mapped to the API's fleet_size values.
    The values on the right are the backend's enum (see api.js), not ours to
-   restyle — "3 to 10" would be rejected. The labels on the left are what the
+   restyle, "3 to 10" would be rejected. The labels on the left are what the
    user reads and are swept like any other copy.
    strip-dashes: keep-start */
 const FLEET_SIZES = {

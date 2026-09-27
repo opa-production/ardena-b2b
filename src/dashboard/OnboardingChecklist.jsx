@@ -88,7 +88,7 @@ export default function OnboardingChecklist() {
           </p>
         </div>
         <div className="onboard-right">
-          {/* progress as one dot per step — reads at a glance and sits flush
+          {/* progress as one dot per step, reads at a glance and sits flush
               with the dismiss button instead of a bar stretching the header */}
           <span
             className="onboard-pips"

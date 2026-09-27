@@ -1,12 +1,12 @@
-/* Usage & billing — what you're running up, then what you owe.
+/* Usage & billing, what you're running up, then what you owe.
  *
  * The two used to be separate Account pages, which meant the answer to "why is
  * this month's bill that size?" lived one click away from the bill. They are
  * one screen now: the spend chart on top, the invoice list under it, and
  * nothing else. What the plans cost lives on the public /pricing page.
  *
- * The chart leads with the figure — total drawn in the window, and how that
- * compares with the window before it — because the shape of the line is only
+ * The chart leads with the figure, total drawn in the window, and how that
+ * compares with the window before it, because the shape of the line is only
  * meaningful against a number. The window switch re-slices data already in
  * hand; it does not re-fetch. */
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -40,7 +40,7 @@ const axisLabel = (iso) => {
 };
 
 /* A continuous day-by-day series, long enough to cover the widest window and
- * its comparison, so the axis has no holes — a day with no checks is a zero,
+ * its comparison, so the axis has no holes, a day with no checks is a zero,
  * not a gap.
  *
  * The usage endpoint sends period totals, not a daily breakdown, so the series

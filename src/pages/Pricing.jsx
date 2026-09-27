@@ -19,7 +19,7 @@ function Reveal({ as: Tag = "div", className = "", children }) {
 }
 
 /* Every figure here is derived from pricingData, never typed. A pricing page
-   that disagrees with the invoice is worse than no pricing page — which during
+   that disagrees with the invoice is worse than no pricing page, which during
    the launch phase means these answers may state exactly two things: the free
    months, and the per-check verification price. */
 const PRICING_FAQS = [

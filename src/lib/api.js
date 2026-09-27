@@ -57,24 +57,24 @@ function messageFrom(data, status) {
  *
  * `inflight` deduplicates: if the same GET is already in the air, the second
  * caller joins it instead of opening a second connection. That happens more
- * than it looks — a page and a widget inside it wanting the same list, or a
+ * than it looks, a page and a widget inside it wanting the same list, or a
  * route change that remounts a component mid-fetch.
  *
  * `cached` is opt-in, per endpoint, via `cache: <ms>`. It exists because
  * navigating back to a list you were looking at ten seconds ago should show
  * that list, not a skeleton over an identical request. It is deliberately NOT
  * applied to anything polled or anything whose whole purpose is to be current
- * — payment status checks, unread counts, the support thread — so a short TTL
+ *, payment status checks, unread counts, the support thread, so a short TTL
  * can never freeze a screen that is waiting for something to change.
  *
  * Any write empties the cache, and so does the session changing hands. Blunt,
- * but a mutation is rare and a stale list after one — or worse, one account
- * seeing the previous account's list — is the exact bug this must not
+ * but a mutation is rare and a stale list after one, or worse, one account
+ * seeing the previous account's list, is the exact bug this must not
  * introduce.
  *
  * One rule for callers: a cached response may be handed to more than one of
  * them, so treat what comes back as read-only. Everything in here already
- * does — pages map API rows into their own shape rather than editing them in
+ * does, pages map API rows into their own shape rather than editing them in
  * place.
  */
 const inflight = new Map();
@@ -162,7 +162,7 @@ async function request(path, opts = {}, retried = false) {
   const { method = "GET", cache = 0 } = opts;
 
   /* Reads go through the maps above; writes go straight out and invalidate
-     them. A retry after a token refresh skips both — it is already inside a
+     them. A retry after a token refresh skips both, it is already inside a
      request that owns its inflight slot. */
   if (method === "GET" && !retried) {
     const key = path;
@@ -189,7 +189,7 @@ async function request(path, opts = {}, retried = false) {
   return send(path, opts, retried);
 }
 
-async function send(path, { method = "GET", body, auth = true, headers: extra } = {}, retried = false, steppedUp = false) {
+async function send(path, { method = "GET", body, auth = true, headers: extra, as } = {}, retried = false, steppedUp = false) {
   const headers = { ...extra };
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
@@ -209,7 +209,7 @@ async function send(path, { method = "GET", body, auth = true, headers: extra } 
 
   if (res.status === 401 && auth) {
     if (!retried && (await refreshSession())) {
-      return send(path, { method, body, auth, headers: extra }, true, steppedUp);
+      return send(path, { method, body, auth, headers: extra, as }, true, steppedUp);
     }
     if (getSession().token) {
       try {
@@ -228,6 +228,9 @@ async function send(path, { method = "GET", body, auth = true, headers: extra } 
     const code = await stepUpHandler(messageFrom(data, 428));
     return send(path, { method, body, auth, headers: { ...extra, "X-2FA-Code": code } }, retried, true);
   }
+
+  // Files (report PDFs) come back as a Blob; errors are still JSON.
+  if (as === "blob" && res.ok) return res.blob();
 
   const data = res.status === 204 ? null : await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(messageFrom(data, res.status), res.status, data);
@@ -395,7 +398,7 @@ export function updateVehicle(plate, patch) {
   });
 }
 
-// 409s if the vehicle has an active booking — surface the message to the user
+// 409s if the vehicle has an active booking, surface the message to the user
 export function deleteVehicle(plate) {
   return request(`/vehicles/${encodeURIComponent(plate)}`, { method: "DELETE" });
 }
@@ -520,6 +523,42 @@ export function fetchFleetCalendar(params = {}) {
   return request(`/reports/calendar${qs ? `?${qs}` : ""}`);
 }
 
+/* PDF reports: pick a category and a period, the server renders and keeps
+   the PDF, and View, Download and Email all serve that same file. */
+
+// -> [{ type, title, description, group }]
+export function fetchReportCatalog() {
+  return request("/reports/catalog", { cache: LIST_TTL });
+}
+
+// { type, from, to } -> Report { id, type, title, period_start, period_end,
+//   status, created_at, created_by, size_bytes, pages }
+export function generateReport(payload) {
+  return request("/reports", { method: "POST", body: payload });
+}
+
+// { type?, page?, per_page? } -> { data: [Report], total, page, per_page }
+export function fetchReports(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/reports${qs ? `?${qs}` : ""}`);
+}
+
+// -> Blob (application/pdf). Not cached: the viewer keeps its own object URL.
+export function fetchReportPdf(id) {
+  return send(`/reports/${encodeURIComponent(id)}/pdf`, { as: "blob" });
+}
+
+// { to: [email], message? } -> { sent_to }
+export function emailReport(id, payload) {
+  return request(`/reports/${encodeURIComponent(id)}/email`, { method: "POST", body: payload });
+}
+
+export function deleteReport(id) {
+  return request(`/reports/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
 /* ---- Bookings (§4) ---- */
 
 // params: { status, payment, from, to, plate, client_id, page, per_page }
@@ -586,11 +625,11 @@ export function bookingDepositAction(ref, action) {
 }
 
 
-/* Record money taken outside Ardena — cash at the counter, or a bank transfer
+/* Record money taken outside Ardena, cash at the counter, or a bank transfer
    straight to the business. Nothing moves through us, so this is a bookkeeping
    entry, not a charge: it marks the booking paid and files the amount under
    cash so Finances can separate what we collected from what they did.
-   { amount, note? } — the backend stamps who recorded it and when. */
+   { amount, note? }, the backend stamps who recorded it and when. */
 export function markBookingPaidCash(ref, payload) {
   return request(`/bookings/${encodeURIComponent(ref)}/cash-payment`, {
     method: "POST",
@@ -669,7 +708,7 @@ export function refundPayment(paymentId, payload = {}) {
   return request(`/payments/${paymentId}/refund`, { method: "POST", body: payload });
 }
 
-// overrides bookings version — now returns { checkout_url, paystack_reference, payment_status }
+// overrides bookings version, now returns { checkout_url, paystack_reference, payment_status }
 export function sendStkPush(ref, phone, provider) {
   return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, {
     method: "POST",
@@ -703,7 +742,7 @@ export function deleteInvite(inviteId) {
   return request(`/staff/invites/${inviteId}`, { method: "DELETE" });
 }
 
-// 🌐 Public — { token, password } → { message, email }
+// 🌐 Public, { token, password } → { message, email }
 export function acceptInvite(payload) {
   return request("/staff/invites/accept", { method: "POST", body: payload, auth: false });
 }
@@ -837,7 +876,7 @@ export async function submitFeatureRequest({ title, detail, area }) {
    person, so nothing here fires without an explicit confirmed submit, and the
    audience is always counted back to the sender first. */
 
-// { channel: "email" | "sms", audience } → { count } — how many will receive it
+// { channel: "email" | "sms", audience } → { count }, how many will receive it
 export function fetchMarketingAudience(params = {}) {
   const qs = new URLSearchParams(
     Object.entries(params).filter(([, v]) => v != null && v !== "")
@@ -908,7 +947,7 @@ export function submitReview(token, payload) {
  *
  * Frames (ai.md §1): `meta` once at the start with the conversation id, `tool`
  * when a lookup begins, `token` per chunk of reply, `done` at the end. Errors
- * arrive as an `error` *frame*, not a status code — the response is already 200
+ * arrive as an `error` *frame*, not a status code, the response is already 200
  * by the time the model can fail, so a 503 (assistant offline) would otherwise
  * be invisible to a .catch().
  *
@@ -942,8 +981,7 @@ export function streamAssistant({ message, conversationId, signal, on }) {
       return;
     }
 
-    // A non-200 here is the request being rejected before the stream opens —
-    // auth, or the 20/min rate limit — so it is still JSON.
+    // A non-200 here is the request being rejected before the stream opens, // auth, or the 20/min rate limit, so it is still JSON.
     if (!res.ok || !res.body) {
       const data = await res.json().catch(() => null);
       on.error?.({
@@ -967,7 +1005,7 @@ export function streamAssistant({ message, conversationId, signal, on }) {
         buffer += decoder.decode(value, { stream: true });
 
         // Frames are separated by a blank line. Anything after the last one is
-        // a partial frame — leave it in the buffer for the next chunk.
+        // a partial frame, leave it in the buffer for the next chunk.
         const frames = buffer.split("\n\n");
         buffer = frames.pop() ?? "";
 
@@ -1001,7 +1039,7 @@ export function streamAssistant({ message, conversationId, signal, on }) {
   return () => controller.abort();
 }
 
-// { data, total } — chats are workspace-wide, so `started_by` may be a colleague
+// { data, total }, chats are workspace-wide, so `started_by` may be a colleague
 export function fetchAssistantConversations() {
   return request("/assistant/conversations");
 }
@@ -1067,7 +1105,7 @@ export function fetchChauffeur(id) {
   return request(`/chauffeurs/${encodeURIComponent(id)}`);
 }
 
-// contact / licence / daily_rate / notes — status changes via setChauffeurStatus
+// contact / licence / daily_rate / notes, status changes via setChauffeurStatus
 export function updateChauffeur(id, patch) {
   return request(`/chauffeurs/${encodeURIComponent(id)}`, { method: "PATCH", body: patch });
 }
@@ -1135,7 +1173,7 @@ export function saveMarketplaceListing(plate, payload) {
 }
 
 // Publish the vehicle to the Ardena marketplace. Refused (400, naming what's
-// missing) until the listing meets the host-app bar — the response's
+// missing) until the listing meets the host-app bar, the response's
 // `missing_fields` / `ready_to_publish` say in advance whether it will pass.
 export function publishMarketplaceListing(plate) {
   return request(`/fleet/${encodeURIComponent(plate)}/marketplace/publish`, {
@@ -1169,7 +1207,7 @@ export function uploadMarketplaceCover(plate, file) {
 
 // Ask the AI for a draft description. `payload.hint` (a few words from the
 // user) is required; any other form values (seats, fuel_type, features…)
-// sharpen the draft. Nothing is saved — returns { description } to accept or
+// sharpen the draft. Nothing is saved, returns { description } to accept or
 // discard. 503 means AI isn't configured, 502 means try again.
 export function generateListingDescription(plate, payload) {
   return request(`/fleet/${encodeURIComponent(plate)}/marketplace/generate-description`, {
@@ -1188,7 +1226,7 @@ export function uploadMarketplaceVideo(plate, file) {
   });
 }
 
-// Upload gallery images (≤12 per listing in total). Returns { urls } — the full
+// Upload gallery images (≤12 per listing in total). Returns { urls }, the full
 // merged list. Starts a draft listing if the vehicle doesn't have one yet.
 export function uploadMarketplaceImages(plate, files) {
   const form = new FormData();
@@ -1207,7 +1245,7 @@ export function uploadMarketplaceImages(plate, files) {
 // { total_gross, commission_rate, commission_amount, net_earnings,
 //   pending_withdrawals_total, withdrawable, paid_bookings_count,
 //   marketplace_active }
-// marketplace_active=false means nothing has been published yet — show an
+// marketplace_active=false means nothing has been published yet, show an
 // empty state pointing at Fleet rather than treating it as an error.
 export function fetchMarketplaceEarnings() {
   return request("/marketplace/earnings");
@@ -1261,11 +1299,11 @@ export function deletePayoutMethod(id) {
    and because a business that has lost access to one can still complete the
    change. One code, valid from whichever arrives first.
 
-   Nothing is sent to the *account being verified* — the code goes to the
+   Nothing is sent to the *account being verified*, the code goes to the
    business's contacts, so naming a stranger's till cannot mail that stranger.
    Spec: settlements-otp.md. */
 
-// → { sent_to_email, sent_to_phone } — both masked, so the UI can say where
+// → { sent_to_email, sent_to_phone }, both masked, so the UI can say where
 //   to look without printing a full address or number on screen
 export function requestSettlementVerification(id) {
   return request(`/settlement-accounts/${id}/verify`, { method: "POST" });
@@ -1341,7 +1379,7 @@ export function rateRenter(ref, payload) {
 
 /* ---------------- Deposit claims & extensions ----------------
    Ardena holds the deposit on an app booking, so the dashboard's own
-   refund/forfeit buttons are refused for those — this is the path instead. */
+   refund/forfeit buttons are refused for those, this is the path instead. */
 
 export function fileDepositClaim(ref, payload) {
   return request(`/marketplace/bookings/${encodeURIComponent(ref)}/deposit-claim`, {
@@ -1358,7 +1396,7 @@ export function fetchExtensionRequests(pendingOnly = true) {
   return request(`/marketplace/extension-requests?pending_only=${pendingOnly}`);
 }
 
-// Approving re-checks availability — can still 409 if the vehicle was booked
+// Approving re-checks availability, can still 409 if the vehicle was booked
 // for those dates in the meantime.
 export function decideExtension(id, payload) {
   return request(`/marketplace/extension-requests/${id}/decide`, {
@@ -1408,7 +1446,7 @@ export function uploadVehicleDocument(plate, kind, file) {
 }
 
 // Replaces the temporary LINK-* plate on a vehicle imported from a linked host
-// account. Refused on any plate that isn't a placeholder — a real plate is the
+// account. Refused on any plate that isn't a placeholder, a real plate is the
 // vehicle's identity and booking rows reference it by value.
 export function setVehiclePlate(plate, newPlate) {
   return request(`/vehicles/${encodeURIComponent(plate)}/plate`, {

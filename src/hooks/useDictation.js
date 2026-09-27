@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from "react";
  *    wrong before they send.
  *
  * `onError` takes ("blocked" | "failed") so the caller can phrase its own
- * message — this hook has no business reaching for a toast.
+ * message, this hook has no business reaching for a toast.
  */
 export default function useDictation({ value, onChange, lang = "en-KE", onError }) {
   const [listening, setListening] = useState(false);

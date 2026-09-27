@@ -8,7 +8,7 @@ import useDictation from "../hooks/useDictation";
 import { toast } from "./toastStore";
 
 /* The tool names the server sends in a `tool` frame, said in English. An
-   unlisted one falls back to a plain "Checking…" — the list is allowed to go
+   unlisted one falls back to a plain "Checking…", the list is allowed to go
    stale without the UI showing a raw identifier. */
 const TOOL_LABELS = {
   look_up_help: "Checking the handbook",
@@ -26,7 +26,7 @@ const TOOL_LABELS = {
 };
 
 /* What the wait is called while no tool has been named. One word each, in the
-   assistant's own voice — it cycles so a long pause reads as work in progress
+   assistant's own voice, it cycles so a long pause reads as work in progress
    rather than a frozen label. */
 const THINKING_WORDS = [
   "Thinking",
@@ -107,7 +107,7 @@ export default function AssistantPanel({ onNavigate }) {
   return (
     <>
       {/* No "New chat". Nothing here is stored between sessions, so a reset
-          control offers to clear something that already clears itself — and
+          control offers to clear something that already clears itself, and
           this is one conversation with one assistant, not a list of threads to
           manage. */}
       <header className="card-head assist-head">
@@ -132,7 +132,7 @@ export default function AssistantPanel({ onNavigate }) {
           <div key={m.id} className={`msg ${m.from === "user" ? "user" : "support"}`}>
             {/* The reply is plain text in a plain bubble, so markdown the
                 model emits out of habit is stripped rather than shown as
-                literal asterisks and dashes — see assistantFormat. */}
+                literal asterisks and dashes, see assistantFormat. */}
             {m.from === "agent"
               ? cleanReply(m.text).map((line, i) => <p key={i}>{line || " "}</p>)
               : <p>{m.text}</p>}

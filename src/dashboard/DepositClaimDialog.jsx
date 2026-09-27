@@ -19,8 +19,7 @@ const VALUE_BY_LABEL = Object.fromEntries(CLAIM_TYPES.map((t) => [t.label, t.val
 /**
  * Claim against a renter's deposit on an Ardena app booking.
  *
- * Ardena holds that money — the renter paid it at checkout, not to the business —
- * so the dashboard's own refund/forfeit buttons are refused for these bookings.
+ * Ardena holds that money, the renter paid it at checkout, not to the business, * so the dashboard's own refund/forfeit buttons are refused for these bookings.
  * This is the route instead: the claim goes to Ardena for review and the money
  * moves once, either back to the renter or to the business.
  *

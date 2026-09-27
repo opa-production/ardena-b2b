@@ -6,8 +6,8 @@ import "./auth.css";
 
 /* Why the activation failed, said in a sentence the person can act on.
  *
- * The backend answers a duplicate email with a 500 and a generic body — the
- * unique-constraint violation never reaches the browser — so "Something went
+ * The backend answers a duplicate email with a 500 and a generic body, the
+ * unique-constraint violation never reaches the browser, so "Something went
  * wrong. Please try again." was the whole message, and trying again produced
  * exactly the same wall. These map the statuses this endpoint can actually
  * return onto the two things that are really happening: the link is spent, or
@@ -24,7 +24,7 @@ function explainFailure(err) {
   if (detail.includes("already exists") || detail.includes("duplicate") || err?.status === 409) {
     return {
       title: "That email already has an account",
-      body: "Sign in with your existing password instead — the invite doesn't need accepting. If you've forgotten it, use “Forgot password” on the sign-in page.",
+      body: "Sign in with your existing password instead, the invite doesn't need accepting. If you've forgotten it, use “Forgot password” on the sign-in page.",
     };
   }
 
@@ -42,7 +42,7 @@ function explainFailure(err) {
   if (err?.status >= 500 || generic) {
     return {
       title: "We couldn't activate this account",
-      body: "This usually means the email on the invite already has an Ardena account — try signing in instead. If that isn't it, ask your admin to re-send the invite and let us know.",
+      body: "This usually means the email on the invite already has an Ardena account, try signing in instead. If that isn't it, ask your admin to re-send the invite and let us know.",
     };
   }
 

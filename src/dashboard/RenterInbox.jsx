@@ -35,7 +35,7 @@ const fmtDay = (v) =>
 /* Direct messages with renters.
 
    Renters can write first from the app; the business can too, but only to
-   renters with a live trip on its cars — confirmed (waiting to collect) or
+   renters with a live trip on its cars, confirmed (waiting to collect) or
    active (waiting to return). Those are listed above the conversations so the
    morning-of-pickup "we're at the gate" message is one click away. */
 export default function RenterInbox() {
@@ -152,7 +152,7 @@ export default function RenterInbox() {
 
   /* Optimistic: the bubble appears the moment Send is pressed, marked
      "Sending…", and the request runs behind it. On success the bubble is
-     swapped for the saved message in place — same position, no reload — and a
+     swapped for the saved message in place, same position, no reload, and a
      toast confirms delivery. On failure it's removed and the text handed back. */
   async function handleSend(e) {
     e.preventDefault();

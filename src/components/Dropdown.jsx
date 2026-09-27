@@ -6,7 +6,7 @@ import "./dropdown.css";
    value so FormData-based forms keep working.
 
    `ariaLabel` is for the places where the visible label is a plain <span>
-   rather than a <label> — a <label> cannot name a button, so the trigger has
+   rather than a <label>, a <label> cannot name a button, so the trigger has
    to carry the name itself. */
 export default function Dropdown({
   id,

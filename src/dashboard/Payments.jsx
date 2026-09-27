@@ -35,15 +35,15 @@ const TYPE_CHIP = {
 
 /* One money page.
  *
- * A rental business takes money two ways — bookings it makes itself (settled
+ * A rental business takes money two ways, bookings it makes itself (settled
  * via Paystack) and bookings renters make on the Ardena app (settled by Ardena,
  * paid out on request). Those used to be two sidebar entries, which made the
- * obvious question — "how much came in?" — impossible to answer without adding
+ * obvious question, "how much came in?", impossible to answer without adding
  * two pages together in your head.
  *
  * So: one KPI row that reconciles both sources, then a tab for the detail of
  * each. `viewMoney` gates the app side (Owner/Finance) while the page itself is
- * `manageBilling` (Owner/Manager/Finance) — a Manager sees direct takings only,
+ * `manageBilling` (Owner/Manager/Finance), a Manager sees direct takings only,
  * exactly as before the merge.
  */
 export default function Payments() {
@@ -54,10 +54,10 @@ export default function Payments() {
   // Two conditions, and both must hold: the role is allowed to see money, AND
   // this workspace is actually on the Ardena app. Without the second, a
   // direct-bookings business got a source toggle, a "From the Ardena app" card
-  // reading zero, and a tab leading nowhere — all for a channel it isn't on.
+  // reading zero, and a tab leading nowhere, all for a channel it isn't on.
   const canSeeApp = B2C_MARKETPLACE && can("viewMoney") && business.appLinked;
 
-  // /dashboard/payments/marketplace still works — it just opens this page on
+  // /dashboard/payments/marketplace still works, it just opens this page on
   // the app tab, so old links and bookmarks land somewhere sensible.
   //
   // Derived from the URL rather than held in state: `canSeeApp` depends on
@@ -74,7 +74,7 @@ export default function Payments() {
 
   // Everything both tabs need, in one pass. The app-side detail used to be
   // fetched by the panel itself, which made the KPI row pop in first and the
-  // charts and tables fill in a beat later — one gate means one paint.
+  // charts and tables fill in a beat later, one gate means one paint.
   const load = useCallback(async () => {
     try {
       const [payData, sumData, earn, tx, wd, pm] = await Promise.all([
@@ -122,7 +122,7 @@ export default function Payments() {
 
   /* `cash_collected` / `cash_count` are the counter takings recorded against
      bookings (see markBookingPaidCash). Defaulted to 0 so the page is correct
-     against a backend that hasn't shipped them yet — it reads as "no cash
+     against a backend that hasn't shipped them yet, it reads as "no cash
      recorded", which is true, rather than breaking. */
   const stats = summary || {};
   const collected = Number(stats.collected) || 0;

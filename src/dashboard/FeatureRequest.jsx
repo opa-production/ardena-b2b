@@ -1,4 +1,4 @@
-/* Feature requests — one form, one send.
+/* Feature requests, one form, one send.
  *
  * Deliberately not a board: a list of other businesses' requests with vote
  * counts is a product Ardena would have to run, and what the person on this
@@ -7,7 +7,7 @@
  * than left to be discovered.
  *
  * The submitted state replaces the form instead of toasting over it, so it is
- * unambiguous that the request left the building — and "Send another" puts a
+ * unambiguous that the request left the building, and "Send another" puts a
  * clean form back rather than making them find the page again. */
 import { useState } from "react";
 import { Link } from "react-router-dom";

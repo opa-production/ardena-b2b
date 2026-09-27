@@ -5,7 +5,7 @@
  * "what do I owe?", and they were never two visits.
  *
  * Deliberately one list. An outstanding invoice doesn't get a banner of its
- * own — it is set apart in place by a heavy rule above and below, and turns
+ * own, it is set apart in place by a heavy rule above and below, and turns
  * red once its due date has passed. The row you must act on is therefore
  * always in the same place as the rows you don't. */
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -111,7 +111,7 @@ export default function InvoicesPanel() {
         }
         // pending / error → retry next tick silently
       } catch {
-        // network hiccup — retry
+        // network hiccup, retry
       } finally {
         inFlight = false;
       }

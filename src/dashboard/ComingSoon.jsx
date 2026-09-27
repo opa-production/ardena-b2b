@@ -4,7 +4,7 @@ import "./coming.css";
 /* The one way this dashboard says "not yet".
  *
  * Every page that is built but switched off used to invent its own version of
- * this — a dot and a sentence here, an empty-state card there — so the same
+ * this, a dot and a sentence here, an empty-state card there, so the same
  * message read as a different kind of nothing on each screen. One component,
  * one illustration, one shape: what it is, when it lands, and where to go in
  * the meantime.

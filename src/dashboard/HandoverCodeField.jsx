@@ -12,11 +12,12 @@ export default function HandoverCodeField({ id, name, label, bookingRef, phase, 
   const [value, setValue] = useState("");
   const [state, setState] = useState({ kind: "idle", msg: "" });
 
-  async function verify() {
-    if (value.length !== 6 || state.kind === "checking") return;
+  // `code` is passed on the auto-check, where state hasn't caught up yet.
+  async function verify(code = value) {
+    if (code.length !== 6 || state.kind === "checking") return;
     setState({ kind: "checking", msg: "" });
     try {
-      await verifyHandoverCode(bookingRef, phase, value);
+      await verifyHandoverCode(bookingRef, phase, code);
       setState({ kind: "ok", msg: "Code verified. This is the right renter." });
     } catch (err) {
       setState({ kind: "error", msg: err.message || "Couldn't check that code" });
@@ -39,8 +40,11 @@ export default function HandoverCodeField({ id, name, label, bookingRef, phase, 
           value={value}
           aria-describedby={`${id}-status`}
           onChange={(e) => {
-            setValue(e.target.value.replace(/\D/g, ""));
+            const next = e.target.value.replace(/\D/g, "");
+            setValue(next);
             setState({ kind: "idle", msg: "" });
+            // Check it as soon as the sixth digit lands.
+            if (next.length === 6) verify(next);
           }}
           onKeyDown={(e) => {
             // Enter checks the code instead of submitting the whole handover.
@@ -53,7 +57,7 @@ export default function HandoverCodeField({ id, name, label, bookingRef, phase, 
         <button
           type="button"
           className={`btn ho-verify-btn${state.kind === "ok" ? " is-ok" : ""}`}
-          onClick={verify}
+          onClick={() => verify()}
           disabled={value.length !== 6 || state.kind === "checking" || state.kind === "ok"}
         >
           {state.kind === "checking" ? "Checking…" : state.kind === "ok" ? "✓ Verified" : "Verify"}

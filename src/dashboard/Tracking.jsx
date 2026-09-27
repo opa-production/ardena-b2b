@@ -85,7 +85,7 @@ export default function Tracking() {
   }
 
   /* No GPS connector exists yet and Ardena fits the units in person, so the
-     live screens would show a map that never moves. Say so instead — the
+     live screens would show a map that never moves. Say so instead, the
      whole page below is ready for the day there is hardware behind it. */
   if (!VEHICLE_TRACKING) {
     return (
@@ -134,8 +134,7 @@ export default function Tracking() {
       </div>
 
       {/* The one thing this page can't do for you. Connecting a tracker in the
-          UI only registers a device that is already wired into the vehicle —
-          fitting it is an on-site job, and a business that doesn't know that
+          UI only registers a device that is already wired into the vehicle, fitting it is an on-site job, and a business that doesn't know that
           will sit waiting for a location that never arrives. */}
       <p className="page-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

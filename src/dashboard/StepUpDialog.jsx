@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ApiError, sendStepUpCode, setStepUpHandler } from "../lib/api";
 import "./bookings.css";
 import "./security.css";
+import { submitWhenComplete } from "../lib/autoSubmit";
 
 /* The "confirm it's you" prompt for sensitive actions, shown when the account
    has two-step sign-in on. Mounted once in the dashboard; api.js calls it
@@ -86,7 +87,10 @@ export default function StepUpDialog() {
             maxLength={6}
             placeholder="••••••"
             value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            onChange={(e) => {
+              setCode(e.target.value.replace(/\D/g, ""));
+              submitWhenComplete(e);
+            }}
             aria-label="One-time code"
           />
           {error && <p className="form-error">{error}</p>}

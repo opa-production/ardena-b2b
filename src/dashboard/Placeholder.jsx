@@ -4,7 +4,7 @@ import { SECTION_TITLES } from "./nav";
 import usePageTitle from "../hooks/usePageTitle";
 
 /* Any dashboard section that is named but not built yet. It is deliberately
-   the same page as every other "not yet" in here — see ComingSoon — so a
+   the same page as every other "not yet" in here, see ComingSoon, so a
    module on the roadmap never looks like a module that broke. */
 export default function Placeholder() {
   const { section } = useParams();

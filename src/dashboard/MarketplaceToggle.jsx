@@ -10,7 +10,7 @@ import "./marketplace.css";
 
    The switch is on only when renters can actually book the car
    (live_on_marketplace). Every new car is reviewed by Ardena first; while it
-   waits the switch stays off and locked, and the chip says "In review" — an
+   waits the switch stays off and locked, and the chip says "In review", an
    "on" switch beside "In review" told businesses two different things.
 
    Turning it on only publishes directly when the listing is already complete.
@@ -54,7 +54,7 @@ export default function MarketplaceToggle({ vehicle, showLabel = false }) {
       );
     } catch (err) {
       // Most likely an unverified workspace or a field that changed since the
-      // list loaded — the editor explains either.
+      // list loaded, the editor explains either.
       toast(err.message);
       if (next) navigate(editor);
     } finally {

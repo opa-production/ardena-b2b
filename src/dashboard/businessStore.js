@@ -13,8 +13,8 @@ const DEFAULTS = {
   trustSlug: null,
   verifiedSince: null,
   // Is this workspace on the Ardena consumer app at all? Everything that only
-  // exists because of that channel — app earnings, renter messages, reviews,
-  // claims, marketplace listing — stays hidden until it's true. A workspace
+  // exists because of that channel, app earnings, renter messages, reviews,
+  // claims, marketplace listing, stays hidden until it's true. A workspace
   // doing direct bookings only should never see a control for a channel it
   // isn't on, or numbers that can only ever read zero.
   //
@@ -32,7 +32,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc. — run in-memory */
+    /* private mode etc., run in-memory */
   }
   return { ...DEFAULTS };
 }

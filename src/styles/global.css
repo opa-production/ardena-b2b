@@ -19,7 +19,7 @@
   --bg: #f6f7f9;
   --panel: #ffffff; /* cards sit white against the light grey page */
   --surface: #f0f2f5;
-  /* The sidebar is near-black in both themes — the nav is chrome, not content,
+  /* The sidebar is near-black in both themes, the nav is chrome, not content,
      and the sharpest way to say so is to invert it rather than tint it. The
      ink tokens inside it are re-pointed in dashboard.css; --brand stays the
      one accent, and the active row's blue bar carries it. */
@@ -32,8 +32,7 @@
 
   /* Edges. These replaced the old neumorphic raised/carved shadows: surfaces
      are now defined by a 1px hairline rather than by light and shade.
-     They stay box-shadows rather than real borders so they cost no layout —
-     every call site was a box-shadow already.
+     They stay box-shadows rather than real borders so they cost no layout, every call site was a box-shadow already.
        --edge        the default hairline, on cards, buttons, popovers
        --edge-strong the same line darkened, for hover and focus
        --edge-in     drawn inside, for inputs, wells and pressed states
@@ -44,13 +43,13 @@
   --edge-inv: 0 0 0 1px rgba(255, 255, 255, 0.22);
   --edge-inv-in: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 
-  /* The one KPI on a page that gates the rest of it — the verification wallet.
+  /* The one KPI on a page that gates the rest of it, the verification wallet.
      Cream is already the brand's third ground (see --ard-cream on the
      marketing pages); this is that colour with an edge dark enough to hold the
      card's shape against a near-white page. */
   /* A KPI card's edge: the hairline with brand blue mixed into it, so a row of
      figures reads as one instrument panel rather than four loose boxes. Faint
-     on purpose (1.5:1 against the card) — it is an edge, not a border. */
+     on purpose (1.5:1 against the card), it is an edge, not a border. */
   --kpi-edge: #bcd6f8;
 
   --kpi-cream: #f5f0e8;
@@ -64,7 +63,7 @@
   /* A filled button for an action that is sensitive but not destructive:
      changing a password, and anything else that alters access rather than
      deleting something. Distinct from --danger, which is reserved for actions
-     that remove or end things (delete, log out) — using red for both would
+     that remove or end things (delete, log out), using red for both would
      teach people to read "irreversible" where none exists.
      Deeper than --warn because it carries white text: 5.18:1 filled, where
      --warn would give 3.19:1 and fail as a button label. */
@@ -86,7 +85,7 @@
   /* Chart colours. Validated with the dataviz palette checker rather than
      picked by eye: this trio clears CVD separation, the normal-vision floor
      and 3:1 contrast on a light surface. The obvious green/red pair for
-     up/down does NOT — #16a34a vs #dc2626 sits at ΔE 5.0 under deuteranopia,
+     up/down does NOT, #16a34a vs #dc2626 sits at ΔE 5.0 under deuteranopia,
      which is why --rr-down is a burnt orange. */
   --rr-fill: #007ffa;
   --rr-up: #0d7a52;
@@ -102,7 +101,7 @@
      The two below are the exceptions, and they are narrow ones: a chat bubble
      with square corners is not a bubble, and a round icon button is the
      difference between a control and a tile. Conversational surfaces and
-     hand-sized controls only — dialogs, cards and panels stay square. */
+     hand-sized controls only, dialogs, cards and panels stay square. */
   --radius: 0;
   --radius-sm: 0;
   --radius-soft: 12px; /* message bubbles, composer, inputs you type into */
@@ -115,7 +114,7 @@
 }
 
 /* ---------------------------------------------
-   Dark theme — graphite surfaces, sky-mint accent.
+   Dark theme, graphite surfaces, sky-mint accent.
    Only the token values change; every component reads these, so the whole
    dashboard re-skins from here. Applied via data-theme="dark" on <html>.
 ---------------------------------------------- */
@@ -362,7 +361,7 @@ h3 {
   box-shadow: var(--edge-in);
 }
 
-/* Sensitive, not destructive — see --caution. */
+/* Sensitive, not destructive, see --caution. */
 .btn-caution {
   background: var(--caution);
   color: var(--on-caution);

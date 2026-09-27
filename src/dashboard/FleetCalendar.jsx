@@ -1,4 +1,4 @@
-/* Fleet calendar — which car is out when.
+/* Fleet calendar, which car is out when.
  *
  * Cars down the side, days across the top, each booking a bar across the days
  * it holds the car. The gaps are the point: an idle stretch is money not being
@@ -46,7 +46,7 @@ const dayIndex = (start, iso) => Math.round((parse(iso) - start) / DAY);
 
 const fmtRangeLabel = (a, b) => {
   const opts = { day: "numeric", month: "short" };
-  return `${a.toLocaleDateString("en-KE", opts)} – ${b.toLocaleDateString("en-KE", { ...opts, year: "numeric" })}`;
+  return `${a.toLocaleDateString("en-KE", opts)} to ${b.toLocaleDateString("en-KE", { ...opts, year: "numeric" })}`;
 };
 
 /* Greedy lane assignment: each bar takes the first lane whose last bar ended

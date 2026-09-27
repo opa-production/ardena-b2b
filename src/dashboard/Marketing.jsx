@@ -1,10 +1,10 @@
-/* Marketing — reaching your own clients, from the workspace that already has
+/* Marketing, reaching your own clients, from the workspace that already has
  * their details.
  *
  * Two columns, one per channel: email on the left, SMS on the right. They are
  * side by side rather than behind a toggle because they are not the same
- * message — an email has a subject and room to explain, an SMS is one line
- * that costs per segment — and a business writing both should be able to see
+ * message, an email has a subject and room to explain, an SMS is one line
+ * that costs per segment, and a business writing both should be able to see
  * both. Each column carries its own audience, because who you email is rarely
  * exactly who you text.
  *
@@ -15,7 +15,7 @@
  * Every send reaches a real inbox or handset, so nothing fires on a single
  * click: the audience is counted back to the sender first, and the send goes
  * through a confirmation naming the channel and the count. No drafts, no
- * scheduling — this sends now or not at all. */
+ * scheduling, this sends now or not at all. */
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchMarketingAudience, sendMarketingCampaign } from "../lib/api";
@@ -38,7 +38,7 @@ const AUDIENCES = [
 ];
 
 // One GSM segment. Past this a message is billed as two, which is the sender's
-// money — so the count is shown rather than the limit enforced.
+// money, so the count is shown rather than the limit enforced.
 const SMS_SEGMENT = 160;
 
 const MailIcon = () => (
@@ -55,8 +55,8 @@ const SmsIcon = () => (
   </svg>
 );
 
-/* One channel's composer. Both columns are the same shape — head, audience,
-   reach, body, send — so they line up row for row down the page; only the
+/* One channel's composer. Both columns are the same shape, head, audience,
+   reach, body, send, so they line up row for row down the page; only the
    subject field and the segment counter differ. */
 function ChannelCard({ channel, title, note, icon, placeholder }) {
   const isEmail = channel === "email";
@@ -160,7 +160,7 @@ function ChannelCard({ channel, title, note, icon, placeholder }) {
             />
           </label>
         ) : (
-          <p className="mk-nosubject">No subject line — an SMS opens straight into the text.</p>
+          <p className="mk-nosubject">No subject line, an SMS opens straight into the text.</p>
         )}
 
         <label className="field-label mk-body">
@@ -211,7 +211,7 @@ function ChannelCard({ channel, title, note, icon, placeholder }) {
 export default function Marketing() {
   usePageTitle("Marketing");
 
-  /* Nothing sends until there is a gateway behind /marketing/* — see
+  /* Nothing sends until there is a gateway behind /marketing/*, see
      lib/features.js. The composers below are left intact so turning it on is
      one flag, not a rebuild. */
   if (!MARKETING) {

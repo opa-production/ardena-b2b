@@ -24,7 +24,7 @@ function NotLinked() {
 /**
  * Route guard for pages that only exist because of the Ardena consumer app.
  *
- * The nav already hides these, so this catches the other ways in — a typed URL,
+ * The nav already hides these, so this catches the other ways in, a typed URL,
  * a bookmark from before a workspace unlinked, a link pasted by a colleague. It
  * explains rather than redirecting, so a stale bookmark doesn't look like a
  * broken page.

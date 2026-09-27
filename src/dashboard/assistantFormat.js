@@ -1,6 +1,6 @@
 /* Cleaning the model's prose for a chat bubble that renders plain text.
  *
- * The server streams markdown out of habit — **bold**, `code`, "- " bullets,
+ * The server streams markdown out of habit, **bold**, `code`, "- " bullets,
  * the occasional "###" heading and em dash. None of that is rendered here, so
  * left alone it shows up as literal punctuation in the answer. Rather than
  * pull in a markdown renderer for a two-sentence reply, the markers are
@@ -8,7 +8,7 @@
  * into their plain-text equivalent.
  *
  * This runs on every token of a streaming reply, so it stays a handful of
- * regexes over a short string — and it has to tolerate half-written markers,
+ * regexes over a short string, and it has to tolerate half-written markers,
  * since "**fl" arrives before "**fleet**" does.
  */
 
@@ -17,7 +17,7 @@
 const FENCE = /```[a-z]*\n?/gi;
 
 /* Bold/italic. Longest marker first so "**x**" doesn't get eaten a star at a
-   time, and both are only closed pairs — a lone trailing "*" is a marker
+   time, and both are only closed pairs, a lone trailing "*" is a marker
    still being streamed and is dropped at the end instead. */
 const BOLD = /\*\*([^*]+)\*\*/g;
 const BOLD_ALT = /__([^_]+)__/g;

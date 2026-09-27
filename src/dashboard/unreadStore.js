@@ -1,4 +1,4 @@
-/* The two unread badges — notifications and support — polled once for the
+/* The two unread badges, notifications and support, polled once for the
  * whole dashboard.
  *
  * They used to be fetched in two places: the layout, on a 60-second poll for
@@ -7,8 +7,7 @@
  * backend where that endpoint answers in ~1.8s the second one is pure wait.
  *
  * Same shape as the other stores: module state, a listener set, and
- * useSyncExternalStore on the components. The poll belongs to the layout —
- * `startUnreadPolling` is called once there — so a component reading the
+ * useSyncExternalStore on the components. The poll belongs to the layout, * `startUnreadPolling` is called once there, so a component reading the
  * counts never triggers a fetch of its own.
  */
 import { fetchUnreadCount, fetchSupportUnread } from "../lib/api";
@@ -59,7 +58,7 @@ export async function refreshUnread() {
 }
 
 /** Start the shared 60s poll. Returns a stop function. Polling pauses while
- *  the tab is hidden — nobody is looking at a badge in a background tab — and
+ *  the tab is hidden, nobody is looking at a badge in a background tab, and
  *  catches up the moment it comes back. */
 export function startUnreadPolling() {
   refreshUnread();
@@ -81,7 +80,7 @@ export function startUnreadPolling() {
   };
 }
 
-/** Clear the badges without waiting for the next poll — after marking a
+/** Clear the badges without waiting for the next poll, after marking a
  *  thread or the notification list read. */
 export function setUnread(patch) {
   state = { ...state, ...patch };

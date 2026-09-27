@@ -86,7 +86,7 @@ export default function MarketplaceEarningsPanel({
   const [busy, setBusy] = useState(false);
 
   // `methods` is loaded by the parent and arrives after mount, so default the
-  // selection once it does — and clear it if the chosen destination is deleted.
+  // selection once it does, and clear it if the chosen destination is deleted.
   useEffect(() => {
     setMethodId((current) => {
       if (current && methods.some((m) => String(m.id) === current)) return current;
@@ -125,7 +125,7 @@ export default function MarketplaceEarningsPanel({
     }
   }
 
-  // Nothing published yet isn't an error — it just means there's nothing to
+  // Nothing published yet isn't an error, it just means there's nothing to
   // earn on. Point at the fleet rather than showing zeroes and a payout form.
   if (summary && !summary.marketplace_active) {
     return (

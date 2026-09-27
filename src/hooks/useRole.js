@@ -1,7 +1,7 @@
 // Who is allowed to do what.
 //
 // The backend enforces these server-side on every B2B endpoint, so this file is
-// not the security boundary — it exists so a staff member never sees a button
+// not the security boundary, it exists so a staff member never sees a button
 // that answers 403. Keep it in step with `require_b2b_roles(...)` in the backend;
 // if the two disagree, the backend wins and the user gets a confusing failure.
 //
@@ -24,7 +24,7 @@ export const PERMISSIONS = {
   // Deposit claims sit between operations and finance.
   fileDepositClaim: ["Owner", "Manager", "Finance"],
   // The Claims & requests page carries both queues, and the two have different
-  // audiences — Finance files claims, Booking agents answer extensions. Gating
+  // audiences, Finance files claims, Booking agents answer extensions. Gating
   // the page on either alone locked one of them out of their own work.
   claimsOrExtensions: ["Owner", "Manager", "Finance", "Booking agent"],
 

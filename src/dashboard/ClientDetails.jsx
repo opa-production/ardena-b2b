@@ -14,8 +14,7 @@ const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 export default function ClientDetails() {
   const { id } = useParams();
-  // The row from the clients list, if that is where this was opened from —
-  // name, phone and verification are enough to draw the header while the full
+  // The row from the clients list, if that is where this was opened from, // name, phone and verification are enough to draw the header while the full
   // record (bookings, spend) loads. See recordSeeds.
   const [c, setC] = useState(() => getSeed("clients", id));
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,7 @@
 /* Every dashboard screen, as a dynamic import.
  *
  * The whole app used to build into one 516 KB script, and the dashboard is
- * roughly ten times the weight of the public site — so anyone landing on the
+ * roughly ten times the weight of the public site, so anyone landing on the
  * marketing pages or the sign-in form downloaded the entire back office before
  * they could read a headline, and paid for it on the slowest connection they
  * were ever going to have with us.
@@ -13,7 +13,7 @@
  * clicks the sidebar the chunk is already there.
  *
  * The loaders live here rather than inline in App.jsx so the preloader can
- * reference the same functions — a second `import()` of a module already in
+ * reference the same functions, a second `import()` of a module already in
  * flight or already loaded resolves from the module registry, it does not
  * fetch twice.
  */
@@ -74,8 +74,7 @@ export function preloadCommonPages() {
 
   const run = () => COMMON.forEach((key) => load[key]?.().catch(() => {}));
 
-  // requestIdleCallback where it exists, a generous timeout where it doesn't —
-  // either way this must never compete with the page's own data fetches.
+  // requestIdleCallback where it exists, a generous timeout where it doesn't, // either way this must never compete with the page's own data fetches.
   if (typeof window.requestIdleCallback === "function") {
     window.requestIdleCallback(run, { timeout: 4000 });
   } else {

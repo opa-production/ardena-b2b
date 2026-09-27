@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./refresh.css";
 
-/* Re-fetch this page's data in place — for things that change without the
+/* Re-fetch this page's data in place, for things that change without the
    user doing anything here: an Ardena review landing, a renter paying, a new
    claim. `onRefresh` is the page's own loader; it must not flip the page back
    to its skeleton, so the content stays put while the icon spins.

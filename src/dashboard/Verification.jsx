@@ -92,8 +92,7 @@ export default function Verification() {
     setLookupOpen(true);
   }
 
-  /* The check is already recorded server-side by the time the result renders —
-     `runLookup` refreshes the store — so closing is just dismissing the
+  /* The check is already recorded server-side by the time the result renders, `runLookup` refreshes the store, so closing is just dismissing the
      receipt. Clearing here means the next open starts on an empty form rather
      than the last person's result. */
   function closeLookup() {
@@ -238,7 +237,7 @@ export default function Verification() {
               </button>
             </header>
 
-            {/* Result first once there is one — the form has done its job. */}
+            {/* Result first once there is one, the form has done its job. */}
             {result?.entity ? (
               <div className="modal-body">
                 <div className="verify-success">

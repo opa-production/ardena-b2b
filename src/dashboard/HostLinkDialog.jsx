@@ -4,6 +4,7 @@ import { toast } from "./toastStore";
 import { hydrateFleet } from "./fleetStore";
 import "../components/confirm.css";
 import "./hostlink.css";
+import { submitWhenComplete } from "../lib/autoSubmit";
 
 /**
  * Link an existing Ardena mobile host account to this workspace.
@@ -14,7 +15,7 @@ import "./hostlink.css";
  * one channel alone isn't enough to prove ownership.
  *
  * On success the host's cars land in the fleet. They arrive with temporary
- * `LINK-*` plates because the consumer app never stored a number plate — that's
+ * `LINK-*` plates because the consumer app never stored a number plate, that's
  * surfaced here rather than left for someone to discover in the fleet list.
  */
 export default function HostLinkDialog({ suggestion, onClose, onLinked }) {
@@ -149,7 +150,10 @@ export default function HostLinkDialog({ suggestion, onClose, onLinked }) {
                   autoComplete="one-time-code"
                   required
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => {
+                    setOtp(e.target.value);
+                    submitWhenComplete(e);
+                  }}
                   className="hostlink-otp"
                   placeholder="000000"
                 />

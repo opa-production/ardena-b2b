@@ -5,8 +5,7 @@
 /**
  * Connecting an existing Ardena consumer-app host account to a workspace.
  *
- * Deferred to a later phase, so new workspaces are not offered it at all —
- * neither the Settings panel nor the sign-in suggestion dialog. Workspaces
+ * Deferred to a later phase, so new workspaces are not offered it at all, * neither the Settings panel nor the sign-in suggestion dialog. Workspaces
  * that are *already* linked keep the Settings panel, because they still need
  * to see the link's status and be able to release it.
  *
@@ -19,9 +18,9 @@ export const HOST_ACCOUNT_LINKING = false;
  *
  * The first public launch is the B2B dashboard standing on its own: a rental
  * business runs its fleet, bookings, clients, staff and payments without any
- * connection to the consumer marketplace. The B2C half — listing vehicles,
+ * connection to the consumer marketplace. The B2C half, listing vehicles,
  * renter messages, renter reviews, deposit claims on app bookings, and app
- * earnings and withdrawals — is built but is not part of that launch.
+ * earnings and withdrawals, is built but is not part of that launch.
  *
  * This is a harder gate than `business.appLinked`: a workspace that arrives
  * with `app_linked: true` from the backend still sees none of it while this is
@@ -29,16 +28,16 @@ export const HOST_ACCOUNT_LINKING = false;
  * launch build.
  *
  * Flip to `true` to bring the whole B2C side back. What it gates:
- *   · nav       — Reviews, Claims & requests (see nav.js `appOnly`)
- *   · routes    — /reviews, /claims, /renter-messages, /fleet/:plate/marketplace
- *   · Fleet     — the per-vehicle Marketplace action (shown disabled meanwhile)
- *   · Finances  — the app-earnings tab, commission figures and withdrawals
- *   · Support   — the renter-messages cross-links
+ *   · nav, Reviews, Claims & requests (see nav.js `appOnly`)
+ *   · routes, /reviews, /claims, /renter-messages, /fleet/:plate/marketplace
+ *   · Fleet, the per-vehicle Marketplace action (shown disabled meanwhile)
+ *   · Finances, the app-earnings tab, commission figures and withdrawals
+ *   · Support, the renter-messages cross-links
  */
 export const B2C_MARKETPLACE = true;
 
 /**
- * Listing fleet vehicles on the Ardena app — the editor, and the per-vehicle
+ * Listing fleet vehicles on the Ardena app, the editor, and the per-vehicle
  * "On Ardena app" toggle in Fleet and on the vehicle page.
  *
  * Split out of B2C_MARKETPLACE so a workspace can put cars on the app before
@@ -62,8 +61,7 @@ export const VEHICLE_TRACKING = false;
 /**
  * Marketing: emailing and texting a workspace's own clients.
  *
- * The composers are built and wired to `/marketing/*`, but nothing sends yet —
- * there is no email or SMS gateway behind those endpoints, and a business that
+ * The composers are built and wired to `/marketing/*`, but nothing sends yet, * there is no email or SMS gateway behind those endpoints, and a business that
  * wrote a campaign today would watch it fail after committing to the send.
  * Shown as a coming-soon page until there is a sender behind it.
  *

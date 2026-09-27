@@ -50,8 +50,7 @@ export default function WalletTopup({ className = "btn btn-ghost page-action-btn
     setWaiting(false);
   }
 
-  // Poll until Paystack confirms, then refresh the balance. 3-minute cap —
-  // STK prompts expire on-device well before then.
+  // Poll until Paystack confirms, then refresh the balance. 3-minute cap, // STK prompts expire on-device well before then.
   function startPolling(reference) {
     setWaiting(true);
     deadlineRef.current = Date.now() + 3 * 60 * 1000;
@@ -76,9 +75,9 @@ export default function WalletTopup({ className = "btn btn-ghost page-action-btn
           onSettled?.();
           toast("Top-up wasn't confirmed, the prompt may have expired. Try again.", "warn");
         }
-        // still pending — retry next tick
+        // still pending, retry next tick
       } catch {
-        // network hiccup — retry next tick
+        // network hiccup, retry next tick
       } finally {
         inFlight = false;
       }

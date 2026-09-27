@@ -24,7 +24,7 @@ function RoleBlocked({ role }) {
  *
  * Hiding the nav entry stops people stumbling in; this stops them arriving by
  * typed URL, bookmark, or a link a colleague pasted in chat. It explains rather
- * than redirecting — silently bouncing someone to the overview looks like a
+ * than redirecting, silently bouncing someone to the overview looks like a
  * broken link, so they just try again.
  *
  * The page title is set inside `RoleBlocked` rather than here: a parent's

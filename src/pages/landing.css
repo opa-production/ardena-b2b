@@ -196,7 +196,7 @@
 
 /* ---- Sticky marketing nav (nav as direct child of the scroll container) ---- */
 
-/* The bar crosses four different backgrounds on this page — the dark hero, the
+/* The bar crosses four different backgrounds on this page, the dark hero, the
    white pillars and pricing, the black FAQ, the dark closing. Rather than
    recolour the text per section (which is what made the links vanish against
    the light bar), the bar is dark everywhere and the text stays white in every

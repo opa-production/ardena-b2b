@@ -6,7 +6,7 @@
  * The reply streams. A placeholder agent message goes in as soon as the turn
  * starts and its text grows token by token, so the page renders progress
  * without knowing anything about SSE. `conversationId` is whatever the server
- * handed back in the `meta` frame — it is held for the session and deliberately
+ * handed back in the `meta` frame, it is held for the session and deliberately
  * not persisted: the transcript belongs to the backend, and the UI is one
  * conversation with one assistant, not a thread list.
  *
@@ -19,7 +19,7 @@ import { streamAssistant } from "../lib/api";
 let nextId = 1;
 
 /* Starts genuinely empty. The thread used to be seeded with a greeting the
-   panel then hid and sliced past — a sentinel that existed only so "is this a
+   panel then hid and sliced past, a sentinel that existed only so "is this a
    fresh thread" could be asked as `length === 1`. An empty array asks it
    honestly, and the panel's empty state says the same thing the greeting did
    in fewer words. */
@@ -129,7 +129,7 @@ export function sendMessage(text) {
   });
 }
 
-/** Abandon the turn in flight — the drawer closing, or the page unmounting. */
+/** Abandon the turn in flight, the drawer closing, or the page unmounting. */
 export function cancelTurn() {
   abort?.();
   abort = null;

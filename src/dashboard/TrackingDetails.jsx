@@ -74,7 +74,7 @@ export default function TrackingDetails() {
   const trail = tracker.trail || [];
   const recent = [...trail].reverse();
 
-  // Same gate as the list — see features.js. A typed URL shouldn't reach a
+  // Same gate as the list, see features.js. A typed URL shouldn't reach a
   // live map that has no hardware feeding it.
   if (!VEHICLE_TRACKING) return <Navigate to="/dashboard/tracking" replace />;
 

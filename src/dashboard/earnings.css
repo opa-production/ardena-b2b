@@ -30,9 +30,9 @@
   margin: 0 0 8px;
 }
 
-/* Second heading inside the same card — needs a rule above it so the payout
+/* Second heading inside the same card, needs a rule above it so the payout
    list doesn't read as part of the withdrawal form. */
-/* No longer a section appended to another card — it heads its own card on
+/* No longer a section appended to another card, it heads its own card on
    Settlements, so it loses the rule above it. */
 .payout-head {
   display: flex;
@@ -160,7 +160,7 @@
 /* The destination is the value the eye scans down the column, so it gets the
    tabular face the rest of the app uses for account and plate numbers.
    Declared in full rather than leaning on the shared .mono, which lives in
-   tracking.css and verification.css — neither of which this page loads. */
+   tracking.css and verification.css, neither of which this page loads. */
 .settle-table td.mono {
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;

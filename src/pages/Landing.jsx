@@ -44,7 +44,7 @@ const TRUST = [
 ];
 
 /* Built from pricingData so the landing can never quote a price /pricing
-   disagrees with — which is exactly what happened when this page advertised
+   disagrees with, which is exactly what happened when this page advertised
    fleet bands the backend had never heard of. */
 export default function Landing() {
   usePageTitle("");

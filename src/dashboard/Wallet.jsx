@@ -1,4 +1,4 @@
-/* Wallet — the one prepaid balance the dashboard spends.
+/* Wallet, the one prepaid balance the dashboard spends.
  *
  * It started life as the "KYC wallet" on Verification, because ID checks were
  * the only thing it paid for. Review-request SMS draw on it too now, and plan

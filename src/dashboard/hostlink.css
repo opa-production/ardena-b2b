@@ -12,7 +12,7 @@
   margin-top: 16px;
 }
 
-/* Spaced like a code, not a word — makes a mistyped digit obvious. */
+/* Spaced like a code, not a word, makes a mistyped digit obvious. */
 .hostlink-otp {
   max-width: 200px;
   letter-spacing: 0.35em;

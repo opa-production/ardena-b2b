@@ -93,7 +93,7 @@
   height: 13px;
 }
 
-/* One quiet line of standing context above a page's content — the kind of
+/* One quiet line of standing context above a page's content, the kind of
    thing a business needs to know once, not a dismissible alert. The rule on
    the left is the only ornament. */
 .page-note {
@@ -118,8 +118,7 @@
 }
 
 /* Minimal way back: an arrow and the place it returns to, no card. Replaces a
-   whole header card on pages whose header was only a back button and a title —
-   the form or table underneath already says what the page is. */
+   whole header card on pages whose header was only a back button and a title, the form or table underneath already says what the page is. */
 .page-back {
   display: inline-flex;
   align-items: center;
@@ -161,7 +160,7 @@
   background: var(--surface);
 }
 
-/* Square icon-only button — the gear that opens a page's settings. It carries
+/* Square icon-only button, the gear that opens a page's settings. It carries
    ink rather than the muted grey the other icon buttons use: it is often the
    only control on its row, with nothing beside it to read it against. */
 .toolbar-gear {
@@ -257,7 +256,7 @@
 /* icon-only table action (e.g. delete): square, no label padding */
 /* No label, so the glyph is the entire affordance and has to carry it: full
    ink and a firmer edge than a button whose text does the work. These sit in
-   page headers — the chauffeur and agreement actions on a booking — where a
+   page headers, the chauffeur and agreement actions on a booking, where a
    soft grey outline read as decoration rather than something to press. */
 .icon-btn.icon-only {
   padding: 8px;
@@ -336,7 +335,7 @@
   white-space: nowrap;
 }
 
-/* two controls in one cell — the rating ask and View */
+/* two controls in one cell, the rating ask and View */
 .actions-cell .icon-btn + .icon-btn {
   margin-left: 8px;
 }
@@ -363,8 +362,8 @@
 }
 
 /* Inert, not invisible. A control that exists to say "not yet" has to be
-   readable enough to say it, and the old treatment — 0.72 opacity over
-   --ink-mute — measured 2.80:1 on this ground, under the 4.5:1 text floor.
+   readable enough to say it, and the old treatment, 0.72 opacity over
+   --ink-mute, measured 2.80:1 on this ground, under the 4.5:1 text floor.
    The state is carried by the recess instead of by fading the label: a filled
    ground and an inset hairline where an enabled button has a raised one, so it
    reads as pressed shut rather than half-erased. Text stays at --ink-soft,
@@ -376,7 +375,7 @@
   box-shadow: var(--edge-in);
 }
 
-/* Already asked. It stays disabled — the recess says that — but the star is
+/* Already asked. It stays disabled, the recess says that, but the star is
    filled in the amber it would wear on a rating, so a glance down the column
    shows which finished rentals have been chased. */
 .icon-btn.is-done {

@@ -7,7 +7,7 @@ import { useState } from "react";
  * the 14th?", which nobody asks; the shape of the run and whether it is
  * climbing is the actual question, and a line says that in one glance. The
  * comparison series is what turns the big number above the chart into a
- * judgement — 486 GB means nothing, "486 GB, up 14%" means something.
+ * judgement, 486 GB means nothing, "486 GB, up 14%" means something.
  *
  * Both series are passed already aligned: `data[i]` and `prev[i]` are the same
  * offset into their respective windows, so the dotted line sits under its own

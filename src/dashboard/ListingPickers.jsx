@@ -2,7 +2,7 @@
 
    Typing a comma-separated list was slow and every business spelled the same
    feature differently. The common ones are now tiles and chips; anything else
-   still goes in free text, so nothing a business already wrote is lost — on
+   still goes in free text, so nothing a business already wrote is lost, on
    load, stored values that don't match a preset land in the free-text box. */
 
 const I = (d) => (

@@ -1,4 +1,4 @@
-/* Settings — the things you configure once and then leave alone.
+/* Settings, the things you configure once and then leave alone.
  *
  * Split out of the profile page, which was eight cards deep and mixed "who
  * this business is" with "how it is set up". Identity stayed there; the rental
@@ -106,7 +106,7 @@ export default function WorkspaceSettings() {
         </div>
 
         <div className="details-side">
-          {/* No subscription figure here on purpose — there isn't one yet.
+          {/* No subscription figure here on purpose, there isn't one yet.
               See the launch-phase note in src/pages/pricingData.js. */}
           <section className="panel-card">
             <header className="card-head">

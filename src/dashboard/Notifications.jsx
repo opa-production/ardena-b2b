@@ -127,7 +127,7 @@ export default function Notifications() {
         return next;
       });
     } catch {
-      // silent — user can retry
+      // silent, user can retry
     } finally {
       setBusyId(null);
     }

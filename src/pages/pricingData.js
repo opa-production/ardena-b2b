@@ -36,8 +36,7 @@ export const MODULES = [
   },
 ];
 
-/* The landing page leads with four pillars rather than all eight modules —
-   the full list still appears on /pricing, where people are comparing. */
+/* The landing page leads with four pillars rather than all eight modules, the full list still appears on /pricing, where people are comparing. */
 export const PILLARS = [
   {
     title: "Fleet",
@@ -58,13 +57,13 @@ export const PILLARS = [
 ];
 
 /* ---------------------------------------------------------------------------
-   Pricing — launch phase. Mirrors docs/BACKEND.md §4; keep them in step.
+   Pricing, launch phase. Mirrors docs/BACKEND.md §4; keep them in step.
    ---------------------------------------------------------------------------
    Ardena for Business is FREE for a workspace's first FREE_MONTHS months.
    Subscription pricing has not been set yet: it will be announced, and every
    existing workspace told, well before anyone is charged. Nothing on the
    marketing site or in the dashboard may quote a subscription figure until
-   then — an unannounced number that later changes is worse than no number.
+   then, an unannounced number that later changes is worse than no number.
 
    The earlier model (KES 400 per vehicle per month, a 3-vehicle minimum, and
    a 9% Ardena-app commission credit against the bill) has been removed rather
@@ -81,12 +80,12 @@ export const PILLARS = [
 export const FREE_MONTHS = 2;
 
 /** KES per renter verification check, drawn from the prepaid wallet.
- *  Charged during the free months too — see the note above. */
+ *  Charged during the free months too, see the note above. */
 export const CHECK_PRICE = 100;
 
 /* The plan grid.
  *
- * Three tiers, and only the first has a price — because only the first is
+ * Three tiers, and only the first has a price, because only the first is
  * true today. `price: null` means "not announced yet" and renders as "Soon";
  * `price: 0` renders "Free". Launching pricing is therefore one number per
  * tier in this file, with no markup to touch and no layout that shifts when

@@ -4,7 +4,7 @@ import { ICONS } from "./icons";
 import { subscribe as subscribeUnread, getUnread } from "./unreadStore";
 import useRole from "../hooks/useRole";
 
-/* Billing and support have no sidebar entry — they live only in the tenant
+/* Billing and support have no sidebar entry, they live only in the tenant
    menu behind the avatar, which is easy to miss. These two icons match the
    ones used there so the same destination looks the same in both places. */
 const ICON_BILLING = (
@@ -24,7 +24,7 @@ const ICON_SUPPORT = (
 
 /* The three the business asked to have surfaced come first; the rest follow
    in the order someone setting up a workspace tends to need them.
-   `requires` is a capability from hooks/useRole.js — a Booking agent should
+   `requires` is a capability from hooks/useRole.js, a Booking agent should
    not be shown a billing tile that answers 403. */
 const LINKS = [
   {
@@ -84,7 +84,7 @@ const LINKS = [
 export default function QuickLinks() {
   const { can } = useRole();
   /* The same count the sidebar badge shows, from the store the layout already
-     polls — this used to fetch it a second time on every visit to Overview. */
+     polls, this used to fetch it a second time on every visit to Overview. */
   const { support: supportUnread } = useSyncExternalStore(subscribeUnread, getUnread);
 
   const links = LINKS.filter((l) => !l.requires || can(l.requires));

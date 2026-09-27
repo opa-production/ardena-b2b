@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "./Logo";
 
 /* Marketing header in the ardena.co.ke language: fixed, white at 97% with a
-   backdrop blur, links centred, and a single blue CTA on the right — the only
+   backdrop blur, links centred, and a single blue CTA on the right, the only
    place brand blue appears on these pages.
 
    Section links are plain anchors ("/#modules") so they work from any page.

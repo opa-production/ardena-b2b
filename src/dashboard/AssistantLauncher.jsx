@@ -6,7 +6,7 @@ import "./assistant.css";
 
 /* The assistant is reachable from every dashboard page rather than owning a
    nav slot: a button pinned bottom-right opens it in a slide-over. Mounted
-   once by DashboardLayout, so the conversation survives navigation — the
+   once by DashboardLayout, so the conversation survives navigation, the
    thread itself lives in assistantStore, not in this component. */
 export default function AssistantLauncher() {
   const [open, setOpen] = useState(false);

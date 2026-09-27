@@ -18,7 +18,7 @@
   overflow-y: auto;
 }
 
-/* A button rather than a div so the list is keyboard-navigable — the whole
+/* A button rather than a div so the list is keyboard-navigable, the whole
    row is the target, so it has to reset the browser's button styling. */
 .inbox-item {
   position: relative;
@@ -67,7 +67,7 @@
   font-size: 12.5px;
   line-height: 1.45;
   color: var(--ink-soft);
-  /* One line only — the thread is one click away. */
+  /* One line only, the thread is one click away. */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

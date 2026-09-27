@@ -402,7 +402,7 @@
   box-shadow: none;
 }
 
-/* Session ended on its own (one-hour limit) — informational, not an error. */
+/* Session ended on its own (one-hour limit), informational, not an error. */
 .auth-notice {
   margin-top: 14px;
   padding: 10px 12px;

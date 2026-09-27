@@ -115,7 +115,7 @@ export function fmtDate(iso) {
   return FULL.format(new Date(`${iso}T00:00:00`));
 }
 
-// "2 Jul – 6 Jul 2026"
+// "2 Jul to 6 Jul 2026"
 export function fmtRange(a, b) {
   return `${DAY_MONTH.format(new Date(`${a}T00:00:00`))} to ${FULL.format(new Date(`${b}T00:00:00`))}`;
 }
@@ -132,8 +132,8 @@ export function todayISO() {
 
 /* Status → chip class, shared by every screen that shows a booking's state.
    These lived in Bookings.jsx, which meant Booking details, Client details and
-   the payments list each imported a whole page module — and, once the routes
-   were code-split, dragged that page's chunk along with it — for two lookup
+   the payments list each imported a whole page module, and, once the routes
+   were code-split, dragged that page's chunk along with it, for two lookup
    tables. */
 export const STATUS_CHIP = {
   Pending: "pending",

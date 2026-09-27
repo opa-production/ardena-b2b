@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import "./confirm.css";
 
-/* Custom confirmation modal — replaces window.confirm. Closes on Escape,
+/* Custom confirmation modal, replaces window.confirm. Closes on Escape,
    backdrop click or Cancel; runs onConfirm on the primary action. */
 export default function ConfirmDialog({
   open,

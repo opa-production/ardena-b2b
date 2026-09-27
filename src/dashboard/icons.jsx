@@ -127,7 +127,7 @@ export const ICONS = {
       <path d="M9 21v-6h6v6" />
     </svg>
   ),
-  // megaphone — reaching your own clients, not broadcasting at strangers
+  // megaphone, reaching your own clients, not broadcasting at strangers
   marketing: (
     <svg {...base}>
       <path d="M3 11v2a1 1 0 001 1h2l5 4V6L6 10H4a1 1 0 00-1 1z" />

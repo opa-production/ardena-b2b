@@ -1,13 +1,13 @@
 // Which notification categories reach this user, and where they reach them.
 //
 // These toggles used to be a block of useState inside Settings that nothing
-// read and nothing saved — flip a switch, leave the page, and it was gone. The
+// read and nothing saved, flip a switch, leave the page, and it was gone. The
 // preferences now live here, persisted per device the same way the theme is
 // (see themeStore.js), so the panel on the Notifications page means something.
 //
 // Per device rather than per account on purpose: there is no preferences
 // endpoint yet. When one lands, hydrate from it here and the UI needs no
-// changes — only this file does.
+// changes, only this file does.
 
 const KEY = "ardena-notification-prefs";
 
@@ -52,7 +52,7 @@ function readSaved() {
     }
     return out;
   } catch {
-    /* storage blocked or corrupt — the defaults are a fine answer */
+    /* storage blocked or corrupt, the defaults are a fine answer */
     return DEFAULTS;
   }
 }

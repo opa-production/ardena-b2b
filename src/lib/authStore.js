@@ -10,7 +10,7 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc. — run in-memory */
+    /* private mode etc., run in-memory */
   }
   return { ...DEFAULTS };
 }

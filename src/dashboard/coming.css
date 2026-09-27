@@ -14,7 +14,7 @@
   padding: 32px 20px;
 }
 
-/* Capped by height as well as width — these are wide landscape drawings, and
+/* Capped by height as well as width, these are wide landscape drawings, and
    sizing on width alone lets them swallow a short viewport. */
 .coming-art {
   width: 100%;

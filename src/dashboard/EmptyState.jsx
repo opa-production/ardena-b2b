@@ -7,7 +7,7 @@ import "./empty.css";
  * once, but the Overview has four cards waiting on their first data at the
  * same time, and four of those read as clutter rather than help.
  *
- * The full treatment — icon, title, a line of guidance and a button — is for
+ * The full treatment, icon, title, a line of guidance and a button, is for
  * a page that is empty end to end and has somewhere to send you. In practice
  * that means: if there is an `action`, it earns the furniture. */
 export default function EmptyState({ icon, title, message, action, compact = false, minimal = false }) {

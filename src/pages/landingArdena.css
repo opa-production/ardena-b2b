@@ -1,5 +1,5 @@
 /* =========================================================================
-   Marketing pages — ardena.co.ke design language
+   Marketing pages, ardena.co.ke design language
    -------------------------------------------------------------------------
    Shared by the landing page, /pricing and /contact. Everything is scoped
    under `.ard`, which those pages wrap themselves in.
@@ -7,7 +7,7 @@
    Ported from the live ardena.co.ke stylesheet:
      · Space Grotesk throughout; hero title at weight 300, headings at 700
      · slate ink #1e293b, secondary #475569, bands white / #f8fafc / cream
-     · brand blue #007FFA as an accent only — the nav CTA and the thin
+     · brand blue #007FFA as an accent only, the nav CTA and the thin
        marker bar in the hero
      · eyebrow label → heading → description, then a sticky-intro split with
        a numbered list beside it, sides alternating section to section
@@ -44,8 +44,7 @@
 /* global.css sets h1–h3 to the display font at 600/-0.02em; the ardena scale
    is its own thing, so reset the inherited bits once here.
    :where() keeps this at .ard's specificity (0,1,0) rather than (0,1,1), so
-   the single-class rules below — .ard-hero-title at 300, .ard-heading at 700 —
-   still win on source order instead of being clobbered by the reset. */
+   the single-class rules below, .ard-hero-title at 300, .ard-heading at 700, still win on source order instead of being clobbered by the reset. */
 .ard :where(h1, h2, h3) {
   font-family: var(--ard-font);
   font-weight: 600;
@@ -90,7 +89,7 @@
   background: var(--ard-white);
 }
 
-/* ▪ WHY ARDENA — the small tracked label above every heading */
+/* ▪ WHY ARDENA, the small tracked label above every heading */
 .ard-label {
   font-size: 0.75rem;
   font-weight: 600;
@@ -152,7 +151,7 @@
   transition: var(--ard-t);
 }
 
-/* ink pill — used on light bands */
+/* ink pill, used on light bands */
 .ard-btn--ink {
   background: var(--ard-ink);
   color: #fff;
@@ -593,7 +592,7 @@
     position: static;
   }
 
-  /* stacked, the heading has to lead again — the source order is list-first
+  /* stacked, the heading has to lead again, the source order is list-first
      purely so the desktop grid can flip sides */
   .ard-split--reverse .ard-intro {
     order: 1;
@@ -820,7 +819,7 @@
    opposite directions at different speeds so the crest never repeats.
 
    Waves rather than the home page's corner blobs, because this is the same
-   distinction the reference draws — the landing page announces, an interior
+   distinction the reference draws, the landing page announces, an interior
    page introduces. They are white rather than brand blue here on purpose: the
    swell has to hand off to the white cards directly beneath it, so it reads as
    the page surface rising rather than a shape sitting on top of one. */
@@ -947,7 +946,7 @@
    ========================================================================= */
 
 /* Copy and picture side by side. The image is a saturated yellow graphic, so
-   it keeps its own half rather than sitting under the type — any overlay dark
+   it keeps its own half rather than sitting under the type, any overlay dark
    enough to carry white text would flatten it. */
 .ct-hero {
   position: relative;
@@ -1023,7 +1022,7 @@
 
   /* A portrait crop of a landscape frame keeps only a narrow slice, so pick
      the one with the handset in it. `object-position` addresses the source
-     image, which is un-mirrored — the subject is at its left, and the flip
+     image, which is un-mirrored, the subject is at its left, and the flip
      then carries it to the right of the box. Anchoring at 78% selected empty
      frame and left a stray length of cord across the paragraph. */
   .ct-hero-bg img {
@@ -1289,7 +1288,7 @@
 }
 
 /* =========================================================================
-   Pricing — "your Ardena bookings pay your bill"
+   Pricing, "your Ardena bookings pay your bill"
    -------------------------------------------------------------------------
    The estimator on the cards above shows the mechanism moving; this shows it
    standing still, four fleets side by side. Both read the same numbers out of
@@ -1406,7 +1405,7 @@
 /* ---- Search landing pages (SeoPage.jsx) ---- */
 
 /* On a desktop each section fills the screen: one idea in view, scroll for
-   the next. Phones keep natural height — a forced full-screen band there is
+   the next. Phones keep natural height, a forced full-screen band there is
    mostly empty space. */
 @media (min-width: 900px) {
   .ard-section--screen {

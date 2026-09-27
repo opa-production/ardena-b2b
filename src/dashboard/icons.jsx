@@ -90,6 +90,12 @@ export const ICONS = {
       <path d="M7 15h4" />
     </svg>
   ),
+  reports: (
+    <svg {...base}>
+      <path d="M4 20h16" />
+      <path d="M7 16v-5M12 16V6M17 16v-8" />
+    </svg>
+  ),
   staff: (
     <svg {...base}>
       <circle cx="12" cy="7.5" r="3.2" />

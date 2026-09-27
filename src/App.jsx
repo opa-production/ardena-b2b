@@ -42,6 +42,8 @@ const Staff = lazy(load.staff);
 const Usage = lazy(load.usage);
 const Settlements = lazy(load.settlements);
 const Wallet = lazy(load.wallet);
+const Reports = lazy(load.reports);
+const FleetCalendar = lazy(load.fleetCalendar);
 const Marketing = lazy(load.marketing);
 const FeatureRequest = lazy(load.featureRequest);
 const Support = lazy(load.support);
@@ -119,6 +121,7 @@ export default function App() {
           element={<RequireRole capability="manageBookings"><NewBooking /></RequireRole>}
         />
         <Route path="bookings/all" element={<AllBookings />} />
+        <Route path="bookings/calendar" element={<FleetCalendar />} />
         <Route path="bookings/:ref" element={<BookingDetails />} />
         <Route
           path="claims"
@@ -179,6 +182,10 @@ export default function App() {
         <Route
           path="settlements"
           element={<RequireRole capability="manageBilling"><Settlements /></RequireRole>}
+        />
+        <Route
+          path="reports"
+          element={<RequireRole capability="viewReports"><Reports /></RequireRole>}
         />
         <Route
           path="wallet"

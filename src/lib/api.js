@@ -499,6 +499,27 @@ export function fetchWalletLedger(params = {}) {
   return request(`/wallet/transactions${qs ? `?${qs}` : ""}`);
 }
 
+/* ---- Reports (pricing-and-reports.md §4) ----
+   Read-only views over bookings and payments the dashboard already has. */
+
+// { from?, to? } (YYYY-MM-DD, default last 30 days) ->
+// { period, utilisation, receivables, deposits, collected_by_staff, clients, demand }
+export function fetchReportInsights(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/reports/insights${qs ? `?${qs}` : ""}`);
+}
+
+// { start?, days? } -> { start, days, cars: [{ plate, name, status }],
+//   bookings: [{ ref, plate, customer, start, end, status, source }] } (end inclusive)
+export function fetchFleetCalendar(params = {}) {
+  const qs = new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+  return request(`/reports/calendar${qs ? `?${qs}` : ""}`);
+}
+
 /* ---- Bookings (§4) ---- */
 
 // params: { status, payment, from, to, plate, client_id, page, per_page }

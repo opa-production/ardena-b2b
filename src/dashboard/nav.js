@@ -26,6 +26,8 @@ export const NAV_SECTIONS = [
         name: "Bookings",
         children: [
           { to: "/dashboard/bookings", key: "bookings-overview", name: "Overview" },
+          // Which car is free when: every role needs this, so no `requires`.
+          { to: "/dashboard/bookings/calendar", key: "bookings-calendar", name: "Calendar" },
           {
             to: "/dashboard/renter-messages",
             key: "renter-messages",
@@ -64,6 +66,9 @@ export const NAV_SECTIONS = [
         name: "Finances",
         requires: "manageBilling",
       },
+      // What the bookings say about the business: utilisation, money owed,
+      // clients and demand. Beside Finances because half of it is money.
+      { to: "/dashboard/reports", key: "reports", name: "Reports", requires: "viewReports" },
       // A collapsible group rather than a destination of its own: `children`
       // makes the sidebar render a disclosure row with a chevron instead of a
       // link. The group has no `to` — clicking it opens the pages beneath it.
@@ -154,6 +159,7 @@ export const SECTION_TITLES = {
   usage: "Usage & billing",
   settlements: "Settlements",
   wallet: "Wallet",
+  reports: "Reports",
   staff: "Staff & roles",
   marketing: "Marketing",
   // Not a sidebar item — it lives in the profile menu — but the page still

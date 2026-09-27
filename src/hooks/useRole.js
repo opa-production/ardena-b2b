@@ -52,6 +52,9 @@ export const PERMISSIONS = {
   manageStaff: ["Owner", "Manager"],
   manageSettings: ["Owner", "Manager"],
   manageBilling: ["Owner", "Manager", "Finance"],
+  // Reports mix operations (utilisation) with money (what's owed, who
+  // collected it), so they sit with the roles that see Finances.
+  viewReports: ["Owner", "Manager", "Finance"],
 };
 
 function currentRole() {

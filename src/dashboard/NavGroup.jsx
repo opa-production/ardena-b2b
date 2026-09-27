@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { ICONS } from "./icons";
+import { preloadNav } from "./pageLoaders";
 
 /* A sidebar row that opens to reveal its children rather than navigating.
  *
@@ -59,6 +60,8 @@ export default function NavGroup({ item }) {
             key={child.key}
             to={child.to}
             end={child.end}
+            onMouseEnter={() => preloadNav(child.key)}
+            onFocus={() => preloadNav(child.key)}
             className={({ isActive }) => "nav-item nav-sub-item" + (isActive ? " active" : "")}
           >
             {child.name}

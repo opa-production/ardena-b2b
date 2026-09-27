@@ -81,3 +81,13 @@ export function preloadCommonPages() {
     setTimeout(run, 1500);
   }
 }
+
+/* Sidebar keys that don't share a name with their page's loader. */
+const NAV_ALIAS = { reviews: "ratings", account: "settings" };
+
+/** Start fetching a page's code when the pointer reaches its sidebar link.
+ *  The ~100 ms between hover and click is usually enough for the chunk to
+ *  land, so the first visit to a less common page skips the wait. */
+export function preloadNav(key) {
+  load[NAV_ALIAS[key] || key]?.().catch(() => {});
+}

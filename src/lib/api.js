@@ -89,6 +89,24 @@ export function clearApiCache() {
   cached.clear();
 }
 
+/* Resolves once no GET has been in flight for two checks in a row (or after
+   `max` ms, whichever is first). The dashboard shell uses it to hold back
+   background loads until the page on screen has its data: the backend works
+   through a handful of requests at a time, so ten fired together make the one
+   that matters wait its turn. */
+export function whenQuiet({ interval = 150, max = 4000 } = {}) {
+  return new Promise((resolve) => {
+    const started = Date.now();
+    let idleChecks = 0;
+    const tick = () => {
+      idleChecks = inflight.size === 0 ? idleChecks + 1 : 0;
+      if (idleChecks >= 2 || Date.now() - started >= max) resolve();
+      else setTimeout(tick, interval);
+    };
+    setTimeout(tick, interval);
+  });
+}
+
 /* ---- Step-up (2FA) for sensitive actions ----
  *
  * With two-step sign-in on, the backend answers a sensitive request (staff

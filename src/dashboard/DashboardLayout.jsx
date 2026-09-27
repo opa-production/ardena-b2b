@@ -32,7 +32,7 @@ import { hydrateConfig } from "./configStore";
 import { hydrateChauffeurs } from "./chauffeursStore";
 import { hydrateTracking } from "./trackingStore";
 import PageSkeleton from "./PageSkeleton";
-import { preloadCommonPages } from "./pageLoaders";
+import { preloadCommonPages, preloadNav } from "./pageLoaders";
 import {
   subscribe as subscribeUnread,
   getUnread,
@@ -46,6 +46,7 @@ import {
   fetchBillingGate,
   fetchHostLinkSuggestion,
   logout,
+  whenQuiet,
 } from "../lib/api";
 import Logo from "../components/Logo";
 import { HOST_ACCOUNT_LINKING, VEHICLE_TRACKING } from "../lib/features";
@@ -169,11 +170,6 @@ export default function DashboardLayout() {
     };
 
     hydrateFleet().catch(() => {}); // every page reads the fleet store
-    hydrateConfig(); // pulls the Mapbox token (and any future client config)
-    hydrateChauffeurs().catch(() => {}); // chauffeur roster (§C)
-    // Tracking is behind a flag and every screen that reads the store is a
-    // coming-soon page while it's off, so don't spend a request on it.
-    if (VEHICLE_TRACKING) hydrateTracking().catch(() => {});
 
     fetchMe()
       .then(({ user, business: biz }) => {
@@ -185,8 +181,22 @@ export default function DashboardLayout() {
         /* a dead session is cleared by the client; RequireAuth redirects */
       });
     fetchBusiness().then(settle(hydrateBusiness)).catch(() => {});
-    fetchPolicy().then(settle(hydratePolicy)).catch(() => {});
     fetchOnboarding().then(settle(hydrateOnboarding)).catch(() => {});
+
+    /* Secondary stores wait until the page on screen has its data. The
+       backend handles a few requests at a time, so firing these alongside
+       the page's own fetch only queued that fetch behind them. Each store
+       starts from sensible defaults, and a page that needs one sooner still
+       loads it itself. */
+    whenQuiet().then(() => {
+      if (!alive) return;
+      hydrateConfig(); // the Mapbox token (and any future client config)
+      hydrateChauffeurs().catch(() => {}); // chauffeur roster (§C)
+      fetchPolicy().then(settle(hydratePolicy)).catch(() => {});
+      // Tracking is behind a flag and every screen that reads the store is a
+      // coming-soon page while it's off, so don't spend a request on it.
+      if (VEHICLE_TRACKING) hydrateTracking().catch(() => {});
+    });
 
     return () => {
       alive = false;
@@ -195,7 +205,18 @@ export default function DashboardLayout() {
 
   // The shared 60 s badge poll, see unreadStore. Everything else that shows
   // a count reads the same store rather than asking again.
-  useEffect(() => startUnreadPolling(), []);
+  // Badges can wait for the page's own data; see whenQuiet.
+  useEffect(() => {
+    let stop = null;
+    let alive = true;
+    whenQuiet().then(() => {
+      if (alive) stop = startUnreadPolling();
+    });
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, []);
 
   /* Confirmed, because signing out is one click from a menu that also holds
      Profile, and on a shared counter machine the cost of a misclick is the
@@ -314,6 +335,8 @@ export default function DashboardLayout() {
                     key={item.key}
                     to={item.to}
                     end={item.end}
+                    onMouseEnter={() => preloadNav(item.key)}
+                    onFocus={() => preloadNav(item.key)}
                     className={({ isActive }) =>
                       "nav-item" + (isActive ? " active" : "")
                     }

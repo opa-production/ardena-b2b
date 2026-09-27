@@ -9,11 +9,10 @@
  * shape, so they live behind the gear on the Notifications page instead. */
 import { useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribePolicy, getPolicy, setPolicy, RETURN_HOUR } from "./policyStore";
 import { subscribe as subscribeBusiness, getBusiness } from "./businessStore";
 import { updatePolicy } from "../lib/api";
-import { CHECK_PRICE, FREE_MONTHS, fmtKES } from "../pages/pricingData";
+import PlanCard from "./PlanCard";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
 import "./fleet.css";
@@ -22,7 +21,6 @@ import "./workspace.css";
 
 export default function WorkspaceSettings() {
   usePageTitle("Settings");
-  const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
   const policy = useSyncExternalStore(subscribePolicy, getPolicy);
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
   const [savingPolicy, setSavingPolicy] = useState(false);
@@ -106,30 +104,8 @@ export default function WorkspaceSettings() {
         </div>
 
         <div className="details-side">
-          {/* No subscription figure here on purpose, there isn't one yet.
-              See the launch-phase note in src/pages/pricingData.js. */}
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Plan &amp; billing</h2>
-              <p>Launch offer</p>
-            </header>
-            <p className="util-hero">
-              Free
-              <span className="util-per">for {FREE_MONTHS} months</span>
-            </p>
-            <p className="plan-price">
-              {vehicles.length} vehicle{vehicles.length === 1 ? "" : "s"} · every
-              module included
-            </p>
-            <p className="side-hint">
-              We&apos;ll announce pricing well before your free months end, and
-              tell you first. Renter checks stay billed at KES{" "}
-              {fmtKES(CHECK_PRICE)} each.
-            </p>
-            <Link to="/pricing" className="btn btn-ghost pay-btn">
-              See what&apos;s included
-            </Link>
-          </section>
+          {/* The live plan, from the same endpoint as Usage & billing. */}
+          <PlanCard compact />
 
           <section className="panel-card">
             <header className="card-head">

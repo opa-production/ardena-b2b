@@ -15,6 +15,7 @@ import PageSkeleton from "./PageSkeleton";
 import { fetchBillingUsage, fetchWalletTransactions } from "../lib/api";
 import UsageTrend from "./charts/UsageTrend";
 import InvoicesPanel from "./InvoicesPanel";
+import PlanCard from "./PlanCard";
 import EmptyState from "./EmptyState";
 import { toast } from "./toastStore";
 import usePageTitle from "../hooks/usePageTitle";
@@ -132,6 +133,9 @@ export default function Usage() {
   return (
     <>
       <h1 className="sr-only">Usage &amp; billing</h1>
+
+      {/* The plan first: it's what this page is about for most visits. */}
+      <PlanCard onChange={load} />
 
       <section className="chart-card usage-card">
         {/* The figure and the window switch share a row: the number is what

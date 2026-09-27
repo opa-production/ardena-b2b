@@ -6,14 +6,14 @@
 
    Every claim here must be true of the product today. No prices beyond the
    free months and the per-check fee (see pricingData.js). */
-import { FREE_MONTHS, CHECK_PRICE } from "./pricingData.js";
+import { FREE_MONTHS, CHECK_PRICE, STARTER_CARS, FLEET_PRICE, FLEET_CAP, FOUNDING_SLOTS } from "./pricingData.js";
 
 export const SEO_PAGES = [
   {
     slug: "car-rental-software-kenya",
     nav: "Car rental software",
     title: "Car rental management software for Kenya | Ardena for Business",
-    description: `Car rental management software built for Kenyan car hire businesses: fleet, bookings, renter verification, M-Pesa payments and staff roles in one dashboard. Free for ${FREE_MONTHS} months.`,
+    description: `Car rental management software built for Kenyan car hire businesses: fleet, bookings, renter verification, M-Pesa payments and staff roles in one dashboard. Free to start on Starter.`,
     h1: "Car rental management software, built for Kenya",
     lead:
       "Run your car hire business from one dashboard: every car, every booking, every renter checked and every shilling tracked. Built around how rental businesses in Kenya actually work, M-Pesa included.",
@@ -45,7 +45,7 @@ export const SEO_PAGES = [
     ],
     faq: [
       { q: "Is there car rental software made for Kenya?", a: "Yes. Ardena for Business is car rental management software built for Kenyan car hire and fleet businesses, with M-Pesa payment prompts, renter ID verification and staff roles built in." },
-      { q: "How much does it cost?", a: `The first ${FREE_MONTHS} months are free, with every module and every vehicle. Renter verification checks are KES ${CHECK_PRICE} each. Pricing after the free months will be announced to every workspace in advance.` },
+      { q: "How much does it cost?", a: `Starter is free for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, capped at KES ${FLEET_CAP.toLocaleString("en-KE")}, and our first ${FOUNDING_SLOTS} businesses get ${FREE_MONTHS} months of it free. Renter verification checks are KES ${CHECK_PRICE} each.` },
       { q: "How do I sign up?", a: "Access is by request. Ardena verifies your business registration and director details, then sends your logins, usually within 24 hours." },
     ],
   },
@@ -165,14 +165,14 @@ export const SEO_PAGES = [
     faq: [
       { q: "How do I verify a car rental customer in Kenya?", a: `With Ardena for Business you run an ID lookup, liveness and licence check from the dashboard in seconds, at KES ${CHECK_PRICE} per check.` },
       { q: "Do I need a separate verification provider?", a: "No. Verification is built in and pay as you go, from a prepaid wallet." },
-      { q: "Is it included in the free months?", a: `The dashboard is free for the first ${FREE_MONTHS} months. Renter checks are the one thing charged from day one, at KES ${CHECK_PRICE} each.` },
+      { q: "Is it included in the plans?", a: `Renter checks are pay as you go on every plan, including free Starter, at KES ${CHECK_PRICE} each from your wallet.` },
     ],
   },
   {
     slug: "car-hire-management-system-kenya",
     nav: "Car hire management system",
     title: "Car hire management system for Kenya | Ardena for Business",
-    description: `A car hire management system for Kenyan rental businesses: bookings, pickups and returns, handover records, M-Pesa payments and renter checks on one screen. Free for ${FREE_MONTHS} months.`,
+    description: `A car hire management system for Kenyan rental businesses: bookings, pickups and returns, handover records, M-Pesa payments and renter checks on one screen. Free to start on Starter.`,
     h1: "The car hire management system for Kenyan rental desks",
     lead:
       "From the morning's pickups to the evening's returns, Ardena for Business keeps the whole day of a car hire desk on one screen your whole team can see.",
@@ -249,9 +249,9 @@ export const SEO_PAGES = [
     slug: "car-hire-software-kenya",
     nav: "Car hire software",
     title: "Car hire software for Kenya: features & free trial | Ardena for Business",
-    description: `Car hire software for Kenyan businesses. See what's included, what it costs (free for ${FREE_MONTHS} months) and how to get started with Ardena for Business.`,
+    description: `Car hire software for Kenyan businesses. See what's included, what it costs (free to start) and how to get started with Ardena for Business.`,
     h1: "Car hire software: what you get and how to start",
-    lead: `Ardena for Business is car hire software for Kenyan rental businesses of any size. Every module is included, the first ${FREE_MONTHS} months are free, and there is no card required.`,
+    lead: `Ardena for Business is car hire software for Kenyan rental businesses of any size. Starter is free for up to ${STARTER_CARS} cars, Fleet is KES ${FLEET_PRICE} per car per month, and there is no card required to start.`,
     sections: [
       {
         label: "WHAT YOU GET",
@@ -272,12 +272,12 @@ export const SEO_PAGES = [
           { title: "Request access", desc: "Tell us about your business in a short form." },
           { title: "Get verified", desc: "We check your registration and director details, usually within 24 hours." },
           { title: "Add your cars", desc: "Your logins arrive by email; the first vehicle takes a minute to add." },
-          { title: `Free for ${FREE_MONTHS} months`, desc: `Renter checks are the only charge, at KES ${CHECK_PRICE} each.` },
+          { title: "Free to start", desc: `Starter is free for up to ${STARTER_CARS} cars; renter checks are KES ${CHECK_PRICE} each.` },
         ],
       },
     ],
     faq: [
-      { q: "How much does car hire software cost in Kenya?", a: `Ardena for Business is free for the first ${FREE_MONTHS} months with every module. Renter checks are KES ${CHECK_PRICE} each. Pricing after that will be announced in advance.` },
+      { q: "How much does car hire software cost in Kenya?", a: `Ardena for Business has a free Starter plan for up to ${STARTER_CARS} cars. Fleet, with every feature, is KES ${FLEET_PRICE} per car per month and never more than KES ${FLEET_CAP.toLocaleString("en-KE")}. Renter checks are KES ${CHECK_PRICE} each.` },
       { q: "Do I need to install anything?", a: "No. It runs in a web browser on a computer, tablet or phone." },
       { q: "How long does it take to get started?", a: "Businesses are usually verified and sent their logins within 24 hours of requesting access." },
     ],
@@ -403,7 +403,7 @@ export const SEO_PAGES = [
     slug: "car-hire-management-system-nairobi",
     nav: "Nairobi",
     title: "Car hire management system in Nairobi | Ardena for Business",
-    description: `Car hire management software for Nairobi rental businesses: bookings, pickups across the city, M-Pesa payments and renter verification. Free for ${FREE_MONTHS} months.`,
+    description: `Car hire management software for Nairobi rental businesses: bookings, pickups across the city, M-Pesa payments and renter verification. Free to start on Starter.`,
     h1: "Car hire management for Nairobi rental businesses",
     lead:
       "Nairobi car hire moves fast: pickups across the city, customers who want to pay by M-Pesa, and a lot of cars to keep track of. Ardena for Business keeps it in one place.",
@@ -434,14 +434,14 @@ export const SEO_PAGES = [
     faq: [
       { q: "Is there car hire software for Nairobi businesses?", a: "Yes. Ardena for Business is built for car hire businesses across Kenya, Nairobi included, to run fleet, bookings, payments and renter checks in one place." },
       { q: "Can I list my Nairobi cars online?", a: "Yes, on the Ardena car rental app. Each listing is reviewed by Ardena before renters can book it." },
-      { q: "How do I get started?", a: `Request access; we verify your business and send logins, usually within 24 hours. The first ${FREE_MONTHS} months are free.` },
+      { q: "How do I get started?", a: `Request access; we verify your business and send logins, usually within 24 hours. You start free on Starter.` },
     ],
   },
   {
     slug: "car-hire-management-system-nakuru",
     nav: "Nakuru",
     title: "Car hire management system in Nakuru | Ardena for Business",
-    description: `Car hire management software for Nakuru rental businesses, from the team that builds Ardena in Nakuru: bookings, M-Pesa payments and renter verification. Free for ${FREE_MONTHS} months.`,
+    description: `Car hire management software for Nakuru rental businesses, from the team that builds Ardena in Nakuru: bookings, M-Pesa payments and renter verification. Free to start on Starter.`,
     h1: "Car hire management for Nakuru rental businesses",
     lead:
       "Ardena is built in Nakuru. Ardena for Business gives local car hire businesses the same system as the big city fleets: bookings, payments, renter checks and the whole team in one place.",
@@ -472,7 +472,7 @@ export const SEO_PAGES = [
     faq: [
       { q: "Is there car hire software for Nakuru businesses?", a: "Yes. Ardena for Business is built by Ardena, based in Nakuru, for car hire businesses across Kenya." },
       { q: "Can visitors to Nakuru book my cars online?", a: "Yes, by listing them on the Ardena car rental app. Those bookings appear in your dashboard with your own." },
-      { q: "How do I get started?", a: `Request access; we verify your business and send logins, usually within 24 hours. The first ${FREE_MONTHS} months are free.` },
+      { q: "How do I get started?", a: `Request access; we verify your business and send logins, usually within 24 hours. You start free on Starter.` },
     ],
   },
 ];

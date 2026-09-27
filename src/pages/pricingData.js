@@ -57,87 +57,81 @@ export const PILLARS = [
 ];
 
 /* ---------------------------------------------------------------------------
-   Pricing, launch phase. Mirrors docs/BACKEND.md §4; keep them in step.
+   Pricing. Mirrors the backend (opabackend app/services/b2b_plans.py, served
+   at GET /public/plans); keep the two in step.
    ---------------------------------------------------------------------------
-   Ardena for Business is FREE for a workspace's first FREE_MONTHS months.
-   Subscription pricing has not been set yet: it will be announced, and every
-   existing workspace told, well before anyone is charged. Nothing on the
-   marketing site or in the dashboard may quote a subscription figure until
-   then, an unannounced number that later changes is worse than no number.
+   Starter   free forever, up to STARTER_CARS cars, no reports or exports.
+   Fleet     FLEET_PRICE per car per month, billed on at least FLEET_MIN_CARS
+             cars and capped at FLEET_CAP, paid from the prepaid wallet, with
+             Ardena app commission taken off. Everything included.
+   Enterprise custom terms.
+   The first FOUNDING_SLOTS businesses get FREE_MONTHS months of Fleet free
+   (founding members); everyone after starts on Starter. Not paying moves a
+   workspace to Starter; nothing is locked or deleted.
+   Renter checks (CHECK_PRICE) are pay as you go on every plan. */
 
-   The earlier model (KES 400 per vehicle per month, a 3-vehicle minimum, and
-   a 9% Ardena-app commission credit against the bill) has been removed rather
-   than hidden, so nothing can quote it by accident. It is in git history at
-   commit 173f9b3 if the next model builds on it.
-
-   Renter verification is the one thing that IS charged during the free
-   months, and it is unchanged: CHECK_PRICE per check, drawn from a prepaid
-   wallet. It is a genuine pass-through cost with unpredictable volume, so it
-   never sat inside the subscription and does not sit inside the free period
-   either. This is the only price the UI may state. */
-
-/** Months free from signup. The whole launch offer, in one number. */
+/** Months of free Fleet for a founding member. */
 export const FREE_MONTHS = 2;
+/** How many businesses get the founding trial. */
+export const FOUNDING_SLOTS = 50;
+export const STARTER_CARS = 3;
+export const FLEET_PRICE = 300;
+export const FLEET_MIN_CARS = 3;
+export const FLEET_CAP = 6000;
 
-/** KES per renter verification check, drawn from the prepaid wallet.
- *  Charged during the free months too, see the note above. */
+/** KES per renter verification check, drawn from the prepaid wallet, on every plan. */
 export const CHECK_PRICE = 100;
 
-/* The plan grid.
- *
- * Three tiers, and only the first has a price, because only the first is
- * true today. `price: null` means "not announced yet" and renders as "Soon";
- * `price: 0` renders "Free". Launching pricing is therefore one number per
- * tier in this file, with no markup to touch and no layout that shifts when
- * the figures arrive.
- *
- * The `fleet` and `enterprise` tiers are placeholders for the shape we expect,
- * not committed product. Their names and feature lines should be confirmed
- * before the prices are.
- */
+/* The plan grid. `tone` picks the card colour (see pricingCards.css): plain,
+   brand blue, and the lavender accent. */
 export const TIERS = [
   {
-    key: "free",
-    name: "Free",
+    key: "starter",
+    name: "Starter",
+    tone: "plain",
     price: 0,
-    per: `for ${FREE_MONTHS} months`,
-    blurb: "Everything, for your first two months. No card required.",
-    cta: { label: "Get started free", to: "/signup", solid: true },
+    per: "forever",
+    blurb: `For getting going. Run up to ${STARTER_CARS} cars on the dashboard, free.`,
+    cta: { label: "Get started free", to: "/signup" },
     features: [
-      "Every module: fleet, bookings, clients, staff, reports",
-      "Unlimited vehicles, bookings and staff seats",
-      "M-Pesa and card payment prompting",
-      "Document expiry alerts and exports",
-      "Email support",
+      `Up to ${STARTER_CARS} cars`,
+      "Bookings, clients and the fleet calendar",
+      "M-Pesa payment prompts and cash records",
+      "Staff roles for your whole team",
+      "List your cars on the Ardena app",
     ],
-    // Shown rather than hidden: nobody should meet this on an invoice.
-    muted: [`Renter checks, KES ${CHECK_PRICE} each, from your wallet`],
+    muted: ["Reports and exports", `Renter checks, KES ${CHECK_PRICE} each, from your wallet`],
   },
   {
     key: "fleet",
     name: "Fleet",
-    price: null,
-    per: "per month",
-    blurb:
-      "For a rental business running its own fleet. What the free months become.",
-    cta: { label: "Get started free", to: "/signup" },
+    tone: "brand",
+    price: FLEET_PRICE,
+    per: "per car, per month",
+    blurb: `Everything, for a growing fleet. From ${FLEET_MIN_CARS} cars, and never more than KES ${FLEET_CAP.toLocaleString("en-KE")} a month.`,
+    cta: { label: "Start with Fleet", to: "/signup", solid: true },
     features: [
-      "Everything in Free, kept",
-      "Priced per vehicle, so a small fleet pays like one",
-      "Announced well before your free months end",
+      "Everything in Starter",
+      "Up to 100 cars, every one bookable",
+      "Reports: utilisation, money owed, clients, PDF reports",
+      "CSV exports for your accountant",
+      "Ardena app commission comes off your bill",
+      "Paid monthly from your wallet, cancel any time",
     ],
-    muted: [],
+    muted: [`Renter checks, KES ${CHECK_PRICE} each, from your wallet`],
   },
   {
     key: "enterprise",
     name: "Enterprise",
+    tone: "accent",
     price: null,
-    per: "custom",
-    blurb: "For large fleets, multiple branches and bespoke terms.",
+    per: "custom terms",
+    blurb: "For large fleets, several branches and terms of your own.",
     cta: { label: "Talk to us", to: "/contact" },
     features: [
       "Everything in Fleet",
-      "Volume terms for 100+ vehicles",
+      "No car limit",
+      "Volume pricing for 100+ cars",
       "Onboarding help and a named contact",
     ],
     muted: [],
@@ -156,7 +150,7 @@ export const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `Your first ${FREE_MONTHS} months are free, every module, every vehicle, your whole team, no card required. We are still setting the prices that follow, and we will announce them well before your free months end; every workspace already signed up hears it from us first. Renter checks are the one thing billed from day one, at KES ${fmtKES(CHECK_PRICE)} each.`,
+    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, from ${FLEET_MIN_CARS} cars and capped at KES ${fmtKES(FLEET_CAP)}, paid from a prepaid wallet you top up with M-Pesa, and any Ardena app commission comes off the bill. Our first ${FOUNDING_SLOTS} businesses get ${FREE_MONTHS} months of Fleet free. Renter checks are KES ${fmtKES(CHECK_PRICE)} each on every plan.`,
   },
   {
     q: "Do I need my own identity verification account?",

@@ -1,0 +1,80 @@
+/* ── Plan card (Usage & billing, Settings) ──────────────────────────── */
+
+.plan-card {
+  margin-bottom: 20px;
+  border-top: 3px solid var(--line);
+}
+
+/* The plan's colour, matching the pricing page cards. */
+.plan-card--fleet {
+  border-top-color: var(--brand);
+}
+
+.plan-card--enterprise {
+  border-top-color: rgb(183, 172, 232);
+}
+
+.plan-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.plan-eyebrow {
+  margin: 0 0 2px;
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.plan-name {
+  margin: 0 0 4px;
+  font-size: 22px;
+}
+
+.plan-status {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+.plan-badge {
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  background: rgb(183, 172, 232);
+}
+
+.plan-note {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.plan-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.plan-offer .plan-price {
+  margin: 0 0 2px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.plan-offer .plan-price span {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink-soft);
+}

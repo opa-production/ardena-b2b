@@ -4,7 +4,7 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
-import { FREE_MONTHS } from "./pricingData";
+import { FOUNDING_SLOTS, FREE_MONTHS } from "./pricingData";
 import { SEO_PAGES } from "./seoPagesData";
 import "./landingArdena.css";
 
@@ -100,10 +100,11 @@ export default function SeoPage({ page }) {
 
             <div className="ard-cta-card seo-cta">
               <div className="ard-cta-content">
-                <h2 className="ard-cta-title">Try it free for {FREE_MONTHS} months</h2>
+                <h2 className="ard-cta-title">Start free on Starter</h2>
                 <p className="ard-cta-text">
                   Tell us about your business and we will verify it and send your
-                  logins within 24 hours. No card required.
+                  logins within 24 hours. No card required, and our first{" "}
+                  {FOUNDING_SLOTS} businesses get {FREE_MONTHS} months of Fleet free.
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">

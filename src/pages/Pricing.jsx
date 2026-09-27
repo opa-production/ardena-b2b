@@ -5,7 +5,16 @@ import useReveal from "../hooks/useReveal";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
 import PricingPlans from "../components/PricingPlans";
-import { CHECK_PRICE, FREE_MONTHS, fmtKES } from "./pricingData";
+import {
+  CHECK_PRICE,
+  FLEET_CAP,
+  FLEET_MIN_CARS,
+  FLEET_PRICE,
+  FOUNDING_SLOTS,
+  FREE_MONTHS,
+  STARTER_CARS,
+  fmtKES,
+} from "./pricingData";
 import "./landingArdena.css";
 import "./pricingCards.css";
 
@@ -18,30 +27,32 @@ function Reveal({ as: Tag = "div", className = "", children }) {
   );
 }
 
-/* Every figure here is derived from pricingData, never typed. A pricing page
-   that disagrees with the invoice is worse than no pricing page, which during
-   the launch phase means these answers may state exactly two things: the free
-   months, and the per-check verification price. */
+/* Every figure here is derived from pricingData, never typed, so the page
+   can't disagree with the backend's plans (GET /public/plans). */
 const PRICING_FAQS = [
   {
     q: "What does it cost?",
-    a: `Nothing for your first ${FREE_MONTHS} months. No card, no commitment, every module included. We are still setting the prices that follow, and we would rather say that plainly than publish a number we might change.`,
+    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, billed on at least ${FLEET_MIN_CARS} cars and never more than KES ${fmtKES(FLEET_CAP)} a month however big your fleet. Enterprise is priced with you.`,
   },
   {
-    q: "What happens after the free months?",
-    a: `We will announce pricing well before your free months run out, and every workspace already signed up hears it from us first, by email and in the dashboard. Nobody gets moved onto a paid plan by surprise, and nobody is charged without agreeing to the price.`,
+    q: "What's the founding offer?",
+    a: `Our first ${FOUNDING_SLOTS} businesses get ${FREE_MONTHS} months of Fleet free, every feature and every car. When the ${FREE_MONTHS} months end you choose: keep Fleet, or carry on free on Starter. We never charge you because a trial ended.`,
   },
   {
-    q: "Is renter verification free too?",
-    a: `No, checks are the one thing billed during the free months, at KES ${fmtKES(CHECK_PRICE)} each, paid from a prepaid wallet you top up like airtime. Each check costs us money at the registry, so it is a genuine pass-through rather than something we can give away. You only pay for checks you actually run.`,
+    q: "How do I pay?",
+    a: "From your Ardena wallet, which you top up with M-Pesa or card like airtime. Fleet is paid 30 days at a time and renews itself from the wallet, and you can turn renewal off whenever you like.",
   },
   {
-    q: "Is there a limit on vehicles or staff during the free months?",
-    a: "No. Add every car you run and invite your whole team. We would rather see the platform used properly than meter a trial.",
+    q: "What if I don't pay?",
+    a: `You move to Starter. Nothing is locked and nothing is deleted: your cars, bookings, clients and history all stay. New bookings go on your first ${STARTER_CARS} cars and reports pause until you upgrade again.`,
   },
   {
-    q: "Do I have to list on the Ardena app?",
-    a: "No. The dashboard runs your own direct bookings perfectly well on its own, and plenty of fleets use it that way. Listing is how you fill the cars that are sitting idle.",
+    q: "I list cars on the Ardena app. Do I pay twice?",
+    a: "No. The commission we earn from your Ardena app bookings comes off your Fleet bill. List a few cars that get booked and the dashboard can cost you nothing.",
+  },
+  {
+    q: "Is renter verification included?",
+    a: `Checks are pay as you go on every plan, at KES ${fmtKES(CHECK_PRICE)} each from your wallet. Each check costs us money at the registry, so it is a genuine pass-through, and you only pay for checks you actually run.`,
   },
   {
     q: "Do you take commission on my own direct bookings?",
@@ -49,7 +60,7 @@ const PRICING_FAQS = [
   },
   {
     q: "Am I tied into a contract?",
-    a: "No. There is nothing to cancel during the free months, and when pricing does start it will be monthly with no lock-in. Your data is yours to export whenever you want it.",
+    a: "No. Fleet is 30 days at a time with no lock-in, and your data is yours to export whenever you want it.",
   },
 ];
 
@@ -67,14 +78,14 @@ export default function Pricing() {
         <section className="pr-hero">
           <div className="pr-hero-inner">
             <h1 className="pr-title">
-              Free for your
+              Start free.
               <br />
-              <span className="pr-title-soft">first {FREE_MONTHS} months.</span>
+              <span className="pr-title-soft">Pay as your fleet grows.</span>
             </h1>
             <p className="pr-sub">
-              Every module, every vehicle, your whole team, no card required.
-              We&apos;re still setting what comes after, and we&apos;ll announce
-              it well before it starts.
+              Starter is free forever for up to {STARTER_CARS} cars. Fleet is KES{" "}
+              {FLEET_PRICE} per car a month, never more than KES {fmtKES(FLEET_CAP)},
+              and our first {FOUNDING_SLOTS} businesses get {FREE_MONTHS} months of it free.
             </p>
           </div>
         </section>
@@ -86,31 +97,29 @@ export default function Pricing() {
           </div>
         </section>
 
-        {/* ---- What happens after the free months ----
-             The one question a free launch offer always raises. Answering it
-             here, unprompted and above the FAQ, is the difference between an
-             offer and a trap. */}
+        {/* ---- How paying works ----
+             The questions a price always raises, answered before anyone has
+             to go looking in the FAQ. */}
         <section className="ard-section ard-section--white">
           <div className="ard-container">
-            <h2 className="ard-section-title">And after that?</h2>
+            <h2 className="ard-section-title">How paying works</h2>
             <Reveal className="pr-explain">
               <p className="pr-explain-lead">
-                We haven&apos;t set the prices yet, and we&apos;re not going to
-                pretend otherwise. What we can promise is how it will happen:
-                pricing gets announced well before your free months end, every
-                workspace already signed up hears it from us first, and nobody
-                is moved onto a paid plan without agreeing to the price.
+                Fleet is paid from your Ardena wallet, 30 days at a time, and
+                renews itself from the wallet. Top the wallet up with M-Pesa or
+                card whenever it suits you, and turn renewal off any time.
               </p>
               <p className="pr-explain-lead">
-                When it lands it will be competitive for the Kenyan market,
-                monthly, and cancellable, the same terms we would want. Your
-                data is yours to export either way.
+                If a renewal can&apos;t be paid, you simply move to Starter.
+                Nothing is locked and nothing is deleted, and upgrading again
+                picks up where you left off. Commission we earn from your Ardena
+                app bookings comes off your bill.
               </p>
               <p className="pr-explain-foot">
-                Renter verification is the exception, and it is charged from day
-                one: KES {fmtKES(CHECK_PRICE)} per check, drawn from a prepaid
-                wallet. Each check costs us money at the registry, so it is
-                passed straight through rather than given away.
+                Renter verification is pay as you go on every plan: KES{" "}
+                {fmtKES(CHECK_PRICE)} per check, drawn from the same wallet.
+                Each check costs us money at the registry, so it is passed
+                straight through rather than given away.
               </p>
             </Reveal>
           </div>
@@ -152,13 +161,12 @@ export default function Pricing() {
             <div className="ard-cta-card">
               <div className="ard-cta-content">
                 <h2 className="ard-cta-title">
-                  Start free, decide later
+                  Start free, upgrade when it pays
                 </h2>
                 <p className="ard-cta-text">
-                  {FREE_MONTHS} months, every module, no card. If it
-                  isn&apos;t running your business by the end of them, walk
-                  away, and if it is, you&apos;ll know the price before you
-                  ever pay it.
+                  Run up to {STARTER_CARS} cars free on Starter, and move to
+                  Fleet when reports and a bigger fleet are worth KES{" "}
+                  {FLEET_PRICE} a car to you.
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">

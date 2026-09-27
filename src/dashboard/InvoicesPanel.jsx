@@ -21,7 +21,6 @@ import { toast } from "./toastStore";
 import LoadingOverlay from "../components/LoadingOverlay";
 import PageLoader from "../components/PageLoader";
 import { fmtAmount, fmtDate } from "./billingFormat";
-import { FREE_MONTHS } from "../pages/pricingData";
 import "./billing.css";
 import "./bookings.css"; // modal + provider-pill styles
 
@@ -158,7 +157,7 @@ export default function InvoicesPanel() {
           <h2>Invoices</h2>
           <p>
             Newest first
-            {sub?.next_billing_date ? ` · next bill ${fmtDate(sub.next_billing_date)}` : ""}
+            {sub?.next_billing_date ? ` · paid until ${fmtDate(sub.next_billing_date)}` : ""}
           </p>
         </header>
 
@@ -166,7 +165,7 @@ export default function InvoicesPanel() {
           {loading ? (
             <PageLoader compact message="Pulling together your invoices…" />
           ) : invoices.length === 0 ? (
-            <EmptyState minimal title={`Nothing billed, you're in your first ${FREE_MONTHS} free months`} />
+            <EmptyState minimal title="No plan payments yet" />
           ) : (
             invoices.map((inv) => {
               const due = inv.status === "Due";

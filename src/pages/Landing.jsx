@@ -4,7 +4,7 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
-import { MODULES, FAQS, FREE_MONTHS } from "./pricingData";
+import { MODULES, FAQS, FOUNDING_SLOTS, FREE_MONTHS } from "./pricingData";
 import "./landingArdena.css";
 
 /* The landing page follows the ardena.co.ke design language: an image-free
@@ -190,8 +190,8 @@ export default function Landing() {
                 </h2>
                 <p className="ard-cta-text">
                   Tell us about your business and we will verify it and send
-                  your logins within 24 hours. Your first {FREE_MONTHS} months
-                  are free, no card required.
+                  your logins within 24 hours. Start free on Starter, no card
+                  required, and our first {FOUNDING_SLOTS} businesses get {FREE_MONTHS} months of Fleet free.
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">

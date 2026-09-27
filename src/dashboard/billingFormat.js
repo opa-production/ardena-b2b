@@ -12,17 +12,19 @@ export function fmtDate(iso) {
   return d.toLocaleDateString("en-KE", { dateStyle: "medium" });
 }
 
-/* Subscription status → the shared .chip modifier that colours it. */
+/* Plan status (GET /billing/subscription) → the shared .chip modifier. */
 export const STATUS_CHIP = {
   trial: "pending",
   active: "active",
-  past_due: "cancelled",
+  enterprise: "active",
+  starter: "confirmed",
 };
 
 export function statusLabel(status) {
-  if (status === "trial") return "Free trial";
-  if (status === "past_due") return "Past due";
-  return "Active";
+  if (status === "trial") return "Founding trial";
+  if (status === "enterprise") return "Enterprise";
+  if (status === "starter") return "Starter";
+  return "Fleet";
 }
 
 /* The wallet-transactions endpoint mixes top-ups (money in) with per-check

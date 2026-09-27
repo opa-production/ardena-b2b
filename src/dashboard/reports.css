@@ -33,6 +33,22 @@
   position: relative;
 }
 
+/* Starter plan: one quiet prompt above the list instead of dead buttons. */
+.rp-upgrade {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 760px) {
+  .rp-upgrade {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 /* One row per report: what it is on the left, period + Generate on the right. */
 .rp-list {
   list-style: none;

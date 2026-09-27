@@ -10,7 +10,7 @@
  * that call fails.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import RefreshButton from "../components/RefreshButton";
 import Dropdown from "../components/Dropdown";
@@ -20,6 +20,7 @@ import {
   deleteReport,
   emailReport,
   fetchReportCatalog,
+  fetchPlan,
   fetchReportPdf,
   fetchReports,
   generateReport,
@@ -356,7 +357,7 @@ function FileActions({ report, onView, onDownload, onEmail, busy }) {
   );
 }
 
-function ReportRow({ cat, latest, generating, onGenerate, actions, placement }) {
+function ReportRow({ cat, latest, generating, onGenerate, actions, placement, locked }) {
   const [period, setPeriod] = useState("30");
   const [custom, setCustom] = useState({ from: "", to: "" });
   const range = resolvePeriod(period, custom);
@@ -392,7 +393,8 @@ function ReportRow({ cat, latest, generating, onGenerate, actions, placement }) 
         <button
           type="button"
           className="btn btn-primary rp-generate"
-          disabled={!range || generating}
+          disabled={!range || generating || locked}
+          title={locked ? "Reports are part of the Fleet plan" : undefined}
           onClick={() => onGenerate(cat, range)}
         >
           {generating ? "Generating…" : "Generate"}
@@ -413,15 +415,22 @@ export default function Reports() {
   const [viewing, setViewing] = useState(null);
   const [emailing, setEmailing] = useState(null);
   const [removing, setRemoving] = useState(null);
+  // Generating is a Fleet-plan feature (402 on Starter). Past reports stay
+  // viewable either way. Unknown plan -> unlocked; the server still gates.
+  const [locked, setLocked] = useState(false);
   const getUrl = usePdfCache();
   const closeRemove = useCallback(() => setRemoving(null), []);
   const closeViewer = useCallback(() => setViewing(null), []);
 
   const load = useCallback(async () => {
-    const [cat, list] = await Promise.allSettled([
+    const [cat, list, plan] = await Promise.allSettled([
       fetchReportCatalog(),
       fetchReports({ per_page: 50 }),
+      fetchPlan(),
     ]);
+    if (plan.status === "fulfilled" && Array.isArray(plan.value?.features)) {
+      setLocked(!plan.value.features.includes("reports"));
+    }
     setCatalog(cat.status === "fulfilled" && cat.value?.length ? cat.value : FALLBACK_CATALOG);
     if (list.status === "fulfilled") setHistory(list.value?.data || []);
     else if (list.reason?.status !== 404) toast(list.reason?.message || "Failed to load reports", "danger");
@@ -456,6 +465,7 @@ export default function Reports() {
         setViewing(report);
       }
     } catch (err) {
+      if (err.status === 402) setLocked(true);
       toast(err.message || "Couldn't generate the report", "danger");
     } finally {
       setGenerating(null);
@@ -505,6 +515,21 @@ export default function Reports() {
         <RefreshButton onRefresh={load} />
       </div>
 
+      {locked && (
+        <section className="panel-card rp-upgrade">
+          <div>
+            <p className="rp-row-title">Reports are part of the Fleet plan</p>
+            <p className="rp-row-desc">
+              Upgrade to generate PDF reports for any period. Reports you already generated stay here to view,
+              download and email.
+            </p>
+          </div>
+          <Link to="/dashboard/usage" className="btn btn-primary rp-generate">
+            See the Fleet plan
+          </Link>
+        </section>
+      )}
+
       {groups.map(([group, items]) => (
         <section className="panel-card rp-group" key={group}>
           <header className="card-head">
@@ -515,6 +540,7 @@ export default function Reports() {
               <ReportRow
                 key={cat.type}
                 placement={i === 0 ? "down" : "up"}
+                locked={locked}
                 cat={cat}
                 latest={latestByType[cat.type]}
                 generating={generating === cat.type}

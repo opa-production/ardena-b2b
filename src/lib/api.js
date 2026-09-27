@@ -795,6 +795,33 @@ export function fetchSubscription() {
 }
 
 // { gated, status, vehicle_count, due_amount, fleet_cap }
+/* ---- Plans (opabackend app/services/b2b_plans.py) ---- */
+
+// Public, no account: plan prices and founding spots left, for /pricing.
+export function fetchPublicPlans() {
+  return request("/public/plans", { auth: false });
+}
+
+// This workspace's plan, limits and the current Fleet price (quote.amount).
+export function fetchPlan() {
+  return request("/billing/plan");
+}
+
+// Pay 30 days of Fleet from the wallet. `expectedAmount` is the price shown;
+// the server refuses (409) if its own quote differs. Idempotency key makes a
+// retry safe. Owner and Finance only.
+export function upgradePlan(expectedAmount, idempotencyKey) {
+  return request("/billing/plan/upgrade", {
+    method: "POST",
+    body: { plan: "fleet", expected_amount: expectedAmount },
+    headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
+  });
+}
+
+export function setPlanAutoRenew(enabled) {
+  return request("/billing/plan/auto-renew", { method: "PUT", body: { enabled } });
+}
+
 export function fetchBillingGate() {
   return request("/billing/gate");
 }

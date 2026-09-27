@@ -55,6 +55,8 @@ export const PERMISSIONS = {
   // Reports mix operations (utilisation) with money (what's owed, who
   // collected it), so they sit with the roles that see Finances.
   viewReports: ["Owner", "Manager", "Finance"],
+  // Paying for a plan spends the wallet, so it sits with the money roles.
+  changePlan: ["Owner", "Finance"],
 };
 
 function currentRole() {

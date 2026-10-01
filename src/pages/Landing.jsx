@@ -28,6 +28,8 @@ function Reveal({ as: Tag = "div", className = "", children }) {
   );
 }
 
+const DEMO_URL = "https://youtu.be/YW9jhuvzkXo";
+
 const TRUST = [
   {
     title: "Verified businesses only",
@@ -76,11 +78,16 @@ export default function Landing() {
               </p>
               <div className="ard-hero-buttons">
                 <Link to="/signup" className="ard-btn ard-btn--ink">
-                  Request access
+                  Get started
                 </Link>
-                <Link to="/login" className="ard-btn ard-btn--outline">
-                  Sign in
-                </Link>
+                <a
+                  href={DEMO_URL}
+                  className="ard-btn ard-btn--outline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View demo
+                </a>
               </div>
             </div>
           </div>
@@ -195,7 +202,7 @@ export default function Landing() {
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">
-                Request access
+                Get started
               </Link>
             </div>
           </div>

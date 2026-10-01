@@ -170,7 +170,7 @@ export default function Pricing() {
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">
-                Request access
+                Get started
               </Link>
             </div>
           </div>

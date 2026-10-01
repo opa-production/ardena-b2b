@@ -43,7 +43,7 @@ export default function SeoPage({ page }) {
               <p className="ard-hero-sub">{page.lead}</p>
               <div className="ard-hero-buttons">
                 <Link to="/signup" className="ard-btn ard-btn--ink">
-                  Request access
+                  Get started
                 </Link>
                 <Link to="/pricing" className="ard-btn ard-btn--outline">
                   See pricing
@@ -108,7 +108,7 @@ export default function SeoPage({ page }) {
                 </p>
               </div>
               <Link to="/signup" className="ard-btn ard-btn--ink">
-                Request access
+                Get started
               </Link>
             </div>
 

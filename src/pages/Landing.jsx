@@ -28,7 +28,7 @@ function Reveal({ as: Tag = "div", className = "", children }) {
   );
 }
 
-const DEMO_URL = "https://youtu.be/YW9jhuvzkXo";
+const DEMO_EMBED_URL = "https://www.youtube-nocookie.com/embed/YW9jhuvzkXo?rel=0";
 
 const TRUST = [
   {
@@ -80,12 +80,7 @@ export default function Landing() {
                 <Link to="/signup" className="ard-btn ard-btn--ink">
                   Get started
                 </Link>
-                <a
-                  href={DEMO_URL}
-                  className="ard-btn ard-btn--outline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="#demo" className="ard-btn ard-btn--outline">
                   View demo
                 </a>
               </div>
@@ -154,6 +149,23 @@ export default function Landing() {
                 </p>
               </Reveal>
             </div>
+          </div>
+        </section>
+
+        {/* ---- Demo video: plays in place, no trip to YouTube ---- */}
+        <section className="ard-section ard-section--light" id="demo">
+          <div className="ard-container">
+            <h2 className="ard-section-title">See it in action</h2>
+            <Reveal className="ard-demo-frame">
+              <iframe
+                src={DEMO_EMBED_URL}
+                title="Ardena for Business demo"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            </Reveal>
           </div>
         </section>
 

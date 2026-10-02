@@ -1,5 +1,7 @@
 // Session state: tokens plus the signed-in user and their business.
-// Persisted to localStorage so a refresh keeps you signed in.
+// Kept per tab (see tabStorage): a refresh keeps you signed in, another tab
+// can be signed in as someone else, and closing the tab ends the session.
+import { tabGet, tabSet, tabRemove } from "./tabStorage";
 
 const KEY = "ardena-session";
 
@@ -7,10 +9,10 @@ const DEFAULTS = { token: null, refreshToken: null, user: null, business: null }
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = tabGet(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc., run in-memory */
+    /* unreadable, start clean */
   }
   return { ...DEFAULTS };
 }
@@ -20,11 +22,7 @@ let state = load();
 const listeners = new Set();
 
 function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* ignore */
-  }
+  tabSet(KEY, JSON.stringify(state));
 }
 
 function emit() {
@@ -52,10 +50,6 @@ export function setSession(next) {
 
 export function clearSession() {
   state = { ...DEFAULTS };
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
+  tabRemove(KEY);
   emit();
 }

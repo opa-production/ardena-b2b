@@ -1,5 +1,7 @@
 // Business profile. Shared by the sidebar avatar and Settings, hydrated from
-// GET /business and cached in localStorage so a reload paints instantly.
+// GET /business and cached so a reload paints instantly. The cache is per tab,
+// like the session it belongs to (see tabStorage).
+import { tabGet, tabSet, tabRemove } from "../lib/tabStorage";
 
 const KEY = "ardena-business";
 
@@ -29,10 +31,10 @@ const DEFAULTS = {
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = tabGet(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc., run in-memory */
+    /* unreadable, start clean */
   }
   return { ...DEFAULTS };
 }
@@ -42,11 +44,7 @@ let state = load();
 const listeners = new Set();
 
 function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* ignore */
-  }
+  tabSet(KEY, JSON.stringify(state));
 }
 
 function emit() {
@@ -72,11 +70,7 @@ export function setBusiness(next) {
 // details never leak into another's session).
 export function resetBusiness() {
   state = { ...DEFAULTS };
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
+  tabRemove(KEY);
   emit();
 }
 

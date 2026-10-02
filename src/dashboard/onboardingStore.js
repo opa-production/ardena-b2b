@@ -1,6 +1,8 @@
 // Onboarding checklist state. Steps flip to done when the real action
 // happens anywhere in the app (stores call markStep), and progress
-// survives reloads via localStorage.
+// survives reloads. Cached per tab, like the session it belongs to (see
+// tabStorage).
+import { tabGet, tabSet, tabRemove } from "../lib/tabStorage";
 
 const KEY = "ardena-onboarding";
 
@@ -30,10 +32,10 @@ export function markShownThisSession() {
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = tabGet(KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
   } catch {
-    /* private mode etc., run in-memory */
+    /* unreadable, start clean */
   }
   return { ...DEFAULTS };
 }
@@ -43,11 +45,7 @@ let state = load();
 const listeners = new Set();
 
 function persist() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* ignore */
-  }
+  tabSet(KEY, JSON.stringify(state));
 }
 
 function emit() {
@@ -68,11 +66,7 @@ export function getOnboarding() {
 export function resetOnboarding() {
   state = { ...DEFAULTS };
   shownThisSession = false;
-  try {
-    localStorage.removeItem(KEY);
-  } catch {
-    /* ignore */
-  }
+  tabRemove(KEY);
   emit();
 }
 

@@ -4,6 +4,7 @@ import { startTopup, verifyTopup, hydrateWallet } from "./verificationsStore";
 import Dropdown from "../components/Dropdown";
 import LoadingOverlay from "../components/LoadingOverlay";
 import { toast } from "./toastStore";
+import "./bookings.css"; // modal chrome, .field-label / .field-input
 
 /* Value is what the API takes; label is what the person reads. */
 const PAYMENT_METHODS = [
@@ -18,9 +19,15 @@ const PAYMENT_METHODS = [
  *
  * `onSettled` runs after a top-up is confirmed (or given up on) so the page
  * can refresh its own figures; `onWaitingChange` reports the wait so a page
- * can say so next to its balance.
+ * can say so next to its balance. `suggestedAmount` pre-fills the amount when
+ * the caller knows what is missing (the plan upgrade's shortfall).
  */
-export default function WalletTopup({ className = "btn btn-ghost page-action-btn", onSettled, onWaitingChange }) {
+export default function WalletTopup({
+  className = "btn btn-ghost page-action-btn",
+  suggestedAmount,
+  onSettled,
+  onWaitingChange,
+}) {
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("mpesa");
@@ -87,7 +94,7 @@ export default function WalletTopup({ className = "btn btn-ghost page-action-btn
   }
 
   function openModal() {
-    setAmount("");
+    setAmount(suggestedAmount > 0 ? String(Math.ceil(suggestedAmount)) : "");
     setMethod("mpesa");
     setOpen(true);
   }

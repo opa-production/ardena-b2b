@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { fetchPlan, setPlanAutoRenew, upgradePlan } from "../lib/api";
 import useRole from "../hooks/useRole";
+import WalletTopup from "./WalletTopup";
 import { toast } from "./toastStore";
 import { fmtAmount } from "./billingFormat";
 import "../components/confirm.css";
@@ -169,19 +170,31 @@ export default function PlanCard({ compact = false, onChange }) {
               </p>
               {short && (
                 <p className="form-error">
-                  Your wallet is KES {fmtAmount(q.amount - plan.wallet_balance)} short.{" "}
-                  <Link to="/dashboard/wallet">Top up the wallet</Link> first.
+                  Your wallet is KES {fmtAmount(q.amount - plan.wallet_balance)} short. Top it up, then
+                  pay for Fleet here.
                 </p>
               )}
+              {/* Short of the price, the pay button gives way to the top-up
+                  itself: once the money lands the plan reloads with the new
+                  balance and the pay button comes back, without leaving the
+                  dialog. */}
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost modal-btn" disabled={busy}
                   onClick={() => setConfirming(false)}>
                   Cancel
                 </button>
-                <button type="button" className="btn btn-primary modal-btn" disabled={busy || short}
-                  onClick={handleUpgrade}>
-                  {busy ? "Paying…" : `Pay KES ${fmtAmount(q.amount)}`}
-                </button>
+                {short ? (
+                  <WalletTopup
+                    className="btn btn-primary modal-btn"
+                    suggestedAmount={q.amount - plan.wallet_balance}
+                    onSettled={load}
+                  />
+                ) : (
+                  <button type="button" className="btn btn-primary modal-btn" disabled={busy}
+                    onClick={handleUpgrade}>
+                    {busy ? "Paying…" : `Pay KES ${fmtAmount(q.amount)}`}
+                  </button>
+                )}
               </div>
             </div>
           </div>,

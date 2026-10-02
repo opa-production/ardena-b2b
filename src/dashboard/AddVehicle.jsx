@@ -1,8 +1,10 @@
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { addVehicle, getVehicle, getVehicles, isFleetLoaded, subscribe } from "./fleetStore";
+import { fetchPlan } from "../lib/api";
 import Dropdown from "../components/Dropdown";
 import DatePicker from "./DatePicker";
+import PlanCard from "./PlanCard";
 import { todayISO } from "./bookingsStore";
 import { toast } from "./toastStore";
 import "./fleet.css";
@@ -21,8 +23,30 @@ export default function AddVehicle() {
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
   const atCap = loaded && vehicles.length >= 100;
 
+  // undefined while it loads, null if it couldn't be read (then the form is
+  // left open rather than locking someone out over a failed fetch).
+  const [plan, setPlan] = useState(undefined);
+  const loadPlan = useCallback(async () => {
+    try {
+      setPlan(await fetchPlan());
+    } catch {
+      setPlan(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadPlan();
+  }, [loadPlan]);
+
+  // Starter stops at its car limit: a car past it can't take bookings, so the
+  // form gives way to the upgrade instead of accepting one that would sit idle.
+  const carCount = loaded ? vehicles.length : plan?.cars || 0;
+  const atPlanLimit =
+    !atCap && plan?.plan === "starter" && plan.car_limit > 0 && carCount >= plan.car_limit;
+
   async function handleSubmit(e) {
     e.preventDefault();
+    if (plan === undefined || atPlanLimit) return;
     const form = e.currentTarget;
     const f = new FormData(form);
     const plate = f.get("plate").trim().toUpperCase();
@@ -104,7 +128,20 @@ export default function AddVehicle() {
         </div>
       )}
 
-      {!atCap && <div className="details-grid">
+      {atPlanLimit && (
+        <>
+          <div className="panel-card fleet-cap-notice">
+            <h3>Upgrade to add more cars</h3>
+            <p>
+              Starter covers up to {plan.car_limit} cars and you have {carCount}. Upgrade to Fleet to
+              add this one. It is paid from your wallet, so top up first if the balance is short.
+            </p>
+          </div>
+          <PlanCard onChange={loadPlan} />
+        </>
+      )}
+
+      {!atCap && !atPlanLimit && <div className="details-grid">
         <form id="add-vehicle-form" className="panel-card" onSubmit={handleSubmit}>
           <div className="form-grid">
             {/* Make and model are separate because the Ardena app renders them
@@ -209,10 +246,10 @@ export default function AddVehicle() {
               <p>Save this vehicle or discard it</p>
             </header>
             <div className="action-stack">
-              <button type="submit" form="add-vehicle-form" className="btn btn-primary" disabled={saving}>
+              <button type="submit" form="add-vehicle-form" className="btn btn-primary" disabled={saving || plan === undefined}>
                 {saving ? "Adding…" : "Add to fleet"}
               </button>
-              <button type="submit" form="add-vehicle-form" name="again" className="btn btn-ghost" disabled={saving}>
+              <button type="submit" form="add-vehicle-form" name="again" className="btn btn-ghost" disabled={saving || plan === undefined}>
                 Save &amp; add another
               </button>
               <Link to="/dashboard/fleet" className="btn btn-ghost">

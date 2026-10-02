@@ -43,8 +43,7 @@ export default function UpgradeDialog({ atLimit = false, onClose, onUpgraded }) 
   const [adding, setAdding] = useState(atLimit ? "1" : "");
   // { cars, quote } for the total last priced, or { cars, error }.
   const [quoted, setQuoted] = useState(null);
-  // A backend without the quote endpoint: no car count, today's flat upgrade.
-  const [seatsOff, setSeatsOff] = useState(false);
+  const [quoteMissing, setQuoteMissing] = useState(false);
   const [requote, setRequote] = useState(0);
 
   useEffect(() => {
@@ -53,6 +52,11 @@ export default function UpgradeDialog({ atLimit = false, onClose, onUpgraded }) 
     });
   }, []);
 
+  // A backend that doesn't sell by car count yet: no field, today's flat
+  // upgrade. The plan says so up front (`max_cars` arrives with the feature),
+  // so the field is either there from the first paint or never shown, rather
+  // than appearing and then vanishing when the quote comes back 404.
+  const seatsOff = quoteMissing || plan?.max_cars == null;
   const paid = plan?.source === "paid";
   const base = plan ? Math.max(plan.cars || 0, paid ? plan.paid_cars || 0 : 0) : 0;
   const n = Math.max(parseInt(adding, 10) || 0, 0);
@@ -71,7 +75,7 @@ export default function UpgradeDialog({ atLimit = false, onClose, onUpgraded }) 
         .then((quote) => alive && setQuoted({ cars: total, quote }))
         .catch((err) => {
           if (!alive) return;
-          if (err.status === 404 || err.status === 405) setSeatsOff(true);
+          if (err.status === 404 || err.status === 405) setQuoteMissing(true);
           else setQuoted({ cars: total, error: err.message || "Couldn't price that" });
         });
     }, 250);

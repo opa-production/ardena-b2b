@@ -14,7 +14,7 @@ import {
   subscribe as subscribeAvail,
   getBlocked,
 } from "./availabilityStore";
-import { createBooking, fetchVehicleAvailability } from "../lib/api";
+import { createBooking, fetchBookedRanges } from "../lib/api";
 import DateRangePicker from "./DateRangePicker";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -45,10 +45,41 @@ export default function NewBooking() {
   const vehicle = bookable.find((v) => v.plate === plate);
   const blockedMap = useSyncExternalStore(subscribeAvail, getBlocked);
 
-  // days blocked on the availability calendar for the chosen vehicle
+  // The chosen vehicle's existing bookings, so their dates can't be picked at
+  // all rather than being refused when the form is submitted. `taken.plate`
+  // says which vehicle the ranges belong to: until it matches the selection
+  // the calendar stays shut, so nobody picks from the previous car's dates.
+  const [taken, setTaken] = useState({ plate: "", ranges: [] });
+  const [recheck, setRecheck] = useState(0);
+  useEffect(() => {
+    if (!plate) return undefined;
+    let alive = true;
+    fetchBookedRanges(plate)
+      .then((ranges) => alive && setTaken({ plate, ranges }))
+      // Couldn't ask: leave the dates open, the server still refuses a clash.
+      .catch(() => alive && setTaken({ plate, ranges: [] }));
+    return () => {
+      alive = false;
+    };
+  }, [plate, recheck]);
+  const checking = Boolean(plate) && taken.plate !== plate;
+
+  // every day the chosen vehicle can't be booked: days inside an existing
+  // booking, plus days blocked on the availability calendar
   const bookedDays = useMemo(() => {
-    return new Set(blockedMap[plate] || []);
-  }, [plate, blockedMap]);
+    const days = new Set(blockedMap[plate] || []);
+    if (taken.plate === plate) {
+      for (const r of taken.ranges) {
+        const cur = new Date(`${r.start}T00:00:00`);
+        const stop = new Date(`${r.end}T00:00:00`);
+        while (cur <= stop) {
+          days.add(isoOf(cur));
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
+    }
+    return days;
+  }, [plate, blockedMap, taken]);
 
   // switching vehicles can invalidate an already-picked range
   useEffect(() => {
@@ -105,6 +136,8 @@ export default function NewBooking() {
       navigate(`/dashboard/bookings/${encodeURIComponent(booking.ref)}`);
     } catch (err) {
       setError(err.message || "Failed to create booking. Try again.");
+      // Someone else took the dates meanwhile: redraw the calendar with them.
+      if (err.status === 409) setRecheck((v) => v + 1);
       setSubmitting(false);
     }
   }
@@ -150,16 +183,23 @@ export default function NewBooking() {
               type="button"
               className={"drp-trigger" + (datesOpen ? " open" : "")}
               onClick={() => setDatesOpen((o) => !o)}
+              disabled={checking}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="17" rx="2" />
                 <path d="M8 2v4M16 2v4M3 9h18" />
               </svg>
-              {pickup ? fmtDate(pickup) : <span className="placeholder">Pickup date</span>}
-              <span className="drp-arrow">→</span>
-              {dropoff ? fmtDate(dropoff) : <span className="placeholder">Return date</span>}
+              {checking ? (
+                <span className="placeholder">Checking this vehicle&apos;s dates…</span>
+              ) : (
+                <>
+                  {pickup ? fmtDate(pickup) : <span className="placeholder">Pickup date</span>}
+                  <span className="drp-arrow">→</span>
+                  {dropoff ? fmtDate(dropoff) : <span className="placeholder">Return date</span>}
+                </>
+              )}
             </button>
-            {datesOpen && (
+            {datesOpen && !checking && (
               <div className="drp-pop">
                 <DateRangePicker
                   start={pickup || null}

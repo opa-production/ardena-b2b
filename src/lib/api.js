@@ -589,6 +589,27 @@ export function fetchBookings(params = {}) {
   return request(`/bookings${qs ? `?${qs}` : ""}`, { cache: LIST_TTL });
 }
 
+/* The spans a vehicle is taken for: [{ start, end, ref }], ISO dates, both
+   ends included. These are the bookings still holding their dates, the same
+   three statuses the server checks a new booking against, and it refuses any
+   overlap with either end, so the return day of one rental can't be the
+   pickup day of the next. App bookings are in here too; the server mirrors
+   them into this list.
+
+   Asked for one status at a time so a busy car's history can't push a live
+   booking off the page: a car holds a handful of these at once, never 100. */
+const HOLDING_STATUSES = ["Pending", "Confirmed", "Active"];
+
+export async function fetchBookedRanges(plate) {
+  const pages = await Promise.all(
+    HOLDING_STATUSES.map((status) => fetchBookings({ plate, status, per_page: 100 }))
+  );
+  return pages
+    .flatMap((p) => p?.data || [])
+    .filter((b) => b.pickup && b.dropoff)
+    .map((b) => ({ start: b.pickup, end: b.dropoff, ref: b.ref }));
+}
+
 // { customer, phone, plate, pickup, dropoff, location, notes?, deposit_amount?, client_id? }
 export function createBooking(payload) {
   return request("/bookings", { method: "POST", body: payload });

@@ -52,15 +52,31 @@ const TIMES = Array.from({ length: 48 }, (_, i) => {
   return `${h}:${i % 2 ? "30" : "00"}`;
 });
 
-/* The one button in the header, per status. A new booking has none: its next
-   step is payment, and paying confirms it (the server moves Pending to
-   Confirmed when the money lands or cash is recorded). A paid booking whose
-   pickup is today starts on its own, see startIfDue, so "Start rental" is
-   only ever seen on one booked ahead. */
+/* The one button in the header, per status. Paying confirms a booking (the
+   server moves Pending to Confirmed when the money lands or cash is recorded),
+   and a paid booking whose pickup is today starts on its own, see startIfDue. */
 const NEXT_STEP = {
   Confirmed: { label: "Start rental", to: "Active" },
   Active: { label: "Mark completed", to: "Completed" },
 };
+
+/* A new booking's usual next step is payment, on the payment card. But not
+   every payment goes through Ardena: a bank transfer, an account customer,
+   cash that gets recorded later. So a walk-in can also be moved on by hand
+   with nothing paid: started if the pickup day has come, confirmed if it is
+   booked ahead. The label says "without payment" so nobody takes it for the
+   paid path, and it is drawn quieter than the pay buttons. The booking stays
+   Unpaid and the money can still be recorded afterwards.
+
+   Never for a booking from the Ardena app: the renter has paid Ardena, and it
+   starts at their pickup code. */
+function nextStep(b) {
+  if (b.status !== "Pending") return NEXT_STEP[b.status];
+  if (b.source === "marketplace") return undefined;
+  return b.pickup <= todayISO()
+    ? { label: "Start without payment", to: "Active", quiet: true }
+    : { label: "Confirm without payment", to: "Confirmed", quiet: true };
+}
 
 /* Paid, and the pickup day has come: the rental is under way, so start it
    rather than leave a button for someone to remember. A later pickup stays
@@ -261,7 +277,7 @@ export default function BookingDetails() {
   const total = days * b.rate;
   // Money in (or returned): cash counts, see the cash action on the payment card.
   const settled = b.payment === "Paid" || b.payment === "Refunded";
-  const next = NEXT_STEP[b.status];
+  const next = nextStep(b);
   const canCancel = CANCELLABLE.includes(b.status);
   const canPrompt = b.payment !== "Paid" && b.payment !== "Refunded" && b.status !== "Cancelled" && b.status !== "Completed";
   const ho = b.handover || { out: null, inn: null };
@@ -650,7 +666,12 @@ export default function BookingDetails() {
             </svg>
           </button>
           {next && (
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => doStatus(next.to)}>
+            <button
+              type="button"
+              className={next.quiet ? "btn btn-ghost" : "btn btn-primary"}
+              disabled={busy}
+              onClick={() => doStatus(next.to)}
+            >
               {next.label}
             </button>
           )}

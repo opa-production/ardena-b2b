@@ -1,6 +1,6 @@
 # Ardena for Business
 
-> Car rental and fleet management software for rental businesses in Kenya. One web dashboard for the fleet, bookings, renter ID verification, M-Pesa payment prompts, staff roles and finances, with an optional listing on the Ardena car rental app. Free for up to 3 cars (Starter); Fleet is KES 300 per car per month, capped at KES 6,000; renter verification checks are KES 100 each.
+> Car rental and fleet management software for rental businesses in Kenya. One web dashboard for the fleet, bookings, renter ID verification, M-Pesa payment prompts, staff roles and finances, with an optional listing on the Ardena car rental app. Free for up to 3 cars (Starter); on Fleet the first 3 cars stay free and each car after that is KES 300 a month, capped at KES 6,000; renter verification checks are KES 100 each.
 
 Ardena for Business (business.ardena.co.ke) is made by Ardena Platforms Africa Ltd, the company behind the Ardena car rental app (ardena.co.ke). It is built for car hire companies, self-drive and chauffeur rental operators, and corporate fleet owners in Kenya, from a handful of cars to large fleets.
 
@@ -19,7 +19,7 @@ Access is by request: Ardena verifies each business's registration and director 
 ## Pricing
 
 - Starter: free forever for up to 3 cars, with bookings, clients, payments, staff and the calendar. No card required.
-- Fleet: KES 300 per car per month, billed on at least 3 cars and capped at KES 6,000, paid 30 days at a time from a prepaid wallet. Adds reports and exports, up to 100 cars.
+- Fleet: the first 3 cars stay free; KES 300 a month for each car after that, with a minimum of KES 300 and a cap of KES 6,000. For example 4 cars is KES 300 a month, 5 cars KES 600, 10 cars KES 2,100. Paid 30 days at a time from a prepaid wallet. Adds reports and exports, up to 100 cars.
 - Enterprise: custom terms for larger fleets.
 - There is no time-limited free trial; not paying keeps a business on Starter and nothing is locked or deleted.
 - Renter verification: KES 100 per check, pay as you go from a prepaid wallet.

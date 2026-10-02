@@ -8,7 +8,9 @@ import PricingPlans from "../components/PricingPlans";
 import {
   CHECK_PRICE,
   FLEET_CAP,
-  FLEET_MIN_CARS,
+  FLEET_FREE_CARS,
+  FLEET_RULE,
+  fleetFee,
   FLEET_PRICE,
   STARTER_CARS,
   fmtKES,
@@ -30,7 +32,7 @@ function Reveal({ as: Tag = "div", className = "", children }) {
 const PRICING_FAQS = [
   {
     q: "What does it cost?",
-    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, billed on at least ${FLEET_MIN_CARS} cars and never more than KES ${fmtKES(FLEET_CAP)} a month however big your fleet. Enterprise is priced with you.`,
+    a: `Starter is free forever for up to ${STARTER_CARS} cars. On Fleet ${FLEET_RULE} a month, however big your fleet. So a fleet of 5 cars pays for 2: KES ${fmtKES(fleetFee(5))} a month. Enterprise is priced with you.`,
   },
   {
     q: "Is there a free trial?",
@@ -81,8 +83,9 @@ export default function Pricing() {
               <span className="pr-title-soft">Pay as your fleet grows.</span>
             </h1>
             <p className="pr-sub">
-              Starter is free forever for up to {STARTER_CARS} cars. Fleet is KES{" "}
-              {FLEET_PRICE} per car a month, never more than KES {fmtKES(FLEET_CAP)}.
+              Starter is free forever for up to {STARTER_CARS} cars. On Fleet your first{" "}
+              {FLEET_FREE_CARS} stay free and each extra car is KES {FLEET_PRICE} a month, never
+              more than KES {fmtKES(FLEET_CAP)}.
             </p>
           </div>
         </section>

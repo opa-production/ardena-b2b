@@ -17,6 +17,20 @@ const uid = () =>
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+/* How the Fleet price was worked out, in the server's own numbers: the first
+   cars are free, the rest are charged, with a minimum and a cap. */
+function quoteLine(q) {
+  const free = q.free_cars ?? 3;
+  if (q.fee === q.monthly_cap) {
+    return `${q.cars} cars, capped at KES ${fmtAmount(q.monthly_cap)}`;
+  }
+  const extra = Math.max(q.cars - free, 0);
+  if (extra === 0) {
+    return `Your ${q.cars === 1 ? "car is" : `${q.cars} cars are`} inside the ${free} free ones, so this is the Fleet minimum`;
+  }
+  return `Your first ${free} cars are free, ${extra} more at KES ${q.price_per_car}`;
+}
+
 /* One line on what the workspace has right now and until when. */
 function statusLine(p) {
   if (p.source === "trial") return `Free Fleet access until ${fmtDay(p.until)}`;
@@ -119,9 +133,7 @@ export default function PlanCard({ compact = false, onChange }) {
               KES {fmtAmount(q.amount)} <span>for 30 days of Fleet</span>
             </p>
             <p className="field-note">
-              {q.cars} car{q.cars === 1 ? "" : "s"} at KES {q.price_per_car}
-              {q.cars < q.min_billed_cars ? `, billed as ${q.min_billed_cars}` : ""}
-              {q.fee === q.monthly_cap ? `, capped at KES ${fmtAmount(q.monthly_cap)}` : ""}
+              {quoteLine(q)}
               {q.credit ? `, less KES ${fmtAmount(q.credit)} Ardena app commission` : ""}.
             </p>
           </div>

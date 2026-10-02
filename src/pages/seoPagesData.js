@@ -6,7 +6,7 @@
 
    Every claim here must be true of the product today. No prices beyond the
    free months and the per-check fee (see pricingData.js). */
-import { CHECK_PRICE, STARTER_CARS, FLEET_PRICE, FLEET_CAP } from "./pricingData.js";
+import { CHECK_PRICE, STARTER_CARS, FLEET_PRICE, FLEET_CAP, FLEET_RULE } from "./pricingData.js";
 
 export const SEO_PAGES = [
   {
@@ -45,7 +45,7 @@ export const SEO_PAGES = [
     ],
     faq: [
       { q: "Is there car rental software made for Kenya?", a: "Yes. Ardena for Business is car rental management software built for Kenyan car hire and fleet businesses, with M-Pesa payment prompts, renter ID verification and staff roles built in." },
-      { q: "How much does it cost?", a: `Starter is free for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, capped at KES ${FLEET_CAP.toLocaleString("en-KE")}. Renter verification checks are KES ${CHECK_PRICE} each.` },
+      { q: "How much does it cost?", a: `Starter is free for up to ${STARTER_CARS} cars. On Fleet ${FLEET_RULE}. Renter verification checks are KES ${CHECK_PRICE} each.` },
       { q: "How do I sign up?", a: "Access is by request. Ardena verifies your business registration and director details, then sends your logins, usually within 24 hours." },
     ],
   },
@@ -251,7 +251,7 @@ export const SEO_PAGES = [
     title: "Car hire software for Kenya: features & free plan | Ardena for Business",
     description: `Car hire software for Kenyan businesses. See what's included, what it costs (free to start) and how to get started with Ardena for Business.`,
     h1: "Car hire software: what you get and how to start",
-    lead: `Ardena for Business is car hire software for Kenyan rental businesses of any size. Starter is free for up to ${STARTER_CARS} cars, Fleet is KES ${FLEET_PRICE} per car per month, and there is no card required to start.`,
+    lead: `Ardena for Business is car hire software for Kenyan rental businesses of any size. Starter is free for up to ${STARTER_CARS} cars, Fleet is KES ${FLEET_PRICE} a month for each car after those, and there is no card required to start.`,
     sections: [
       {
         label: "WHAT YOU GET",
@@ -277,7 +277,7 @@ export const SEO_PAGES = [
       },
     ],
     faq: [
-      { q: "How much does car hire software cost in Kenya?", a: `Ardena for Business has a free Starter plan for up to ${STARTER_CARS} cars. Fleet, with every feature, is KES ${FLEET_PRICE} per car per month and never more than KES ${FLEET_CAP.toLocaleString("en-KE")}. Renter checks are KES ${CHECK_PRICE} each.` },
+      { q: "How much does car hire software cost in Kenya?", a: `Ardena for Business has a free Starter plan for up to ${STARTER_CARS} cars. On Fleet, with every feature, ${FLEET_RULE}. Renter checks are KES ${CHECK_PRICE} each.` },
       { q: "Do I need to install anything?", a: "No. It runs in a web browser on a computer, tablet or phone." },
       { q: "How long does it take to get started?", a: "Businesses are usually verified and sent their logins within 24 hours of requesting access." },
     ],

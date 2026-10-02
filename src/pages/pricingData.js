@@ -61,9 +61,11 @@ export const PILLARS = [
    at GET /public/plans); keep the two in step.
    ---------------------------------------------------------------------------
    Starter   free forever, up to STARTER_CARS cars, no reports or exports.
-   Fleet     FLEET_PRICE per car per month, billed on at least FLEET_MIN_CARS
-             cars and capped at FLEET_CAP, paid from the prepaid wallet, with
-             Ardena app commission taken off. Everything included.
+   Fleet     the first FLEET_FREE_CARS cars stay free; FLEET_PRICE a month for
+             each car after that, at least FLEET_MIN_FEE and capped at
+             FLEET_CAP, paid from the prepaid wallet, with Ardena app
+             commission taken off. Everything included. So a 4th car costs
+             one car's price, not four (see fleetFee below).
    Enterprise custom terms.
    Every workspace starts on Starter; there is no free trial of Fleet. Not
    paying moves a workspace to Starter; nothing is locked or deleted.
@@ -71,8 +73,20 @@ export const PILLARS = [
 
 export const STARTER_CARS = 3;
 export const FLEET_PRICE = 300;
-export const FLEET_MIN_CARS = 3;
+/** Cars that are never charged for on Fleet: the same ones Starter gives. */
+export const FLEET_FREE_CARS = 3;
+/** The least a Fleet month costs (Fleet also unlocks reports and exports). */
+export const FLEET_MIN_FEE = 300;
 export const FLEET_CAP = 6000;
+
+/** What Fleet costs a month for a fleet of `cars`. Same sum as the backend's
+    fleet_fee(); the dashboard always shows the server's own quote, this is
+    for the examples on the public pages. */
+export const fleetFee = (cars) =>
+  Math.min(Math.max(Math.max(cars - FLEET_FREE_CARS, 0) * FLEET_PRICE, FLEET_MIN_FEE), FLEET_CAP);
+
+/** The Fleet price rule as one clause, so every page states it the same way. */
+export const FLEET_RULE = `your first ${FLEET_FREE_CARS} cars stay free and each car after that is KES ${FLEET_PRICE} a month, with a minimum of KES ${FLEET_MIN_FEE} and never more than KES ${FLEET_CAP.toLocaleString("en-KE")}`;
 
 /** KES per renter verification check, drawn from the prepaid wallet, on every plan. */
 export const CHECK_PRICE = 100;
@@ -102,11 +116,12 @@ export const TIERS = [
     name: "Fleet",
     tone: "brand",
     price: FLEET_PRICE,
-    per: "/ car / month",
-    blurb: `Everything, for a growing fleet. From ${FLEET_MIN_CARS} cars, and never more than KES ${FLEET_CAP.toLocaleString("en-KE")} a month.`,
+    per: "/ extra car / month",
+    blurb: `Everything, for a growing fleet. Your first ${FLEET_FREE_CARS} cars stay free, and it's never more than KES ${FLEET_CAP.toLocaleString("en-KE")} a month.`,
     cta: { label: "Start with Fleet", to: "/signup", solid: true },
     features: [
       "Everything in Starter",
+      `First ${FLEET_FREE_CARS} cars free, pay only for the cars after them`,
       "Up to 100 cars, every one bookable",
       "Reports: utilisation, money owed, clients, PDF reports",
       "CSV exports for your accountant",
@@ -145,7 +160,7 @@ export const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, from ${FLEET_MIN_CARS} cars and capped at KES ${fmtKES(FLEET_CAP)}, paid from a prepaid wallet you top up with M-Pesa, and any Ardena app commission comes off the bill. Renter checks are KES ${fmtKES(CHECK_PRICE)} each on every plan.`,
+    a: `Starter is free forever for up to ${STARTER_CARS} cars. On Fleet ${FLEET_RULE}, paid from a prepaid wallet you top up with M-Pesa, and any Ardena app commission comes off the bill. Renter checks are KES ${fmtKES(CHECK_PRICE)} each on every plan.`,
   },
   {
     q: "Do I need my own identity verification account?",

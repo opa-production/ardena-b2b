@@ -1005,3 +1005,20 @@
   font-size: 12.5px;
   color: var(--ink-mute);
 }
+
+/* Customer name with client suggestions (ClientNameField). The panel and its
+   options are the shared dropdown's; this only anchors it to the input. */
+.client-suggest {
+  position: relative;
+}
+
+.client-suggest .dd-panel {
+  top: 100%;
+  margin-top: 6px;
+}
+
+.client-suggest-meta {
+  flex-shrink: 0;
+  font-size: 12.5px;
+  color: var(--ink-mute);
+}

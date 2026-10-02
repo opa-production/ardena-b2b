@@ -17,6 +17,7 @@ import {
 import { createBooking, fetchBookedRanges, updateBooking, uploadHandoverPhotos } from "../lib/api";
 import { compressImage, stagedToFiles } from "./handoverPhotosStore";
 import DateRangePicker from "./DateRangePicker";
+import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
 import "./fleet.css";
@@ -47,6 +48,18 @@ export default function NewBooking() {
   const [fuel, setFuel] = useState("Full");
   const [photos, setPhotos] = useState([]);
   const [photoBusy, setPhotoBusy] = useState(false);
+  // The existing client picked from the name suggestions, if any. Their phone
+  // and ID number are filled in from the record; both stay editable.
+  const [client, setClient] = useState(null);
+  const phoneRef = useRef(null);
+  const idRef = useRef(null);
+
+  function handleClientPick(picked) {
+    setClient(picked);
+    if (!picked) return;
+    if (phoneRef.current) phoneRef.current.value = picked.phone || "";
+    if (idRef.current && picked.id_number) idRef.current.value = picked.id_number;
+  }
 
   async function handlePhotoPick(e) {
     const files = Array.from(e.target.files || []);
@@ -161,6 +174,10 @@ export default function NewBooking() {
       booking = await createBooking({
         customer: f.get("customer").trim(),
         phone: f.get("phone").trim(),
+        // Booking the client picked from the suggestions. Without it the
+        // server matches on name and phone, and adds a new client if nobody
+        // matches, so the clients list grows from bookings too.
+        ...(client ? { client_id: client.id } : {}),
         id_number: idNumber,
         plate: vehicle.plate,
         pickup,
@@ -223,15 +240,15 @@ export default function NewBooking() {
         <div className="form-grid">
           <div className="field">
             <label htmlFor="b-customer">Customer name</label>
-            <input id="b-customer" name="customer" type="text" placeholder="Wanjiku Kamau" required />
+            <ClientNameField id="b-customer" placeholder="Wanjiku Kamau" onPick={handleClientPick} />
           </div>
           <div className="field">
             <label htmlFor="b-phone">Mobile number (M-Pesa)</label>
-            <input id="b-phone" name="phone" type="tel" placeholder="0722 000 000" required />
+            <input id="b-phone" name="phone" type="tel" placeholder="0722 000 000" required ref={phoneRef} />
           </div>
           <div className="field">
             <label htmlFor="b-id">ID or passport number</label>
-            <input id="b-id" name="id_number" type="text" placeholder="12345678" maxLength={40} required />
+            <input id="b-id" name="id_number" type="text" placeholder="12345678" maxLength={40} required ref={idRef} />
           </div>
           <div className="field">
             <label htmlFor="b-destination">Where the car is going</label>

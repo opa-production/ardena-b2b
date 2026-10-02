@@ -236,7 +236,11 @@ export default function NewBooking() {
 
       <h1 className="sr-only">New booking</h1>
 
-      <form className="panel-card form-card" onSubmit={handleSubmit}>
+      {/* Two columns so the whole booking fits a screen: the customer and trip
+          on the left, the total, the buttons and the optional condition on
+          the right, always in view. One <form> around both. */}
+      <form className="details-grid" onSubmit={handleSubmit}>
+        <div className="panel-card">
         <div className="form-grid">
           <div className="field">
             <label htmlFor="b-customer">Customer name</label>
@@ -327,90 +331,100 @@ export default function NewBooking() {
             <textarea id="b-notes" name="notes" rows="2" placeholder="Flight details, special requests" />
           </div>
         </div>
+        </div>
 
-        {/* The car's condition is an extra: asked for only when someone opens
-            it, and never required to create the booking. */}
-        {conditionOpen ? (
-          <div className="ho-form condition-extra">
-            <p className="ho-step condition-head">
-              <span>Vehicle condition at pickup · optional</span>
-              <button type="button" className="spec-link" onClick={() => setConditionOpen(false)}>
-                Remove
+        <aside className="details-side">
+          <section className="panel-card">
+            <div className="booking-total" aria-live="polite">
+              <p>
+                {vehicle && datesValid
+                  ? `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`
+                  : "Pick a vehicle and dates to see the total"}
+              </p>
+              <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>
+            </div>
+
+            {error && <p className="form-error">{error}</p>}
+
+            <div className="action-stack">
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? "Creating…" : "Create booking"}
               </button>
-            </p>
-            <div className="form-grid">
-              <div className="field">
-                <label htmlFor="b-odo">Odometer (km)</label>
-                <input id="b-odo" name="odometer" type="number" min="0" placeholder="48210" />
-              </div>
-              <div className="field">
-                <label htmlFor="b-fuel">Fuel level</label>
-                <Dropdown id="b-fuel" value={fuel} onChange={setFuel} options={FUEL_LEVELS} />
-              </div>
-              <div className="field form-full">
-                <label htmlFor="b-cond">Condition notes</label>
-                <textarea id="b-cond" name="condition_notes" rows="2" placeholder="Scratches, dents, anything the renter should not be charged for" />
-              </div>
-              <div className="field form-full">
-                <label>
-                  Photos of the car <span className="ho-photos-hint">· timestamped evidence for damage disputes</span>
-                </label>
-                <div className="photo-grid">
-                  {photos.map((p) => (
-                    <div className="photo-thumb" key={p.id}>
-                      <img src={p.url} alt="" />
-                      <button
-                        type="button"
-                        className="photo-del"
-                        onClick={() => setPhotos((prev) => prev.filter((x) => x.id !== p.id))}
-                        aria-label="Remove photo"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                  {photos.length < 8 && (
-                    <label className={"photo-add" + (photoBusy ? " busy" : "")}>
-                      <input type="file" accept="image/*" capture="environment" multiple onChange={handlePhotoPick} />
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M14.5 4h-5L8 6H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1h-4l-1.5-2z" />
-                        <circle cx="12" cy="12.5" r="3.2" />
-                      </svg>
-                      <span>{photoBusy ? "Adding…" : "Add photo"}</span>
+              <Link to="/dashboard/bookings" className="btn btn-ghost">
+                Cancel
+              </Link>
+            </div>
+          </section>
+
+          {/* The car's condition is an extra: asked for only when someone
+              opens it, and never required to create the booking. */}
+          <section className="panel-card">
+            {conditionOpen ? (
+              <div className="ho-form">
+                <p className="ho-step condition-head">
+                  <span>Vehicle condition · optional</span>
+                  <button type="button" className="spec-link" onClick={() => setConditionOpen(false)}>
+                    Remove
+                  </button>
+                </p>
+                <div className="form-grid condition-fields">
+                  <div className="field">
+                    <label htmlFor="b-odo">Odometer (km)</label>
+                    <input id="b-odo" name="odometer" type="number" min="0" placeholder="48210" />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="b-fuel">Fuel level</label>
+                    <Dropdown id="b-fuel" value={fuel} onChange={setFuel} options={FUEL_LEVELS} />
+                  </div>
+                  <div className="field form-full">
+                    <label htmlFor="b-cond">Condition notes</label>
+                    <textarea id="b-cond" name="condition_notes" rows="2" placeholder="Scratches, dents, anything the renter should not be charged for" />
+                  </div>
+                  <div className="field form-full">
+                    <label>
+                      Photos of the car <span className="ho-photos-hint">· timestamped evidence for damage disputes</span>
                     </label>
-                  )}
+                    <div className="photo-grid">
+                      {photos.map((p) => (
+                        <div className="photo-thumb" key={p.id}>
+                          <img src={p.url} alt="" />
+                          <button
+                            type="button"
+                            className="photo-del"
+                            onClick={() => setPhotos((prev) => prev.filter((x) => x.id !== p.id))}
+                            aria-label="Remove photo"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                      {photos.length < 8 && (
+                        <label className={"photo-add" + (photoBusy ? " busy" : "")}>
+                          <input type="file" accept="image/*" capture="environment" multiple onChange={handlePhotoPick} />
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14.5 4h-5L8 6H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1h-4l-1.5-2z" />
+                            <circle cx="12" cy="12.5" r="3.2" />
+                          </svg>
+                          <span>{photoBusy ? "Adding…" : "Add photo"}</span>
+                        </label>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        ) : (
-          <button type="button" className="btn btn-ghost condition-open" onClick={() => setConditionOpen(true)}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Add odometer, photos and condition notes
-          </button>
-        )}
-
-        <div className="booking-total" aria-live="polite">
-          <p>
-            {vehicle && datesValid
-              ? `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`
-              : "Pick a vehicle and dates to see the total"}
-          </p>
-          <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>
-        </div>
-
-        {error && <p className="form-error">{error}</p>}
-
-        <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {submitting ? "Creating…" : "Create booking"}
-          </button>
-          <Link to="/dashboard/bookings" className="btn btn-ghost">
-            Cancel
-          </Link>
-        </div>
+            ) : (
+              <button type="button" className="btn btn-ghost condition-open" onClick={() => setConditionOpen(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                  <path d="M12 5v14M5 12h14" />
+                </svg>
+                Add vehicle condition
+              </button>
+            )}
+            {!conditionOpen && (
+              <p className="action-hint">Odometer, fuel, photos and condition notes. Optional.</p>
+            )}
+          </section>
+        </aside>
       </form>
     </>
   );

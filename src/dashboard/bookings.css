@@ -521,14 +521,29 @@
   font-size: 13.5px;
 }
 
-.form-card .btn.condition-open,
-.form-card .condition-extra {
-  margin-top: 20px;
+/* New booking, right-hand column: the total stacked over the buttons, and
+   the condition fields one to a row, the column is a third of the page. */
+.details-side .booking-total {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 0;
+  margin-bottom: 16px;
 }
 
-.condition-extra {
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+.details-side .form-error {
+  margin: 0 0 14px;
+}
+
+.details-side .btn.condition-open {
+  width: 100%;
+  margin-top: 0;
+  text-align: left;
+}
+
+.form-grid.condition-fields {
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .ho-step.condition-head {

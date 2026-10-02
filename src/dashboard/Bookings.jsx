@@ -20,7 +20,7 @@ function todayLocalISO() {
 }
 
 // The overview shows the latest few; the rest live on All bookings.
-const RECENT_COUNT = 5;
+const RECENT_COUNT = 2;
 
 export default function Bookings() {
   const { pathname } = useLocation();

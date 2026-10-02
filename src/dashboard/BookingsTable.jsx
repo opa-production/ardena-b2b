@@ -16,7 +16,7 @@ const StarIcon = () => (
   </svg>
 );
 
-/* The bookings table, shared by the Bookings overview (latest five) and the
+/* The bookings table, shared by the Bookings overview (latest two) and the
    All bookings page (everything, filtered). `numberOf` maps a ref to its
    running number so a row keeps the same number on both pages. */
 export default function BookingsTable({ rows, numberOf }) {

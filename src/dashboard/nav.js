@@ -25,7 +25,13 @@ export const NAV_SECTIONS = [
         key: "bookings",
         name: "Bookings",
         children: [
-          { to: "/dashboard/bookings", key: "bookings-overview", name: "Overview" },
+          // `end` so it isn't lit alongside the pages beneath it (All bookings,
+          // Calendar), which share its path.
+          { to: "/dashboard/bookings", key: "bookings-overview", name: "Overview", end: true },
+          // Straight to the full list, for whoever came to find a booking
+          // rather than to read the summary. The key is the page loader's
+          // name, so hovering the link preloads it.
+          { to: "/dashboard/bookings/all", key: "allBookings", name: "All bookings" },
           // Which car is free when: every role needs this, so no `requires`.
           { to: "/dashboard/bookings/calendar", key: "bookings-calendar", name: "Calendar" },
           {

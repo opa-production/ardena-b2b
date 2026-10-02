@@ -1,21 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { Link } from "react-router-dom";
-import { fetchPlan, setPlanAutoRenew, upgradePlan } from "../lib/api";
+import { setPlanAutoRenew } from "../lib/api";
 import useRole from "../hooks/useRole";
-import WalletTopup from "./WalletTopup";
+import UpgradeDialog from "./UpgradeDialog";
+import { getPlan, hydratePlan, setPlan, subscribe } from "./planStore";
 import { toast } from "./toastStore";
 import { fmtAmount } from "./billingFormat";
-import "../components/confirm.css";
 import "./plan.css";
 
 const fmtDay = (iso) =>
   iso ? new Date(iso).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" }) : "";
-
-const uid = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 /* How the Fleet price was worked out, in the server's own numbers: the first
    cars are free, the rest are charged, with a minimum and a cap. */
@@ -42,47 +36,18 @@ function statusLine(p) {
 
 /**
  * The workspace's plan: what it has, what Fleet would cost right now, and the
- * button that pays for it from the wallet.
- *
- * The price shown is the server's quote, and it is sent back with the upgrade
- * as `expected_amount`: if anything changed in between (a car added, app
- * commission landing) the server refuses and this reloads the new figure
- * instead of charging one nobody saw. `compact` is the Settings summary.
+ * button that opens the upgrade dialog. It reads the shared plan store, so it
+ * shows at once on a workspace the shell has already loaded. `compact` is the
+ * Settings summary.
  */
 export default function PlanCard({ compact = false, onChange }) {
   const { can } = useRole();
-  const [plan, setPlan] = useState(null);
+  const plan = useSyncExternalStore(subscribe, getPlan);
   const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  const load = useCallback(async () => {
-    try {
-      setPlan(await fetchPlan());
-    } catch (err) {
-      toast(err.message || "Couldn't load your plan", "danger");
-    }
-  }, []);
 
   useEffect(() => {
-    load();
-  }, [load]);
-
-  async function handleUpgrade() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const next = await upgradePlan(plan.quote.amount, uid());
-      setPlan(next);
-      setConfirming(false);
-      toast(`You're on Fleet until ${fmtDay(next.until)}.`);
-      onChange?.();
-    } catch (err) {
-      toast(err.message || "Couldn't upgrade", "danger");
-      if (err.status === 409) await load(); // price moved: show the new one
-    } finally {
-      setBusy(false);
-    }
-  }
+    hydratePlan().catch((err) => toast(err.message || "Couldn't load your plan", "danger"));
+  }, []);
 
   async function toggleRenew() {
     try {
@@ -101,9 +66,7 @@ export default function PlanCard({ compact = false, onChange }) {
   }
 
   const q = plan.quote;
-  const short = q.amount > plan.wallet_balance;
   const payer = can("changePlan");
-  const starts = plan.source === "trial" ? fmtDay(plan.upgrade_starts_at) : "today";
 
   return (
     <section className={`panel-card plan-card plan-card--${plan.plan}`}>
@@ -166,52 +129,9 @@ export default function PlanCard({ compact = false, onChange }) {
         </Link>
       )}
 
-      {confirming &&
-        createPortal(
-          <div className="modal-overlay" onMouseDown={() => !busy && setConfirming(false)}>
-            <div className="modal-card" role="dialog" aria-modal="true" aria-label="Upgrade to Fleet"
-              onMouseDown={(e) => e.stopPropagation()}>
-              <h3 className="modal-title">Upgrade to Fleet</h3>
-              <p className="modal-message">
-                <span className="strong">KES {fmtAmount(q.amount)}</span> from your wallet for 30 days of Fleet,
-                starting {starts}. Your wallet has KES {fmtAmount(plan.wallet_balance)}.
-              </p>
-              <p className="field-note">
-                It renews from your wallet every 30 days; you can turn that off any time. If the wallet
-                can&apos;t cover a renewal you move to Starter, nothing is locked.
-              </p>
-              {short && (
-                <p className="form-error">
-                  Your wallet is KES {fmtAmount(q.amount - plan.wallet_balance)} short. Top it up, then
-                  pay for Fleet here.
-                </p>
-              )}
-              {/* Short of the price, the pay button gives way to the top-up
-                  itself: once the money lands the plan reloads with the new
-                  balance and the pay button comes back, without leaving the
-                  dialog. */}
-              <div className="modal-actions">
-                <button type="button" className="btn btn-ghost modal-btn" disabled={busy}
-                  onClick={() => setConfirming(false)}>
-                  Cancel
-                </button>
-                {short ? (
-                  <WalletTopup
-                    className="btn btn-primary modal-btn"
-                    suggestedAmount={q.amount - plan.wallet_balance}
-                    onSettled={load}
-                  />
-                ) : (
-                  <button type="button" className="btn btn-primary modal-btn" disabled={busy}
-                    onClick={handleUpgrade}>
-                    {busy ? "Paying…" : `Pay KES ${fmtAmount(q.amount)}`}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
+      {confirming && (
+        <UpgradeDialog onClose={() => setConfirming(false)} onUpgraded={() => onChange?.()} />
+      )}
     </section>
   );
 }

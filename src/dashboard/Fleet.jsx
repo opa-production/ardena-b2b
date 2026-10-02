@@ -1,6 +1,8 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { subscribe, getVehicles, removeVehicle, isFleetLoaded, hydrateFleet } from "./fleetStore";
+import { subscribe as subscribePlan, getPlan, atCarLimit } from "./planStore";
+import UpgradeDialog from "./UpgradeDialog";
 import { toast } from "./toastStore";
 import { MARKETPLACE_LISTINGS } from "../lib/features";
 import MarketplaceToggle from "./MarketplaceToggle";
@@ -26,6 +28,9 @@ export default function Fleet() {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [confirming, setConfirming] = useState(null);
+  const plan = useSyncExternalStore(subscribePlan, getPlan);
+  const [upgrading, setUpgrading] = useState(false);
+  const navigate = useNavigate();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -123,7 +128,18 @@ export default function Fleet() {
               Fleet at capacity, contact sales
             </Link>
           ) : (
-            <Link to="/dashboard/fleet/new" className="btn btn-primary toolbar-btn">
+            <Link
+              to="/dashboard/fleet/new"
+              className="btn btn-primary toolbar-btn"
+              onClick={(e) => {
+                // Out of cars on Starter: the upgrade comes up here, over the
+                // list, instead of a form that can't be submitted.
+                if (atCarLimit(plan, vehicles.length)) {
+                  e.preventDefault();
+                  setUpgrading(true);
+                }
+              }}
+            >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -249,6 +265,15 @@ export default function Fleet() {
           </div>
         )}
       </section>
+      )}
+
+      {upgrading && (
+        <UpgradeDialog
+          title="Upgrade to add more cars"
+          lead={`Starter covers up to ${plan?.car_limit} cars and you have ${vehicles.length}. Upgrade to Fleet to add another.`}
+          onClose={() => setUpgrading(false)}
+          onUpgraded={() => navigate("/dashboard/fleet/new")}
+        />
       )}
     </>
   );

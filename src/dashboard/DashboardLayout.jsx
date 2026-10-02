@@ -28,6 +28,7 @@ import {
 import { hydrateOnboarding } from "./onboardingStore";
 import { hydratePolicy } from "./policyStore";
 import { hydrateFleet } from "./fleetStore";
+import { hydratePlan } from "./planStore";
 import { hydrateConfig } from "./configStore";
 import { hydrateChauffeurs } from "./chauffeursStore";
 import { hydrateTracking } from "./trackingStore";
@@ -193,6 +194,7 @@ export default function DashboardLayout() {
       hydrateConfig(); // the Mapbox token (and any future client config)
       hydrateChauffeurs().catch(() => {}); // chauffeur roster (§C)
       fetchPolicy().then(settle(hydratePolicy)).catch(() => {});
+      hydratePlan().catch(() => {}); // the Add vehicle gate reads it on click
       // Tracking is behind a flag and every screen that reads the store is a
       // coming-soon page while it's off, so don't spend a request on it.
       if (VEHICLE_TRACKING) hydrateTracking().catch(() => {});

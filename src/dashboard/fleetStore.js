@@ -11,6 +11,7 @@ import {
 } from "../lib/api";
 import { markStep } from "./onboardingStore";
 import { setBusiness } from "./businessStore";
+import { invalidatePlan } from "./planStore";
 
 let vehicles = [];
 let loaded = false; // first successful GET /vehicles has landed
@@ -81,12 +82,14 @@ export async function addVehicle(v) {
   const created = await createVehicle(v);
   vehicles = [normalize({ ...v, ...(created?.data ?? created ?? {}) }), ...vehicles];
   markStep("vehicle"); // the server flips it too; this keeps the checklist instant
+  invalidatePlan(); // the Fleet quote counts cars
   emit();
 }
 
 export async function removeVehicle(plate) {
   await apiDeleteVehicle(plate);
   vehicles = vehicles.filter((v) => v.plate !== plate);
+  invalidatePlan();
   emit();
 }
 

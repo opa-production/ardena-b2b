@@ -93,7 +93,10 @@ export default function Usage() {
     try {
       const [usageData, txData] = await Promise.all([
         fetchBillingUsage(),
-        fetchWalletTransactions({ per_page: 200 }).catch(() => null),
+        // 100 is the most the endpoint allows; asking for more is refused
+        // outright, which left this chart empty. It is only the fallback
+        // now: the usage response carries the daily series itself.
+        fetchWalletTransactions({ per_page: 100 }).catch(() => null),
       ]);
       setUsage(usageData);
       const rows = Array.isArray(txData) ? txData : txData?.data || [];

@@ -10,8 +10,6 @@ import {
   FLEET_CAP,
   FLEET_MIN_CARS,
   FLEET_PRICE,
-  FOUNDING_SLOTS,
-  FREE_MONTHS,
   STARTER_CARS,
   fmtKES,
 } from "./pricingData";
@@ -35,8 +33,8 @@ const PRICING_FAQS = [
     a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, billed on at least ${FLEET_MIN_CARS} cars and never more than KES ${fmtKES(FLEET_CAP)} a month however big your fleet. Enterprise is priced with you.`,
   },
   {
-    q: "What's the founding offer?",
-    a: `Our first ${FOUNDING_SLOTS} businesses get ${FREE_MONTHS} months of Fleet free, every feature and every car. When the ${FREE_MONTHS} months end you choose: keep Fleet, or carry on free on Starter. We never charge you because a trial ended.`,
+    q: "Is there a free trial?",
+    a: `There's no time-limited trial. Instead, Starter is free forever for up to ${STARTER_CARS} cars, with bookings, clients, payments, staff and the calendar. Move to Fleet when you want reports, exports and more cars, and drop back to Starter any time. We never charge you unless you choose to upgrade.`,
   },
   {
     q: "How do I pay?",
@@ -84,8 +82,7 @@ export default function Pricing() {
             </h1>
             <p className="pr-sub">
               Starter is free forever for up to {STARTER_CARS} cars. Fleet is KES{" "}
-              {FLEET_PRICE} per car a month, never more than KES {fmtKES(FLEET_CAP)},
-              and our first {FOUNDING_SLOTS} businesses get {FREE_MONTHS} months of it free.
+              {FLEET_PRICE} per car a month, never more than KES {fmtKES(FLEET_CAP)}.
             </p>
           </div>
         </section>

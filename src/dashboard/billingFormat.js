@@ -21,7 +21,7 @@ export const STATUS_CHIP = {
 };
 
 export function statusLabel(status) {
-  if (status === "trial") return "Founding trial";
+  if (status === "trial") return "Free trial";
   if (status === "enterprise") return "Enterprise";
   if (status === "starter") return "Starter";
   return "Fleet";

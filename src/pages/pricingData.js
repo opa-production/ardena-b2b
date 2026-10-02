@@ -65,15 +65,10 @@ export const PILLARS = [
              cars and capped at FLEET_CAP, paid from the prepaid wallet, with
              Ardena app commission taken off. Everything included.
    Enterprise custom terms.
-   The first FOUNDING_SLOTS businesses get FREE_MONTHS months of Fleet free
-   (founding members); everyone after starts on Starter. Not paying moves a
-   workspace to Starter; nothing is locked or deleted.
+   Every workspace starts on Starter; there is no free trial of Fleet. Not
+   paying moves a workspace to Starter; nothing is locked or deleted.
    Renter checks (CHECK_PRICE) are pay as you go on every plan. */
 
-/** Months of free Fleet for a founding member. */
-export const FREE_MONTHS = 2;
-/** How many businesses get the founding trial. */
-export const FOUNDING_SLOTS = 50;
 export const STARTER_CARS = 3;
 export const FLEET_PRICE = 300;
 export const FLEET_MIN_CARS = 3;
@@ -150,7 +145,7 @@ export const FAQS = [
   },
   {
     q: "How does billing work?",
-    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, from ${FLEET_MIN_CARS} cars and capped at KES ${fmtKES(FLEET_CAP)}, paid from a prepaid wallet you top up with M-Pesa, and any Ardena app commission comes off the bill. Our first ${FOUNDING_SLOTS} businesses get ${FREE_MONTHS} months of Fleet free. Renter checks are KES ${fmtKES(CHECK_PRICE)} each on every plan.`,
+    a: `Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, from ${FLEET_MIN_CARS} cars and capped at KES ${fmtKES(FLEET_CAP)}, paid from a prepaid wallet you top up with M-Pesa, and any Ardena app commission comes off the bill. Renter checks are KES ${fmtKES(CHECK_PRICE)} each on every plan.`,
   },
   {
     q: "Do I need my own identity verification account?",

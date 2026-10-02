@@ -11,35 +11,6 @@
    The button sits at the foot of every card. Corners stay near-sharp (3px).
    ========================================================================= */
 
-.pc-founding {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  max-width: 1060px;
-  margin: 0 auto 1.4rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  text-align: center;
-  color: var(--ard-text, #475569);
-}
-
-.pc-founding strong {
-  color: var(--ard-ink-dark, #0f172a);
-}
-
-.pc-founding-tag {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 3px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  color: #0f172a;
-  background: rgb(183, 172, 232);
-}
-
 .pc-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

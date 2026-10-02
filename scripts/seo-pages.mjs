@@ -19,7 +19,16 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODULES, FAQS, FREE_MONTHS, CHECK_PRICE } from "../src/pages/pricingData.js";
+import {
+  MODULES,
+  FAQS,
+  CHECK_PRICE,
+  STARTER_CARS,
+  FLEET_PRICE,
+  FLEET_MIN_CARS,
+  FLEET_CAP,
+  fmtKES,
+} from "../src/pages/pricingData.js";
 import { SEO_PAGES } from "../src/pages/seoPagesData.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -45,7 +54,7 @@ const SOFTWARE = {
     "@type": "Offer",
     price: "0",
     priceCurrency: "KES",
-    description: `Free for the first ${FREE_MONTHS} months. Renter verification checks are KES ${CHECK_PRICE} each.`,
+    description: `Free for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, capped at KES ${fmtKES(FLEET_CAP)}. Renter verification checks are KES ${CHECK_PRICE} each.`,
   },
   publisher: {
     "@type": "Organization",
@@ -73,14 +82,14 @@ const PAGES = [
     path: "/",
     title: "Ardena for Business | Car rental management software, Kenya",
     description:
-      "Car rental and fleet management software for Kenyan rental businesses. Fleet, bookings, renter ID verification and M-Pesa payments in one dashboard. Free for the first 2 months.",
+      "Car rental and fleet management software for Kenyan rental businesses. Fleet, bookings, renter ID verification and M-Pesa payments in one dashboard. Free for up to 3 cars.",
     ld: [SOFTWARE, FAQ_LD],
     body: `
       <h1>Car rental management software for Kenyan rental businesses</h1>
       <p>Ardena for Business is the dashboard a car hire or fleet business runs on: every vehicle and its documents, every booking with double-bookings caught automatically, renter ID and licence verification before the keys are handed over, and M-Pesa payment prompts sent straight from a booking. Staff get their own logins and roles, and every action is logged.</p>
       <p>Businesses can also list their cars on the Ardena car rental app, where Ardena reviews each listing before renters can book it.</p>
       <h2>What's included</h2>${modulesList}
-      <h2>Pricing</h2><p>Free for the first ${FREE_MONTHS} months, every module, every vehicle and your whole team. Renter verification checks are KES ${CHECK_PRICE} each from a prepaid wallet.</p>
+      <h2>Pricing</h2><p>Starter is free forever for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, billed on at least ${FLEET_MIN_CARS} cars and capped at KES ${fmtKES(FLEET_CAP)}. Renter verification checks are KES ${CHECK_PRICE} each from a prepaid wallet.</p>
       <h2>Frequently asked questions</h2>${faqList}
       <p><a href="/pricing">Pricing</a> · <a href="/contact">Contact</a> · <a href="/signup">Request access</a></p>`,
   },
@@ -88,11 +97,11 @@ const PAGES = [
     file: "pricing.html",
     path: "/pricing",
     title: "Pricing | Ardena for Business car rental software",
-    description: `Ardena for Business is free for the first ${FREE_MONTHS} months: fleet, bookings, verification, payments and staff roles. Renter checks KES ${CHECK_PRICE} each.`,
+    description: `Ardena for Business is free for up to ${STARTER_CARS} cars. Fleet is KES ${FLEET_PRICE} per car per month, capped at KES ${fmtKES(FLEET_CAP)}. Renter checks KES ${CHECK_PRICE} each.`,
     ld: [SOFTWARE],
     body: `
       <h1>Ardena for Business pricing</h1>
-      <p>Your first ${FREE_MONTHS} months are free: every module, every vehicle, your whole team, no card required. Pricing after that will be announced to every workspace well before the free months end.</p>
+      <p>Starter is free forever for up to ${STARTER_CARS} cars, no card required. Fleet is KES ${FLEET_PRICE} per car per month, billed on at least ${FLEET_MIN_CARS} cars and never more than KES ${fmtKES(FLEET_CAP)} a month, paid 30 days at a time from a prepaid wallet. Enterprise is priced with you. There is no time-limited trial: not paying keeps you on Starter and nothing is locked or deleted.</p>
       <p>Renter verification is pay as you go at KES ${CHECK_PRICE} per check, from a prepaid wallet you top up.</p>
       <h2>Every module included</h2>${modulesList}`,
   },

@@ -18,7 +18,7 @@ const uid = () =>
 
 /* One line on what the workspace has right now and until when. */
 function statusLine(p) {
-  if (p.source === "trial") return `Founding trial, free until ${fmtDay(p.until)}`;
+  if (p.source === "trial") return `Free Fleet access until ${fmtDay(p.until)}`;
   if (p.source === "paid")
     return `Paid until ${fmtDay(p.until)}${p.auto_renew ? ", renews from your wallet" : ", not renewing"}`;
   if (p.source === "custom") return p.until ? `Custom terms until ${fmtDay(p.until)}` : "Custom terms";
@@ -126,7 +126,7 @@ export default function PlanCard({ compact = false, onChange }) {
           </div>
           {payer ? (
             <button type="button" className="btn btn-primary" onClick={() => setConfirming(true)}>
-              {plan.source === "trial" ? "Keep Fleet after the trial" : "Upgrade to Fleet"}
+              {plan.source === "trial" ? "Keep Fleet after the free period" : "Upgrade to Fleet"}
             </button>
           ) : (
             <p className="field-note">The Owner or Finance can upgrade.</p>

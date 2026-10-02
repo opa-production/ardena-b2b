@@ -815,7 +815,7 @@ export function fetchSubscription() {
 // { gated, status, vehicle_count, due_amount, fleet_cap }
 /* ---- Plans (opabackend app/services/b2b_plans.py) ---- */
 
-// Public, no account: plan prices and founding spots left, for /pricing.
+// Public, no account: plan prices.
 export function fetchPublicPlans() {
   return request("/public/plans", { auth: false });
 }

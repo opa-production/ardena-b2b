@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useReveal from "../hooks/useReveal";
-import { fetchPublicPlans } from "../lib/api";
-import { FOUNDING_SLOTS, FREE_MONTHS, TIERS, fmtKES } from "../pages/pricingData";
+import { TIERS, fmtKES } from "../pages/pricingData";
 import "../pages/pricingCards.css";
 
 /* Filled tick for an included line; hollow grey for one that sits outside the
@@ -37,40 +35,12 @@ function Price({ price }) {
  * white. The button sits at the foot of every card so the three line up. The
  * blue is a shade deeper than the brand #007FFA because white small text on
  * #007FFA is only 3.9:1; on #0068D6 it passes at 5.2:1.
- *
- * The founding line reads the live number of spots left from the backend
- * (GET /public/plans) and simply leaves the count out if that call fails, so
- * the page never shows a stale or invented figure.
  */
 export default function PricingPlans() {
   const ref = useReveal();
-  const [left, setLeft] = useState(null);
-
-  useEffect(() => {
-    let alive = true;
-    fetchPublicPlans()
-      .then((p) => alive && setLeft(p?.founding?.left ?? null))
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, []);
 
   return (
     <div ref={ref} className="reveal-group">
-      {left !== 0 && (
-        <p className="pc-founding">
-          <span className="pc-founding-tag">Founding offer</span>
-          Our first {FOUNDING_SLOTS} businesses get {FREE_MONTHS} months of Fleet free.
-          {left != null && (
-            <strong>
-              {" "}
-              {left} {left === 1 ? "spot" : "spots"} left.
-            </strong>
-          )}
-        </p>
-      )}
-
       <div className="pc-grid">
         {TIERS.map((t) => (
           <article className={`pc-card pc-card--${t.tone}`} key={t.key}>

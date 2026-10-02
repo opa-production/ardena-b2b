@@ -5,8 +5,8 @@
  * made, and here it's visible at a glance instead of being worked out from a
  * list of dates.
  *
- * Booking state is carried by the bar's fill *style* (outline, tint, solid,
- * grey) and spelled out in the legend and each bar's tooltip, so it never
+ * Booking state is carried by the bar's colour plus a mark of its own (dashed edge,
+ * stripe, hatch) and spelled out in the legend and each bar's tooltip, so it never
  * rests on colour alone. Two bookings that overlap on one car (a double
  * booking) are stacked in separate lanes rather than drawn on top of each
  * other, which makes the clash obvious instead of hiding it.

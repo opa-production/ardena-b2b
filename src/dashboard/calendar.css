@@ -30,7 +30,8 @@
   padding: 0;
   list-style: none;
   font-size: 12.5px;
-  color: var(--ink-soft);
+  font-weight: 500;
+  color: var(--ink);
 }
 
 .fc-legend li {
@@ -41,8 +42,9 @@
 
 .fc-swatch {
   display: inline-block;
-  width: 22px;
-  height: 12px;
+  width: 26px;
+  height: 14px;
+  border-radius: 3px;
 }
 
 /* The grid scrolls inside the card on narrow screens; the page never does. */
@@ -135,7 +137,7 @@
   background: var(--brand-soft);
 }
 
-/* Bars. State is the fill style; the colours are only a second cue. */
+/* Bars. */
 .fc-bar {
   z-index: 1;
   display: flex;
@@ -145,7 +147,7 @@
   padding: 0 8px;
   overflow: hidden;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -154,10 +156,10 @@
   border-radius: 4px;
 }
 
-.fc-bar:hover,
-.fc-bar:focus-visible {
-  filter: brightness(0.96);
-  outline: 2px solid var(--usage-bar);
+.fc-bar.fc-bar:hover,
+.fc-bar.fc-bar:focus-visible {
+  filter: brightness(1.08);
+  outline: 2px solid var(--ink);
   outline-offset: 1px;
 }
 
@@ -174,31 +176,37 @@
   border-bottom-right-radius: 0;
 }
 
+/* One loud colour per state, the same in light and dark: these are fixed
+   fills with their own text colour, not theme tokens, because the tinted and
+   outlined versions sank into the grid in both themes. Each state keeps a
+   mark of its own besides the colour (dashed edge, stripe, hatch), and the
+   legend and every bar's tooltip name it. */
+.fc-bar.is-pending,
+.fc-swatch.is-pending {
+  background: #f7c948;
+  color: #2b2100;
+  outline: 1.5px dashed #6b5200;
+  outline-offset: -1.5px;
+}
+
 .fc-bar.is-confirmed,
 .fc-swatch.is-confirmed {
-  background: var(--brand-soft);
-  box-shadow: inset 3px 0 0 var(--usage-bar), inset 0 0 0 1px var(--usage-bar);
+  background: #6d4fd6;
+  color: #fff;
+  box-shadow: inset 4px 0 0 #3b2a94;
 }
 
 .fc-bar.is-active,
 .fc-swatch.is-active {
-  background: var(--ink-inv);
-  color: var(--on-ink);
-}
-
-.fc-bar.is-pending,
-.fc-swatch.is-pending {
-  background: transparent;
-  outline: 1.5px dashed var(--ink-mute);
-  outline-offset: -1.5px;
-  color: var(--ink-soft);
+  background: #0a7d3c;
+  color: #fff;
 }
 
 .fc-bar.is-completed,
 .fc-swatch.is-completed {
-  background: var(--surface);
-  box-shadow: inset 0 0 0 1px var(--line);
-  color: var(--ink-mute);
+  background: #4a6a8a
+    repeating-linear-gradient(135deg, transparent 0 6px, rgba(255, 255, 255, 0.16) 6px 8px);
+  color: #fff;
 }
 
 @media (max-width: 640px) {

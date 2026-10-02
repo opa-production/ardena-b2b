@@ -14,7 +14,8 @@ import {
   subscribe as subscribeAvail,
   getBlocked,
 } from "./availabilityStore";
-import { createBooking, fetchBookedRanges } from "../lib/api";
+import { createBooking, fetchBookedRanges, updateBooking, uploadHandoverPhotos } from "../lib/api";
+import { compressImage, stagedToFiles } from "./handoverPhotosStore";
 import DateRangePicker from "./DateRangePicker";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -22,6 +23,8 @@ import "./fleet.css";
 import "./bookings.css";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
+
+const FUEL_LEVELS = ["Full", "3/4", "1/2", "1/4", "Reserve"];
 
 // local-date ISO; toISOString() would shift a day in UTC+3
 const isoOf = (d) =>
@@ -37,6 +40,30 @@ export default function NewBooking() {
   const [submitting, setSubmitting] = useState(false);
   const [datesOpen, setDatesOpen] = useState(false);
   const datesRef = useRef(null);
+  // The car's condition at pickup. Out of the way until asked for: most of
+  // the form is about the customer, and a booking for next week has no
+  // odometer reading to give yet.
+  const [conditionOpen, setConditionOpen] = useState(false);
+  const [fuel, setFuel] = useState("Full");
+  const [photos, setPhotos] = useState([]);
+  const [photoBusy, setPhotoBusy] = useState(false);
+
+  async function handlePhotoPick(e) {
+    const files = Array.from(e.target.files || []);
+    e.target.value = ""; // let the same file be re-picked after removal
+    if (!files.length) return;
+    setPhotoBusy(true);
+    try {
+      const urls = await Promise.all(files.map((file) => compressImage(file)));
+      setPhotos((prev) =>
+        [...prev, ...urls.map((url) => ({ id: `${Date.now()}-${Math.random()}`, url }))].slice(0, 8)
+      );
+    } catch (err) {
+      toast(err.message || "Couldn't add that photo", "danger");
+    } finally {
+      setPhotoBusy(false);
+    }
+  }
 
   const bookable = useMemo(
     () => vehicles.filter((v) => v.status !== "In maintenance"),
@@ -121,25 +148,64 @@ export default function NewBooking() {
     setSubmitting(true);
     const f = new FormData(e.currentTarget);
     const deposit = f.get("deposit");
+    const idNumber = f.get("id_number").trim();
+    const destination = f.get("destination").trim();
+    const notes = f.get("notes").trim();
+    const odometer = conditionOpen ? f.get("odometer") : "";
+    const conditionNotes = conditionOpen ? String(f.get("condition_notes") || "").trim() : "";
+    const checkout = odometer
+      ? { odometer: Number(odometer), fuel, notes: conditionNotes || null }
+      : null;
+    let booking;
     try {
-      const booking = await createBooking({
+      booking = await createBooking({
         customer: f.get("customer").trim(),
         phone: f.get("phone").trim(),
+        id_number: idNumber,
         plate: vehicle.plate,
         pickup,
         dropoff,
         location: f.get("location").trim(),
-        notes: f.get("notes").trim() || null,
+        destination,
+        notes: notes || null,
         ...(deposit ? { deposit_amount: Number(deposit) } : {}),
+        ...(checkout ? { checkout } : {}),
       });
-      toast(`Booking ${booking.ref} created, pending confirmation.`);
-      navigate(`/dashboard/bookings/${encodeURIComponent(booking.ref)}`);
     } catch (err) {
       setError(err.message || "Failed to create booking. Try again.");
       // Someone else took the dates meanwhile: redraw the calendar with them.
       if (err.status === 409) setRecheck((v) => v + 1);
       setSubmitting(false);
+      return;
     }
+
+    // The booking exists from here on, so nothing below may fail the form:
+    // each follow-up reports its own problem and the page moves on.
+    //
+    // A backend that doesn't store the ID and destination yet hands the
+    // booking back without them; keep them in the notes rather than lose what
+    // the customer was just asked for (see walkin-booking-flow.md in the
+    // backend repo).
+    if (booking.id_number === undefined || booking.destination === undefined) {
+      const kept = [`ID ${idNumber}`, `Going to ${destination}`, notes].filter(Boolean).join(". ");
+      await updateBooking(booking.ref, { notes: kept }).catch(() => {});
+    }
+    if (conditionOpen && photos.length) {
+      try {
+        await uploadHandoverPhotos(booking.ref, "out", await stagedToFiles(photos));
+      } catch (err) {
+        toast(
+          `Booking created, but the photos couldn't be uploaded: ${err.message || "add them from the booking"}`,
+          "warn"
+        );
+      }
+    }
+    if (checkout && booking.handover?.out?.odometer == null) {
+      toast("Booking created. The odometer and fuel weren't saved, record them from the booking.", "warn");
+    } else {
+      toast(`Booking ${booking.ref} created. Take payment to confirm it.`);
+    }
+    navigate(`/dashboard/bookings/${encodeURIComponent(booking.ref)}`);
   }
 
   return (
@@ -160,8 +226,16 @@ export default function NewBooking() {
             <input id="b-customer" name="customer" type="text" placeholder="Wanjiku Kamau" required />
           </div>
           <div className="field">
-            <label htmlFor="b-phone">Phone (M-Pesa)</label>
+            <label htmlFor="b-phone">Mobile number (M-Pesa)</label>
             <input id="b-phone" name="phone" type="tel" placeholder="0722 000 000" required />
+          </div>
+          <div className="field">
+            <label htmlFor="b-id">ID or passport number</label>
+            <input id="b-id" name="id_number" type="text" placeholder="12345678" maxLength={40} required />
+          </div>
+          <div className="field">
+            <label htmlFor="b-destination">Where the car is going</label>
+            <input id="b-destination" name="destination" type="text" placeholder="Naivasha, then back to Nairobi" maxLength={255} required />
           </div>
           <div className="field form-full">
             <label htmlFor="b-vehicle">Vehicle</label>
@@ -232,10 +306,74 @@ export default function NewBooking() {
             />
           </div>
           <div className="field form-full">
-            <label htmlFor="b-notes">Notes</label>
-            <textarea id="b-notes" name="notes" rows="3" placeholder="Flight details, upcountry use, special requests" />
+            <label htmlFor="b-notes">Notes · optional</label>
+            <textarea id="b-notes" name="notes" rows="2" placeholder="Flight details, special requests" />
           </div>
         </div>
+
+        {/* The car's condition is an extra: asked for only when someone opens
+            it, and never required to create the booking. */}
+        {conditionOpen ? (
+          <div className="ho-form condition-extra">
+            <p className="ho-step condition-head">
+              <span>Vehicle condition at pickup · optional</span>
+              <button type="button" className="spec-link" onClick={() => setConditionOpen(false)}>
+                Remove
+              </button>
+            </p>
+            <div className="form-grid">
+              <div className="field">
+                <label htmlFor="b-odo">Odometer (km)</label>
+                <input id="b-odo" name="odometer" type="number" min="0" placeholder="48210" />
+              </div>
+              <div className="field">
+                <label htmlFor="b-fuel">Fuel level</label>
+                <Dropdown id="b-fuel" value={fuel} onChange={setFuel} options={FUEL_LEVELS} />
+              </div>
+              <div className="field form-full">
+                <label htmlFor="b-cond">Condition notes</label>
+                <textarea id="b-cond" name="condition_notes" rows="2" placeholder="Scratches, dents, anything the renter should not be charged for" />
+              </div>
+              <div className="field form-full">
+                <label>
+                  Photos of the car <span className="ho-photos-hint">· timestamped evidence for damage disputes</span>
+                </label>
+                <div className="photo-grid">
+                  {photos.map((p) => (
+                    <div className="photo-thumb" key={p.id}>
+                      <img src={p.url} alt="" />
+                      <button
+                        type="button"
+                        className="photo-del"
+                        onClick={() => setPhotos((prev) => prev.filter((x) => x.id !== p.id))}
+                        aria-label="Remove photo"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  {photos.length < 8 && (
+                    <label className={"photo-add" + (photoBusy ? " busy" : "")}>
+                      <input type="file" accept="image/*" capture="environment" multiple onChange={handlePhotoPick} />
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14.5 4h-5L8 6H4a1 1 0 00-1 1v11a1 1 0 001 1h16a1 1 0 001-1V7a1 1 0 00-1-1h-4l-1.5-2z" />
+                        <circle cx="12" cy="12.5" r="3.2" />
+                      </svg>
+                      <span>{photoBusy ? "Adding…" : "Add photo"}</span>
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="btn btn-ghost condition-open" onClick={() => setConditionOpen(true)}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add odometer, photos and condition notes
+          </button>
+        )}
 
         <div className="booking-total" aria-live="polite">
           <p>

@@ -125,8 +125,11 @@ export function rentalDays(a, b) {
   return Math.max(1, Math.round(ms / 86400000));
 }
 
+// Today on this device's calendar. Not toISOString(), which is UTC: in
+// Nairobi that is still yesterday until 3 a.m.
 export function todayISO() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 

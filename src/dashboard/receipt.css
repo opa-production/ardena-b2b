@@ -1,0 +1,160 @@
+/* ── Printed booking receipt (BookingReceipt.jsx) ─────────────────────
+   On screen the sheet does not exist. In print, while it is mounted, it is
+   the only thing on the page. Plain black on white whatever the theme: it is
+   going on paper. */
+
+.receipt-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  body.printing-receipt {
+    background: #fff !important;
+  }
+
+  body.printing-receipt > *:not(.receipt-sheet) {
+    display: none !important;
+  }
+
+  body.printing-receipt > .receipt-sheet {
+    display: block;
+    max-width: 150mm;
+    margin: 0 auto;
+    font-family: var(--font-body, system-ui, sans-serif);
+    font-size: 11pt;
+    line-height: 1.45;
+    color: #000;
+  }
+
+  .receipt-sheet h1,
+  .receipt-sheet h2,
+  .receipt-sheet h3,
+  .receipt-sheet p,
+  .receipt-sheet dl,
+  .receipt-sheet dd {
+    margin: 0;
+    color: #000;
+  }
+
+  .rc-head {
+    display: flex;
+    align-items: center;
+    gap: 12pt;
+    padding-bottom: 12pt;
+    border-bottom: 1.5pt solid #000;
+  }
+
+  .rc-logo {
+    width: 44pt;
+    height: 44pt;
+    object-fit: contain;
+  }
+
+  .rc-head h1 {
+    font-family: var(--font-display, inherit);
+    font-size: 18pt;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+
+  .rc-head p {
+    margin-top: 3pt;
+    font-size: 9.5pt;
+    color: #333;
+  }
+
+  .rc-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin: 16pt 0 14pt;
+  }
+
+  .rc-title h2 {
+    font-size: 13pt;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .rc-title p {
+    font-size: 9.5pt;
+    text-align: right;
+  }
+
+  .rc-block {
+    margin-bottom: 12pt;
+    break-inside: avoid;
+  }
+
+  .rc-block h3 {
+    margin-bottom: 4pt;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #555;
+  }
+
+  .rc-block dl > div,
+  .rc-meta > div {
+    display: flex;
+    gap: 10pt;
+    padding: 2.5pt 0;
+  }
+
+  .receipt-sheet dt {
+    flex: 0 0 82pt;
+    color: #555;
+  }
+
+  .receipt-sheet dd {
+    flex: 1;
+  }
+
+  .rc-lines {
+    width: 100%;
+    margin: 14pt 0 12pt;
+    border-collapse: collapse;
+    break-inside: avoid;
+  }
+
+  .rc-lines td {
+    padding: 6pt 0;
+    border-top: 0.5pt solid #999;
+  }
+
+  .rc-lines td:last-child {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .rc-lines tfoot td {
+    border-top: 1.5pt solid #000;
+    border-bottom: 1.5pt solid #000;
+    font-size: 12.5pt;
+    font-weight: 700;
+  }
+
+  .rc-meta {
+    font-size: 9.5pt;
+  }
+
+  .rc-foot {
+    margin-top: 22pt;
+    padding-top: 10pt;
+    border-top: 0.5pt solid #999;
+    text-align: center;
+    font-size: 9.5pt;
+  }
+
+  .rc-foot .rc-powered {
+    margin-top: 3pt;
+    font-size: 8pt;
+    color: #777;
+  }
+}

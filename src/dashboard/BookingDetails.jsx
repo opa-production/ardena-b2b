@@ -19,7 +19,7 @@ import {
   getPolicy,
   RETURN_HOUR,
 } from "./policyStore";
-import { STATUS_CHIP, PAY_CHIP, fmtDate, rentalDays } from "./bookingsStore";
+import { STATUS_CHIP, PAY_CHIP, fmtDate, rentalDays, todayISO } from "./bookingsStore";
 import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import { getSeed } from "./recordSeeds";
@@ -28,7 +28,8 @@ import HandoverCodeField from "./HandoverCodeField";
 import RenterProfileCard from "./RenterProfileCard";
 import DatePicker from "./DatePicker";
 import Dropdown from "../components/Dropdown";
-import { compressImage } from "./handoverPhotosStore";
+import { compressImage, stagedToFiles } from "./handoverPhotosStore";
+import BookingReceipt from "./BookingReceipt";
 import {
   subscribe as subscribeChauffeurs,
   getChauffeurs,
@@ -44,18 +45,6 @@ import RefreshButton from "../components/RefreshButton";
 
 const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
 
-// Turn staged (compressed) data-URL previews into File objects for multipart upload.
-async function stagedToFiles(pending) {
-  return Promise.all(
-    pending.map(async (p, i) => {
-      const blob = await (await fetch(p.url)).blob();
-      return new File([blob], `handover-${Date.now()}-${i}.jpg`, {
-        type: blob.type || "image/jpeg",
-      });
-    })
-  );
-}
-
 const FUEL_LEVELS = ["Full", "3/4", "1/2", "1/4", "Reserve"];
 
 const TIMES = Array.from({ length: 48 }, (_, i) => {
@@ -63,18 +52,41 @@ const TIMES = Array.from({ length: 48 }, (_, i) => {
   return `${h}:${i % 2 ? "30" : "00"}`;
 });
 
+/* The one button in the header, per status. A new booking has none: its next
+   step is payment, and paying confirms it (the server moves Pending to
+   Confirmed when the money lands or cash is recorded). A paid booking whose
+   pickup is today starts on its own, see startIfDue, so "Start rental" is
+   only ever seen on one booked ahead. */
 const NEXT_STEP = {
-  Pending: { label: "Confirm booking", to: "Confirmed" },
   Confirmed: { label: "Start rental", to: "Active" },
   Active: { label: "Mark completed", to: "Completed" },
 };
 
-/* A paid-but-Pending booking is advanced to Confirmed server-side (the
-   Paystack webhook / charge poll does it, b2b.md §F), and recording cash does
-   the same. So payment *is* the confirmation for the ordinary case, and the
-   button below is only for the other one: reserving a car for a customer who
-   will pay at the counter. It says so while the booking is unpaid rather than
-   sitting there as a second primary action competing with taking the money. */
+/* Paid, and the pickup day has come: the rental is under way, so start it
+   rather than leave a button for someone to remember. A later pickup stays
+   Confirmed. App bookings are left alone, they start at the renter's code.
+
+   The server is meant to do this when the payment lands (walkin-booking-flow.md
+   in the backend repo). Until it does, this does; once it does, the booking
+   arrives here already Active and this is a no-op. */
+async function startIfDue(booking) {
+  if (
+    booking.source === "marketplace" ||
+    booking.status !== "Confirmed" ||
+    booking.payment !== "Paid" ||
+    booking.pickup > todayISO()
+  ) {
+    return booking;
+  }
+  try {
+    return await setBookingStatus(booking.ref, "Active");
+  } catch {
+    return booking; // still Confirmed, with its Start rental button
+  }
+}
+
+const PAID_TOAST = (booking) =>
+  booking.status === "Active" ? "Payment received. The rental is now active." : "Payment received. Booking confirmed.";
 
 const CANCELLABLE = ["Pending", "Confirmed"];
 
@@ -112,6 +124,10 @@ export default function BookingDetails() {
   const [inPending, setInPending] = useState([]); // photos staged before check-in
   const [photoBusy, setPhotoBusy] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [outOpen, setOutOpen] = useState(false); // pickup condition form shown
+  const [inOpen, setInOpen] = useState(false); // return form shown
+  const [printing, setPrinting] = useState(false);
+  const closeReceipt = useCallback(() => setPrinting(false), []);
   const [renterStars, setRenterStars] = useState(0);
   const [renterNote, setRenterNote] = useState("");
   const [rated, setRated] = useState(false);
@@ -183,9 +199,9 @@ export default function BookingDetails() {
           try {
             const res = await checkChargeStatus(psRef);
             if (res.charge_status === "success") {
-              const updated = await fetchBooking(decodedRef);
+              const updated = await startIfDue(await fetchBooking(decodedRef));
               setB(updated);
-              toast("Payment confirmed! Booking marked as Paid.");
+              toast(PAID_TOAST(updated));
             } else {
               // Refresh booking so the chip reflects the current DB state
               const updated = await fetchBooking(decodedRef);
@@ -200,10 +216,10 @@ export default function BookingDetails() {
         const res = await checkChargeStatus(psRef);
 
         if (res.charge_status === "success") {
-          const updated = await fetchBooking(decodedRef);
+          const updated = await startIfDue(await fetchBooking(decodedRef));
           setB(updated);
           stopPolling();
-          toast("Payment confirmed! Booking marked as Paid.");
+          toast(PAID_TOAST(updated));
         } else if (res.charge_status === "failed" || res.charge_status === "timeout") {
           const updated = await fetchBooking(decodedRef);
           setB(updated);
@@ -243,22 +259,20 @@ export default function BookingDetails() {
 
   const days = rentalDays(b.pickup, b.dropoff);
   const total = days * b.rate;
-  /* A booking has two halves and staff only ever work one of them at a time:
-     arrange it (take the money, put a driver on it), then hand the car over.
-     Showing both at once buried the two controls that matter on the day the
-     booking is made under a condition form nobody can fill in yet. Handover
-     stays closed until the money is settled, cash counts, see the cash
-     recording action on the payment card. */
+  // Money in (or returned): cash counts, see the cash action on the payment card.
   const settled = b.payment === "Paid" || b.payment === "Refunded";
   const next = NEXT_STEP[b.status];
-  // Confirming by hand only means something before the money lands.
-  const confirmWithoutPay = b.status === "Pending" && !settled;
   const canCancel = CANCELLABLE.includes(b.status);
   const canPrompt = b.payment !== "Paid" && b.payment !== "Refunded" && b.status !== "Cancelled" && b.status !== "Completed";
   const ho = b.handover || { out: null, inn: null };
   const hoOut = ho.out || null;
   const hoIn = ho.inn || null;
   const penalty = hoIn ? hoIn.penalty : 0;
+  // A phase can exist with photos only (taken before the reading); it counts
+  // as recorded once it has an odometer.
+  const outLogged = hoOut?.odometer != null;
+  const inLogged = hoIn?.odometer != null;
+  const open = b.status !== "Cancelled" && b.status !== "Completed";
   const depositAmt = b.deposit_amount ?? policy.deposit;
 
   // Bookings that came from the Ardena app behave differently almost everywhere:
@@ -268,6 +282,10 @@ export default function BookingDetails() {
   const needsCode = Boolean(b.requires_handover_code);
   const depositWithArdena = Boolean(b.deposit_managed_by_ardena);
   const canClaim = can("fileDepositClaim");
+  const canRecordOut = open && !outLogged;
+  // An app trip is closed with the renter's return code, which only exists
+  // once it has been started with the pickup one.
+  const canRecordIn = b.status === "Active" && !inLogged && (!needsCode || outLogged);
 
   // Chauffeur assignment (§C): a driver is linked to this booking when their
   // derived assignment points back at this ref.
@@ -381,7 +399,8 @@ export default function BookingDetails() {
         setOutPending([]);
       }
       setB(finalBooking);
-      toast("Check-out recorded, keys can go out.");
+      setOutOpen(false);
+      toast("Condition at pickup saved.");
     } catch (err) {
       toast(err.message || "Failed to record check-out", "danger");
     } finally {
@@ -416,6 +435,7 @@ export default function BookingDetails() {
         setInPending([]);
       }
       setB(finalBooking);
+      setInOpen(false);
       const late = finalBooking.handover?.inn?.late_hours || 0;
       const pen = finalBooking.handover?.inn?.penalty || 0;
       if (late > 0) {
@@ -463,8 +483,13 @@ export default function BookingDetails() {
       await markBookingPaidCash(b.ref, { amount, note: cashNote.trim() || undefined });
       setCashModal(false);
       setCashNote("");
-      toast(`KES ${fmtAmount(amount)} recorded as cash.`);
-      await load();
+      const updated = await startIfDue(await fetchBooking(b.ref));
+      setB(updated);
+      toast(
+        updated.status === "Active"
+          ? `KES ${fmtAmount(amount)} recorded as cash. The rental is now active.`
+          : `KES ${fmtAmount(amount)} recorded as cash.`
+      );
     } catch (err) {
       toast(err.message || "Couldn't record the cash payment.", "danger");
     } finally {
@@ -625,18 +650,8 @@ export default function BookingDetails() {
             </svg>
           </button>
           {next && (
-            <button
-              type="button"
-              className={confirmWithoutPay ? "btn btn-ghost" : "btn btn-primary"}
-              disabled={busy}
-              onClick={() => doStatus(next.to)}
-              title={
-                confirmWithoutPay
-                  ? "Hold the car for a customer paying at the counter. Taking payment confirms it on its own."
-                  : undefined
-              }
-            >
-              {confirmWithoutPay ? "Confirm without payment" : next.label}
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={() => doStatus(next.to)}>
+              {next.label}
             </button>
           )}
           {canCancel &&
@@ -678,15 +693,17 @@ export default function BookingDetails() {
 
       {/* What to do next, in one line, so a booking just created opens on an
           instruction rather than on six cards of equal weight. */}
-      {!settled && b.status !== "Cancelled" && (
+      {!settled && b.status === "Pending" && (
         <p className="page-note">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="9" />
             <path d="M12 16v-4M12 8h.01" />
           </svg>
           <span>
-            Next: take payment and assign a chauffeur if this rental needs one.
-            Handover opens once the payment is settled.
+            Next: take payment.{" "}
+            {b.pickup <= todayISO()
+              ? "The rental starts as soon as it is paid."
+              : `It is then confirmed, and you start the rental on ${fmtDate(b.pickup)}.`}
           </span>
         </p>
       )}
@@ -708,10 +725,9 @@ export default function BookingDetails() {
                 <strong>{fmtDate(b.pickup)}</strong>
                 <em>{b.location || "Location not set"}</em>
               </div>
-              <div className="trip-mid" aria-hidden="true">
-                <span>
-                  {days} day{days > 1 ? "s" : ""}
-                </span>
+              <div className="trip-mid">
+                <strong>{days}</strong>
+                <span>day{days > 1 ? "s" : ""}</span>
               </div>
               <div className="trip-end trip-end-right">
                 <span className="trip-tag">Return</span>
@@ -737,6 +753,18 @@ export default function BookingDetails() {
                   )}
                 </dd>
               </div>
+              {b.id_number && (
+                <div className="spec">
+                  <dt>ID / passport</dt>
+                  <dd>{b.id_number}</dd>
+                </div>
+              )}
+              {b.destination && (
+                <div className="spec">
+                  <dt>Going to</dt>
+                  <dd>{b.destination}</dd>
+                </div>
+              )}
               <div className="spec">
                 <dt>Vehicle</dt>
                 <dd>
@@ -766,29 +794,22 @@ export default function BookingDetails() {
             </dl>
           </section>
 
-          {/* ---- Handover: the second half, closed until the first is done ---- */}
-          {!settled ? (
-            <section className="panel-card">
-              <header className="card-head">
-                <h2>Handover</h2>
-                <p>Opens once payment is settled</p>
-              </header>
-              <p className="side-hint">
-                Record the payment, by request or in cash, and the check-out
-                form appears here, ready for the odometer, fuel level and
-                condition photos before you hand over the keys.
-              </p>
-            </section>
-          ) : (
+          {/* ---- Vehicle condition: an extra, opened on demand ----
+              Odometer, fuel, notes and photos are worth having and never
+              required, so they sit behind a button instead of an empty form
+              that reads like a step someone forgot. App bookings are the
+              exception: there the check-out is where the renter's code is
+              entered and the trip starts, so the form stays in view. */}
           <section className="panel-card">
             <header className="card-head">
-              <h2>Handover</h2>
-              <p>Condition recorded at pickup and return</p>
+              <h2>Vehicle condition</h2>
+              <p>Odometer, fuel and photos at pickup and return</p>
             </header>
 
-            {!hoOut && b.status !== "Cancelled" && (
+            {canRecordOut &&
+              (needsCode || outOpen ? (
               <form className="ho-form" onSubmit={handleCheckOut}>
-                <p className="ho-step">Check-out · record before handing over keys</p>
+                <p className="ho-step">At pickup · before handing over the keys</p>
                 {needsCode && (
                   <HandoverCodeField
                     id="ho-code"
@@ -822,29 +843,44 @@ export default function BookingDetails() {
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary" disabled={busy}>
-                    Record check-out
+                    Save condition
                   </button>
+                  {!needsCode && (
+                    <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setOutOpen(false)}>
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </form>
-            )}
+              ) : (
+                <button type="button" className="btn btn-ghost condition-open" onClick={() => setOutOpen(true)}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Record odometer, photos and condition at pickup
+                </button>
+              ))}
 
             {hoOut && (
               <>
-                <div className="pay-row">
-                  <span>Checked out · {hoOut.at}</span>
-                  <span className="mini-amount">
-                    {fmtAmount(hoOut.odometer)} km · fuel {hoOut.fuel}
-                  </span>
-                </div>
+                {outLogged && (
+                  <div className="pay-row">
+                    <span>At pickup · {hoOut.at}</span>
+                    <span className="mini-amount">
+                      {fmtAmount(hoOut.odometer)} km · fuel {hoOut.fuel}
+                    </span>
+                  </div>
+                )}
                 {hoOut.notes && <p className="ho-note">Out: {hoOut.notes}</p>}
                 {renderGallery(hoOut.photos, "out")}
               </>
             )}
 
-            {hoOut && !hoIn && b.status === "Active" && (
+            {canRecordIn &&
+              (needsCode || inOpen ? (
               <form className="ho-form ho-return" onSubmit={handleCheckIn}>
                 <p className="ho-step">
-                  Check-in · due {fmtDate(b.dropoff)} by {RETURN_HOUR}:00 AM, then KES{" "}
+                  At return · due {fmtDate(b.dropoff)} by {RETURN_HOUR}:00 AM, then KES{" "}
                   {fmtAmount(policy.lateFeePerHour)} per started hour
                 </p>
                 {needsCode && (
@@ -860,7 +896,14 @@ export default function BookingDetails() {
                 <div className="form-grid">
                   <div className="field">
                     <label htmlFor="hi-odo">Odometer (km)</label>
-                    <input id="hi-odo" name="odometer" type="number" min={hoOut.odometer} placeholder={String(hoOut.odometer)} required />
+                    <input
+                      id="hi-odo"
+                      name="odometer"
+                      type="number"
+                      min={outLogged ? hoOut.odometer : 0}
+                      placeholder={outLogged ? String(hoOut.odometer) : "48210"}
+                      required
+                    />
                   </div>
                   <div className="field">
                     <label htmlFor="hi-fuel">Fuel level</label>
@@ -898,42 +941,59 @@ export default function BookingDetails() {
                 </div>
                 <div className="form-actions">
                   <button type="submit" className="btn btn-primary" disabled={busy}>
-                    Record check-in
+                    Save return
                   </button>
+                  {!needsCode && (
+                    <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setInOpen(false)}>
+                      Cancel
+                    </button>
+                  )}
                 </div>
               </form>
-            )}
+              ) : (
+                <button type="button" className="btn btn-ghost condition-open" onClick={() => setInOpen(true)}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  Record the return: odometer, time and photos
+                </button>
+              ))}
 
             {hoIn && (
               <>
-                <div className="pay-row">
-                  <span>Checked in · {hoIn.at}</span>
-                  <span className="mini-amount">
-                    {fmtAmount(hoIn.odometer)} km · fuel {hoIn.fuel}
-                  </span>
-                </div>
-                <div className="pay-row">
-                  <span>Distance driven</span>
-                  <span className="mini-amount">{fmtAmount(hoIn.odometer - hoOut.odometer)} km</span>
-                </div>
-                <div className="pay-row">
-                  <span>Late return</span>
-                  <span className={`mini-amount${hoIn.late_hours > 0 ? " penalty-red" : ""}`}>
-                    {hoIn.late_hours > 0
-                      ? `${hoIn.late_hours} hr${hoIn.late_hours > 1 ? "s" : ""} · KES ${fmtAmount(hoIn.penalty)}`
-                      : "On time"}
-                  </span>
-                </div>
+                {inLogged && (
+                  <>
+                    <div className="pay-row">
+                      <span>At return · {hoIn.at}</span>
+                      <span className="mini-amount">
+                        {fmtAmount(hoIn.odometer)} km · fuel {hoIn.fuel}
+                      </span>
+                    </div>
+                    {outLogged && (
+                      <div className="pay-row">
+                        <span>Distance driven</span>
+                        <span className="mini-amount">{fmtAmount(hoIn.odometer - hoOut.odometer)} km</span>
+                      </div>
+                    )}
+                    <div className="pay-row">
+                      <span>Late return</span>
+                      <span className={`mini-amount${hoIn.late_hours > 0 ? " penalty-red" : ""}`}>
+                        {hoIn.late_hours > 0
+                          ? `${hoIn.late_hours} hr${hoIn.late_hours > 1 ? "s" : ""} · KES ${fmtAmount(hoIn.penalty)}`
+                          : "On time"}
+                      </span>
+                    </div>
+                  </>
+                )}
                 {hoIn.notes && <p className="ho-note">In: {hoIn.notes}</p>}
                 {renderGallery(hoIn.photos, "in")}
               </>
             )}
 
-            {!hoOut && b.status === "Cancelled" && (
-              <p className="side-hint">Booking was cancelled before handover.</p>
+            {!hoOut && !hoIn && !canRecordOut && !canRecordIn && (
+              <p className="side-hint">No condition was recorded for this booking.</p>
             )}
           </section>
-          )}
         </div>
 
         <div className="details-side">
@@ -1046,6 +1106,18 @@ export default function BookingDetails() {
                 </div>
               )
             )}
+            {b.payment === "Paid" && (
+              <button type="button" className="btn btn-ghost pay-btn" onClick={() => setPrinting(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M7 9V3h10v6M7 17H5a2 2 0 01-2-2v-4a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2h-2" />
+                  <path d="M7 14h10v7H7z" />
+                </svg>
+                Print receipt
+              </button>
+            )}
+            {printing && (
+              <BookingReceipt booking={b} depositAmount={depositAmt} penalty={penalty} onDone={closeReceipt} />
+            )}
             {canPrompt && (
               <>
                 <div className="pay-actions">
@@ -1058,8 +1130,8 @@ export default function BookingDetails() {
                   {b.payment === "Prompt sent" ? "Resend payment request" : b.payment === "Failed" ? "Retry payment request" : "Request payment"}
                 </button>
                 {/* Plenty of counter business is settled in notes. Without this
-                    the booking sits "Unpaid" forever and the handover step it
-                    gates never opens, so staff learn to ignore the status. */}
+                    the booking sits "Unpaid" forever and never starts, so staff
+                    learn to ignore the status. */}
                 <button
                   type="button"
                   className="btn btn-ghost pay-btn"

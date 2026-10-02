@@ -512,6 +512,39 @@
   background: rgba(255, 255, 255, 0.26);
 }
 
+/* The button that opens an optional condition form, and the form's own
+   heading with its way back out. */
+.btn.condition-open {
+  gap: 8px;
+  margin-top: 4px;
+  padding: 9px 16px;
+  font-size: 13.5px;
+}
+
+.form-card .btn.condition-open,
+.form-card .condition-extra {
+  margin-top: 20px;
+}
+
+.condition-extra {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.ho-step.condition-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.condition-head .spec-link {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .ho-form.ho-return {
   border-top: 1px solid var(--line);
   margin-top: 16px;
@@ -735,7 +768,7 @@
 
 .trip-line {
   display: grid;
-  grid-template-columns: 1fr minmax(80px, 1.2fr) 1fr;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 14px;
   margin-bottom: 12px;
@@ -783,30 +816,34 @@
   white-space: nowrap;
 }
 
-/* Dot, rule, dot, with the duration sitting on the rule. */
+/* The length of the trip, standing between the two dates: the number, then
+   its unit, fenced off from each side by a hairline. */
 .trip-mid {
-  position: relative;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  height: 24px;
+  gap: 1px;
+  align-self: stretch;
+  padding: 0 24px;
+  border-left: 1px solid rgba(143, 128, 214, 0.45);
+  border-right: 1px solid rgba(143, 128, 214, 0.45);
 }
 
-.trip-mid::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 2px dashed rgb(143, 128, 214);
+.trip-mid strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--ink);
 }
 
 .trip-mid span {
-  position: relative;
-  padding: 3px 10px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: #fff;
-  background: #4b3ca8;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
 }
 
 @media (max-width: 560px) {
@@ -820,7 +857,14 @@
   }
 
   .trip-mid {
+    flex-direction: row;
+    align-items: baseline;
     justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 0;
+    border: none;
+    border-top: 1px solid rgba(143, 128, 214, 0.45);
+    border-bottom: 1px solid rgba(143, 128, 214, 0.45);
   }
 }
 

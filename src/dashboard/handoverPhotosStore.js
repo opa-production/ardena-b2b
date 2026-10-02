@@ -103,3 +103,16 @@ export function compressImage(file, maxEdge = 1000, quality = 0.6) {
     reader.readAsDataURL(file);
   });
 }
+
+// Turn staged (compressed) data-URL previews into File objects for multipart
+// upload. Shared by the New booking form and the booking page.
+export async function stagedToFiles(pending) {
+  return Promise.all(
+    pending.map(async (p, i) => {
+      const blob = await (await fetch(p.url)).blob();
+      return new File([blob], `handover-${Date.now()}-${i}.jpg`, {
+        type: blob.type || "image/jpeg",
+      });
+    })
+  );
+}

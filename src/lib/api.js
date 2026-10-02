@@ -423,7 +423,8 @@ export function deleteVehicle(plate) {
   return request(`/vehicles/${encodeURIComponent(plate)}`, { method: "DELETE" });
 }
 
-// Booked date ranges for the availability calendar
+// Booked spans in a window: { plate, from, to, ranges: [{ start, end,
+// booking_ref, status }] }, dates inclusive and clipped to the window.
 export function fetchVehicleAvailability(plate, from, to) {
   const qs = new URLSearchParams({ from, to }).toString();
   return request(`/vehicles/${encodeURIComponent(plate)}/availability?${qs}`);
@@ -590,24 +591,37 @@ export function fetchBookings(params = {}) {
 }
 
 /* The spans a vehicle is taken for: [{ start, end, ref }], ISO dates, both
-   ends included. These are the bookings still holding their dates, the same
-   three statuses the server checks a new booking against, and it refuses any
-   overlap with either end, so the return day of one rental can't be the
-   pickup day of the next. App bookings are in here too; the server mirrors
-   them into this list.
+   ends included. These are the bookings still holding their dates (Pending,
+   Confirmed, Active, and trips booked on the Ardena app), the same ones the
+   server checks a new booking against. It refuses any overlap with either
+   end, so the return day of one rental can't be the pickup day of the next.
 
-   Asked for one status at a time so a busy car's history can't push a live
-   booking off the page: a car holds a handful of these at once, never 100. */
+   One call to the vehicle's availability, from today to two years out, which
+   is further than anyone books. If that can't be read, the bookings list
+   answers the same question, one status at a time so a busy car's history
+   can't push a live booking off the page. */
 const HOLDING_STATUSES = ["Pending", "Confirmed", "Active"];
 
+const localISO = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 export async function fetchBookedRanges(plate) {
-  const pages = await Promise.all(
-    HOLDING_STATUSES.map((status) => fetchBookings({ plate, status, per_page: 100 }))
-  );
-  return pages
-    .flatMap((p) => p?.data || [])
-    .filter((b) => b.pickup && b.dropoff)
-    .map((b) => ({ start: b.pickup, end: b.dropoff, ref: b.ref }));
+  try {
+    const from = new Date();
+    const to = new Date(from.getFullYear() + 2, from.getMonth(), from.getDate());
+    const res = await fetchVehicleAvailability(plate, localISO(from), localISO(to));
+    return (res?.ranges || [])
+      .filter((r) => r.start && r.end)
+      .map((r) => ({ start: r.start, end: r.end, ref: r.booking_ref }));
+  } catch {
+    const pages = await Promise.all(
+      HOLDING_STATUSES.map((status) => fetchBookings({ plate, status, per_page: 100 }))
+    );
+    return pages
+      .flatMap((p) => p?.data || [])
+      .filter((b) => b.pickup && b.dropoff)
+      .map((b) => ({ start: b.pickup, end: b.dropoff, ref: b.ref }));
+  }
 }
 
 // { customer, phone, plate, pickup, dropoff, location, notes?, deposit_amount?, client_id? }

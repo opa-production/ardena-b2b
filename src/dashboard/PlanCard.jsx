@@ -29,7 +29,7 @@ function quoteLine(q) {
 function statusLine(p) {
   if (p.source === "trial") return `Free Fleet access until ${fmtDay(p.until)}`;
   if (p.source === "paid")
-    return `Paid until ${fmtDay(p.until)}${p.auto_renew ? ", renews from your wallet" : ", not renewing"}`;
+    return `${p.paid_cars != null ? `${p.paid_cars} car${p.paid_cars === 1 ? "" : "s"} paid` : "Paid"} until ${fmtDay(p.until)}${p.auto_renew ? ", renews from your wallet" : ", not renewing"}`;
   if (p.source === "custom") return p.until ? `Custom terms until ${fmtDay(p.until)}` : "Custom terms";
   return `Free, up to ${p.car_limit} cars`;
 }
@@ -117,9 +117,16 @@ export default function PlanCard({ compact = false, onChange }) {
               ? `Renews on ${fmtDay(plan.until)} for about KES ${fmtAmount(q.amount)} from your wallet.`
               : `Ends on ${fmtDay(plan.until)}, then you move to Starter.`}
           </p>
-          <button type="button" className="btn btn-ghost" onClick={toggleRenew}>
-            {plan.auto_renew ? "Turn off renewal" : "Turn on renewal"}
-          </button>
+          <div className="plan-actions">
+            {plan.paid_cars != null && (
+              <button type="button" className="btn btn-primary" onClick={() => setConfirming(true)}>
+                Add cars
+              </button>
+            )}
+            <button type="button" className="btn btn-ghost" onClick={toggleRenew}>
+              {plan.auto_renew ? "Turn off renewal" : "Turn on renewal"}
+            </button>
+          </div>
         </div>
       )}
 

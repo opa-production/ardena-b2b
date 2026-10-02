@@ -132,8 +132,8 @@ export default function Fleet() {
               to="/dashboard/fleet/new"
               className="btn btn-primary toolbar-btn"
               onClick={(e) => {
-                // Out of cars on Starter: the upgrade comes up here, over the
-                // list, instead of a form that can't be submitted.
+                // Out of cars on this plan: paying for more comes up here,
+                // over the list, instead of a form that can't be submitted.
                 if (atCarLimit(plan, vehicles.length)) {
                   e.preventDefault();
                   setUpgrading(true);
@@ -269,8 +269,7 @@ export default function Fleet() {
 
       {upgrading && (
         <UpgradeDialog
-          title="Upgrade to add more cars"
-          lead={`Starter covers up to ${plan?.car_limit} cars and you have ${vehicles.length}. Upgrade to Fleet to add another.`}
+          atLimit
           onClose={() => setUpgrading(false)}
           onUpgraded={() => navigate("/dashboard/fleet/new")}
         />

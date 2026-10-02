@@ -827,13 +827,22 @@ export function fetchPlan() {
   return request("/billing/plan");
 }
 
-// Pay 30 days of Fleet from the wallet. `expectedAmount` is the price shown;
-// the server refuses (409) if its own quote differs. Idempotency key makes a
-// retry safe. Owner and Finance only.
-export function upgradePlan(expectedAmount, idempotencyKey) {
+// What Fleet costs for a fleet of `cars` in total (docs/fleet-car-seats.md):
+// the full 30 days on Starter, or the rest of the period for the cars added
+// on a paid plan. Never cached, it is the figure about to be charged.
+export function fetchPlanQuote(cars) {
+  return request(`/billing/plan/quote?cars=${encodeURIComponent(cars)}`);
+}
+
+// Pay for Fleet from the wallet. `expectedAmount` is the price shown; the
+// server refuses (409) if its own quote differs. `cars` is the total the
+// payment covers, so someone adding several pays once; left out, the server
+// bills the cars in the fleet. Idempotency key makes a retry safe. Owner and
+// Finance only.
+export function upgradePlan(expectedAmount, idempotencyKey, cars) {
   return request("/billing/plan/upgrade", {
     method: "POST",
-    body: { plan: "fleet", expected_amount: expectedAmount },
+    body: { plan: "fleet", expected_amount: expectedAmount, ...(cars != null ? { cars } : {}) },
     headers: idempotencyKey ? { "Idempotency-Key": idempotencyKey } : undefined,
   });
 }

@@ -69,7 +69,10 @@ export function resetPlan() {
   emit();
 }
 
-// Starter stops at its car limit: a car past it can't take bookings.
+// Out of cars: Starter at its free limit, or a paid plan with every car it
+// paid for (`paid_cars`) already in the fleet. A car past that can't take
+// bookings, so adding one starts with paying for it.
 export function atCarLimit(p, carCount) {
-  return p?.plan === "starter" && p.car_limit > 0 && carCount >= p.car_limit;
+  if (!p || !(p.car_limit > 0) || carCount < p.car_limit) return false;
+  return p.plan === "starter" || p.paid_cars != null;
 }

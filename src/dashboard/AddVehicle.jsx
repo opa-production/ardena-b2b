@@ -34,9 +34,9 @@ export default function AddVehicle() {
       .finally(() => setPlanChecked(true));
   }, []);
 
-  // Starter stops at its car limit: a car past it can't take bookings, so the
-  // upgrade dialog comes up over the form instead of it accepting one that
-  // would sit idle. The Fleet page stops the click before it gets here; this
+  // A plan stops at the cars it covers: one past that can't take bookings, so
+  // the upgrade dialog comes up over the form instead of it accepting a car
+  // that would sit idle. The Fleet page stops the click before it gets here; this
   // is for the other ways in (a link, "Save & add another" on the last car).
   const carCount = loaded ? vehicles.length : plan?.cars || 0;
   const atPlanLimit = !atCap && atCarLimit(plan, carCount);
@@ -81,6 +81,9 @@ export default function AddVehicle() {
       });
     } catch (err) {
       setError(err.message);
+      // The server's own count says the plan is full: refresh ours, and the
+      // dialog above takes over.
+      if (err.data?.code === "car_limit_reached") hydratePlan({ force: true }).catch(() => {});
       return;
     } finally {
       setSaving(false);
@@ -127,11 +130,10 @@ export default function AddVehicle() {
 
       {atPlanLimit && (
         <UpgradeDialog
-          title="Upgrade to add more cars"
-          lead={`Starter covers up to ${plan.car_limit} cars and you have ${carCount}. Upgrade to Fleet to add another.`}
+          atLimit
           onClose={() => {
-            // Still on Starter means it was dismissed, and there is nothing
-            // to do on this page; after an upgrade the form is what's wanted.
+            // Still out of cars means it was dismissed, and there is nothing
+            // to do on this page; after paying the form is what's wanted.
             if (atCarLimit(getPlan(), carCount)) navigate("/dashboard/fleet");
           }}
         />

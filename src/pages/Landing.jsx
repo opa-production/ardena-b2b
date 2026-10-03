@@ -4,6 +4,7 @@ import useReveal from "../hooks/useReveal";
 import usePageTitle from "../hooks/usePageTitle";
 import ArdNav from "../components/ArdNav";
 import ArdFooter from "../components/ArdFooter";
+import { TestimonialsSection } from "../components/Testimonials";
 import { MODULES, FAQS, STARTER_CARS } from "./pricingData";
 import "./landingArdena.css";
 
@@ -151,6 +152,9 @@ export default function Landing() {
             </div>
           </div>
         </section>
+
+        {/* ---- Testimonials: renders nothing until the API returns some ---- */}
+        <TestimonialsSection />
 
         {/* ---- Demo video: plays in place, no trip to YouTube ---- */}
         <section className="ard-section ard-section--light" id="demo">

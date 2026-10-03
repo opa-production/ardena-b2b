@@ -1472,3 +1472,195 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* ---- Testimonials (components/Testimonials.jsx) -------------------------
+   One row drifting sideways, edges feathered into the band
+   with a mask so cards appear and dissolve rather than hitting a hard wall.
+   Cards stay near-sharp and flat: a hairline border, a ghost quote mark in
+   the ghost-numeral grey, and the profile photos as the only colour. */
+
+.ard-tm-section {
+  overflow: hidden;
+}
+
+.ard-tm-intro {
+  max-width: 640px;
+  margin: 0 auto 3.5rem;
+  text-align: center;
+}
+
+.ard-tm-marquee {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* the vertical padding gives a hovered card room to lift without its top
+   border and shadow being clipped by the row's overflow */
+.ard-tm-row {
+  overflow: hidden;
+  padding: 0.5rem 0 1.5rem;
+  margin-bottom: -1rem;
+}
+
+.ard-tm-track {
+  display: flex;
+  width: max-content;
+  animation: ard-tm-scroll var(--tm-duration, 60s) linear infinite;
+}
+
+.ard-tm-row:hover .ard-tm-track,
+.ard-tm-row:focus-within .ard-tm-track {
+  animation-play-state: paused;
+}
+
+.ard-tm-set {
+  display: flex;
+  gap: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@keyframes ard-tm-scroll {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ard-tm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.ard-tm-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 360px;
+  height: 100%;
+  margin: 0;
+  padding: 1.75rem 1.75rem 1.5rem;
+  background: var(--ard-white);
+  border: 1px solid var(--ard-line);
+  border-radius: 3px;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ard-tm-grid .ard-tm-card {
+  width: auto;
+}
+
+.ard-tm-card:hover {
+  border-color: var(--ard-ink);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -18px rgba(15, 23, 42, 0.35);
+}
+
+.ard-tm-mark {
+  position: absolute;
+  top: 0.4rem;
+  right: 1.25rem;
+  font-size: 5rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ard-line);
+  pointer-events: none;
+}
+
+.ard-tm-chip {
+  align-self: flex-start;
+  margin-bottom: 1rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ard-ink);
+  background: var(--ard-cream);
+  border-radius: 2px;
+}
+
+.ard-tm-quote {
+  flex: 1;
+  margin: 0 0 1.5rem;
+  padding-right: 2rem;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--ard-ink);
+}
+
+.ard-tm-person {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ard-line);
+}
+
+.ard-tm-avatar {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--ard-bg-light);
+}
+
+.ard-tm-avatar--initials {
+  display: grid;
+  place-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--ard-ink);
+}
+
+.ard-tm-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ard-tm-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ard-ink);
+}
+
+.ard-tm-role {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--ard-text);
+}
+
+.ard-tm-role strong {
+  font-weight: 600;
+  color: var(--ard-ink);
+}
+
+@media (max-width: 600px) {
+  .ard-tm-card {
+    width: 290px;
+    padding: 1.4rem 1.4rem 1.25rem;
+  }
+
+  .ard-tm-marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* No drift: the rows become swipeable strips and the looping copies go. */
+@media (prefers-reduced-motion: reduce) {
+  .ard-tm-row {
+    overflow-x: auto;
+    padding: 0 1.5rem;
+  }
+
+  .ard-tm-set[aria-hidden="true"],
+  .ard-tm-slot[aria-hidden="true"] {
+    display: none;
+  }
+}

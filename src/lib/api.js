@@ -857,6 +857,14 @@ export function fetchPublicPlans() {
   return request("/public/plans", { auth: false });
 }
 
+/* ---- Testimonials (docs/testimonials-api.md) ---- */
+
+// Public, no account: approved testimonials for the landing page, newest
+// first. An empty list hides the section.
+export function fetchPublicTestimonials() {
+  return request("/public/testimonials", { auth: false, cache: 5 * 60 * 1000 });
+}
+
 // This workspace's plan, limits and the current Fleet price (quote.amount).
 export function fetchPlan() {
   return request("/billing/plan");

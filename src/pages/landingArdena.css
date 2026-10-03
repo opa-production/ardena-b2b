@@ -312,45 +312,142 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
+/* only exists inside the phone sheet */
+.ard-nav-sheet-foot {
+  display: none;
+}
+
+/* Phones: Sign in leaves the bar; the hamburger opens a full-height dark
+   sheet, big light links over hairline rules, the actions pinned low. */
 @media (max-width: 900px) {
   .ard-nav-toggle {
     display: flex;
   }
 
-  .ard-nav-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    background: rgba(255, 255, 255, 0.98);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    padding: 0.5rem 1.5rem 1rem;
+  .ard-nav-end .ard-nav-cta {
     display: none;
   }
 
-  .ard-nav-menu.is-open {
+  /* a backdrop-filter would make the bar the containing block for the
+     fixed sheet, trapping it inside the bar; the bar is near opaque anyway */
+  .ard-nav {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    transition: background 0.25s ease;
+  }
+
+  /* the sheet slides under the bar, so the logo and close button sit on it */
+  .ard-nav .brand,
+  .ard-nav-end {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ard-nav .brand,
+  .ard-nav-toggle span {
+    transition: color 0.25s ease, background 0.25s ease, transform 0.3s ease,
+      opacity 0.2s ease;
+  }
+
+  .ard-header.is-menu-open .ard-nav {
+    background: var(--ard-night);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+
+  .ard-header.is-menu-open .ard-nav .brand {
+    color: #fff;
+  }
+
+  .ard-header.is-menu-open .ard-nav-toggle span {
+    background: #fff;
+  }
+
+  .ard-nav-menu {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    /* 68px clears the bar */
+    padding: calc(68px + 2rem) 1.5rem calc(2rem + env(safe-area-inset-bottom));
+    background: var(--ard-night);
+    overflow-y: auto;
     display: flex;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, transform 0.3s ease, visibility 0s 0.3s;
+  }
+
+  .ard-nav-menu.is-open {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.25s ease, transform 0.3s ease;
+  }
+
+  .ard-nav-menu > li:not(.ard-nav-sheet-foot) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
 
   .ard-nav-link {
-    padding: 0.85rem 0;
+    display: block;
+    padding: 1.15rem 0;
+    font-size: 1.75rem;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.62);
+  }
+
+  .ard-nav-link:hover,
+  .ard-nav-link.is-active {
+    color: #fff;
   }
 
   .ard-nav-link.is-active::after {
-    left: auto;
-    right: 0;
-    bottom: 50%;
-    transform: translateY(50%);
+    display: none;
   }
 
-  .ard-nav-cta {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
+  .ard-nav-sheet-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.6rem;
+    margin-top: auto;
+    padding-top: 2.5rem;
+  }
+
+  .ard-nav-sheet-cta {
+    display: block;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ard-ink-dark);
+    background: var(--ard-cream);
+    border-radius: 999px;
+    transition: background 0.2s ease;
+  }
+
+  .ard-nav-sheet-cta:hover {
+    background: #fff;
+  }
+
+  .ard-nav-sheet-signin {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .ard-nav-sheet-signin:hover {
+    color: #fff;
   }
 }
 

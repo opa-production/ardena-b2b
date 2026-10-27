@@ -36,33 +36,22 @@
   color: var(--ink-soft);
 }
 
-/* Light theme: the chrome is a white panel too, a shade apart from the grey
-   page by tone and a single hairline, with the same ink as the content. The
-   tokens above are simply re-pointed; no rule below needs to know. */
+/* Light theme: the chrome is a deep slate navy, coloured rather than black
+   or white, so the nav reads apart from the light page. The ink stays light
+   from the block above, lifted a step so the links read strongly on it. */
 [data-theme="light"] .sidebar,
 [data-theme="light"] .dash-topbar {
-  --sidebar: #ffffff;
-  --sidebar-raised: #ffffff;
-  --ink: #0a0d12;
-  --ink-soft: #545c68;
-  --ink-mute: #8b929d;
-  --line: #e3e6eb;
-  --ink-inv: #0a0d12;
-  --ink-inv-hover: #000000;
-  --on-ink: #ffffff;
-  --pop-shadow: 0 14px 40px rgba(163, 174, 192, 0.5);
-  --nav-hover: rgba(10, 13, 18, 0.045);
-  --nav-active: rgba(10, 13, 18, 0.07);
-  --nav-active-hover: rgba(10, 13, 18, 0.09);
-  --nav-badge: #b45309;
-}
-
-[data-theme="light"] .sidebar {
-  box-shadow: 1px 0 0 var(--line);
-}
-
-[data-theme="light"] .dash-topbar {
-  box-shadow: 0 1px 0 var(--line);
+  --sidebar: #1b2b40;
+  --sidebar-raised: #263a54; /* the tenant menu lifts off it by tone */
+  --ink: #ffffff;
+  --ink-soft: #dbe3ee;
+  --ink-mute: #a3b1c4;
+  --line: rgba(255, 255, 255, 0.16);
+  --on-ink: #1b2b40;
+  --pop-shadow: 0 16px 42px rgba(13, 22, 36, 0.45);
+  --nav-hover: rgba(255, 255, 255, 0.07);
+  --nav-active: rgba(255, 255, 255, 0.13);
+  --nav-active-hover: rgba(255, 255, 255, 0.16);
 }
 
 /* the hardcoded amber counters need the brighter step on near-black */

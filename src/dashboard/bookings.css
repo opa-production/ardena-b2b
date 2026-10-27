@@ -408,25 +408,6 @@
   }
 }
 
-/* ---- New booking: the form card ----
-   Light theme only: the customer-and-trip form sits on the brand's cream
-   ground, so it reads apart from the white summary card beside it. Inputs
-   stay near-white paper on it. Tokens are re-pointed rather than restyled, so
-   everything inside follows; the edges are redeclared because they resolved
-   against the light --line on :root. */
-:root:not([data-theme="dark"]) .form-card {
-  --panel: #f5f0e8;
-  --bg: #fffdf9;
-  --surface: #ece5d9;
-  --line: #e0d6c5;
-  --ink-soft: #3b3529;
-  --ink-mute: #6f6655;
-  --edge: 0 0 0 1px var(--line);
-  --edge-strong: 0 0 0 1px var(--ink-mute);
-  --edge-in: inset 0 0 0 1px var(--line);
-  background: var(--panel);
-}
-
 .agreed-field {
   margin-top: 16px;
 }

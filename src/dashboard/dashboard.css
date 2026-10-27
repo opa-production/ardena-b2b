@@ -856,68 +856,35 @@
   }
 }
 
-/* ---- Flat dashboard: no cards ----
-   Content sits straight on the page ground. Sections are divided by a single
-   hairline above each one instead of a box around it, and the numbers along
-   the top of a page are a row of figures split by thin vertical rules rather
-   than a row of tiles. Modals keep their card: they float over the page.
+/* ---- Outlined, not elevated ----
+   Sections, charts, the details header and every KPI keep a full 1px outline
+   so each reads as its own card, but nothing is filled white or lifted: the
+   page ground shows through. Modals keep their fill, they float over the
+   page.
 
-   Written as one override block (`.dash .dash-content` beats the page
-   stylesheets' own two-class rules) so the card styles beneath stay
-   untouched and this is easy to reverse. */
+   One override block (`.dash .dash-content` beats the page stylesheets'
+   own two-class rules) so the card styles beneath stay as they were. */
 
 .dash .dash-content .panel-card,
-.dash .dash-content .chart-card {
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 22px 0 6px;
-  border-top: 1px solid var(--line);
-}
-
-/* the header strip on details pages: a line beneath it, not a box */
-.dash .dash-content .head-card {
-  background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0 0 18px;
-  border-bottom: 1px solid var(--line);
-}
-
-/* a section that directly follows the header strip doesn't need a second line */
-.dash .dash-content .head-card + .panel-card,
-.dash .dash-content .head-card + * > .panel-card:first-child {
-  border-top: none;
-}
-
-/* the figures row */
-.dash .dash-content .stat-grid {
-  gap: 0;
-  padding: 4px 0 18px;
-}
-
+.dash .dash-content .chart-card,
+.dash .dash-content .head-card,
 .dash .dash-content .stat-card {
   background: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 6px 24px;
-  border-left: 1px solid var(--line);
-  transform: none;
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.dash .dash-content .stat-card:first-child {
-  padding-left: 0;
-  border-left: none;
-}
-
+/* KPIs don't lift on hover; a clickable one underlines its figure instead */
 .dash .dash-content .stat-card:hover {
   transform: none;
 }
 
-.dash .dash-content .stat-card.is-clickable:hover .stat-value {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-thickness: 1px;
+.dash .dash-content .stat-card.is-clickable:hover {
+  box-shadow: inset 0 0 0 1px var(--ink-mute);
+}
+
+/* the highlighted wallet KPI keeps its tinted edge, just not its fill */
+.dash .dash-content .stat-card--cream {
+  box-shadow: inset 0 0 0 1px var(--kpi-edge);
 }
 
 /* ---- Pressable rows (see RowLink.jsx) ----
@@ -965,11 +932,5 @@
   .row-go {
     opacity: 0.55;
     transform: none;
-  }
-}
-
-@media (max-width: 640px) {
-  .dash .dash-content .stat-card {
-    padding: 6px 14px;
   }
 }

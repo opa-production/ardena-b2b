@@ -299,7 +299,7 @@ export default function NewBooking() {
           on the left, the total, the buttons and the optional condition on
           the right, always in view. One <form> around both. */}
       <form className="details-grid" onSubmit={handleSubmit}>
-        <div className="panel-card">
+        <div className="panel-card form-card">
         <div className="form-grid">
           <div className="field">
             <label htmlFor="b-customer">Customer name</label>
@@ -449,7 +449,7 @@ export default function NewBooking() {
         </div>
 
         <aside className="details-side">
-          <section className="panel-card summary-card">
+          <section className="panel-card">
             {vehicle ? (
               <PriceBuilder
                 idPrefix="b-price"

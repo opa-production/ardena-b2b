@@ -408,29 +408,23 @@
   }
 }
 
-/* ---- New booking: the summary card ----
-   Inked in the light theme so the total and the button read as the page's
-   one dark block. Tokens are re-pointed rather than restyled, so the inputs,
-   notes and buttons inside follow; the edges are redeclared because they
-   resolved against the light --line on :root. */
-:root:not([data-theme="dark"]) .summary-card {
-  --panel: #14161a;
-  --bg: #1c1f24;
-  --surface: #23272d;
-  --line: #2f343b;
-  --ink: #f3f4f6;
-  --ink-soft: #b4b9c1;
-  --ink-mute: #858b95;
-  --ink-inv: #ffffff;
-  --ink-inv-hover: #f0f2f5;
-  --on-ink: #0a0d12;
-  --brand-soft: rgba(0, 127, 250, 0.3);
+/* ---- New booking: the form card ----
+   Light theme only: the customer-and-trip form sits on the brand's cream
+   ground, so it reads apart from the white summary card beside it. Inputs
+   stay near-white paper on it. Tokens are re-pointed rather than restyled, so
+   everything inside follows; the edges are redeclared because they resolved
+   against the light --line on :root. */
+:root:not([data-theme="dark"]) .form-card {
+  --panel: #f5f0e8;
+  --bg: #fffdf9;
+  --surface: #ece5d9;
+  --line: #e0d6c5;
+  --ink-soft: #3b3529;
+  --ink-mute: #6f6655;
   --edge: 0 0 0 1px var(--line);
   --edge-strong: 0 0 0 1px var(--ink-mute);
   --edge-in: inset 0 0 0 1px var(--line);
   background: var(--panel);
-  color: var(--ink);
-  box-shadow: 0 18px 40px -24px rgba(10, 13, 18, 0.6);
 }
 
 .agreed-field {

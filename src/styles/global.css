@@ -27,8 +27,8 @@
   --sidebar-raised: #232a35; /* popovers lift off the panel by tone, not by a line */
   --line: #e3e6eb;
   --ink: #0a0d12;
-  --ink-soft: #545c68;
-  --ink-mute: #8b929d;
+  --ink-soft: #363c46; /* darkened for legibility: secondary text was too faint */
+  --ink-mute: #656c77;
 
   /* Edges. These replaced the old neumorphic raised/carved shadows: surfaces
      are now defined by a 1px hairline rather than by light and shade.

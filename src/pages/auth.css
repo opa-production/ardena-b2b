@@ -305,6 +305,46 @@
   margin-bottom: 30px;
 }
 
+.split-lede .auth-notice {
+  margin-top: 12px;
+}
+
+/* the done state: the tick sits left with the text, not centred like the old card */
+.split-form-wrap .request-check {
+  margin-bottom: 18px;
+}
+
+.split-form-wrap .request-ref {
+  margin: -12px 0 22px;
+}
+
+.split-form-wrap > .btn {
+  width: 100%;
+}
+
+/* the sign-in code: big spaced digits in the box's single cell */
+.split-box .field input.auth-otp {
+  font-size: 22px;
+  letter-spacing: 0.5em;
+  text-align: left;
+}
+
+/* the show/hide toggle needs room at the end of the bare password input */
+.split-box .password-field input {
+  padding-right: 40px;
+}
+
+/* Forgot password sits under the box rather than tucked up against a field */
+.split-form .auth-forgot {
+  margin-top: -4px;
+}
+
+/* the code step's "Send another code" line, centred like Cancel below it */
+.split-form-wrap .auth-switch {
+  margin-top: 20px;
+  text-align: center;
+}
+
 /* Every field in one sharp-edged box: the fields are cells divided by
    hairlines, each with its small-caps label inside the cell above a bare
    input. The cell being typed in warms to white and its label darkens. */

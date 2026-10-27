@@ -3,9 +3,17 @@ import { Link, useNavigate } from "react-router-dom";
 import PasswordField from "../components/PasswordField";
 import { login, verifyLoginCode, resendLoginCode, takeSessionExpiredNotice } from "../lib/api";
 import usePageTitle from "../hooks/usePageTitle";
-import AuthWaves from "./AuthWaves";
+import AuthSplit from "./AuthSplit";
 import "./auth.css";
 import { submitWhenComplete } from "../lib/autoSubmit";
+
+const SWAP = {
+  title: "New to Ardena?",
+  text: "Request access for your rental business. We verify every business and send logins within 24 hours.",
+  to: "/signup",
+  cta: "Request access",
+  prompt: "New to Ardena?",
+};
 
 export default function Login() {
   usePageTitle("Sign in");
@@ -68,14 +76,13 @@ export default function Login() {
 
   if (challenge) {
     return (
-      <div className="auth">
-        <AuthWaves />
-        <main className="auth-card">
-          <h1>Enter your code</h1>
-          <p>
-            We sent a 6-digit code to {challenge.sent_to}. It expires in 10 minutes.
-          </p>
-          <form className="auth-form" onSubmit={handleCode}>
+      <AuthSplit
+        title="Enter your code"
+        lede={<p>We sent a 6-digit code to {challenge.sent_to}. It expires in 10 minutes.</p>}
+        swap={SWAP}
+      >
+        <form className="auth-form split-form" onSubmit={handleCode}>
+          <div className="split-box">
             <div className="field">
               <label htmlFor="code">One-time code</label>
               <input
@@ -94,45 +101,49 @@ export default function Login() {
                 required
               />
             </div>
-            {error && (
-              <p className="auth-error" role="alert">
-                {error}
-              </p>
-            )}
-            <button type="submit" className="btn btn-primary" disabled={busy || code.length < 6}>
-              {busy ? "Checking…" : "Sign in"}
-            </button>
-          </form>
-          <p className="auth-switch">
-            Didn&apos;t get it?{" "}
-            <button type="button" className="auth-linkish" onClick={resend}>
-              Send another code
-            </button>
-          </p>
-          <p className="auth-cancel">
-            <button type="button" className="auth-linkish" onClick={() => setChallenge(null)}>
-              Use a different account
-            </button>
-          </p>
-        </main>
-      </div>
+          </div>
+          {error && (
+            <p className="auth-error" role="alert">
+              {error}
+            </p>
+          )}
+          <button type="submit" className="btn btn-primary" disabled={busy || code.length < 6}>
+            {busy ? "Checking…" : "Sign in"}
+          </button>
+        </form>
+        <p className="auth-switch">
+          Didn&apos;t get it?{" "}
+          <button type="button" className="auth-linkish" onClick={resend}>
+            Send another code
+          </button>
+        </p>
+        <p className="auth-cancel">
+          <button type="button" className="auth-linkish" onClick={() => setChallenge(null)}>
+            Use a different account
+          </button>
+        </p>
+      </AuthSplit>
     );
   }
 
   return (
-    <div className="auth">
-      <AuthWaves />
-
-      <main className="auth-card">
-        <h1>Welcome back</h1>
-        <p>Sign in to your business dashboard.</p>
-        {expired && (
-          <p className="auth-notice" role="status">
-            For your security, sessions end after an hour. Sign in again to carry on.
-          </p>
-        )}
-
-        <form className="auth-form" onSubmit={handleSubmit}>
+    <AuthSplit
+      title="Welcome back"
+      lede={
+        <>
+          <p>Sign in to your business dashboard.</p>
+          {expired && (
+            <p className="auth-notice" role="status">
+              For your security, sessions end after an hour. Sign in again to carry on.
+            </p>
+          )}
+        </>
+      }
+      swap={SWAP}
+    >
+      <form className="auth-form split-form" onSubmit={handleSubmit}>
+        {/* both fields in one sharp box, like Request access */}
+        <div className="split-box">
           <div className="field">
             <label htmlFor="email">Work email</label>
             <input
@@ -154,31 +165,25 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Link to="/forgot-password" className="auth-forgot">
-            Forgot password?
-          </Link>
+        </div>
+        <Link to="/forgot-password" className="auth-forgot">
+          Forgot password?
+        </Link>
 
-          {error && (
-            <p className="auth-error" role="alert">
-              {error}
-            </p>
-          )}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
 
-          <button type="submit" className="btn btn-primary" disabled={busy}>
-            {busy ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
+        <button type="submit" className="btn btn-primary" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
 
-        <p className="auth-switch">
-          New to Ardena? <Link to="/signup">Request access</Link>
-        </p>
-        {/* Replaces a floating round back button in the page corner. A word is
-            clearer than an arrow about where it goes, and it sits with the
-            other choices instead of hovering over the artwork. */}
-        <p className="auth-cancel">
-          <Link to="/">Cancel</Link>
-        </p>
-      </main>
-    </div>
+      <p className="auth-cancel">
+        <Link to="/">Cancel</Link>
+      </p>
+    </AuthSplit>
   );
 }

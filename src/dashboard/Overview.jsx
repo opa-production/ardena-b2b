@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import SimpleBars from "./charts/SimpleBars";
+import DayColumns from "./charts/DayColumns";
+import DayPartTiles from "./charts/DayPartTiles";
 import UtilisationTrend from "./charts/UtilisationTrend";
 import OnboardingChecklist from "./OnboardingChecklist";
 import EmptyState from "./EmptyState";
@@ -11,8 +13,6 @@ import "./overview.css";
 import RefreshButton from "../components/RefreshButton";
 
 const fmtKES = (n) => `KES ${Number(n).toLocaleString("en-KE")}`;
-
-const fmtCount = (n) => `${n} booking${n === 1 ? "" : "s"}`;
 
 const DAY_NAMES = {
   Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday",
@@ -29,21 +29,6 @@ const DAY_PARTS = [
 
 const busiest = (rows) =>
   rows.reduce((best, r) => (r.value > (best?.value ?? 0) ? r : best), null);
-
-const STATUS_ICON = {
-  warning: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" />
-      <path d="M12 9v4M12 17h.01" />
-    </svg>
-  ),
-  critical: (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M15 9l-6 6M9 9l6 6" />
-    </svg>
-  ),
-};
 
 export default function Overview() {
   const { pathname } = useLocation();
@@ -66,8 +51,6 @@ export default function Overview() {
   const stats = data?.stats;
   const hasFleet = (stats?.fleet_size ?? 0) > 0;
   const hasBookings = (stats?.active_bookings ?? 0) > 0 || (data?.top_vehicles?.length ?? 0) > 0;
-
-  const alerts = data?.attention ?? [];
 
   const heat = data?.booking_heatmap ?? [];
   const byDay = Object.entries(DAY_NAMES).map(([day, label]) => ({
@@ -129,21 +112,6 @@ export default function Overview() {
       </div>
       <OnboardingChecklist />
 
-      {/* ---- Document and inspection alerts ---- */}
-      {alerts.length > 0 && (
-        <ul className="ov-alerts" aria-label="Alerts">
-          {alerts.map((a) => (
-            <li className={`ov-alert ${a.kind}`} key={a.title + a.meta}>
-              <span className="ov-alert-icon">{STATUS_ICON[a.kind]}</span>
-              <p>
-                <strong>{a.title}</strong>
-                <span>{a.meta}</span>
-              </p>
-            </li>
-          ))}
-        </ul>
-      )}
-
       {/* ---- KPI row ---- */}
       <div className="stat-grid">
         {kpis.map((k) => (
@@ -191,11 +159,10 @@ export default function Overview() {
             <p>Bookings made on each day of the week, last 4 weeks</p>
           </header>
           {hasBookings && busiestDay ? (
-            <SimpleBars
-              rows={byDay}
-              format={fmtCount}
-              takeaway={`${busiestDay.label} is your busiest day.`}
-            />
+            <>
+              <p className="chart-takeaway">{busiestDay.label} is your busiest day.</p>
+              <DayColumns rows={byDay} />
+            </>
           ) : (
             <EmptyState minimal title="No booking data yet" />
           )}
@@ -207,11 +174,12 @@ export default function Overview() {
             <p>When customers make their bookings, last 4 weeks</p>
           </header>
           {hasBookings && busiestTime ? (
-            <SimpleBars
-              rows={byTime}
-              format={fmtCount}
-              takeaway={`Most bookings come in the ${busiestTime.label.toLowerCase()}.`}
-            />
+            <>
+              <p className="chart-takeaway">
+                Most bookings come in the {busiestTime.label.toLowerCase()}.
+              </p>
+              <DayPartTiles rows={byTime} />
+            </>
           ) : (
             <EmptyState minimal title="No booking data yet" />
           )}

@@ -118,6 +118,20 @@
    Only the token values change; every component reads these, so the whole
    dashboard re-skins from here. Applied via data-theme="dark" on <html>.
 ---------------------------------------------- */
+/* Dashboard light mode: a warm cream page under white cards, with hairlines
+   warmed to match. [data-theme="light"] is only ever set inside the
+   dashboard (themeStore), so the marketing and auth pages keep their own
+   ground. The edges are restated because they resolved against :root's
+   --line. */
+[data-theme="light"] {
+  --bg: #f5f3ec;
+  --surface: #edeae1;
+  --line: #e2ddd0;
+  --edge: 0 0 0 1px var(--line);
+  --edge-strong: 0 0 0 1px var(--ink-mute);
+  --edge-in: inset 0 0 0 1px var(--line);
+}
+
 [data-theme="dark"] {
   color-scheme: dark;
 

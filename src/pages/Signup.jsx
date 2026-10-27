@@ -102,44 +102,47 @@ export default function Signup() {
           </p>
 
           <form className="auth-form split-form" onSubmit={handleSubmit}>
-            <div className="auth-row">
-              <div className="field">
-                <label htmlFor="r-business">Business name</label>
-                <input id="r-business" type="text" placeholder="Acme Car Hire Ltd" autoComplete="organization" value={form.business} onChange={set("business")} required />
+            {/* every field in one sharp box, divided by hairlines */}
+            <div className="split-box">
+              <div className="auth-row">
+                <div className="field">
+                  <label htmlFor="r-business">Business name</label>
+                  <input id="r-business" type="text" placeholder="Acme Car Hire Ltd" autoComplete="organization" value={form.business} onChange={set("business")} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="r-fleet">Fleet size</label>
+                  <Dropdown
+                    id="r-fleet"
+                    value={fleetSize}
+                    onChange={setFleetSize}
+                    options={FLEET_LABELS}
+                  />
+                </div>
+              </div>
+              <div className="auth-row">
+                <div className="field">
+                  <label htmlFor="r-town">Town / county</label>
+                  <input id="r-town" type="text" placeholder="Nakuru" value={form.town} onChange={set("town")} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="r-name">Your name</label>
+                  <input id="r-name" type="text" placeholder="Wanjiku Kamau" autoComplete="name" value={form.name} onChange={set("name")} required />
+                </div>
+              </div>
+              <div className="auth-row">
+                <div className="field">
+                  <label htmlFor="r-email">Work email</label>
+                  <input id="r-email" type="email" placeholder="you@company.co.ke" autoComplete="email" value={form.email} onChange={set("email")} required />
+                </div>
+                <div className="field">
+                  <label htmlFor="r-phone">Phone (WhatsApp)</label>
+                  <input id="r-phone" type="tel" placeholder="0700 000 000" autoComplete="tel" value={form.phone} onChange={set("phone")} required />
+                </div>
               </div>
               <div className="field">
-                <label htmlFor="r-fleet">Fleet size</label>
-                <Dropdown
-                  id="r-fleet"
-                  value={fleetSize}
-                  onChange={setFleetSize}
-                  options={FLEET_LABELS}
-                />
+                <label htmlFor="r-web">Website or Instagram <span className="field-opt">optional</span></label>
+                <input id="r-web" type="text" placeholder="acmecarhire.co.ke" value={form.website} onChange={set("website")} />
               </div>
-            </div>
-            <div className="auth-row">
-              <div className="field">
-                <label htmlFor="r-town">Town / county</label>
-                <input id="r-town" type="text" placeholder="Nakuru" value={form.town} onChange={set("town")} required />
-              </div>
-              <div className="field">
-                <label htmlFor="r-name">Your name</label>
-                <input id="r-name" type="text" placeholder="Wanjiku Kamau" autoComplete="name" value={form.name} onChange={set("name")} required />
-              </div>
-            </div>
-            <div className="auth-row">
-              <div className="field">
-                <label htmlFor="r-email">Work email</label>
-                <input id="r-email" type="email" placeholder="you@company.co.ke" autoComplete="email" value={form.email} onChange={set("email")} required />
-              </div>
-              <div className="field">
-                <label htmlFor="r-phone">Phone (WhatsApp)</label>
-                <input id="r-phone" type="tel" placeholder="0700 000 000" autoComplete="tel" value={form.phone} onChange={set("phone")} required />
-              </div>
-            </div>
-            <div className="field">
-              <label htmlFor="r-web">Website or Instagram <span className="field-opt">optional</span></label>
-              <input id="r-web" type="text" placeholder="acmecarhire.co.ke" value={form.website} onChange={set("website")} />
             </div>
 
             {error && (

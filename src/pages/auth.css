@@ -257,8 +257,11 @@
    inside a white frame with a gap between them; corners stay sharp. */
 
 .split-auth {
-  --split-ground: #f6f6f2;
-  --split-dark: #0b1418;
+  /* the same cream and deep green the dashboard wears in light mode */
+  --split-ground: #f5f3ec;
+  --split-line: #ddd8ca;
+  --split-dark: #10261f;
+  --split-dark-hover: #183a2f;
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
@@ -302,47 +305,100 @@
   margin-bottom: 30px;
 }
 
-/* small capitals over flat grey wells, like the reference */
-.split-form .field label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+/* Every field in one sharp-edged box: the fields are cells divided by
+   hairlines, each with its small-caps label inside the cell above a bare
+   input. The cell being typed in warms to white and its label darkens. */
+.split-box {
+  background: #fbfaf6;
+  border: 1px solid var(--split-line);
 }
 
-.split-form .field-opt {
+.split-box .auth-row {
+  gap: 0;
+}
+
+.split-box .field {
+  gap: 4px;
+  padding: 12px 16px 11px;
+  border-bottom: 1px solid var(--split-line);
+  transition: background 0.15s var(--ease);
+}
+
+.split-box > .field:last-child {
+  border-bottom: none;
+}
+
+.split-box .auth-row .field + .field {
+  border-left: 1px solid var(--split-line);
+}
+
+.split-box .field:focus-within {
+  background: #ffffff;
+  box-shadow: inset 2px 0 0 var(--split-dark);
+}
+
+.split-box .field label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  transition: color 0.15s var(--ease);
+}
+
+.split-box .field:focus-within label {
+  color: var(--split-dark);
+}
+
+.split-box .field-opt {
   text-transform: none;
   letter-spacing: 0;
 }
 
-.split-form .field input,
-.split-form .dd-trigger {
-  background: #ebebe6;
-  border: 1px solid transparent;
+.split-box .field input,
+.split-box .dd-trigger {
+  padding: 2px 0;
+  font-size: 15px;
+  background: none;
+  border: none;
   box-shadow: none;
-  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
 }
 
-.split-form .field input:hover,
-.split-form .dd-trigger:hover {
-  border-color: #d6d6cf;
+.split-box .field input:focus,
+.split-box .dd-trigger:focus-visible,
+.split-box .dd.open .dd-trigger {
+  box-shadow: none;
 }
 
-.split-form .field input:focus,
-.split-form .dd-trigger:focus-visible,
-.split-form .dd.open .dd-trigger {
-  background: #ffffff;
-  border-color: var(--ink);
-  box-shadow: none;
+.split-box .field input::placeholder {
+  color: #a9a597;
 }
 
 .split-form .btn-primary {
+  background: var(--split-dark);
+  color: #ffffff;
   box-shadow: none;
 }
 
 .split-form .btn-primary:hover {
+  background: var(--split-dark-hover);
   transform: none;
+}
+
+/* one column on a phone: the cells stack and the side rule becomes a top one */
+@media (max-width: 540px) {
+  .split-box .auth-row .field + .field {
+    border-left: none;
+    border-top: 1px solid var(--split-line);
+  }
+
+  .split-box .auth-row .field {
+    border-bottom: none;
+  }
+
+  .split-box .auth-row {
+    border-bottom: 1px solid var(--split-line);
+  }
 }
 
 .split-form-wrap .auth-cancel {

@@ -4,6 +4,11 @@
   --sk-base: #eef0f3;
 }
 
+/* warmed to sit on the cream page */
+[data-theme="light"] {
+  --sk-base: #ebe8df;
+}
+
 [data-theme="dark"] {
   --sk-base: #232322;
 }

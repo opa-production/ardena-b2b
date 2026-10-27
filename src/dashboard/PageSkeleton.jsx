@@ -174,7 +174,7 @@ export default function PageSkeleton({ path = "" }) {
     return (
       <div aria-hidden="true">
         <StatRow />
-        <div className="chart-row">
+        <div className="chart-row ov-charts">
           {[0, 1, 2, 3].map((i) => (
             <section className="chart-card" key={i}>
               <CardHead />

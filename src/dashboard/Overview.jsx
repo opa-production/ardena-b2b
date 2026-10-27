@@ -3,12 +3,13 @@ import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
 import SimpleBars from "./charts/SimpleBars";
 import DayColumns from "./charts/DayColumns";
-import DayPartTiles from "./charts/DayPartTiles";
+import PaymentDonut from "./charts/PaymentDonut";
 import UtilisationTrend from "./charts/UtilisationTrend";
 import OnboardingChecklist from "./OnboardingChecklist";
 import EmptyState from "./EmptyState";
-import { fetchOverview } from "../lib/api";
+import { fetchOverview, fetchPaymentsSummary } from "../lib/api";
 import { toast } from "./toastStore";
+import "./payments.css";
 import "./overview.css";
 import RefreshButton from "../components/RefreshButton";
 
@@ -19,26 +20,25 @@ const DAY_NAMES = {
   Fri: "Friday", Sat: "Saturday", Sun: "Sunday",
 };
 
-// The heatmap's two-hour slots, folded into three parts of the day anyone
-// can name without reading an axis.
-const DAY_PARTS = [
-  { label: "Morning", sub: "6am to 12pm", from: 6, to: 12 },
-  { label: "Afternoon", sub: "12pm to 6pm", from: 12, to: 18 },
-  { label: "Evening", sub: "6pm to 10pm", from: 18, to: 22 },
-];
-
 const busiest = (rows) =>
   rows.reduce((best, r) => (r.value > (best?.value ?? 0) ? r : best), null);
 
 export default function Overview() {
   const { pathname } = useLocation();
   const [data, setData] = useState(null);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     try {
-      const result = await fetchOverview();
+      // Roles that can't see payments get a 403 here, so the money card just
+      // shows its empty state rather than failing the whole page.
+      const [result, sumData] = await Promise.all([
+        fetchOverview(),
+        fetchPaymentsSummary().catch(() => null),
+      ]);
       setData(result);
+      setSummary(sumData);
     } catch (err) {
       toast(err.message || "Failed to load overview", "danger");
     } finally {
@@ -57,13 +57,20 @@ export default function Overview() {
     label,
     value: heat.filter((c) => c.day === day).reduce((n, c) => n + c.count, 0),
   }));
-  const byTime = DAY_PARTS.map(({ label, sub, from, to }) => ({
-    label,
-    sub,
-    value: heat.filter((c) => c.hour >= from && c.hour < to).reduce((n, c) => n + c.count, 0),
-  }));
   const busiestDay = busiest(byDay);
-  const busiestTime = busiest(byTime);
+
+  // Payments summary is the same source the Finances donut reads. Cash and
+  // in-app collections are one "paid" slice here, the split lives on Finances.
+  const sum = summary || {};
+  const paid = (Number(sum.collected) || 0) + (Number(sum.cash_collected) || 0);
+  const owed = Number(sum.outstanding) || 0;
+  const refunded = Number(sum.refunded) || 0;
+  const billed = paid + owed + refunded;
+  const money = [
+    { label: "Paid", value: paid, color: "#0b7a37" },
+    { label: "Still owed", value: owed, color: "#d97706" },
+    { label: "Refunded", value: refunded, color: "#94a3b8" },
+  ];
 
   const earners = (data?.top_vehicles ?? []).map((v) => ({
     label: v.name,
@@ -123,8 +130,8 @@ export default function Overview() {
         ))}
       </div>
 
-      {/* ---- Charts, two by two ---- */}
-      <div className="chart-row">
+      {/* ---- Charts, two by two, sized to fit one screen ---- */}
+      <div className="chart-row ov-charts">
         <section className="chart-card">
           <header className="card-head">
             <h2>Fleet utilisation</h2>
@@ -140,14 +147,14 @@ export default function Overview() {
         <section className="chart-card">
           <header className="card-head">
             <h2>Top earning vehicles</h2>
-            <p>Money each vehicle made this month</p>
+            <p>
+              {earners.length > 0
+                ? `${earners[0].label} earned the most this month`
+                : "Money each vehicle made this month"}
+            </p>
           </header>
           {earners.length > 0 ? (
-            <SimpleBars
-              rows={earners}
-              format={fmtKES}
-              takeaway={`${earners[0].label} earned the most this month.`}
-            />
+            <SimpleBars rows={earners} format={fmtKES} />
           ) : (
             <EmptyState minimal title="No revenue yet" />
           )}
@@ -156,13 +163,14 @@ export default function Overview() {
         <section className="chart-card">
           <header className="card-head">
             <h2>Busiest days</h2>
-            <p>Bookings made on each day of the week, last 4 weeks</p>
+            <p>
+              {hasBookings && busiestDay
+                ? `${busiestDay.label} is your busiest day · last 4 weeks`
+                : "Bookings made on each day of the week, last 4 weeks"}
+            </p>
           </header>
           {hasBookings && busiestDay ? (
-            <>
-              <p className="chart-takeaway">{busiestDay.label} is your busiest day.</p>
-              <DayColumns rows={byDay} />
-            </>
+            <DayColumns rows={byDay} />
           ) : (
             <EmptyState minimal title="No booking data yet" />
           )}
@@ -170,18 +178,19 @@ export default function Overview() {
 
         <section className="chart-card">
           <header className="card-head">
-            <h2>Busiest time of day</h2>
-            <p>When customers make their bookings, last 4 weeks</p>
+            <h2>Money owed to you</h2>
+            <p>
+              {billed === 0
+                ? "Paid, still owed and refunded"
+                : owed > 0
+                  ? `${fmtKES(owed)} still to be collected`
+                  : "Everything billed has been paid"}
+            </p>
           </header>
-          {hasBookings && busiestTime ? (
-            <>
-              <p className="chart-takeaway">
-                Most bookings come in the {busiestTime.label.toLowerCase()}.
-              </p>
-              <DayPartTiles rows={byTime} />
-            </>
+          {billed > 0 ? (
+            <PaymentDonut segments={money} />
           ) : (
-            <EmptyState minimal title="No booking data yet" />
+            <EmptyState minimal title="Nothing billed yet" />
           )}
         </section>
       </div>

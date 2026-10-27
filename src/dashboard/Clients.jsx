@@ -10,10 +10,12 @@ import { VERIF_CHIP } from "./clientsFormat";
 import "./fleet.css";
 import "./bookings.css";
 import RefreshButton from "../components/RefreshButton";
+import { useRowLink, RowGo } from "./RowLink";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 export default function Clients() {
+  const rowLink = useRowLink();
   const { pathname } = useLocation();
   const [clients, setClients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +150,7 @@ export default function Clients() {
               {filtered.map((c) => {
                 const verified = c.verification === "Verified";
                 return (
-                  <tr key={c.id}>
+                  <tr key={c.id} {...rowLink(`/dashboard/clients/${c.id}`)}>
                     <td>
                       <div className="client-name">
                         <span className="client-no">{clientNo.get(c.id)}</span>
@@ -166,12 +168,6 @@ export default function Clients() {
                     </td>
                     <td className="num">{c.bookings_count || 0}</td>
                     <td className="actions-cell">
-                      <Link
-                        className="icon-btn"
-                        to={`/dashboard/clients/${c.id}`}
-                      >
-                        View
-                      </Link>
                       <button
                         type="button"
                         className="icon-btn danger icon-only"
@@ -184,6 +180,7 @@ export default function Clients() {
                           <path d="M10 11v6M14 11v6" />
                         </svg>
                       </button>
+                      <RowGo to={`/dashboard/clients/${c.id}`} label={`Open ${c.name}`} />
                     </td>
                   </tr>
                 );

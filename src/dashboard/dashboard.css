@@ -855,3 +855,121 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ---- Flat dashboard: no cards ----
+   Content sits straight on the page ground. Sections are divided by a single
+   hairline above each one instead of a box around it, and the numbers along
+   the top of a page are a row of figures split by thin vertical rules rather
+   than a row of tiles. Modals keep their card: they float over the page.
+
+   Written as one override block (`.dash .dash-content` beats the page
+   stylesheets' own two-class rules) so the card styles beneath stay
+   untouched and this is easy to reverse. */
+
+.dash .dash-content .panel-card,
+.dash .dash-content .chart-card {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 22px 0 6px;
+  border-top: 1px solid var(--line);
+}
+
+/* the header strip on details pages: a line beneath it, not a box */
+.dash .dash-content .head-card {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* a section that directly follows the header strip doesn't need a second line */
+.dash .dash-content .head-card + .panel-card,
+.dash .dash-content .head-card + * > .panel-card:first-child {
+  border-top: none;
+}
+
+/* the figures row */
+.dash .dash-content .stat-grid {
+  gap: 0;
+  padding: 4px 0 18px;
+}
+
+.dash .dash-content .stat-card {
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 6px 24px;
+  border-left: 1px solid var(--line);
+  transform: none;
+}
+
+.dash .dash-content .stat-card:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+.dash .dash-content .stat-card:hover {
+  transform: none;
+}
+
+.dash .dash-content .stat-card.is-clickable:hover .stat-value {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+/* ---- Pressable rows (see RowLink.jsx) ----
+   The whole row opens the record. On hover the row warms and a chevron
+   slides in at its end, so it reads as something to press. */
+
+.data-table tr.row-link {
+  cursor: pointer;
+}
+
+.data-table tr.row-link:hover {
+  background: var(--surface);
+}
+
+.row-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-left: 6px;
+  vertical-align: middle;
+  border-radius: 50%;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.data-table tr.row-link:hover .row-go,
+.row-go:focus-visible {
+  opacity: 1;
+  transform: none;
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.row-go:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--ink-mute), 0 0 0 3px var(--brand-soft);
+}
+
+/* touch screens have no hover: keep the chevron showing */
+@media (hover: none) {
+  .row-go {
+    opacity: 0.55;
+    transform: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .dash .dash-content .stat-card {
+    padding: 6px 14px;
+  }
+}

@@ -11,6 +11,7 @@ import "./fleet.css";
 import PageLoader from "../components/PageLoader";
 import RefreshButton from "../components/RefreshButton";
 import FilterDropdown from "../components/FilterDropdown";
+import { useRowLink, RowGo } from "./RowLink";
 
 const STATUSES = ["All", "Available", "On booking", "In maintenance"];
 
@@ -23,6 +24,7 @@ const CHIP_CLASS = {
 const fmtRate = (r) => r.toLocaleString("en-KE");
 
 export default function Fleet() {
+  const rowLink = useRowLink();
   const vehicles = useSyncExternalStore(subscribe, getVehicles);
   const loaded = useSyncExternalStore(subscribe, isFleetLoaded);
   const [query, setQuery] = useState("");
@@ -163,7 +165,7 @@ export default function Fleet() {
           <tbody>
             {filtered.map((v) => {
               return (
-                <tr key={v.plate}>
+                <tr key={v.plate} {...rowLink(`/dashboard/fleet/${encodeURIComponent(v.plate)}`)}>
                   <td>
                     <div className="row-name">
                       <span className="row-no">{vehicleNo.get(v.plate)}</span>
@@ -209,12 +211,6 @@ export default function Fleet() {
                       </span>
                     ) : (
                       <>
-                        <Link
-                          className="icon-btn"
-                          to={`/dashboard/fleet/${encodeURIComponent(v.plate)}`}
-                        >
-                          View
-                        </Link>
                         {/* Shown but dead until the consumer app launches.
                             Hiding it entirely would mean a business never
                             learns the marketplace is coming. Disabled is the
@@ -250,6 +246,7 @@ export default function Fleet() {
                             <path d="M10 11v6M14 11v6" />
                           </svg>
                         </button>
+                        <RowGo to={`/dashboard/fleet/${encodeURIComponent(v.plate)}`} label={`Open ${v.name}`} />
                       </>
                     )}
                   </td>

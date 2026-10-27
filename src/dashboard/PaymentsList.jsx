@@ -9,6 +9,7 @@ import "./fleet.css";
 import "./bookings.css";
 import "./payments.css";
 import FilterDropdown from "../components/FilterDropdown";
+import { useRowLink, RowGo } from "./RowLink";
 
 const TYPE_FILTERS = ["All", "payment", "refund"];
 const STATUS_FILTERS = ["All", "completed", "pending", "failed"];
@@ -20,6 +21,7 @@ const STATUS_CHIP = {
 };
 
 export default function PaymentsList() {
+  const rowLink = useRowLink();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -136,7 +138,7 @@ export default function PaymentsList() {
             </thead>
             <tbody>
               {filtered.map((p) => (
-                <tr key={p.id}>
+                <tr key={p.id} {...(p.booking_ref ? rowLink(`/dashboard/bookings/${encodeURIComponent(p.booking_ref)}`) : {})}>
                   <td>
                     <p className="strong">{p.reference}</p>
                     <p className="cell-sub">{p.paystack_reference || "-"}</p>
@@ -181,12 +183,9 @@ export default function PaymentsList() {
                         Request payment
                       </Link>
                     )}
-                    <Link
-                      className="icon-btn"
-                      to={`/dashboard/bookings/${encodeURIComponent(p.booking_ref)}`}
-                    >
-                      View
-                    </Link>
+                    {p.booking_ref && (
+                      <RowGo to={`/dashboard/bookings/${encodeURIComponent(p.booking_ref)}`} label={`Open booking ${p.booking_ref}`} />
+                    )}
                   </td>
                 </tr>
               ))}

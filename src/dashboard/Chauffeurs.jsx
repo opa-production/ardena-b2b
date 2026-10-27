@@ -17,6 +17,7 @@ import usePageTitle from "../hooks/usePageTitle";
 import "./fleet.css";
 import "./bookings.css";
 import "./chauffeurs.css";
+import { useRowLink, RowGo } from "./RowLink";
 
 function initials(name) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map((s) => s[0].toUpperCase()).join("");
@@ -35,6 +36,7 @@ function Stars({ value }) {
 }
 
 export default function Chauffeurs() {
+  const rowLink = useRowLink();
   usePageTitle("Chauffeurs");
   const { pathname } = useLocation();
   const chauffeurs = useSyncExternalStore(subscribe, getChauffeurs);
@@ -152,7 +154,7 @@ export default function Chauffeurs() {
               {filtered.map((c) => {
                 const lic = licenceState(c.licence_expiry);
                 return (
-                  <tr key={c.id}>
+                  <tr key={c.id} {...rowLink(`/dashboard/chauffeurs/${c.id}`)}>
                     <td>
                       <div className="chauffeur-cell">
                         <span className="chauffeur-avatar sm">{initials(c.name)}</span>
@@ -179,7 +181,6 @@ export default function Chauffeurs() {
                     <td className="num">{c.trips}</td>
                     <td><Stars value={c.rating} /></td>
                     <td className="actions-cell">
-                      <Link className="icon-btn" to={`/dashboard/chauffeurs/${c.id}`}>View</Link>
                       <button
                         type="button"
                         className="icon-btn danger icon-only"
@@ -192,6 +193,7 @@ export default function Chauffeurs() {
                           <path d="M10 11v6M14 11v6" />
                         </svg>
                       </button>
+                      <RowGo to={`/dashboard/chauffeurs/${c.id}`} label={`Open ${c.name}`} />
                     </td>
                   </tr>
                 );

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { fmtRange, bookingTotal, shortLength, STATUS_CHIP } from "./bookingsStore";
 import useRole from "../hooks/useRole";
 import { REVIEW_REQUESTS } from "../lib/features";
 import RequestReviewDialog from "./RequestReviewDialog";
+import { useRowLink, RowGo } from "./RowLink";
 
 const fmtAmount = (n) => n.toLocaleString("en-KE");
 
@@ -20,6 +20,7 @@ const StarIcon = () => (
    All bookings page (everything, filtered). `numberOf` maps a ref to its
    running number so a row keeps the same number on both pages. */
 export default function BookingsTable({ rows, numberOf }) {
+  const rowLink = useRowLink();
   const { can } = useRole();
   // Bookings already asked this session. The backend is the real guard against
   // asking twice (3 days apart, 3 at most); this is so the button doesn't
@@ -52,7 +53,7 @@ export default function BookingsTable({ rows, numberOf }) {
               ? `${b.customer} has been asked to rate this rental`
               : `Ask ${b.customer} to rate this rental`;
             return (
-              <tr key={b.ref}>
+              <tr key={b.ref} {...rowLink(`/dashboard/bookings/${encodeURIComponent(b.ref)}`)}>
                 <td>
                   <div className="row-name">
                     <span className="row-no">{numberOf?.get(b.ref)}</span>
@@ -87,9 +88,7 @@ export default function BookingsTable({ rows, numberOf }) {
                       <StarIcon />
                     </button>
                   )}
-                  <Link className="icon-btn" to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}>
-                    View
-                  </Link>
+                  <RowGo to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`} label={`Open ${b.customer}'s booking`} />
                 </td>
               </tr>
             );

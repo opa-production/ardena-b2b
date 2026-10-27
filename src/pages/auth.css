@@ -330,8 +330,8 @@
 }
 
 /* the show/hide toggle needs room at the end of the bare password input */
-.split-box .password-field input {
-  padding-right: 40px;
+.split-box .field .password-field input {
+  padding-right: 46px;
 }
 
 /* Forgot password sits under the box rather than tucked up against a field */
@@ -345,44 +345,29 @@
   text-align: center;
 }
 
-/* Every field in one sharp-edged box: the fields are cells divided by
-   hairlines, each with its small-caps label inside the cell above a bare
-   input. The cell being typed in warms to white and its label darkens. */
+/* Real inputs: each field is its own white, sharp-cornered box with a
+   visible border, the small-caps label above it. Hover darkens the border,
+   focus inks it green with a soft ring, so they read as places to type. */
 .split-box {
-  background: #fbfaf6;
-  border: 1px solid var(--split-line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .split-box .auth-row {
-  gap: 0;
+  gap: 14px;
 }
 
 .split-box .field {
-  gap: 4px;
-  padding: 12px 16px 11px;
-  border-bottom: 1px solid var(--split-line);
-  transition: background 0.15s var(--ease);
-}
-
-.split-box > .field:last-child {
-  border-bottom: none;
-}
-
-.split-box .auth-row .field + .field {
-  border-left: 1px solid var(--split-line);
-}
-
-.split-box .field:focus-within {
-  background: #ffffff;
-  box-shadow: inset 2px 0 0 var(--split-dark);
+  gap: 7px;
 }
 
 .split-box .field label {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ink-mute);
+  color: var(--ink-soft);
   transition: color 0.15s var(--ease);
 }
 
@@ -397,17 +382,28 @@
 
 .split-box .field input,
 .split-box .dd-trigger {
-  padding: 2px 0;
+  height: 48px;
+  padding: 0 14px;
   font-size: 15px;
-  background: none;
-  border: none;
-  box-shadow: none;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid #cfc9b8;
+  border-radius: 0;
+  box-shadow: inset 0 1px 2px rgba(16, 38, 31, 0.06);
+  transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+}
+
+.split-box .field input:hover,
+.split-box .dd-trigger:hover {
+  border-color: #9d9682;
 }
 
 .split-box .field input:focus,
 .split-box .dd-trigger:focus-visible,
 .split-box .dd.open .dd-trigger {
-  box-shadow: none;
+  border-color: var(--split-dark);
+  box-shadow: 0 0 0 3px rgba(16, 38, 31, 0.12);
+  outline: none;
 }
 
 .split-box .field input::placeholder {
@@ -423,22 +419,6 @@
 .split-form .btn-primary:hover {
   background: var(--split-dark-hover);
   transform: none;
-}
-
-/* one column on a phone: the cells stack and the side rule becomes a top one */
-@media (max-width: 540px) {
-  .split-box .auth-row .field + .field {
-    border-left: none;
-    border-top: 1px solid var(--split-line);
-  }
-
-  .split-box .auth-row .field {
-    border-bottom: none;
-  }
-
-  .split-box .auth-row {
-    border-bottom: 1px solid var(--split-line);
-  }
 }
 
 .split-form-wrap .auth-cancel {

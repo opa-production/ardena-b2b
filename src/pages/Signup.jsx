@@ -99,7 +99,7 @@ export default function Signup() {
       swap={SWAP_SIGN_IN}
     >
       <form className="auth-form split-form" onSubmit={handleSubmit}>
-        {/* every field in one sharp box, divided by hairlines */}
+        {/* the fields, each a bordered white input */}
         <div className="split-box">
           <div className="auth-row">
             <div className="field">

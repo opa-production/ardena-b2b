@@ -142,7 +142,7 @@ export default function Login() {
       swap={SWAP}
     >
       <form className="auth-form split-form" onSubmit={handleSubmit}>
-        {/* both fields in one sharp box, like Request access */}
+        {/* the fields, styled like Request access */}
         <div className="split-box">
           <div className="field">
             <label htmlFor="email">Work email</label>

@@ -132,6 +132,12 @@
   list-style: none;
 }
 
+/* The notifications feed, without a card: the toolbar and rows sit on the
+   page ground, the rows still divided by the table's hairlines. */
+.notif-feed .data-table tbody tr:hover {
+  background: var(--panel);
+}
+
 /* table layout for the notifications feed */
 tr.unread-row {
   background: rgba(0, 127, 250, 0.04);

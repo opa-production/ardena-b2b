@@ -406,7 +406,7 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--panel);
+  background: var(--bg); /* the page's own ground: cream in light mode */
   box-shadow: 0 1px 0 var(--line);
 }
 

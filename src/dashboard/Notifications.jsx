@@ -152,7 +152,8 @@ export default function Notifications() {
 
   return (
     <>
-      <section className="panel-card">
+      {/* No card: the feed sits straight on the page ground. */}
+      <section className="notif-feed">
         <div className="fleet-toolbar">
           <FilterDropdown
             id="notif-filter"

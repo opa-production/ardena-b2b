@@ -45,9 +45,10 @@ export const NAV_SECTIONS = [
       },
       { to: "/dashboard/clients", key: "clients", name: "Clients" },
       { to: "/dashboard/chauffeurs", key: "chauffeurs", name: "Chauffeurs" },
-      // `soon` renders a muted tag in the sidebar, the page is a coming-soon
-      // state until VEHICLE_TRACKING flips (see lib/features.js).
-      { to: "/dashboard/tracking", key: "tracking", name: "Tracking", soon: !VEHICLE_TRACKING },
+      // Hidden until it is built: the row appears when VEHICLE_TRACKING flips
+      // (see lib/features.js). The route stays, so a bookmark still lands on
+      // its coming-soon page.
+      ...(VEHICLE_TRACKING ? [{ to: "/dashboard/tracking", key: "tracking", name: "Tracking" }] : []),
       // Not app-only: renters of any dashboard booking can be asked for a
       // review by SMS, so every workspace has reviews to read.
       { to: "/dashboard/reviews", key: "reviews", name: "Reviews" },
@@ -98,15 +99,10 @@ export const NAV_SECTIONS = [
       // Last in the section, under the Account group: reaching clients is the
       // thing you do once the money side is in order, and it is the only item
       // here that sends something outward.
-      {
-        to: "/dashboard/marketing",
-        key: "marketing",
-        name: "Marketing",
-        requires: "sendMarketing",
-        // same muted tag Tracking wears, the page is a coming-soon state
-        // until MARKETING flips (see lib/features.js)
-        soon: !MARKETING,
-      },
+      // Hidden until it is built, like Tracking: shown when MARKETING flips.
+      ...(MARKETING
+        ? [{ to: "/dashboard/marketing", key: "marketing", name: "Marketing", requires: "sendMarketing" }]
+        : []),
     ],
   },
   {

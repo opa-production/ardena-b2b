@@ -35,6 +35,7 @@
   --nav-active-hover: rgba(255, 255, 255, 0.13);
   --nav-badge: #fbbf24;
   --danger: #f05252; /* the deeper red drops to about 3:1 on the nav ground */
+  --surface: rgba(255, 255, 255, 0.08); /* the ringed top-bar buttons' ground */
   color: var(--ink-soft);
 }
 
@@ -282,13 +283,20 @@
   min-width: 0;
 }
 
+.tenant-chip {
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line), 0 1px 2px rgba(10, 13, 18, 0.06);
+}
+
 .tenant-chip:hover {
-  background: var(--nav-hover);
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--ink-mute), 0 4px 10px -4px rgba(10, 13, 18, 0.2);
 }
 
 .tenant-chip.open,
 .tenant-chip:active {
-  background: var(--nav-active);
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--ink);
 }
 
 .tenant-caret {
@@ -415,6 +423,7 @@
     --ink-inv-hover: inherit;
     --on-ink: inherit;
     --danger: inherit;
+    --surface: inherit;
     --pop-shadow: 0 16px 40px -12px rgba(10, 13, 18, 0.28);
     --nav-hover: color-mix(in srgb, var(--ink) 6%, transparent);
     --nav-active: color-mix(in srgb, var(--ink) 10%, transparent);
@@ -434,7 +443,8 @@
   gap: 8px;
 }
 
-/* round icon buttons: notifications and the theme switch */
+/* round icon buttons: notifications and the theme switch, each in its own
+   ringed circle on a tinted ground so they read as buttons at a glance */
 .topbar-icon {
   position: relative;
   display: inline-flex;
@@ -443,8 +453,11 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  color: var(--ink-soft);
-  transition: color 0.15s var(--ease), background 0.15s var(--ease), transform 0.15s var(--ease);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line), 0 1px 2px rgba(10, 13, 18, 0.06);
+  transition: color 0.15s var(--ease), background 0.15s var(--ease), box-shadow 0.15s var(--ease),
+    transform 0.15s var(--ease);
 }
 
 .topbar-icon svg {
@@ -454,7 +467,8 @@
 
 .topbar-icon:hover {
   color: var(--ink);
-  background: var(--nav-hover);
+  background: var(--panel);
+  box-shadow: inset 0 0 0 1px var(--ink-mute), 0 4px 10px -4px rgba(10, 13, 18, 0.2);
 }
 
 .topbar-icon:active {
@@ -462,8 +476,9 @@
 }
 
 .topbar-icon.active {
-  color: var(--ink);
-  background: var(--nav-active);
+  color: var(--on-ink);
+  background: var(--ink-inv);
+  box-shadow: none;
 }
 
 /* unread count: an amber pill on the bell's shoulder */

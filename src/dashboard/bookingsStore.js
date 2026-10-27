@@ -200,7 +200,21 @@ export function shortLength(b) {
   return `${days} day${days > 1 ? "s" : ""}`;
 }
 
-// The price differs from length × rate: an agreed price (or no hourly rate).
+/* ---- the price breakdown ----
+   total = rental + charges − discount. The rental is length × the booking's
+   rate (staff can change the rate per booking) or an agreed rental price;
+   charges are lines staff name themselves ("Chauffeur", "Fuel", anything);
+   the discount carries its own reason. The server sends all of it. */
+
+// The rental part of the price. Older rows without `rental_amount`: the total.
+export function rentalAmount(b) {
+  if (b?.rental_amount != null) return Number(b.rental_amount);
+  return bookingTotal(b);
+}
+
+export const bookingCharges = (b) => (Array.isArray(b?.charges) ? b.charges : []);
+
+// The rental differs from length × rate: an agreed rental price (or no hourly rate).
 export function isAgreedPrice(b) {
   if (b?.total == null) return false;
   const byRate = isHourly(b)
@@ -208,8 +222,32 @@ export function isAgreedPrice(b) {
       ? b.hourly_rate * b.hours
       : null
     : rentalDays(b.pickup, b.dropoff) * (Number(b.rate) || 0);
-  return byRate === null || Number(b.total) !== byRate;
+  return byRate === null || rentalAmount(b) !== byRate;
 }
+
+/* Every line of the price, in order, for details, receipt and agreement:
+   [{ label, amount }], the discount as a negative amount. */
+export function priceLines(b) {
+  let rentalLabel;
+  if (isAgreedPrice(b)) rentalLabel = "Rental, agreed price";
+  else if (isHourly(b)) rentalLabel = `${b.hours} h × KES ${fmtKes(b.hourly_rate)}/h`;
+  else {
+    const days = rentalDays(b.pickup, b.dropoff);
+    rentalLabel = `${days} day${days > 1 ? "s" : ""} × KES ${fmtKes(b.rate)}/day`;
+  }
+  const lines = [{ label: rentalLabel, amount: rentalAmount(b) }];
+  bookingCharges(b).forEach((c) => lines.push({ label: c.label, amount: Number(c.amount) }));
+  if (Number(b?.discount) > 0) {
+    lines.push({
+      label: b.discount_reason ? `Discount (${b.discount_reason})` : "Discount",
+      amount: -Number(b.discount),
+    });
+  }
+  return lines;
+}
+
+// "−KES 1,000" / "KES 2,500"
+export const fmtLineAmount = (n) => `${n < 0 ? "−" : ""}KES ${fmtKes(Math.abs(n))}`;
 
 // "KES 900/h" or "KES 9,500/day". An hourly booking on a car with no hourly
 // rate was priced by hand, so it has no rate to show.

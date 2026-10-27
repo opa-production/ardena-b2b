@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { getBusiness } from "./businessStore";
 import { getSession } from "../lib/authStore";
-import { fmtDate, fmtLength, rateLabel, bookingTotal, isHourly, isAgreedPrice } from "./bookingsStore";
+import { fmtDate, fmtLength, rateLabel, bookingTotal, isHourly, isAgreedPrice, priceLines, fmtLineAmount } from "./bookingsStore";
 import { RETURN_HOUR } from "./policyStore";
 import "./receipt.css";
 
@@ -129,13 +129,22 @@ export default function BookingReceipt({ booking: b, depositAmount, penalty = 0,
 
       <table className="rc-lines">
         <tbody>
-          <tr>
-            <td>
-              Rental, {fmtLength(b)}
-              {isAgreedPrice(b) ? ", agreed price" : ` × ${rateLabel(b)}`}
-            </td>
-            <td>KES {fmtAmount(rental)}</td>
-          </tr>
+          {priceLines(b).map((line, i) => (
+            <tr key={i}>
+              <td>
+                {i === 0
+                  ? `Rental, ${fmtLength(b)}${isAgreedPrice(b) ? ", agreed price" : ` × ${rateLabel(b)}`}`
+                  : line.label}
+              </td>
+              <td>{fmtLineAmount(line.amount)}</td>
+            </tr>
+          ))}
+          {priceLines(b).length > 1 && (
+            <tr className="rc-subtotal">
+              <td>Total</td>
+              <td>KES {fmtAmount(rental)}</td>
+            </tr>
+          )}
           {penalty > 0 && (
             <tr>
               <td>Late return penalty</td>

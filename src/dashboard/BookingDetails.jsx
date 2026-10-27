@@ -26,6 +26,8 @@ import {
   rentalDays,
   todayISO,
   bookingTotal,
+  fmtLineAmount,
+  priceLines,
   isHourly,
   rateLabel,
   replaceBooking,
@@ -1112,6 +1114,17 @@ export default function BookingDetails() {
               <p>Collected from the customer</p>
             </header>
             <p className="util-hero">KES {fmtAmount(total)}</p>
+            {/* Only worth a list when there's more than the rental. */}
+            {priceLines(b).length > 1 && (
+              <dl className="price-lines">
+                {priceLines(b).map((line, i) => (
+                  <div key={i} className={line.amount < 0 ? "is-discount" : ""}>
+                    <dt>{line.label}</dt>
+                    <dd>{fmtLineAmount(line.amount)}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             <div className="pay-row">
               <span>Status</span>
               <span className={`chip ${PAY_CHIP[b.payment]}`}>{b.payment}</span>

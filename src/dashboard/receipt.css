@@ -133,6 +133,10 @@
     white-space: nowrap;
   }
 
+  .rc-lines .rc-subtotal td {
+    font-weight: 700;
+  }
+
   .rc-lines tfoot td {
     border-top: 1.5pt solid #000;
     border-bottom: 1.5pt solid #000;

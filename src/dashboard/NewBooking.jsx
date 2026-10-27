@@ -22,6 +22,7 @@ import { compressImage, stagedToFiles } from "./handoverPhotosStore";
 import DateRangePicker from "./DateRangePicker";
 import DatePicker from "./DatePicker";
 import { UnitToggle, HoursStepper } from "./BillingControls";
+import PriceBuilder, { emptyPrice, priceOf } from "./PriceBuilder";
 import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -45,7 +46,8 @@ export default function NewBooking() {
   const [unit, setUnit] = useState("day");
   const [pickupTime, setPickupTime] = useState("08:00");
   const [hours, setHours] = useState("8");
-  const [agreed, setAgreed] = useState(""); // agreed price, overrides the rate
+  // rate (editable per booking), agreed rental, charges, discount
+  const [price, setPrice] = useState(emptyPrice);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [datesOpen, setDatesOpen] = useState(false);
@@ -93,6 +95,16 @@ export default function NewBooking() {
   );
   const vehicle = bookable.find((v) => v.plate === plate);
   const blockedMap = useSyncExternalStore(subscribeAvail, getBlocked);
+
+  // A new car brings its own rates; charges and the discount stay.
+  useEffect(() => {
+    if (!vehicle) return;
+    setPrice((p) => ({
+      ...p,
+      rate: String(vehicle.rate ?? ""),
+      hourlyRate: vehicle.hourly_rate != null ? String(vehicle.hourly_rate) : "",
+    }));
+  }, [vehicle?.plate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The chosen vehicle's existing bookings, so their dates can't be picked at
   // all rather than being refused when the form is submitted. `taken.plate`
@@ -168,28 +180,20 @@ export default function NewBooking() {
   // Booked hours on the picked day, so they can be worked around.
   const partHours = byHour && pickup ? taken.part.get(pickup) : null;
 
-  // The car has no hourly rate: the price has to be typed in.
-  const needsPrice = Boolean(byHour && vehicle && !vehicle.hourly_rate);
-  const agreedAmount = Number(agreed) > 0 ? Math.round(Number(agreed)) : null;
-  let rateTotal = null;
-  if (vehicle && datesValid) {
-    if (!byHour) rateTotal = days * vehicle.rate;
-    else if (vehicle.hourly_rate) rateTotal = vehicle.hourly_rate * hrs;
-  }
-  const total = agreedAmount ?? rateTotal;
+  const pr = priceOf(price, { byHour, units: datesValid ? (byHour ? hrs : days) : 0 });
+  const total = vehicle ? pr.total : null;
   let totalLine;
   if (!vehicle || !datesValid) {
     totalLine = byHour
       ? "Pick a vehicle, a date and the hours to see the total"
       : "Pick a vehicle and dates to see the total";
-  } else if (agreedAmount) {
-    totalLine = "Agreed price";
-  } else if (!byHour) {
-    totalLine = `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`;
+  } else if (total === null) {
+    totalLine = byHour ? "Enter the hourly rate or a price" : "Enter the day rate or a price";
   } else {
-    totalLine = needsPrice
-      ? "Enter the price for this booking"
-      : `${hrs} h × KES ${fmtAmount(vehicle.hourly_rate)}/h`;
+    const parts = [price.agreedOn ? "Agreed rental" : byHour ? `${hrs} h × KES ${fmtAmount(pr.hourlyRate)}` : `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(pr.rate)}`];
+    if (pr.chargesSum) parts.push(`+ KES ${fmtAmount(pr.chargesSum)} charges`);
+    if (pr.discount) parts.push(`− KES ${fmtAmount(pr.discount)} discount`);
+    totalLine = parts.join(" ");
   }
 
   async function handleSubmit(e) {
@@ -200,8 +204,8 @@ export default function NewBooking() {
       else setError("Pick the pickup date and time.");
       return;
     }
-    if (needsPrice && !agreedAmount) {
-      setError("This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.");
+    if (pr.error) {
+      setError(pr.error);
       return;
     }
     if (submitting) return;
@@ -230,7 +234,14 @@ export default function NewBooking() {
         ...(byHour
           ? { billing_unit: "hour", pickup, pickup_time: pickupTime, hours: hrs }
           : { pickup, dropoff }),
-        ...(agreedAmount ? { amount: agreedAmount } : {}),
+        // only what differs from the car, and only what's there
+        ...(price.agreedOn
+          ? { amount: pr.agreed }
+          : byHour
+            ? pr.hourlyRate !== (vehicle.hourly_rate ?? null) ? { hourly_rate: pr.hourlyRate } : {}
+            : pr.rate !== vehicle.rate ? { rate: pr.rate } : {}),
+        ...(pr.charges.length ? { charges: pr.charges } : {}),
+        ...(pr.discount ? { discount: pr.discount, discount_reason: pr.reason || null } : {}),
         location: f.get("location").trim(),
         destination,
         notes: notes || null,
@@ -439,33 +450,25 @@ export default function NewBooking() {
 
         <aside className="details-side">
           <section className="panel-card summary-card">
+            {vehicle ? (
+              <PriceBuilder
+                idPrefix="b-price"
+                value={price}
+                onChange={(next) => {
+                  setPrice(next);
+                  setError("");
+                }}
+                byHour={byHour}
+                units={datesValid ? (byHour ? hrs : days) : 0}
+                carRate={vehicle.rate}
+                carHourlyRate={vehicle.hourly_rate ?? null}
+              />
+            ) : (
+              <p className="side-hint">Pick a vehicle to set the price.</p>
+            )}
             <div className="booking-total" aria-live="polite">
               <p>{totalLine}</p>
               <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>
-            </div>
-
-            {/* A package deal or a discount, or the whole price when the car
-                has no hourly rate. Sent as `amount`, which wins over the rate. */}
-            <div className="field agreed-field">
-              <label htmlFor="b-amount">{needsPrice ? "Price (KES)" : "Agreed price (KES) · optional"}</label>
-              <input
-                id="b-amount"
-                type="number"
-                min="1"
-                step="1"
-                value={agreed}
-                onChange={(e) => {
-                  setAgreed(e.target.value);
-                  setError("");
-                }}
-                required={needsPrice}
-                placeholder={rateTotal !== null ? `${fmtAmount(rateTotal)} at the car's rate` : "e.g. 9500"}
-              />
-              {needsPrice && (
-                <p className="field-note">
-                  This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.
-                </p>
-              )}
             </div>
 
             {error && <p className="form-error">{error}</p>}

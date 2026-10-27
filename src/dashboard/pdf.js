@@ -1,6 +1,6 @@
 // PDF documents (rental agreement, vehicle statements) built with jsPDF.
 // jsPDF is imported lazily so it only loads when a download is clicked.
-import { rentalDays, fmtDate, bookingTotal, fmtLength, isHourly } from "./bookingsStore.js";
+import { rentalDays, fmtDate, bookingTotal, fmtLength, isHourly, priceLines, fmtLineAmount } from "./bookingsStore.js";
 import { getBusiness } from "./businessStore.js";
 
 const INK = "#0a0d12";
@@ -108,7 +108,13 @@ export async function downloadAgreement(b, policy) {
   } else {
     y = row(doc, "Day rate", kes(b.rate), y);
   }
-  y = row(doc, "Rental total", kes(total), y);
+  // the breakdown: rental, each charge by its own name, the discount.
+  // jsPDF's built-in font has no U+2212 minus, hence the plain hyphen.
+  const lines = priceLines(b);
+  if (lines.length > 1) {
+    lines.forEach((line) => (y = row(doc, line.label, fmtLineAmount(line.amount).replace("−", "-"), y)));
+  }
+  y = row(doc, lines.length > 1 ? "Total" : "Rental total", kes(total), y);
   y = row(doc, "Security deposit (refundable)", kes(policy.deposit), y);
   y = row(doc, "Late return penalty", `${kes(policy.lateFeePerHour)} per hour after ${dueBack}`, y);
   y += 4;

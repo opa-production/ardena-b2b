@@ -3,17 +3,20 @@ import { fetchBookedRanges, updateBooking } from "../lib/api";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
 import { subscribe as subscribeAvail, getBlocked } from "./availabilityStore";
 import {
+  bookingCharges,
   bookingTotal,
   fmtWeekday,
   hourlyEnd,
   isAgreedPrice,
   isHourly,
+  rentalAmount,
   rentalDays,
   todayISO,
 } from "./bookingsStore";
 import { takenDays } from "./bookedDays";
 import DatePicker from "./DatePicker";
 import { UnitToggle, HoursStepper } from "./BillingControls";
+import PriceBuilder, { priceFromBooking, priceOf } from "./PriceBuilder";
 import Dropdown from "../components/Dropdown";
 
 const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
@@ -34,10 +37,11 @@ const addDay = (iso) => {
      renter owns the rest.
    - Completed / Cancelled never get here (the button is hidden).
 
-   A change of length, unit or car re-prices the booking from the car's rates
-   on the server, unless an agreed price goes with it. The preview below is
-   worked out from the fleet's rates; the saved total comes back from the
-   server and is what the page then shows. */
+   A change of length, unit, car or rate re-prices the rental on the server,
+   unless an agreed rental price goes with it; charges and the discount stay
+   until they're changed. The preview below works the same rule out from the
+   form; the saved total comes back from the server and is what the page then
+   shows. */
 export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
   const vehicles = useSyncExternalStore(subscribeFleet, getVehicles);
   const blockedMap = useSyncExternalStore(subscribeAvail, getBlocked);
@@ -53,8 +57,8 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
   const [dropoff, setDropoff] = useState(isHourly(b) ? "" : b.dropoff || "");
   const [pickupTime, setPickupTime] = useState(b.pickup_time || "08:00");
   const [hours, setHours] = useState(String(b.hours || 8));
-  const [agreed, setAgreed] = useState("");
-  const [backToRate, setBackToRate] = useState(false); // send amount: null
+  const agreedAtStart = isAgreedPrice(b);
+  const [price, setPrice] = useState(() => priceFromBooking(b, agreedAtStart));
   const [deposit, setDeposit] = useState(b.deposit_amount != null ? String(b.deposit_amount) : "");
   const [location, setLocation] = useState(b.location || "");
   const [notes, setNotes] = useState(b.notes || "");
@@ -112,14 +116,9 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
   // the server re-prices on any of these
   const reprices = !samePlate || unitChanged || pickupChanged || dropoffChanged || timeChanged || hoursChanged;
 
-  const agreedAmount = Number(agreed) > 0 ? Math.round(Number(agreed)) : null;
-  let rateTotal = null;
-  if (termValid) {
-    if (!byHour && dayRate != null) rateTotal = rentalDays(pickup, dropoff) * dayRate;
-    else if (byHour && hourRate) rateTotal = hourRate * hrs;
-  }
-  const needsPrice = byHour && reprices && !hourRate && !agreedAmount;
-  const newTotal = agreedAmount ?? (reprices || backToRate ? rateTotal : bookingTotal(b));
+  const units = termValid ? (byHour ? hrs : rentalDays(pickup, dropoff)) : 0;
+  const pr = priceOf(price, { byHour, units });
+  const newTotal = pr.total;
   const paid = b.payment === "Paid" ? Number(b.payment_amount) || 0 : 0;
 
   function switchUnit(next) {
@@ -157,8 +156,28 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
         patch.dropoff = dropoff;
       }
     }
-    if (agreedAmount) patch.amount = agreedAmount;
-    else if (backToRate) patch.amount = null;
+    // The price. A new car brings its own rates on the server, so a rate is
+    // sent when it differs from that car's (or from this booking's, same car).
+    const baseRate = samePlate ? b.rate : vehicle?.rate;
+    const baseHourly = samePlate ? b.hourly_rate : vehicle?.hourly_rate;
+    if (pr.rate != null && pr.rate !== (baseRate ?? null)) patch.rate = pr.rate;
+    if (pr.hourlyRate !== (baseHourly ?? null) && (pr.hourlyRate == null || pr.hourlyRate > 0)) {
+      patch.hourly_rate = pr.hourlyRate;
+    }
+    if (price.agreedOn) {
+      // re-sent whenever the server would otherwise re-price it away
+      if (pr.agreed !== rentalAmount(b) || !agreedAtStart || reprices || "rate" in patch || "hourly_rate" in patch) {
+        patch.amount = pr.agreed;
+      }
+    } else if (agreedAtStart) {
+      patch.amount = null;
+    }
+    const sameCharges =
+      JSON.stringify(pr.charges) ===
+      JSON.stringify(bookingCharges(b).map((c) => ({ label: c.label, amount: Number(c.amount) })));
+    if (!sameCharges) patch.charges = pr.charges;
+    if (pr.discount !== (Number(b.discount) || 0)) patch.discount = pr.discount;
+    if (pr.discount && pr.reason !== (b.discount_reason || "")) patch.discount_reason = pr.reason || null;
     if (depositEditable && deposit !== (b.deposit_amount != null ? String(b.deposit_amount) : "")) {
       patch.deposit_amount = deposit === "" ? null : Number(deposit);
     }
@@ -176,8 +195,8 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
       );
       return;
     }
-    if (needsPrice) {
-      setError("This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.");
+    if (!fromApp && pr.error) {
+      setError(pr.error);
       return;
     }
     const patch = buildPatch();
@@ -235,6 +254,15 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
                     onChange={(p) => {
                       setPlate(p);
                       setError("");
+                      // the server prices a new car at its own rates
+                      const car = vehicles.find((v) => v.plate === p);
+                      if (car) {
+                        setPrice((cur) => ({
+                          ...cur,
+                          rate: String(car.rate ?? ""),
+                          hourlyRate: car.hourly_rate != null ? String(car.hourly_rate) : "",
+                        }));
+                      }
                     }}
                     disabled={active}
                     options={
@@ -311,31 +339,19 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
                   </>
                 )}
 
-                <div className="field">
-                  <label htmlFor="eb-amount">{needsPrice || (byHour && !hourRate) ? "Price (KES)" : "Agreed price (KES) · optional"}</label>
-                  <input
-                    id="eb-amount"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={agreed}
-                    onChange={(e) => {
-                      setAgreed(e.target.value);
-                      if (e.target.value) setBackToRate(false);
+                <div className="field form-full">
+                  <PriceBuilder
+                    idPrefix="eb-price"
+                    value={price}
+                    onChange={(next) => {
+                      setPrice(next);
+                      setError("");
                     }}
-                    placeholder={rateTotal !== null ? `${fmtAmount(rateTotal)} at the car's rate` : "e.g. 9500"}
+                    byHour={byHour}
+                    units={units}
+                    carRate={dayRate}
+                    carHourlyRate={hourRate ?? null}
                   />
-                  {byHour && !hourRate ? (
-                    <p className="field-note">This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.</p>
-                  ) : (
-                    isAgreedPrice(b) &&
-                    !agreedAmount && (
-                      <label className="field-note check-line">
-                        <input type="checkbox" checked={backToRate} onChange={(e) => setBackToRate(e.target.checked)} />{" "}
-                        Drop the agreed price and use the car&apos;s rate
-                      </label>
-                    )
-                  )}
                 </div>
                 <div className="field">
                   <label htmlFor="eb-deposit">Security deposit (KES)</label>
@@ -378,7 +394,7 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
                   "Enter the price to see the new total"
                 ) : (
                   <>
-                    {reprices || agreedAmount || backToRate ? "New total" : "Total"}{" "}
+                    {newTotal !== bookingTotal(b) ? "New total" : "Total"}{" "}
                     <strong>KES {fmtAmount(newTotal)}</strong>
                     {newTotal !== bookingTotal(b) && <> · was KES {fmtAmount(bookingTotal(b))}</>}
                   </>

@@ -260,71 +260,85 @@
   opacity: 0.6;
 }
 
-/* ---- Hours: a - 8 h + stepper, then quick-pick chips ---- */
+/* ---- Hours: one bar, the stepper on the left, presets on the right ----
+   ( - )   8    ( + )  |  4h  8h  12h
+          hours
+   Round ink-line buttons either side of a big number; the presets are a
+   small segmented group whose chosen one is inked like the unit switch. */
 
 .hours-picker {
   display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  align-items: stretch;
+  background: var(--bg);
+  box-shadow: var(--edge-in);
+  width: min(100%, 420px);
+  transition: box-shadow 0.15s var(--ease);
+}
+
+.hours-picker:focus-within {
+  box-shadow: inset 0 0 0 1px var(--ink-mute);
 }
 
 .hours-stepper {
-  display: inline-flex;
+  flex: 1;
+  display: flex;
   align-items: center;
-  background: var(--bg);
-  box-shadow: var(--edge-in);
-}
-
-.hours-stepper:focus-within {
-  box-shadow: var(--edge-in), 0 0 0 3px var(--brand-soft);
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
 }
 
 .hours-stepper button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 46px;
-  color: var(--ink-soft);
-  transition: color 0.15s var(--ease), background 0.15s var(--ease);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--panel);
+  box-shadow: 0 0 0 1px var(--line), 0 2px 6px -3px rgba(10, 13, 18, 0.25);
+  transition: transform 0.15s var(--ease), box-shadow 0.15s var(--ease), opacity 0.15s var(--ease);
 }
 
 .hours-stepper button svg {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
 }
 
 .hours-stepper button:hover:not(:disabled) {
-  color: var(--ink);
-  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--ink-mute), 0 4px 10px -4px rgba(10, 13, 18, 0.3);
+}
+
+.hours-stepper button:active:not(:disabled) {
+  transform: scale(0.9);
 }
 
 .hours-stepper button:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .hours-value {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 3px;
-  min-width: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
   cursor: text;
 }
 
-/* beats `.field input`: the number sits bare between the - and + */
+/* beats `.field input`: the number sits bare, centred over its unit */
 .field .hours-value input {
   width: 3ch;
   padding: 0;
   background: none;
   box-shadow: none;
-  text-align: right;
+  text-align: center;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
   appearance: textfield;
@@ -341,36 +355,57 @@
 }
 
 .hours-value span {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-mute);
 }
 
 .hours-chips {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  box-shadow: inset 1px 0 0 var(--line);
 }
 
 .hours-chips button {
-  padding: 7px 13px;
-  border-radius: 999px;
+  min-width: 42px;
+  padding: 8px 10px;
   font-size: 12.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--ink-soft);
-  box-shadow: var(--edge-in);
-  transition: color 0.15s var(--ease), background 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  transition: color 0.15s var(--ease), background 0.15s var(--ease);
 }
 
 .hours-chips button:hover {
   color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--ink-mute);
+  background: var(--surface);
 }
 
-.hours-chips button.active {
-  color: var(--brand);
-  background: var(--brand-soft);
-  box-shadow: inset 0 0 0 1px var(--brand);
+.hours-chips button.active,
+.hours-chips button.active:hover {
+  color: var(--on-ink);
+  background: var(--ink-inv);
+}
+
+/* narrow screens: presets drop to their own row under the stepper */
+@media (max-width: 480px) {
+  .hours-picker {
+    flex-direction: column;
+  }
+
+  .hours-chips {
+    justify-content: center;
+    padding: 8px 10px;
+    box-shadow: inset 0 1px 0 var(--line);
+  }
+
+  .hours-chips button {
+    flex: 1;
+  }
 }
 
 /* ---- New booking: the summary card ----
@@ -1303,4 +1338,117 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+}
+
+/* ---- Price block (PriceBuilder): rate, agreed rental, charges, discount ---- */
+
+.price-builder {
+  display: grid;
+  gap: 14px;
+}
+
+.price-rate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.price-rate-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.price-times {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.price-switch {
+  justify-self: start;
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.price-charges {
+  display: grid;
+  gap: 8px;
+}
+
+.price-charge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.price-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.price-add span {
+  margin-right: 4px;
+}
+
+.price-add button {
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--edge);
+  cursor: pointer;
+}
+
+.price-add button:hover:not(:disabled) {
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px var(--brand);
+}
+
+.price-discount {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 10px;
+}
+
+/* the breakdown on the booking's payment card */
+.price-lines {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 12px;
+  font-size: 13.5px;
+}
+
+.price-lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.price-lines dt {
+  color: var(--ink-soft);
+}
+
+.price-lines dd {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.price-lines .is-discount dd {
+  color: var(--ok);
+}
+
+@media (max-width: 480px) {
+  .price-charge {
+    grid-template-columns: minmax(0, 1fr) 92px auto;
+  }
+  .price-discount {
+    grid-template-columns: 1fr;
+  }
 }

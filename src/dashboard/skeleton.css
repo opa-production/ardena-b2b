@@ -1,34 +1,31 @@
-/* ---- Loading skeletons: shimmer blocks inside real card chrome ---- */
+/* ---- Loading skeletons: soft blocks with a gentle fade ---- */
+
+:root {
+  --sk-base: #eef0f3;
+}
+
+[data-theme="dark"] {
+  --sk-base: #232322;
+}
 
 .sk {
   display: block;
-  position: relative;
-  overflow: hidden;
-  background: var(--surface);
+  background: var(--sk-base);
+  animation: sk-fade 1.8s ease-in-out infinite;
 }
 
-.sk::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.65),
-    transparent
-  );
-  animation: sk-shimmer 1.0s ease-in-out infinite;
-}
-
-@keyframes sk-shimmer {
+@keyframes sk-fade {
+  0%,
   100% {
-    transform: translateX(100%);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sk::after {
+  .sk {
     animation: none;
   }
 }

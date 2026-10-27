@@ -7,8 +7,11 @@ import {
 import {
   rentalDays,
   fmtDate,
+  fmtWeekday,
+  hourlyEnd,
   todayISO,
 } from "./bookingsStore";
+import { takenDays, rangeIsFree } from "./bookedDays";
 import { getPolicy } from "./policyStore";
 import {
   subscribe as subscribeAvail,
@@ -17,6 +20,7 @@ import {
 import { createBooking, fetchBookedRanges, updateBooking, uploadHandoverPhotos } from "../lib/api";
 import { compressImage, stagedToFiles } from "./handoverPhotosStore";
 import DateRangePicker from "./DateRangePicker";
+import DatePicker from "./DatePicker";
 import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -27,9 +31,8 @@ const fmtAmount = (n) => n.toLocaleString("en-KE");
 
 const FUEL_LEVELS = ["Full", "3/4", "1/2", "1/4", "Reserve"];
 
-// local-date ISO; toISOString() would shift a day in UTC+3
-const isoOf = (d) =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+// the usual chauffeured hires
+const QUICK_HOURS = [4, 8, 12];
 
 export default function NewBooking() {
   const navigate = useNavigate();
@@ -37,6 +40,12 @@ export default function NewBooking() {
   const [plate, setPlate] = useState("");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
+  // By the day (pickup → return date) or by the hour (a date, a start time
+  // and a number of hours, for chauffeured and short hires).
+  const [unit, setUnit] = useState("day");
+  const [pickupTime, setPickupTime] = useState("08:00");
+  const [hours, setHours] = useState("8");
+  const [agreed, setAgreed] = useState(""); // agreed price, overrides the rate
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [datesOpen, setDatesOpen] = useState(false);
@@ -89,52 +98,54 @@ export default function NewBooking() {
   // all rather than being refused when the form is submitted. `taken.plate`
   // says which vehicle the ranges belong to: until it matches the selection
   // the calendar stays shut, so nobody picks from the previous car's dates.
-  const [taken, setTaken] = useState({ plate: "", ranges: [] });
+  const [booked, setBooked] = useState({ plate: "", ranges: [] });
   const [recheck, setRecheck] = useState(0);
   useEffect(() => {
     if (!plate) return undefined;
     let alive = true;
     fetchBookedRanges(plate)
-      .then((ranges) => alive && setTaken({ plate, ranges }))
+      .then((ranges) => alive && setBooked({ plate, ranges }))
       // Couldn't ask: leave the dates open, the server still refuses a clash.
-      .catch(() => alive && setTaken({ plate, ranges: [] }));
+      .catch(() => alive && setBooked({ plate, ranges: [] }));
     return () => {
       alive = false;
     };
   }, [plate, recheck]);
-  const checking = Boolean(plate) && taken.plate !== plate;
+  const checking = Boolean(plate) && booked.plate !== plate;
 
-  // every day the chosen vehicle can't be booked: days inside an existing
-  // booking, plus days blocked on the availability calendar
-  const bookedDays = useMemo(() => {
-    const days = new Set(blockedMap[plate] || []);
-    if (taken.plate === plate) {
-      for (const r of taken.ranges) {
-        const cur = new Date(`${r.start}T00:00:00`);
-        const stop = new Date(`${r.end}T00:00:00`);
-        while (cur <= stop) {
-          days.add(isoOf(cur));
-          cur.setDate(cur.getDate() + 1);
-        }
-      }
-    }
-    return days;
-  }, [plate, blockedMap, taken]);
+  // The days the chosen vehicle can't be booked (see bookedDays.js). A daily
+  // booking needs a day with nothing on it; an hourly one only needs it not
+  // to be held whole, and goes around the hours already booked.
+  const taken = useMemo(
+    () => takenDays(booked.plate === plate ? booked.ranges : [], blockedMap[plate] || []),
+    [plate, blockedMap, booked]
+  );
+  const dayTaken = (iso) => taken.full.has(iso) || taken.part.has(iso);
 
-  // switching vehicles can invalidate an already-picked range
+  // switching vehicles can invalidate an already-picked date
   useEffect(() => {
-    if (!pickup || !dropoff) return;
-    const cur = new Date(`${pickup}T00:00:00`);
-    const stop = new Date(`${dropoff}T00:00:00`);
-    while (cur <= stop) {
-      if (bookedDays.has(isoOf(cur))) {
-        setPickup("");
-        setDropoff("");
-        return;
-      }
-      cur.setDate(cur.getDate() + 1);
+    if (unit === "hour") {
+      if (pickup && taken.full.has(pickup)) setPickup("");
+      return;
     }
-  }, [bookedDays]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (pickup && dropoff && !rangeIsFree(taken, pickup, dropoff)) {
+      setPickup("");
+      setDropoff("");
+    }
+  }, [taken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function switchUnit(next) {
+    if (next === unit) return;
+    setUnit(next);
+    setError("");
+    // The pickup day carries over when it still works for the new unit.
+    if (next === "day") {
+      setDropoff("");
+      if (pickup && dayTaken(pickup)) setPickup("");
+    } else if (pickup && taken.full.has(pickup)) {
+      setPickup("");
+    }
+  }
 
   // close the calendar on outside click
   useEffect(() => {
@@ -146,15 +157,51 @@ export default function NewBooking() {
     return () => document.removeEventListener("mousedown", onDown);
   }, [datesOpen]);
 
-  const datesValid =
-    pickup && dropoff && Date.parse(dropoff) > Date.parse(pickup);
-  const days = datesValid ? rentalDays(pickup, dropoff) : 0;
-  const total = vehicle && datesValid ? days * vehicle.rate : null;
+  const byHour = unit === "hour";
+  const hrs = Number(hours);
+  const hoursValid = Number.isInteger(hrs) && hrs >= 1 && hrs <= 72;
+  const datesValid = byHour
+    ? Boolean(pickup && /^\d{2}:\d{2}$/.test(pickupTime) && hoursValid)
+    : Boolean(pickup && dropoff && Date.parse(dropoff) > Date.parse(pickup));
+  const days = datesValid && !byHour ? rentalDays(pickup, dropoff) : 0;
+  const end = datesValid && byHour ? hourlyEnd(pickup, pickupTime, hrs) : null;
+  // Booked hours on the picked day, so they can be worked around.
+  const partHours = byHour && pickup ? taken.part.get(pickup) : null;
+
+  // The car has no hourly rate: the price has to be typed in.
+  const needsPrice = Boolean(byHour && vehicle && !vehicle.hourly_rate);
+  const agreedAmount = Number(agreed) > 0 ? Math.round(Number(agreed)) : null;
+  let rateTotal = null;
+  if (vehicle && datesValid) {
+    if (!byHour) rateTotal = days * vehicle.rate;
+    else if (vehicle.hourly_rate) rateTotal = vehicle.hourly_rate * hrs;
+  }
+  const total = agreedAmount ?? rateTotal;
+  let totalLine;
+  if (!vehicle || !datesValid) {
+    totalLine = byHour
+      ? "Pick a vehicle, a date and the hours to see the total"
+      : "Pick a vehicle and dates to see the total";
+  } else if (agreedAmount) {
+    totalLine = "Agreed price";
+  } else if (!byHour) {
+    totalLine = `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`;
+  } else {
+    totalLine = needsPrice
+      ? "Enter the price for this booking"
+      : `${hrs} h × KES ${fmtAmount(vehicle.hourly_rate)}/h`;
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (!datesValid) {
-      setError("Pick the pickup and return dates.");
+      if (!byHour) setError("Pick the pickup and return dates.");
+      else if (!hoursValid) setError("Hours must be a whole number from 1 to 72. Longer than that, book by the day.");
+      else setError("Pick the pickup date and time.");
+      return;
+    }
+    if (needsPrice && !agreedAmount) {
+      setError("This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.");
       return;
     }
     if (submitting) return;
@@ -180,8 +227,10 @@ export default function NewBooking() {
         ...(client ? { client_id: client.id } : {}),
         id_number: idNumber,
         plate: vehicle.plate,
-        pickup,
-        dropoff,
+        ...(byHour
+          ? { billing_unit: "hour", pickup, pickup_time: pickupTime, hours: hrs }
+          : { pickup, dropoff }),
+        ...(agreedAmount ? { amount: agreedAmount } : {}),
         location: f.get("location").trim(),
         destination,
         notes: notes || null,
@@ -267,10 +316,95 @@ export default function NewBooking() {
               placeholder="Choose a vehicle"
               options={bookable.map((v) => ({
                 value: v.plate,
-                label: `${v.name} · ${v.plate}, KES ${fmtAmount(v.rate)}/day`,
+                label: `${v.name} · ${v.plate}, KES ${fmtAmount(v.rate)}/day${
+                  v.hourly_rate ? ` · KES ${fmtAmount(v.hourly_rate)}/h` : ""
+                }`,
               }))}
             />
           </div>
+          <div className="field form-full">
+            <label id="b-unit-label">Charged</label>
+            <div className="seg unit-seg" role="group" aria-labelledby="b-unit-label">
+              <button type="button" className={byHour ? "" : "active"} aria-pressed={!byHour} onClick={() => switchUnit("day")}>
+                By the day
+              </button>
+              <button type="button" className={byHour ? "active" : ""} aria-pressed={byHour} onClick={() => switchUnit("hour")}>
+                By the hour
+              </button>
+            </div>
+          </div>
+          {byHour ? (
+            <>
+              <div className="field">
+                <label htmlFor="b-date">Pickup date</label>
+                <DatePicker
+                  id="b-date"
+                  value={pickup}
+                  onChange={(iso) => {
+                    setPickup(iso);
+                    setError("");
+                  }}
+                  minDate={todayISO()}
+                  isDisabled={(iso) => taken.full.has(iso)}
+                  disabled={checking}
+                  placeholder={checking ? "Checking this vehicle's dates…" : "Pickup date"}
+                />
+                {partHours && <p className="field-note">Booked {partHours.join(", ")} that day.</p>}
+              </div>
+              <div className="field">
+                <label htmlFor="b-time">Pickup time</label>
+                <input
+                  id="b-time"
+                  type="time"
+                  value={pickupTime}
+                  onChange={(e) => {
+                    setPickupTime(e.target.value);
+                    setError("");
+                  }}
+                  required
+                />
+              </div>
+              <div className="field form-full">
+                <label htmlFor="b-hours">Hours</label>
+                <div className="hours-row">
+                  <input
+                    id="b-hours"
+                    type="number"
+                    min="1"
+                    max="72"
+                    step="1"
+                    value={hours}
+                    onChange={(e) => {
+                      setHours(e.target.value);
+                      setError("");
+                    }}
+                    required
+                  />
+                  <div className="seg" role="group" aria-label="Quick picks">
+                    {QUICK_HOURS.map((h) => (
+                      <button
+                        type="button"
+                        key={h}
+                        className={hrs === h ? "active" : ""}
+                        aria-pressed={hrs === h}
+                        onClick={() => {
+                          setHours(String(h));
+                          setError("");
+                        }}
+                      >
+                        {h} h
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <p className="field-note">
+                  {end
+                    ? `Returns ${end.time}, ${fmtWeekday(end.date)}`
+                    : "1 to 72 hours. Longer than that, book by the day."}
+                </p>
+              </div>
+            </>
+          ) : (
           <div className="field form-full drp-field" ref={datesRef}>
             <label htmlFor="b-dates">Dates</label>
             <button
@@ -300,7 +434,7 @@ export default function NewBooking() {
                   start={pickup || null}
                   end={dropoff || null}
                   minDate={todayISO()}
-                  isDisabled={(iso) => bookedDays.has(iso)}
+                  isDisabled={dayTaken}
                   onChange={({ start, end }) => {
                     setPickup(start || "");
                     setDropoff(end || "");
@@ -311,6 +445,7 @@ export default function NewBooking() {
               </div>
             )}
           </div>
+          )}
           <div className="field">
             <label htmlFor="b-location">Pickup location</label>
             <input id="b-location" name="location" type="text" placeholder="Westlands office" required />
@@ -336,12 +471,32 @@ export default function NewBooking() {
         <aside className="details-side">
           <section className="panel-card">
             <div className="booking-total" aria-live="polite">
-              <p>
-                {vehicle && datesValid
-                  ? `${days} day${days > 1 ? "s" : ""} × KES ${fmtAmount(vehicle.rate)}/day`
-                  : "Pick a vehicle and dates to see the total"}
-              </p>
+              <p>{totalLine}</p>
               <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>
+            </div>
+
+            {/* A package deal or a discount, or the whole price when the car
+                has no hourly rate. Sent as `amount`, which wins over the rate. */}
+            <div className="field agreed-field">
+              <label htmlFor="b-amount">{needsPrice ? "Price (KES)" : "Agreed price (KES) · optional"}</label>
+              <input
+                id="b-amount"
+                type="number"
+                min="1"
+                step="1"
+                value={agreed}
+                onChange={(e) => {
+                  setAgreed(e.target.value);
+                  setError("");
+                }}
+                required={needsPrice}
+                placeholder={rateTotal !== null ? `${fmtAmount(rateTotal)} at the car's rate` : "e.g. 9500"}
+              />
+              {needsPrice && (
+                <p className="field-note">
+                  This car has no hourly rate. Enter the price, or add an hourly rate under Fleet.
+                </p>
+              )}
             </div>
 
             {error && <p className="form-error">{error}</p>}

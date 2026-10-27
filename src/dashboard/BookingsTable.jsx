@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { fmtRange, rentalDays, STATUS_CHIP } from "./bookingsStore";
+import { fmtRange, bookingTotal, shortLength, STATUS_CHIP } from "./bookingsStore";
 import useRole from "../hooks/useRole";
 import { REVIEW_REQUESTS } from "../lib/features";
 import RequestReviewDialog from "./RequestReviewDialog";
@@ -48,7 +48,6 @@ export default function BookingsTable({ rows, numberOf }) {
         </thead>
         <tbody>
           {rows.map((b) => {
-            const days = rentalDays(b.pickup, b.dropoff);
             const askLabel = asked.has(b.ref)
               ? `${b.customer} has been asked to rate this rental`
               : `Ask ${b.customer} to rate this rental`;
@@ -66,11 +65,9 @@ export default function BookingsTable({ rows, numberOf }) {
                 </td>
                 <td>
                   <p>{fmtRange(b.pickup, b.dropoff)}</p>
-                  <p className="cell-sub">
-                    {days} day{days > 1 ? "s" : ""}
-                  </p>
+                  <p className="cell-sub">{shortLength(b)}</p>
                 </td>
-                <td className="num rate-col">{fmtAmount(days * b.rate)}</td>
+                <td className="num rate-col">{fmtAmount(bookingTotal(b))}</td>
                 <td>
                   <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
                 </td>

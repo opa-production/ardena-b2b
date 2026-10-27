@@ -1,6 +1,6 @@
 // PDF documents (rental agreement, vehicle statements) built with jsPDF.
 // jsPDF is imported lazily so it only loads when a download is clicked.
-import { rentalDays, fmtDate } from "./bookingsStore.js";
+import { rentalDays, fmtDate, bookingTotal, fmtLength, isHourly } from "./bookingsStore.js";
 import { getBusiness } from "./businessStore.js";
 
 const INK = "#0a0d12";
@@ -74,8 +74,11 @@ function row(doc, label, value, y, x = 16, w = 178) {
 export async function downloadAgreement(b, policy) {
   const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
-  const days = rentalDays(b.pickup, b.dropoff);
-  const total = days * b.rate;
+  const hourly = isHourly(b);
+  const total = bookingTotal(b);
+  // when the car is due back: an hourly hire at its own end time, a daily
+  // one at the policy return hour
+  const dueBack = hourly ? b.dropoff_time : "10:00 AM";
 
   const biz = getBusiness();
   const bizName = biz.name || "Car Hire";
@@ -94,22 +97,26 @@ export async function downloadAgreement(b, policy) {
 
   y = sectionTitle(doc, "Vehicle & term", y);
   y = row(doc, "Vehicle", `${b.vehicle} (${b.plate})`, y);
-  y = row(doc, "Pickup", `${fmtDate(b.pickup)} · ${b.location}`, y);
-  y = row(doc, "Return", `${fmtDate(b.dropoff)} by 10:00 AM`, y);
-  y = row(doc, "Duration", `${days} day${days > 1 ? "s" : ""}`, y);
+  y = row(doc, "Pickup", `${fmtDate(b.pickup)}${hourly ? ` ${b.pickup_time}` : ""} · ${b.location}`, y);
+  y = row(doc, "Return", `${fmtDate(b.dropoff || b.pickup)} by ${dueBack}`, y);
+  y = row(doc, "Duration", fmtLength(b), y);
   y += 4;
 
   y = sectionTitle(doc, "Charges", y);
-  y = row(doc, "Day rate", kes(b.rate), y);
+  if (hourly) {
+    if (b.hourly_rate) y = row(doc, "Hour rate", `${kes(b.hourly_rate)}/h`, y);
+  } else {
+    y = row(doc, "Day rate", kes(b.rate), y);
+  }
   y = row(doc, "Rental total", kes(total), y);
   y = row(doc, "Security deposit (refundable)", kes(policy.deposit), y);
-  y = row(doc, "Late return penalty", `${kes(policy.lateFeePerHour)} per hour after 10:00 AM`, y);
+  y = row(doc, "Late return penalty", `${kes(policy.lateFeePerHour)} per hour after ${dueBack}`, y);
   y += 4;
 
   y = sectionTitle(doc, "Terms", y);
   const terms = [
     `1. The renter receives the vehicle in the condition recorded at handover and returns it in the same condition, fuel level included.`,
-    `2. The vehicle is due back by 10:00 AM on the return date. Every started hour past that time is charged at ${kes(policy.lateFeePerHour)}.`,
+    `2. The vehicle is due back by ${dueBack} on the return date. Every started hour past that time is charged at ${kes(policy.lateFeePerHour)}.`,
     `3. A refundable security deposit of ${kes(policy.deposit)} is held for the rental and returned after check-in, less any penalties or damage costs.`,
     `4. The renter's identity was verified through the Ardena platform before handover.`,
     `5. The vehicle may only be driven by the named renter within Kenya unless agreed in writing.`,
@@ -168,8 +175,9 @@ export async function downloadVehicleStatement(vehicle, bookings, monthLabel, mo
     y += 8;
   } else {
     inMonth.forEach((b) => {
-      const days = rentalDays(b.pickup, b.dropoff);
-      const amount = days * b.rate;
+      // an hourly hire counts the days it touches toward utilisation
+      const days = isHourly(b) ? Math.max(1, Math.ceil(b.hours / 24)) : rentalDays(b.pickup, b.dropoff);
+      const amount = bookingTotal(b);
       totalRevenue += amount;
       totalDays += days;
       doc.setFont("helvetica", "normal");
@@ -177,7 +185,7 @@ export async function downloadVehicleStatement(vehicle, bookings, monthLabel, mo
       doc.setTextColor(SOFT);
       doc.text(`${b.ref} · ${b.customer}`, 16, y);
       doc.setTextColor(MUTE);
-      doc.text(`${fmtDate(b.pickup)} to ${fmtDate(b.dropoff)} (${days}d)`, 96, y);
+      doc.text(`${fmtDate(b.pickup)} to ${fmtDate(b.dropoff)} (${isHourly(b) ? `${b.hours}h` : `${days}d`})`, 96, y);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(INK);
       doc.text(kes(amount), 194, y, { align: "right" });

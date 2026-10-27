@@ -27,6 +27,8 @@ export default function DatePicker({
   onChange,
   minDate,
   placeholder = "Pick a date",
+  isDisabled = () => false,
+  disabled: triggerDisabled = false,
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -61,6 +63,7 @@ export default function DatePicker({
         id={id}
         className={"drp-trigger" + (open ? " open" : "")}
         onClick={() => setOpen((o) => !o)}
+        disabled={triggerDisabled}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="17" rx="2" />
@@ -98,7 +101,7 @@ export default function DatePicker({
                 {Array.from({ length: days }, (_, i) => {
                   const d = i + 1;
                   const iso = toISO(view.y, view.m, d);
-                  const disabled = minDate && iso < minDate;
+                  const disabled = (minDate && iso < minDate) || isDisabled(iso);
                   return (
                     <button
                       key={iso}

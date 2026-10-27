@@ -19,7 +19,18 @@ import {
   getPolicy,
   RETURN_HOUR,
 } from "./policyStore";
-import { STATUS_CHIP, PAY_CHIP, fmtDate, rentalDays, todayISO } from "./bookingsStore";
+import {
+  STATUS_CHIP,
+  PAY_CHIP,
+  fmtDate,
+  rentalDays,
+  todayISO,
+  bookingTotal,
+  isHourly,
+  rateLabel,
+  replaceBooking,
+} from "./bookingsStore";
+import EditBookingDialog from "./EditBookingDialog";
 import { downloadAgreement } from "./pdf";
 import { toast } from "./toastStore";
 import { getSeed } from "./recordSeeds";
@@ -122,7 +133,7 @@ export default function BookingDetails() {
   const [cancelling, setCancelling] = useState(false);
   const [busy, setBusy] = useState(false);
   const [retDate, setRetDate] = useState(null);
-  const [retTime, setRetTime] = useState("10:00");
+  const [retTime, setRetTime] = useState(null); // null: when it was due back
   const [outFuel, setOutFuel] = useState("Full");
   const [inFuel, setInFuel] = useState("Full");
   const [payModal, setPayModal] = useState(false);
@@ -134,6 +145,8 @@ export default function BookingDetails() {
   const [cashNote, setCashNote] = useState("");
   const [cashBusy, setCashBusy] = useState(false);
   const [payProvider, setPayProvider] = useState("mpesa");
+  const [payAmount, setPayAmount] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
   const [payBusy, setPayBusy] = useState(false);
   const [payWaiting, setPayWaiting] = useState(false);
   const [outPending, setOutPending] = useState([]); // photos staged before check-out
@@ -153,6 +166,9 @@ export default function BookingDetails() {
   const pollRef = useRef(null);
   const pollDeadlineRef = useRef(null);
   const pollPsRef = useRef(null); // Paystack reference being polled
+  // A balance prompt on a booking that's already Paid: the status stays Paid
+  // throughout, so the poll watches amount_due reach 0 instead.
+  const pollBalanceRef = useRef(false);
 
   const chauffeurs = useSyncExternalStore(subscribeChauffeurs, getChauffeurs);
   const decodedRef = decodeURIComponent(ref);
@@ -195,9 +211,16 @@ export default function BookingDetails() {
     setPayWaiting(false);
   }
 
-  function startPolling(paystackRef) {
+  function startPolling(paystackRef, balance = false) {
     pollPsRef.current = paystackRef;
+    pollBalanceRef.current = balance;
     setPayWaiting(true);
+    const paidToast = (updated) =>
+      pollBalanceRef.current
+        ? Number(updated.amount_due) > 0
+          ? `Part payment received. KES ${fmtAmount(updated.amount_due)} still due.`
+          : "Balance received. The booking is paid in full."
+        : PAID_TOAST(updated);
     // Paystack docs: wait at least 10 s before first check, then poll every 10 s.
     // 3-minute hard cap (18 ticks), Paystack STK pushes expire after ~2 min on-device.
     pollDeadlineRef.current = Date.now() + 3 * 60 * 1000;
@@ -217,7 +240,7 @@ export default function BookingDetails() {
             if (res.charge_status === "success") {
               const updated = await startIfDue(await fetchBooking(decodedRef));
               setB(updated);
-              toast(PAID_TOAST(updated));
+              toast(paidToast(updated));
             } else {
               // Refresh booking so the chip reflects the current DB state
               const updated = await fetchBooking(decodedRef);
@@ -234,13 +257,22 @@ export default function BookingDetails() {
         if (res.charge_status === "success") {
           const updated = await startIfDue(await fetchBooking(decodedRef));
           setB(updated);
+          toast(paidToast(updated));
           stopPolling();
-          toast(PAID_TOAST(updated));
         } else if (res.charge_status === "failed" || res.charge_status === "timeout") {
           const updated = await fetchBooking(decodedRef);
           setB(updated);
           stopPolling();
           toast(res.message || "Payment was declined or timed out. You can resend the request.", "danger");
+        } else if (pollBalanceRef.current) {
+          // The booking stays Paid while a balance prompt waits, so its
+          // amount_due is the thing that says the money has landed.
+          const updated = await fetchBooking(decodedRef);
+          setB(updated);
+          if (Number(updated.amount_due) === 0) {
+            toast(paidToast(updated));
+            stopPolling();
+          }
         }
         // "pending" or "error", silent, will retry next tick
       } catch {
@@ -273,13 +305,30 @@ export default function BookingDetails() {
     );
   }
 
+  const hourly = isHourly(b);
   const days = rentalDays(b.pickup, b.dropoff);
-  const total = days * b.rate;
+  // the stored price: rate × length, or the agreed price
+  const total = bookingTotal(b);
+  // What's still owed. Older rows without it: the whole price until paid.
+  const amountDue =
+    b.amount_due != null
+      ? Number(b.amount_due)
+      : b.payment === "Paid" || b.payment === "Refunded"
+        ? 0
+        : total;
+  // when the car is due back: an hourly hire at its own end time
+  const dueBy = hourly ? b.dropoff_time : `${RETURN_HOUR}:00 AM`;
   // Money in (or returned): cash counts, see the cash action on the payment card.
   const settled = b.payment === "Paid" || b.payment === "Refunded";
   const next = nextStep(b);
   const canCancel = CANCELLABLE.includes(b.status);
-  const canPrompt = b.payment !== "Paid" && b.payment !== "Refunded" && b.status !== "Cancelled" && b.status !== "Completed";
+  // Owed and not cancelled. A paid booking made longer can be asked for its
+  // balance; it stays Paid while the prompt waits.
+  const canPrompt = amountDue > 0 && b.status !== "Cancelled";
+  const balanceDue = b.payment === "Paid" && amountDue > 0;
+  const canEdit = b.status !== "Completed" && b.status !== "Cancelled";
+  const returnTime = retTime ?? (hourly && b.dropoff_time ? b.dropoff_time : "10:00");
+  const timeOptions = TIMES.includes(returnTime) ? TIMES : [...TIMES, returnTime].sort();
   const ho = b.handover || { out: null, inn: null };
   const hoOut = ho.out || null;
   const hoIn = ho.inn || null;
@@ -435,7 +484,7 @@ export default function BookingDetails() {
         fuel: inFuel,
         notes: f.get("notes").trim() || null,
         return_date: retDate || b.dropoff,
-        return_time: retTime,
+        return_time: returnTime,
         ...(needsCode ? { return_code: String(f.get("return_code") || "").trim() } : {}),
       });
       let finalBooking = updated;
@@ -483,6 +532,7 @@ export default function BookingDetails() {
   function openPayModal() {
     setPayPhone(b.phone || "");
     setPayProvider("mpesa");
+    setPayAmount(String(amountDue));
     setPayModal(true);
   }
 
@@ -516,15 +566,22 @@ export default function BookingDetails() {
   async function handleStkPush(e) {
     e.preventDefault();
     if (payBusy) return;
+    const amount = Math.round(Number(payAmount));
+    if (!(amount >= 1) || amount > amountDue) {
+      toast(`Ask for between KES 1 and KES ${fmtAmount(amountDue)}.`, "danger");
+      return;
+    }
     setPayBusy(true);
+    const wasPaid = b.payment === "Paid";
     try {
-      const result = await sendStkPush(b.ref, payPhone, payProvider);
+      // the full amount due goes without `amount`, which asks for exactly that
+      const result = await sendStkPush(b.ref, payPhone, payProvider, amount < amountDue ? amount : undefined);
       const updated = await fetchBooking(b.ref);
       setB(updated);
       setPayModal(false);
       toast(result.message || "STK push sent.", result.success ? undefined : "danger");
       if (result.success && result.paystack_reference) {
-        startPolling(result.paystack_reference);
+        startPolling(result.paystack_reference, wasPaid);
       }
     } catch (err) {
       toast(err.message || "Failed to send STK push", "danger");
@@ -603,6 +660,27 @@ export default function BookingDetails() {
 
   return (
     <>
+      {editOpen && (
+        <EditBookingDialog
+          booking={b}
+          onClose={() => setEditOpen(false)}
+          onSaved={(updated) => {
+            setB(updated);
+            replaceBooking(updated);
+            setEditOpen(false);
+            // Say what the change did to the money: the server re-priced it.
+            const newTotal = bookingTotal(updated);
+            const due = Number(updated.amount_due) || 0;
+            const over = updated.payment === "Paid" ? (Number(updated.payment_amount) || 0) - newTotal : 0;
+            let msg = `Booking updated. Total KES ${fmtAmount(newTotal)}`;
+            if (newTotal !== total) msg += ` (was KES ${fmtAmount(total)})`;
+            if (updated.payment === "Paid" && due > 0) msg += `, balance KES ${fmtAmount(due)} due`;
+            else if (over > 0) msg += `. The customer paid KES ${fmtAmount(over)} more; refund it from Payments`;
+            toast(`${msg}.`, due > 0 || over > 0 ? "warn" : undefined);
+          }}
+        />
+      )}
+
       {claimOpen && (
         <DepositClaimDialog
           booking={b}
@@ -734,9 +812,16 @@ export default function BookingDetails() {
           <RenterProfileCard renter={b.renter} />
 
           <section className="panel-card">
-            <header className="card-head">
-              <h2>Booking information</h2>
-              <p>Reservation record</p>
+            <header className="card-head with-action">
+              <div>
+                <h2>Booking information</h2>
+                <p>Reservation record</p>
+              </div>
+              {canEdit && (
+                <button type="button" className="icon-btn" disabled={seeded} onClick={() => setEditOpen(true)}>
+                  Edit booking
+                </button>
+              )}
             </header>
             {/* The trip as a line: when it starts, how long, when it ends.
                 Dates are what a desk is asked about most, so they lead. */}
@@ -744,16 +829,19 @@ export default function BookingDetails() {
               <div className="trip-end">
                 <span className="trip-tag">Pickup</span>
                 <strong>{fmtDate(b.pickup)}</strong>
-                <em>{b.location || "Location not set"}</em>
+                <em>
+                  {hourly && b.pickup_time ? `${b.pickup_time} · ` : ""}
+                  {b.location || "Location not set"}
+                </em>
               </div>
               <div className="trip-mid">
-                <strong>{days}</strong>
-                <span>day{days > 1 ? "s" : ""}</span>
+                <strong>{hourly ? b.hours : days}</strong>
+                <span>{hourly ? "h" : `day${days > 1 ? "s" : ""}`}</span>
               </div>
               <div className="trip-end trip-end-right">
                 <span className="trip-tag">Return</span>
-                <strong>{fmtDate(b.dropoff)}</strong>
-                <em>by {RETURN_HOUR}:00 AM</em>
+                <strong>{fmtDate(b.dropoff || b.pickup)}</strong>
+                <em>by {dueBy}</em>
               </div>
             </div>
 
@@ -795,8 +883,8 @@ export default function BookingDetails() {
                 </dd>
               </div>
               <div className="spec spec-key">
-                <dt>Day rate</dt>
-                <dd>KES {fmtAmount(b.rate)}</dd>
+                <dt>{hourly ? "Hour rate" : "Day rate"}</dt>
+                <dd>{rateLabel(b)}</dd>
               </div>
               <div className="spec">
                 <dt>Booked via</dt>
@@ -901,7 +989,7 @@ export default function BookingDetails() {
               (needsCode || inOpen ? (
               <form className="ho-form ho-return" onSubmit={handleCheckIn}>
                 <p className="ho-step">
-                  At return · due {fmtDate(b.dropoff)} by {RETURN_HOUR}:00 AM, then KES{" "}
+                  At return · due {fmtDate(b.dropoff)} by {dueBy}, then KES{" "}
                   {fmtAmount(policy.lateFeePerHour)} per started hour
                 </p>
                 {needsCode && (
@@ -949,9 +1037,9 @@ export default function BookingDetails() {
                     <label htmlFor="hi-time">Return time</label>
                     <Dropdown
                       id="hi-time"
-                      value={retTime}
+                      value={returnTime}
                       onChange={setRetTime}
-                      options={TIMES}
+                      options={timeOptions}
                     />
                   </div>
                   <div className="field form-full">
@@ -1028,6 +1116,20 @@ export default function BookingDetails() {
               <span>Status</span>
               <span className={`chip ${PAY_CHIP[b.payment]}`}>{b.payment}</span>
             </div>
+            {/* Made longer after it was paid: the extra is still owed, and the
+                booking stays Paid while it's asked for. */}
+            {balanceDue && (
+              <>
+                <div className="pay-row">
+                  <span>Received</span>
+                  <span className="mini-amount">KES {fmtAmount(b.payment_amount)}</span>
+                </div>
+                <div className="pay-row balance-due" role="status">
+                  <span>Balance due</span>
+                  <span>KES {fmtAmount(amountDue)}</span>
+                </div>
+              </>
+            )}
             <div className="pay-row">
               <span>Security deposit</span>
               <span className="mini-amount">
@@ -1148,7 +1250,13 @@ export default function BookingDetails() {
                   disabled={busy || payWaiting}
                   onClick={openPayModal}
                 >
-                  {b.payment === "Prompt sent" ? "Resend payment request" : b.payment === "Failed" ? "Retry payment request" : "Request payment"}
+                  {balanceDue
+                    ? `Request balance (KES ${fmtAmount(amountDue)})`
+                    : b.payment === "Prompt sent"
+                      ? "Resend payment request"
+                      : b.payment === "Failed"
+                        ? "Retry payment request"
+                        : "Request payment"}
                 </button>
                 {/* Plenty of counter business is settled in notes. Without this
                     the booking sits "Unpaid" forever and never starts, so staff
@@ -1158,15 +1266,15 @@ export default function BookingDetails() {
                   className="btn btn-ghost pay-btn"
                   disabled={busy || payWaiting}
                   onClick={() => {
-                    setCashAmount(String(total));
+                    setCashAmount(String(amountDue));
                     setCashModal(true);
                   }}
                 >
-                  Mark paid in cash
+                  {balanceDue ? "Record balance in cash" : "Mark paid in cash"}
                 </button>
                 </div>
                 <p className="side-hint">
-                  Request sends an STK push for KES {fmtAmount(total)}. Cash is a
+                  Request sends an STK push for KES {fmtAmount(amountDue)}. Cash is a
                   record only, the money never passes through Ardena.
                 </p>
               </>
@@ -1223,7 +1331,7 @@ export default function BookingDetails() {
               <div className="modal-overlay" onClick={() => !payBusy && setPayModal(false)}>
                 <div className="modal-card" onClick={(e) => e.stopPropagation()}>
                   <header className="modal-head">
-                    <h3>Request payment · KES {fmtAmount(total)}</h3>
+                    <h3>{balanceDue ? "Request balance" : "Request payment"} · KES {fmtAmount(Number(payAmount) || 0)}</h3>
                     <button type="button" className="icon-btn" disabled={payBusy} onClick={() => setPayModal(false)}>✕</button>
                   </header>
                   <form onSubmit={handleStkPush} className="modal-body">
@@ -1238,6 +1346,22 @@ export default function BookingDetails() {
                         required
                         autoFocus
                       />
+                    </label>
+                    <label className="field-label">
+                      Amount (KES)
+                      <input
+                        type="number"
+                        min="1"
+                        max={amountDue}
+                        step="1"
+                        className="field-input"
+                        value={payAmount}
+                        onChange={(e) => setPayAmount(e.target.value)}
+                        required
+                      />
+                      <span className="field-note">
+                        KES {fmtAmount(amountDue)} is due. Asking for less records a part payment.
+                      </span>
                     </label>
                     <fieldset className="provider-group">
                       <legend className="field-label">Payment method</legend>

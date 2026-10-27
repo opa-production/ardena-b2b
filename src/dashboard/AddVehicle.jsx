@@ -72,6 +72,7 @@ export default function AddVehicle() {
         plate,
         cat: f.get("cat"),
         rate: Number(f.get("rate")),
+        ...(Number(f.get("hourly_rate")) > 0 ? { hourly_rate: Math.round(Number(f.get("hourly_rate"))) } : {}),
         year: Number(f.get("year")) || null,
         chassis_no: f.get("chassis_no")?.trim() || null,
         status: f.get("status"),
@@ -183,6 +184,11 @@ export default function AddVehicle() {
             <div className="field">
               <label htmlFor="v-rate">Day rate (KES)</label>
               <input id="v-rate" name="rate" type="number" min="0" step="100" placeholder="9,500" required />
+            </div>
+            <div className="field">
+              <label htmlFor="v-hourly">Hour rate (KES), optional</label>
+              <input id="v-hourly" name="hourly_rate" type="number" min="1" step="1" placeholder="e.g. 900" />
+              <p className="field-note">For chauffeured or short hires by the hour.</p>
             </div>
             <div className="field">
               <label htmlFor="v-chassis">Chassis / VIN</label>

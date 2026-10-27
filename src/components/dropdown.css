@@ -119,3 +119,8 @@
 .dd-trigger .dd-stack-sub {
   color: var(--ink-mute);
 }
+
+.dd-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

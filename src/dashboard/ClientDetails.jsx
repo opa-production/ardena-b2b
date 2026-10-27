@@ -4,7 +4,7 @@ import PageSkeleton from "./PageSkeleton";
 import { fetchClient } from "../lib/api";
 import { STATUS_CHIP } from "./bookingsStore";
 import { VERIF_CHIP } from "./clientsFormat";
-import { fmtDate, fmtRange, rentalDays } from "./bookingsStore";
+import { fmtDate, fmtRange, bookingTotal, isHourly, shortLength } from "./bookingsStore";
 import { toast } from "./toastStore";
 import { getSeed } from "./recordSeeds";
 import "./fleet.css";
@@ -166,8 +166,11 @@ export default function ClientDetails() {
                     <p className="strong">{b.vehicle}</p>
                     <p className="cell-sub">{b.plate}</p>
                   </td>
-                  <td>{fmtRange(b.pickup, b.dropoff)}</td>
-                  <td className="num">{fmtAmount(rentalDays(b.pickup, b.dropoff) * b.rate)}</td>
+                  <td>
+                    {fmtRange(b.pickup, b.dropoff)}
+                    {isHourly(b) && <p className="cell-sub">{shortLength(b)}</p>}
+                  </td>
+                  <td className="num">{fmtAmount(bookingTotal(b))}</td>
                   <td>
                     <span className={`chip ${STATUS_CHIP[b.status]}`}>{b.status}</span>
                   </td>

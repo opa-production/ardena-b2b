@@ -56,6 +56,13 @@ export function addBooking(b) {
   return ref;
 }
 
+// Swap in the server's copy of one booking (after an edit), if it's listed.
+export function replaceBooking(updated) {
+  if (!updated?.ref || !bookings.some((b) => b.ref === updated.ref)) return;
+  bookings = bookings.map((b) => (b.ref === updated.ref ? { ...b, ...updated } : b));
+  emit();
+}
+
 export function setStatus(ref, status) {
   bookings = bookings.map((b) =>
     b.ref === ref
@@ -130,6 +137,85 @@ export function rentalDays(a, b) {
 export function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+/* ---- hourly bookings ----
+   A booking is billed by the day (pickup → dropoff, whole days) or by the
+   hour (pickup + pickup_time, for `hours`). The server stores the price as
+   `total`, which is what every screen shows; nothing here re-derives it from
+   the rate except a row from before prices were stored. */
+
+const WEEKDAY_DAY_MONTH = new Intl.DateTimeFormat("en-KE", { weekday: "short", day: "numeric", month: "short" });
+
+const fmtKes = (n) => Number(n || 0).toLocaleString("en-KE");
+
+export const isHourly = (b) => b?.billing_unit === "hour";
+
+export function bookingTotal(b) {
+  if (b?.total != null) return Number(b.total);
+  return rentalDays(b.pickup, b.dropoff) * (Number(b.rate) || 0);
+}
+
+// "Tue 28 Oct"
+export function fmtWeekday(iso) {
+  if (!iso) return "-";
+  return WEEKDAY_DAY_MONTH.format(new Date(`${iso}T00:00:00`)).replace(",", "");
+}
+
+/* When an hourly booking ends: { date, time }. Worked in UTC so the device's
+   own timezone can't shift it; the times are Nairobi wall-clock either way. */
+export function hourlyEnd(pickup, time, hours) {
+  const [y, mo, d] = pickup.split("-").map(Number);
+  const [h, m] = String(time).split(":").map(Number);
+  const end = new Date(Date.UTC(y, mo - 1, d, h, m) + Number(hours) * 3600000);
+  const pad = (n) => String(n).padStart(2, "0");
+  return {
+    date: `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}`,
+    time: `${pad(end.getUTCHours())}:${pad(end.getUTCMinutes())}`,
+  };
+}
+
+// "Tue 28 Oct, 08:30–16:30 (8 h)", or "28 Oct 20:00 → 29 Oct 08:00 (12 h)"
+// past midnight. A daily booking reads "3 days".
+export function fmtLength(b) {
+  if (!isHourly(b)) {
+    const days = rentalDays(b.pickup, b.dropoff);
+    return `${days} day${days > 1 ? "s" : ""}`;
+  }
+  const end = b.dropoff_time
+    ? { date: b.dropoff || b.pickup, time: b.dropoff_time }
+    : hourlyEnd(b.pickup, b.pickup_time, b.hours);
+  if (end.date === b.pickup) {
+    return `${fmtWeekday(b.pickup)}, ${b.pickup_time}–${end.time} (${b.hours} h)`;
+  }
+  return `${DAY_MONTH.format(new Date(`${b.pickup}T00:00:00`))} ${b.pickup_time} → ${DAY_MONTH.format(
+    new Date(`${end.date}T00:00:00`)
+  )} ${end.time} (${b.hours} h)`;
+}
+
+// The short length for a table cell: "8 h" or "3 days".
+export function shortLength(b) {
+  if (isHourly(b)) return `${b.hours} h · ${b.pickup_time}–${b.dropoff_time || hourlyEnd(b.pickup, b.pickup_time, b.hours).time}`;
+  const days = rentalDays(b.pickup, b.dropoff);
+  return `${days} day${days > 1 ? "s" : ""}`;
+}
+
+// The price differs from length × rate: an agreed price (or no hourly rate).
+export function isAgreedPrice(b) {
+  if (b?.total == null) return false;
+  const byRate = isHourly(b)
+    ? b.hourly_rate
+      ? b.hourly_rate * b.hours
+      : null
+    : rentalDays(b.pickup, b.dropoff) * (Number(b.rate) || 0);
+  return byRate === null || Number(b.total) !== byRate;
+}
+
+// "KES 900/h" or "KES 9,500/day". An hourly booking on a car with no hourly
+// rate was priced by hand, so it has no rate to show.
+export function rateLabel(b) {
+  if (isHourly(b)) return b.hourly_rate ? `KES ${fmtKes(b.hourly_rate)}/h` : "Agreed price";
+  return `KES ${fmtKes(b.rate)}/day`;
 }
 
 

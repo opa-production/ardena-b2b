@@ -49,6 +49,15 @@ const fmtRangeLabel = (a, b) => {
   return `${a.toLocaleDateString("en-KE", opts)} to ${b.toLocaleDateString("en-KE", { ...opts, year: "numeric" })}`;
 };
 
+/* "08:30–16:30" for an hourly booking (start_time on its start date, end_time
+   on its end date), null for a daily one, which holds whole days. */
+function partHours(b) {
+  const start = b.start_time ?? (b.billing_unit === "hour" ? b.pickup_time : null);
+  if (!start) return null;
+  const end = b.end_time ?? b.dropoff_time;
+  return end ? `${start}–${end}` : start;
+}
+
 /* Greedy lane assignment: each bar takes the first lane whose last bar ended
    before it starts. One lane in the normal case; more only on a clash. */
 function laneUp(bars) {
@@ -218,23 +227,30 @@ export default function FleetCalendar() {
                         style={{ gridColumn: i + 1, gridRow: "1 / -1" }}
                       />
                     ))}
-                    {bars.map((b) => (
-                      <Link
-                        key={b.ref}
-                        to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}
-                        className={
-                          `fc-bar is-${b.status.toLowerCase()}` +
-                          (b.cutLeft ? " cut-left" : "") +
-                          (b.cutRight ? " cut-right" : "")
-                        }
-                        style={{ gridColumn: `${b.from + 1} / ${b.to + 2}`, gridRow: b.lane + 1 }}
-                        title={`${b.customer} · ${b.ref} · ${STATUS_LABEL[b.status] || b.status}${
-                          b.source === "marketplace" ? " · Ardena app" : ""
-                        } · ${b.start} to ${b.end}`}
-                      >
-                        {b.customer}
-                      </Link>
-                    ))}
+                    {bars.map((b) => {
+                      // An hourly booking holds only part of its days: drawn
+                      // slimmer, with its hours, so the rest of the day reads
+                      // as still bookable by the hour.
+                      const hours = partHours(b);
+                      return (
+                        <Link
+                          key={b.ref}
+                          to={`/dashboard/bookings/${encodeURIComponent(b.ref)}`}
+                          className={
+                            `fc-bar is-${b.status.toLowerCase()}` +
+                            (hours ? " is-part" : "") +
+                            (b.cutLeft ? " cut-left" : "") +
+                            (b.cutRight ? " cut-right" : "")
+                          }
+                          style={{ gridColumn: `${b.from + 1} / ${b.to + 2}`, gridRow: b.lane + 1 }}
+                          title={`${b.customer} · ${b.ref} · ${STATUS_LABEL[b.status] || b.status}${
+                            b.source === "marketplace" ? " · Ardena app" : ""
+                          } · ${hours ? `${b.start} ${hours}` : `${b.start} to ${b.end}`}`}
+                        >
+                          {hours ? `${b.customer} · ${hours}` : b.customer}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

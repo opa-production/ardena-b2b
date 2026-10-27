@@ -562,3 +562,75 @@ tr.unread-row {
   min-height: 150px;
   height: 100%;
 }
+
+/* ---- Settings: Share your experience (testimonial) ---- */
+
+.tm-pitch {
+  margin: 0 0 18px;
+}
+
+.tm-banner {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  background: var(--surface);
+  box-shadow: inset 3px 0 0 var(--ink-mute);
+}
+
+.tm-banner strong {
+  display: block;
+  color: var(--ink);
+}
+
+.tm-banner p {
+  margin-top: 2px;
+}
+
+.tm-banner.is-approved {
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+
+.tm-banner.is-approved strong {
+  color: var(--ok);
+}
+
+.tm-banner.is-rejected {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+
+.tm-banner.is-rejected strong {
+  color: var(--warn);
+}
+
+.tm-count {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.tm-count.is-over span:first-child {
+  color: var(--danger, #dc2626);
+}
+
+.tm-avatar {
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.tm-consent {
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.tm-consent input {
+  margin-top: 3px;
+}
+
+.tm-confirm {
+  flex-wrap: wrap;
+  margin-top: 18px;
+}

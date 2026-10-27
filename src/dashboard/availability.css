@@ -54,6 +54,17 @@
   background: var(--brand);
 }
 
+.cal-legend .part,
+.cal-day.part .cal-chip {
+  background: repeating-linear-gradient(135deg, var(--brand) 0 4px, var(--brand-soft) 4px 7px);
+}
+
+.cal-day.part .cal-chip {
+  color: var(--ink);
+  background: var(--brand-soft);
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+
 .cal-legend .blocked {
   background: var(--ink);
 }

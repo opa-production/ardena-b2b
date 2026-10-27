@@ -21,6 +21,7 @@ export default function Dropdown({
   formatValue,
   // "up" opens the panel above the trigger, for rows near the bottom of a list.
   placement = "down",
+  disabled = false,
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -56,6 +57,7 @@ export default function Dropdown({
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
+        disabled={disabled}
         onClick={() => setOpen((o) => !o)}
       >
         {selected ? (

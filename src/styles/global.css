@@ -566,3 +566,11 @@ h3 {
 .crash .btn {
   margin-top: 6px;
 }
+
+/* A quiet line under a form field: a hint, a limit, a preview. */
+.field-note {
+  margin: 6px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-mute);
+}

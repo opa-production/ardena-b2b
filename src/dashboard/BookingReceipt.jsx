@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { getBusiness } from "./businessStore";
 import { getSession } from "../lib/authStore";
-import { fmtDate, rentalDays } from "./bookingsStore";
+import { fmtDate, fmtLength, rateLabel, bookingTotal, isHourly, isAgreedPrice } from "./bookingsStore";
 import { RETURN_HOUR } from "./policyStore";
 import "./receipt.css";
 
@@ -46,9 +46,12 @@ export default function BookingReceipt({ booking: b, depositAmount, penalty = 0,
 
   const biz = getBusiness();
   const staff = getSession().user;
-  const days = rentalDays(b.pickup, b.dropoff);
-  const rental = days * b.rate;
+  const hourly = isHourly(b);
+  const rental = bookingTotal(b);
+  // payment_amount is the running total received across every payment, cash
+  // and prompts; a booking made longer after it was paid can still owe some.
   const paid = b.payment_amount ?? rental;
+  const due = Number(b.amount_due) || 0;
   const method = METHOD_LABEL[b.payment_method] || b.payment_method;
 
   return createPortal(
@@ -103,13 +106,16 @@ export default function BookingReceipt({ booking: b, depositAmount, penalty = 0,
             <dt>Pickup</dt>
             <dd>
               {fmtDate(b.pickup)}
+              {hourly ? ` ${b.pickup_time}` : ""}
               {b.location ? `, ${b.location}` : ""}
             </dd>
           </div>
           <div>
             <dt>Return</dt>
             <dd>
-              {fmtDate(b.dropoff)}, by {RETURN_HOUR}:00 AM
+              {hourly
+                ? `${fmtDate(b.dropoff || b.pickup)} ${b.dropoff_time || ""}`.trim()
+                : `${fmtDate(b.dropoff)}, by ${RETURN_HOUR}:00 AM`}
             </dd>
           </div>
           {b.destination && (
@@ -125,7 +131,8 @@ export default function BookingReceipt({ booking: b, depositAmount, penalty = 0,
         <tbody>
           <tr>
             <td>
-              Rental, {days} day{days > 1 ? "s" : ""} × KES {fmtAmount(b.rate)}
+              Rental, {fmtLength(b)}
+              {isAgreedPrice(b) ? ", agreed price" : ` × ${rateLabel(b)}`}
             </td>
             <td>KES {fmtAmount(rental)}</td>
           </tr>
@@ -141,6 +148,12 @@ export default function BookingReceipt({ booking: b, depositAmount, penalty = 0,
             <td>Paid</td>
             <td>KES {fmtAmount(paid)}</td>
           </tr>
+          {due > 0 && (
+            <tr>
+              <td>Balance due</td>
+              <td>KES {fmtAmount(due)}</td>
+            </tr>
+          )}
         </tfoot>
       </table>
 

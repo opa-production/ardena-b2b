@@ -8,6 +8,7 @@ import {
   expiringSoon,
   isFleetLoaded,
   hydrateFleet,
+  saveVehicle,
 } from "./fleetStore";
 import { getBookings } from "./bookingsStore";
 import { setVehiclePlate, uploadVehicleDocument } from "../lib/api";
@@ -54,6 +55,8 @@ export default function VehicleDetails() {
   const [newPlate, setNewPlate] = useState("");
   const [plateBusy, setPlateBusy] = useState(false);
   const [docBusy, setDocBusy] = useState(null);
+  const [hourlyDraft, setHourlyDraft] = useState(null); // null = not editing
+  const [rateBusy, setRateBusy] = useState(false);
   const docInputs = useRef({});
 
   const v = getVehicle(decodeURIComponent(plate));
@@ -96,6 +99,35 @@ export default function VehicleDetails() {
     } finally {
       setDocBusy(null);
     }
+  }
+
+  // value: whole KES, or null to clear the hourly rate
+  async function saveHourly(value) {
+    if (rateBusy) return;
+    setRateBusy(true);
+    try {
+      await saveVehicle(v.plate, { hourly_rate: value });
+      setHourlyDraft(null);
+      toast(value ? `Hour rate set to KES ${value.toLocaleString("en-KE")}/h.` : "Hour rate cleared.");
+    } catch (err) {
+      toast(err.message || "Couldn't save the hour rate", "danger");
+    } finally {
+      setRateBusy(false);
+    }
+  }
+
+  function handleSaveHourly(e) {
+    e.preventDefault();
+    const n = Math.round(Number(hourlyDraft));
+    if (!hourlyDraft.trim()) {
+      saveHourly(null);
+      return;
+    }
+    if (!(n >= 1)) {
+      toast("Enter an hour rate of at least KES 1, or clear it.", "danger");
+      return;
+    }
+    saveHourly(n);
   }
 
   async function handleSetPlate(e) {
@@ -233,6 +265,49 @@ export default function VehicleDetails() {
             <div className="spec spec-key">
               <dt>Day rate</dt>
               <dd>KES {v.rate.toLocaleString("en-KE")}</dd>
+            </div>
+            {/* Optional, for chauffeured and short hires by the hour. The only
+                field editable here so far: bookings by the hour need it. */}
+            <div className="spec">
+              <dt>Hour rate</dt>
+              <dd>
+                {hourlyDraft === null ? (
+                  <>
+                    {v.hourly_rate ? `KES ${v.hourly_rate.toLocaleString("en-KE")}/h` : "Not set"}{" "}
+                    <button
+                      type="button"
+                      className="spec-link"
+                      onClick={() => setHourlyDraft(v.hourly_rate ? String(v.hourly_rate) : "")}
+                    >
+                      {v.hourly_rate ? "Change" : "Add"}
+                    </button>
+                  </>
+                ) : (
+                  <form className="rate-edit" onSubmit={handleSaveHourly}>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={hourlyDraft}
+                      onChange={(e) => setHourlyDraft(e.target.value)}
+                      placeholder="e.g. 900"
+                      aria-label="Hour rate (KES)"
+                      autoFocus
+                    />
+                    <button type="submit" className="spec-link" disabled={rateBusy}>
+                      {rateBusy ? "Saving…" : "Save"}
+                    </button>
+                    {v.hourly_rate && (
+                      <button type="button" className="spec-link" disabled={rateBusy} onClick={() => saveHourly(null)}>
+                        Clear
+                      </button>
+                    )}
+                    <button type="button" className="spec-link" disabled={rateBusy} onClick={() => setHourlyDraft(null)}>
+                      Cancel
+                    </button>
+                  </form>
+                )}
+              </dd>
             </div>
             <div className="spec">
               <dt>Added to fleet</dt>

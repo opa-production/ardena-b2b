@@ -612,7 +612,15 @@ export async function fetchBookedRanges(plate) {
     const res = await fetchVehicleAvailability(plate, localISO(from), localISO(to));
     return (res?.ranges || [])
       .filter((r) => r.start && r.end)
-      .map((r) => ({ start: r.start, end: r.end, ref: r.booking_ref }));
+      .map((r) => ({
+        start: r.start,
+        end: r.end,
+        ref: r.booking_ref,
+        // An hourly booking's hours on its first and last day; null for a
+        // daily booking, which holds the whole of every day.
+        start_time: r.start_time ?? null,
+        end_time: r.end_time ?? null,
+      }));
   } catch {
     const pages = await Promise.all(
       HOLDING_STATUSES.map((status) => fetchBookings({ plate, status, per_page: 100 }))
@@ -620,11 +628,20 @@ export async function fetchBookedRanges(plate) {
     return pages
       .flatMap((p) => p?.data || [])
       .filter((b) => b.pickup && b.dropoff)
-      .map((b) => ({ start: b.pickup, end: b.dropoff, ref: b.ref }));
+      .map((b) => ({
+        start: b.pickup,
+        end: b.dropoff,
+        ref: b.ref,
+        start_time: b.billing_unit === "hour" ? b.pickup_time : null,
+        end_time: b.billing_unit === "hour" ? b.dropoff_time : null,
+      }));
   }
 }
 
-// { customer, phone, plate, pickup, dropoff, location, notes?, deposit_amount?, client_id? }
+/* By the day: { customer, phone, plate, pickup, dropoff, location, notes?,
+   deposit_amount?, client_id?, amount? }. By the hour: billing_unit "hour",
+   pickup, pickup_time ("HH:MM", Nairobi) and hours (1–72) instead of dropoff.
+   `amount` is an agreed price that overrides the car's rate. */
 export function createBooking(payload) {
   return request("/bookings", { method: "POST", body: payload });
 }
@@ -633,7 +650,10 @@ export function fetchBooking(ref) {
   return request(`/bookings/${encodeURIComponent(ref)}`);
 }
 
-// { pickup?, dropoff?, location?, notes? }
+/* Send only what changed: customer, phone, plate, pickup, dropoff,
+   billing_unit, pickup_time, hours, amount (null = back to the rate),
+   deposit_amount, location, notes, id_number, destination. A change of
+   length, unit or car re-prices the booking unless `amount` comes with it. */
 export function updateBooking(ref, patch) {
   return request(`/bookings/${encodeURIComponent(ref)}`, { method: "PATCH", body: patch });
 }
@@ -764,10 +784,12 @@ export function refundPayment(paymentId, payload = {}) {
 }
 
 // overrides bookings version, now returns { checkout_url, paystack_reference, payment_status }
-export function sendStkPush(ref, phone, provider) {
+// Without `amount` the prompt asks for the booking's amount_due; a smaller
+// amount records a part payment (more than amount_due is a 400).
+export function sendStkPush(ref, phone, provider, amount) {
   return request(`/bookings/${encodeURIComponent(ref)}/payment-prompt`, {
     method: "POST",
-    body: { phone, provider },
+    body: { phone, provider, ...(amount ? { amount } : {}) },
   });
 }
 
@@ -863,6 +885,29 @@ export function fetchPublicPlans() {
 // first. An empty list hides the section.
 export function fetchPublicTestimonials() {
   return request("/public/testimonials", { auth: false, cache: 5 * 60 * 1000 });
+}
+
+// This workspace's testimonial (Owner/Manager). 204 means there isn't one, or
+// it was withdrawn: that resolves to null, not an error.
+export async function getTestimonial() {
+  return (await request("/testimonial")) || null;
+}
+
+// { name, title?, quote, consent: true }. Always goes back to "pending".
+export function saveTestimonial(payload) {
+  return request("/testimonial", { method: "PUT", body: payload });
+}
+
+// JPEG/PNG/WebP up to 2 MB. 404 until the testimonial has been saved once.
+export function uploadTestimonialAvatar(file) {
+  const form = new FormData();
+  form.append("file", file);
+  return request("/testimonial/avatar", { method: "POST", body: form });
+}
+
+// Off the landing page at once, photo deleted. 204.
+export function withdrawTestimonial() {
+  return request("/testimonial", { method: "DELETE" });
 }
 
 // This workspace's plan, limits and the current Fleet price (quote.amount).

@@ -191,3 +191,8 @@
 .dp-single {
   padding-bottom: 18px;
 }
+
+.drp-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

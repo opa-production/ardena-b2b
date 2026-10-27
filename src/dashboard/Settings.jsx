@@ -21,6 +21,8 @@ import { toast } from "./toastStore";
 import HostLinkPanel from "./HostLinkPanel";
 import QuickLinks from "./QuickLinks";
 import TwoFactorRow from "./TwoFactorRow";
+import TestimonialPanel from "./TestimonialPanel";
+import useRole from "../hooks/useRole";
 import "./fleet.css";
 import "./bookings.css";
 import "./workspace.css";
@@ -52,6 +54,7 @@ function resizeImage(file, max = 256) {
 
 export default function Settings() {
   const business = useSyncExternalStore(subscribeBusiness, getBusiness);
+  const { can } = useRole();
   const [currency, setCurrency] = useState("KES, Kenyan shilling");
   const [logo, setLogo] = useState(business.logo);
   const [logoFile, setLogoFile] = useState(null); // picked file, awaiting upload
@@ -294,6 +297,9 @@ export default function Settings() {
               </div>
             </form>
           </section>
+
+          {/* Owner and Manager only: the endpoint answers anyone else 403. */}
+          {can("manageSettings") && <TestimonialPanel />}
 
           <QuickLinks />
 

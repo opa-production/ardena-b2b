@@ -5,6 +5,7 @@
 import {
   fetchVehicles,
   createVehicle,
+  updateVehicle,
   deleteVehicle as apiDeleteVehicle,
   publishMarketplaceListing,
   hideMarketplaceListing,
@@ -46,6 +47,8 @@ function normalize(v) {
     notes: "",
     ...v,
     rate: Number(v.rate) || 0,
+    // optional: for chauffeured and short hires by the hour
+    hourly_rate: v.hourly_rate != null && v.hourly_rate !== "" ? Number(v.hourly_rate) : null,
     util: Math.round(Number(v.utilisation ?? v.util) || 0),
     ins: toDisplayDate(v.ins),
     inspection: toDisplayDate(v.inspection),
@@ -83,6 +86,16 @@ export async function addVehicle(v) {
   vehicles = [normalize({ ...v, ...(created?.data ?? created ?? {}) }), ...vehicles];
   markStep("vehicle"); // the server flips it too; this keeps the checklist instant
   invalidatePlan(); // the Fleet quote counts cars
+  emit();
+}
+
+// PATCH a vehicle and fold the response into the list. `hourly_rate: null`
+// clears the hourly rate.
+export async function saveVehicle(plate, patch) {
+  const updated = await updateVehicle(plate, patch);
+  vehicles = vehicles.map((v) =>
+    v.plate === plate ? normalize({ ...v, ...patch, ...(updated?.data ?? updated ?? {}) }) : v
+  );
   emit();
 }
 

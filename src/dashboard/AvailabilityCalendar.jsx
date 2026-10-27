@@ -1,7 +1,7 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useNavigate } from "react-router-dom";
 import { subscribe as subscribeFleet, getVehicles } from "./fleetStore";
-import { subscribe as subscribeBookings, getBookings } from "./bookingsStore";
+import { subscribe as subscribeBookings, getBookings, isHourly } from "./bookingsStore";
 import {
   subscribe as subscribeAvail,
   getBlocked,
@@ -40,7 +40,9 @@ export default function AvailabilityCalendar() {
     [blockedMap, plate]
   );
 
-  // iso → booking info for the selected vehicle's live reservations
+  // iso → booking info for the selected vehicle's live reservations. An
+  // hourly booking holds only some hours of its first and last day: those
+  // days are part-booked and carry the hours, so they don't read as gone.
   const bookedDays = useMemo(() => {
     const map = new Map();
     bookings
@@ -50,11 +52,28 @@ export default function AvailabilityCalendar() {
           ["Pending", "Confirmed", "Active"].includes(b.status)
       )
       .forEach((b) => {
+        const hourly = isHourly(b);
+        const end = b.dropoff || b.pickup;
         const cur = new Date(`${b.pickup}T00:00:00`);
-        const stop = new Date(`${b.dropoff}T00:00:00`);
+        const stop = new Date(`${end}T00:00:00`);
         while (cur <= stop) {
           const iso = toISO(cur.getFullYear(), cur.getMonth(), cur.getDate());
-          map.set(iso, { ref: b.ref, customer: b.customer, isStart: iso === b.pickup });
+          let span = null;
+          if (hourly && b.pickup === end) span = `${b.pickup_time}–${b.dropoff_time}`;
+          else if (hourly && iso === b.pickup) span = `${b.pickup_time}–24:00`;
+          else if (hourly && iso === end) span = `00:00–${b.dropoff_time}`;
+          const prev = map.get(iso);
+          if (span && prev?.part) {
+            prev.hours.push(span);
+          } else if (!prev || prev.part) {
+            map.set(iso, {
+              ref: b.ref,
+              customer: b.customer,
+              isStart: iso === b.pickup,
+              part: Boolean(span),
+              hours: span ? [span] : [],
+            });
+          }
           cur.setDate(cur.getDate() + 1);
         }
       });
@@ -115,6 +134,7 @@ export default function AvailabilityCalendar() {
 
         <div className="cal-legend">
           <span><i className="booked" /> Booked</span>
+          <span><i className="part" /> Some hours booked</span>
           <span><i className="blocked" /> Blocked</span>
           <span><i className="free" /> Available</span>
         </div>
@@ -139,6 +159,7 @@ export default function AvailabilityCalendar() {
           const cls = [
             "cal-day",
             booked && "booked",
+            booked?.part && "part",
             isBlocked && "blocked",
             past && "past",
             iso === todayISO && "today",
@@ -154,7 +175,7 @@ export default function AvailabilityCalendar() {
               disabled={past && !booked}
               title={
                 booked
-                  ? `${booked.customer} · ${booked.ref}`
+                  ? `${booked.customer} · ${booked.ref}${booked.part ? ` · Booked ${booked.hours.join(", ")}` : ""}`
                   : isBlocked
                     ? "Blocked · click to reopen"
                     : past
@@ -165,7 +186,7 @@ export default function AvailabilityCalendar() {
               <span className="cal-num">{d}</span>
               {booked && (
                 <span className="cal-chip">
-                  {booked.isStart ? booked.customer.split(" ")[0] : ""}
+                  {booked.part ? booked.hours.join(", ") : booked.isStart ? booked.customer.split(" ")[0] : ""}
                 </span>
               )}
               {!booked && isBlocked && (

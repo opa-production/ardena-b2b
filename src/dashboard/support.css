@@ -2,11 +2,11 @@
 
 /* Breaks out of .dash-content's gutter so the conversation runs from the
    sidebar to the right edge and fills the height. The negative margin is
-   exactly the padding it cancels, so the page still measures 100dvh and
-   nothing scrolls behind it. */
+   exactly the padding it cancels, so the page measures the screen below the
+   top bar and nothing scrolls behind it. */
 .support-page {
   margin: calc(var(--content-pad) * -1);
-  height: 100dvh;
+  height: calc(100dvh - var(--topbar-h, 0px)); /* less the sticky top bar */
   display: flex;
   flex-direction: column;
   min-height: 0;

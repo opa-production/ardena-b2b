@@ -116,7 +116,7 @@ export const NAV_SECTIONS = [
       // is on the Ardena app, and every role can read them. Never add `appOnly`
       // or a `requires` here, the pages gate their own write actions instead.
       { to: "/dashboard/staff", key: "staff", name: "Staff & roles" },
-      { to: "/dashboard/notifications", key: "notifications", name: "Notifications" },
+      // Notifications is the bell in the top bar, not a row here.
       { to: "/dashboard/support", key: "support", name: "Support" },
     ],
   },
@@ -168,8 +168,8 @@ export const SECTION_TITLES = {
   reports: "Reports",
   staff: "Staff & roles",
   marketing: "Marketing",
-  // Not a sidebar item, it lives in the profile menu, but the page still
-  // needs a title when it is the current route.
+  // Not sidebar items, they live in the top bar and its profile menu, but
+  // the pages still need a title when they are the current route.
   "feature-request": "Feature request",
   notifications: "Notifications",
   support: "Support",

@@ -201,8 +201,7 @@
 }
 
 /* amber unread counters read fine but nudge them lighter for the dark bar */
-[data-theme="dark"] .nav-badge,
-[data-theme="dark"] .topbar-badge {
+[data-theme="dark"] .nav-badge {
   color: #fbbf24;
 }
 

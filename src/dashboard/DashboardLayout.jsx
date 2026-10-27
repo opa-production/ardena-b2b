@@ -61,7 +61,7 @@ import StepUpDialog from "./StepUpDialog";
 import ErrorBoundary from "../components/ErrorBoundary";
 import "./dashboard.css";
 
-/* "Dark mode" / "Light mode" in the tenant menu. Set false to park it again, themeStore and every [data-theme="dark"] rule stay live either way. */
+/* The dark / light switch in the top bar. Set false to park it again, themeStore and every [data-theme="dark"] rule stay live either way. */
 const SHOW_THEME_TOGGLE = true;
 
 function PaymentWall({ gate }) {
@@ -106,7 +106,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
-  const footRef = useRef(null);
+  const profileRef = useRef(null);
 
   const { notifications: unread, support: supportUnread } = useSyncExternalStore(
     subscribeUnread,
@@ -276,7 +276,7 @@ export default function DashboardLayout() {
   useEffect(() => {
     if (!menuOpen) return;
     function onDown(e) {
-      if (!footRef.current?.contains(e.target)) setMenuOpen(false);
+      if (!profileRef.current?.contains(e.target)) setMenuOpen(false);
     }
     document.addEventListener("mousedown", onDown);
     return () => document.removeEventListener("mousedown", onDown);
@@ -301,22 +301,6 @@ export default function DashboardLayout() {
       {linkPrompt && (
         <HostLinkDialog suggestion={linkPrompt} onClose={dismissLinkPrompt} />
       )}
-
-      <header className="dash-topbar">
-        <button
-          type="button"
-          className="nav-toggle"
-          onClick={() => setNavOpen((o) => !o)}
-          aria-label={navOpen ? "Close menu" : "Open menu"}
-          aria-expanded={navOpen}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 6h18M3 12h18M3 18h18" />
-          </svg>
-        </button>
-        <Logo className="topbar-logo" />
-        {unread > 0 && <span className="topbar-badge" aria-label={`${unread} unread`}>{unread}</span>}
-      </header>
 
       {navOpen && (
         <div className="nav-backdrop" onClick={() => setNavOpen(false)} aria-hidden="true" />
@@ -345,9 +329,6 @@ export default function DashboardLayout() {
                   >
                     {ICONS[item.key]}
                     {item.name}
-                    {item.key === "notifications" && unread > 0 && (
-                      <span className="nav-badge">{unread}</span>
-                    )}
                     {item.key === "support" && supportUnread > 0 && (
                       <span className="nav-badge">{supportUnread}</span>
                     )}
@@ -358,112 +339,144 @@ export default function DashboardLayout() {
             </div>
           ))}
         </nav>
-
-        <div className="sidebar-foot" ref={footRef}>
-          {menuOpen && (
-            <div className="tenant-menu" role="menu">
-              {SHOW_THEME_TOGGLE && (
-                <button
-                  type="button"
-                  role="menuitemcheckbox"
-                  aria-checked={theme === "dark"}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleTheme();
-                  }}
-                >
-                  {theme === "dark" ? (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="4" />
-                      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-                    </svg>
-                  ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
-                    </svg>
-                  )}
-                  {theme === "dark" ? "Light mode" : "Dark mode"}
-                </button>
-              )}
-              <button type="button" role="menuitem" onClick={() => go("/dashboard/settings")}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                Profile
-              </button>
-              {/* Tracking, billing and Support used to hide in here; they are
-                  sidebar destinations now (see nav.js) so they can actually be
-                  found. Feature request is the exception that belongs here: it
-                  is about Ardena rather than about the workspace, in the same
-                  way Profile and Log out are, and it would have been the only
-                  sidebar row that isn't part of running the business. */}
-              <button type="button" role="menuitem" onClick={() => go("/dashboard/feature-request")}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18h6" />
-                  <path d="M10 21h4" />
-                  <path d="M12 3a6 6 0 00-3.5 10.9c.3.3.5.7.5 1.1h6c0-.4.2-.8.5-1.1A6 6 0 0012 3z" />
-                </svg>
-                Feature request
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="menu-danger"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setConfirmLogout(true);
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3" />
-                  <path d="M16 17l5-5-5-5M21 12H9" />
-                </svg>
-                Log out
-              </button>
-            </div>
-          )}
-          <button
-            type="button"
-            className={"tenant-chip" + (menuOpen ? " open" : "")}
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-          >
-            <span className="tenant-avatar">
-              {business.logo ? (
-                <img src={business.logo} alt="" />
-              ) : (
-                businessInitial(business.name)
-              )}
-              {supportUnread > 0 && <span className="tenant-dot" aria-label="New support message" />}
-            </span>
-            <div>
-              <p className="tenant-name">{business.name || "Your business"}</p>
-              <p className="tenant-plan">Fleet plan</p>
-            </div>
-            <svg className="tenant-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 15l6-6 6 6" />
-            </svg>
-          </button>
-        </div>
       </aside>
 
-      <main className="dash-content">
-        {gate?.gated && !onBillingPage ? (
-          <PaymentWall gate={gate} />
-        ) : (
-          /* A page's chunk still arriving looks the same as its data still
-             arriving, the skeleton it was going to show anyway. */
-          /* Inside the content area, so a page that fails keeps the sidebar
-             and nav; moving to another page clears it. */
-          <ErrorBoundary resetKey={location.pathname}>
-            <Suspense fallback={<PageSkeleton path={location.pathname} />}>
-              <Outlet />
-            </Suspense>
-          </ErrorBoundary>
-        )}
-      </main>
+      <div className="dash-main">
+        {/* The top bar: the menu button and logo on phones; notifications,
+            the theme switch and the profile menu on the right at every width.
+            They used to be sidebar rows and a sidebar footer. */}
+        <header className="dash-topbar">
+          <button
+            type="button"
+            className="nav-toggle"
+            onClick={() => setNavOpen((o) => !o)}
+            aria-label={navOpen ? "Close menu" : "Open menu"}
+            aria-expanded={navOpen}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+          <Logo className="topbar-logo" />
+
+          <div className="topbar-actions">
+            <NavLink
+              to="/dashboard/notifications"
+              className={({ isActive }) => "topbar-icon" + (isActive ? " active" : "")}
+              onMouseEnter={() => preloadNav("notifications")}
+              onFocus={() => preloadNav("notifications")}
+              aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"}
+              title="Notifications"
+            >
+              {ICONS.notifications}
+              {unread > 0 && <span className="topbar-count">{unread > 99 ? "99+" : unread}</span>}
+            </NavLink>
+
+            {SHOW_THEME_TOGGLE && (
+              <button
+                type="button"
+                className="topbar-icon"
+                onClick={toggleTheme}
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {theme === "dark" ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z" />
+                  </svg>
+                )}
+              </button>
+            )}
+
+            <div className="topbar-profile" ref={profileRef}>
+              <button
+                type="button"
+                className={"tenant-chip" + (menuOpen ? " open" : "")}
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+              >
+                <span className="tenant-avatar">
+                  {business.logo ? (
+                    <img src={business.logo} alt="" />
+                  ) : (
+                    businessInitial(business.name)
+                  )}
+                  {supportUnread > 0 && <span className="tenant-dot" aria-label="New support message" />}
+                </span>
+                <div className="tenant-text">
+                  <p className="tenant-name">{business.name || "Your business"}</p>
+                  <p className="tenant-plan">Fleet plan</p>
+                </div>
+                <svg className="tenant-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {menuOpen && (
+                <div className="tenant-menu" role="menu">
+                  <button type="button" role="menuitem" onClick={() => go("/dashboard/settings")}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Profile
+                  </button>
+                  {/* Tracking, billing and Support used to hide in here; they are
+                      sidebar destinations now (see nav.js) so they can actually be
+                      found. Feature request is the exception that belongs here: it
+                      is about Ardena rather than about the workspace, in the same
+                      way Profile and Log out are, and it would have been the only
+                      sidebar row that isn't part of running the business. */}
+                  <button type="button" role="menuitem" onClick={() => go("/dashboard/feature-request")}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18h6" />
+                      <path d="M10 21h4" />
+                      <path d="M12 3a6 6 0 00-3.5 10.9c.3.3.5.7.5 1.1h6c0-.4.2-.8.5-1.1A6 6 0 0012 3z" />
+                    </svg>
+                    Feature request
+                  </button>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="menu-danger"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setConfirmLogout(true);
+                    }}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H6a2 2 0 01-2-2V5a2 2 0 012-2h3" />
+                      <path d="M16 17l5-5-5-5M21 12H9" />
+                    </svg>
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <main className="dash-content">
+          {gate?.gated && !onBillingPage ? (
+            <PaymentWall gate={gate} />
+          ) : (
+            /* A page's chunk still arriving looks the same as its data still
+               arriving, the skeleton it was going to show anyway. */
+            /* Inside the content area, so a page that fails keeps the sidebar
+               and nav; moving to another page clears it. */
+            <ErrorBoundary resetKey={location.pathname}>
+              <Suspense fallback={<PageSkeleton path={location.pathname} />}>
+                <Outlet />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+        </main>
+      </div>
 
       <ConfirmDialog
         open={confirmLogout}

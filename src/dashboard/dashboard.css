@@ -1,6 +1,7 @@
 /* ---- Dashboard shell: fixed left sidebar + content ---- */
 
 .dash {
+  --topbar-h: 64px; /* full-height pages (Support, Direct messages) subtract it */
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
@@ -33,6 +34,7 @@
   --nav-active: rgba(255, 255, 255, 0.1);
   --nav-active-hover: rgba(255, 255, 255, 0.13);
   --nav-badge: #fbbf24;
+  --danger: #f05252; /* the deeper red drops to about 3:1 on the nav ground */
   color: var(--ink-soft);
 }
 
@@ -55,8 +57,7 @@
 }
 
 /* the hardcoded amber counters need the brighter step on near-black */
-.sidebar .nav-badge,
-.dash-topbar .topbar-badge {
+.sidebar .nav-badge {
   color: var(--nav-badge);
 }
 
@@ -207,17 +208,15 @@
   font-size: 13.5px;
 }
 
-/* Log out is the one destructive item in the tenant menu, and it sits directly
-   under Profile, colour is what stops a misclick. #f05252 rather than the
-   light theme's --danger: this menu is always on the near-black panel, where
-   the deeper red drops to about 3:1. */
-.tenant-menu button.menu-danger {
-  color: #f05252;
+/* Log out is the one destructive item in the profile menu, and it sits
+   directly under Feature request, colour is what stops a misclick. */
+.tenant-menu button.menu-danger,
+.tenant-menu button.menu-danger:hover {
+  color: var(--danger);
 }
 
 .tenant-menu button.menu-danger:hover {
-  color: #ff6b6b;
-  background: rgba(240, 82, 82, 0.12);
+  background: rgba(240, 82, 82, 0.1);
 }
 
 /* a nav destination that exists but isn't switched on yet */
@@ -258,20 +257,19 @@
   z-index: 1;
 }
 
-/* ---- Sidebar footer / tenant chip ---- */
+/* ---- Top bar profile chip ---- */
 
-.sidebar-foot {
-  border-top: 1px solid var(--line);
-  padding-top: 16px;
+.topbar-profile {
   position: relative;
 }
 
 .tenant-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 5px 8px;
+  gap: 9px;
+  max-width: 240px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
   text-align: left;
   /* a <button> does not inherit colour from its parent, so the business name
      inside would fall back to the UA's black, invisible on the dark panel */
@@ -280,7 +278,7 @@
 }
 
 /* the name can run long; keep it on one line rather than pushing the chip open */
-.tenant-chip > div {
+.tenant-chip > .tenant-text {
   min-width: 0;
 }
 
@@ -305,8 +303,8 @@
 }
 
 .tenant-avatar {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--ink-inv);
   color: var(--on-ink);
@@ -343,13 +341,11 @@
 
 .tenant-menu {
   position: absolute;
-  left: 0;
   right: 0;
-  bottom: calc(100% + 10px);
-  /* no hairline: on the dark panel the menu is separated by being lighter,
-     the same way the nav rows are */
+  top: calc(100% + 10px);
+  width: 220px;
   background: var(--panel);
-  box-shadow: var(--pop-shadow);
+  box-shadow: var(--edge), var(--pop-shadow);
   padding: 6px;
   z-index: 3;
   animation: rise 0.2s var(--ease) both;
@@ -379,10 +375,121 @@
   background: var(--nav-active);
 }
 
-/* ---- Mobile top bar (hidden on desktop) ---- */
+/* ---- Top bar ----
+   Notifications, the theme switch and the profile menu, right-aligned over
+   the content. On desktop it is part of the page: white (or the dark card)
+   with a hairline under it, so the custom properties the sidebar block above
+   re-pointed for it are handed back to the page's own with `inherit`. On a
+   phone it is the stand-in for the sidebar and keeps the nav ground. */
+
+.dash-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
 
 .dash-topbar {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 clamp(24px, 3.5vw, 44px);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--panel);
+  box-shadow: 0 1px 0 var(--line);
+}
+
+@media (min-width: 901px) {
+  .dash-main > .dash-topbar,
+  [data-theme] .dash-main > .dash-topbar {
+    --bg: inherit;
+    --panel: inherit;
+    --ink: inherit;
+    --ink-soft: inherit;
+    --ink-mute: inherit;
+    --line: inherit;
+    --ink-inv: inherit;
+    --ink-inv-hover: inherit;
+    --on-ink: inherit;
+    --danger: inherit;
+    --pop-shadow: 0 16px 40px -12px rgba(10, 13, 18, 0.28);
+    --nav-hover: color-mix(in srgb, var(--ink) 6%, transparent);
+    --nav-active: color-mix(in srgb, var(--ink) 10%, transparent);
+    color: var(--ink-soft);
+  }
+
+  .dash-topbar .nav-toggle,
+  .dash-topbar .topbar-logo {
+    display: none;
+  }
+}
+
+.topbar-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* round icon buttons: notifications and the theme switch */
+.topbar-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  transition: color 0.15s var(--ease), background 0.15s var(--ease), transform 0.15s var(--ease);
+}
+
+.topbar-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.topbar-icon:hover {
+  color: var(--ink);
+  background: var(--nav-hover);
+}
+
+.topbar-icon:active {
+  transform: scale(0.92);
+}
+
+.topbar-icon.active {
+  color: var(--ink);
+  background: var(--nav-active);
+}
+
+/* unread count: an amber pill on the bell's shoulder */
+.topbar-count {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 17px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  background: #d97706;
+  box-shadow: 0 0 0 2px var(--panel);
+}
+
+/* a hairline between the icons and the profile */
+.topbar-profile {
+  margin-left: 4px;
+  padding-left: 12px;
+  box-shadow: inset 1px 0 0 var(--line);
 }
 
 /* ---- Content ---- */
@@ -513,32 +620,38 @@
 
 @media (max-width: 900px) {
   .dash {
+    --topbar-h: 60px;
     flex-direction: column;
   }
 
   .dash-topbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 16px;
+    padding: 0 12px 0 8px;
     /* the mobile stand-in for the sidebar, so it wears the same nav ground */
     background: var(--sidebar);
-    position: sticky;
-    top: 0;
-    z-index: 20;
+    box-shadow: none;
+  }
+
+  .topbar-actions {
+    gap: 4px;
+  }
+
+  /* just the avatar on a phone; the name is in Profile */
+  .tenant-chip {
+    padding: 4px;
+  }
+
+  .tenant-chip .tenant-text,
+  .tenant-chip .tenant-caret {
+    display: none;
+  }
+
+  .topbar-profile {
+    margin-left: 2px;
+    padding-left: 6px;
   }
 
   .topbar-logo svg {
     height: 16px;
-  }
-
-  /* unread count sits at the far right of the bar */
-  .topbar-badge {
-    margin-left: auto;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: #d97706;
-    font-variant-numeric: tabular-nums;
   }
 
   .nav-toggle {

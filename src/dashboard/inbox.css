@@ -131,7 +131,7 @@
 
 .dm-page {
   margin: calc(var(--content-pad) * -1);
-  height: 100dvh;
+  height: calc(100dvh - var(--topbar-h, 0px));
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   min-height: 0;

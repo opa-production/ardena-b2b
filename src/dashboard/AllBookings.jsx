@@ -78,11 +78,10 @@ export default function AllBookings() {
 
   return (
     <>
-      <Link to="/dashboard/bookings" className="page-back">
+      <Link to="/dashboard/bookings" className="page-back" aria-label="Back to bookings" title="Bookings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Bookings
       </Link>
 
       <h1 className="sr-only">All bookings</h1>

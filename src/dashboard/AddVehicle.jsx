@@ -105,11 +105,10 @@ export default function AddVehicle() {
 
   return (
     <>
-      <Link to="/dashboard/fleet" className="page-back">
+      <Link to="/dashboard/fleet" className="page-back" aria-label="Back to fleet" title="Fleet">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Fleet
       </Link>
 
       <h1 className="sr-only">Add vehicle</h1>

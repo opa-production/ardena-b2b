@@ -21,6 +21,7 @@ import { createBooking, fetchBookedRanges, updateBooking, uploadHandoverPhotos }
 import { compressImage, stagedToFiles } from "./handoverPhotosStore";
 import DateRangePicker from "./DateRangePicker";
 import DatePicker from "./DatePicker";
+import { UnitToggle, HoursStepper } from "./BillingControls";
 import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
@@ -32,7 +33,6 @@ const fmtAmount = (n) => n.toLocaleString("en-KE");
 const FUEL_LEVELS = ["Full", "3/4", "1/2", "1/4", "Reserve"];
 
 // the usual chauffeured hires
-const QUICK_HOURS = [4, 8, 12];
 
 export default function NewBooking() {
   const navigate = useNavigate();
@@ -276,11 +276,10 @@ export default function NewBooking() {
 
   return (
     <>
-      <Link to="/dashboard/bookings" className="page-back">
+      <Link to="/dashboard/bookings" className="page-back" title="Bookings" aria-label="Back to bookings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Bookings
       </Link>
 
       <h1 className="sr-only">New booking</h1>
@@ -324,14 +323,7 @@ export default function NewBooking() {
           </div>
           <div className="field form-full">
             <label id="b-unit-label">Charged</label>
-            <div className="seg unit-seg" role="group" aria-labelledby="b-unit-label">
-              <button type="button" className={byHour ? "" : "active"} aria-pressed={!byHour} onClick={() => switchUnit("day")}>
-                By the day
-              </button>
-              <button type="button" className={byHour ? "active" : ""} aria-pressed={byHour} onClick={() => switchUnit("hour")}>
-                By the hour
-              </button>
-            </div>
+            <UnitToggle value={byHour ? "hour" : "day"} onChange={switchUnit} labelledBy="b-unit-label" />
           </div>
           {byHour ? (
             <>
@@ -366,37 +358,14 @@ export default function NewBooking() {
               </div>
               <div className="field form-full">
                 <label htmlFor="b-hours">Hours</label>
-                <div className="hours-row">
-                  <input
-                    id="b-hours"
-                    type="number"
-                    min="1"
-                    max="72"
-                    step="1"
-                    value={hours}
-                    onChange={(e) => {
-                      setHours(e.target.value);
-                      setError("");
-                    }}
-                    required
-                  />
-                  <div className="seg" role="group" aria-label="Quick picks">
-                    {QUICK_HOURS.map((h) => (
-                      <button
-                        type="button"
-                        key={h}
-                        className={hrs === h ? "active" : ""}
-                        aria-pressed={hrs === h}
-                        onClick={() => {
-                          setHours(String(h));
-                          setError("");
-                        }}
-                      >
-                        {h} h
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <HoursStepper
+                  id="b-hours"
+                  value={hours}
+                  onChange={(v) => {
+                    setHours(v);
+                    setError("");
+                  }}
+                />
                 <p className="field-note">
                   {end
                     ? `Returns ${end.time}, ${fmtWeekday(end.date)}`
@@ -469,7 +438,7 @@ export default function NewBooking() {
         </div>
 
         <aside className="details-side">
-          <section className="panel-card">
+          <section className="panel-card summary-card">
             <div className="booking-total" aria-live="polite">
               <p>{totalLine}</p>
               <strong>{total !== null ? `KES ${fmtAmount(total)}` : "-"}</strong>

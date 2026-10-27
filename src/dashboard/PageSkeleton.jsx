@@ -44,13 +44,10 @@ function CardLines({ rows = 5 }) {
   );
 }
 
-/* The minimal back link that replaced the header card on form, full-list and
-   settings pages, one short muted row, not a card. */
+/* The round back arrow on form, full-list and settings pages. */
 function BackLine() {
   return (
-    <div className="page-back">
-      <Line w={90} h={13} />
-    </div>
+    <div className="page-back sk" />
   );
 }
 

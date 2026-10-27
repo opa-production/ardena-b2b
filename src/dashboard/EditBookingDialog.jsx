@@ -13,11 +13,11 @@ import {
 } from "./bookingsStore";
 import { takenDays } from "./bookedDays";
 import DatePicker from "./DatePicker";
+import { UnitToggle, HoursStepper } from "./BillingControls";
 import Dropdown from "../components/Dropdown";
 
 const fmtAmount = (n) => Number(n || 0).toLocaleString("en-KE");
 
-const QUICK_HOURS = [4, 8, 12];
 
 const addDay = (iso) => {
   const d = new Date(`${iso}T00:00:00`);
@@ -251,14 +251,7 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
                 </div>
                 <div className="field form-full">
                   <label id="eb-unit-label">Charged</label>
-                  <div className="seg unit-seg" role="group" aria-labelledby="eb-unit-label">
-                    <button type="button" className={byHour ? "" : "active"} aria-pressed={!byHour} disabled={active} onClick={() => switchUnit("day")}>
-                      By the day
-                    </button>
-                    <button type="button" className={byHour ? "active" : ""} aria-pressed={byHour} disabled={active} onClick={() => switchUnit("hour")}>
-                      By the hour
-                    </button>
-                  </div>
+                  <UnitToggle value={byHour ? "hour" : "day"} onChange={switchUnit} disabled={active} labelledBy="eb-unit-label" />
                 </div>
 
                 {byHour ? (
@@ -283,16 +276,7 @@ export default function EditBookingDialog({ booking: b, onClose, onSaved }) {
                     </div>
                     <div className="field form-full">
                       <label htmlFor="eb-hours">Hours</label>
-                      <div className="hours-row">
-                        <input id="eb-hours" type="number" min="1" max="72" step="1" value={hours} onChange={(e) => setHours(e.target.value)} required />
-                        <div className="seg" role="group" aria-label="Quick picks">
-                          {QUICK_HOURS.map((h) => (
-                            <button type="button" key={h} className={hrs === h ? "active" : ""} aria-pressed={hrs === h} onClick={() => setHours(String(h))}>
-                              {h} h
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <HoursStepper id="eb-hours" value={hours} onChange={setHours} />
                       <p className="field-note">
                         {end ? `Returns ${end.time}, ${fmtWeekday(end.date)}` : "1 to 72 hours. Longer than that, book by the day."}
                       </p>

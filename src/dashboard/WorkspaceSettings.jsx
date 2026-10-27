@@ -45,11 +45,10 @@ export default function WorkspaceSettings() {
 
   return (
     <>
-      <Link to="/dashboard/settings" className="page-back">
+      <Link to="/dashboard/settings" className="page-back" aria-label="Back to profile" title="Profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Profile
       </Link>
 
       <h1 className="sr-only">Settings</h1>

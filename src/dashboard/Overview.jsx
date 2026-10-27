@@ -1,19 +1,34 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import PageSkeleton from "./PageSkeleton";
-import BookingHeatmap from "./charts/BookingHeatmap";
-import RevenueRanking from "./charts/RevenueRanking";
+import SimpleBars from "./charts/SimpleBars";
 import UtilisationTrend from "./charts/UtilisationTrend";
 import OnboardingChecklist from "./OnboardingChecklist";
 import EmptyState from "./EmptyState";
-import { fetchOverview, exportReport } from "../lib/api";
+import { fetchOverview } from "../lib/api";
 import { toast } from "./toastStore";
 import "./overview.css";
 import RefreshButton from "../components/RefreshButton";
 
 const fmtKES = (n) => `KES ${Number(n).toLocaleString("en-KE")}`;
 
-const FLEET_STATUSES = ["Available", "On booking", "In maintenance"];
+const fmtCount = (n) => `${n} booking${n === 1 ? "" : "s"}`;
+
+const DAY_NAMES = {
+  Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday",
+  Fri: "Friday", Sat: "Saturday", Sun: "Sunday",
+};
+
+// The heatmap's two-hour slots, folded into three parts of the day anyone
+// can name without reading an axis.
+const DAY_PARTS = [
+  { label: "Morning", sub: "6am to 12pm", from: 6, to: 12 },
+  { label: "Afternoon", sub: "12pm to 6pm", from: 12, to: 18 },
+  { label: "Evening", sub: "6pm to 10pm", from: 18, to: 22 },
+];
+
+const busiest = (rows) =>
+  rows.reduce((best, r) => (r.value > (best?.value ?? 0) ? r : best), null);
 
 const STATUS_ICON = {
   warning: (
@@ -30,17 +45,10 @@ const STATUS_ICON = {
   ),
 };
 
-const EXPORT_TYPES = [
-  { value: "bookings", label: "Bookings" },
-  { value: "payments", label: "Payments" },
-  { value: "clients", label: "Clients" },
-];
-
 export default function Overview() {
   const { pathname } = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [exporting, setExporting] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -55,21 +63,30 @@ export default function Overview() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function handleExport(type) {
-    if (exporting) return;
-    setExporting(type);
-    try {
-      await exportReport({ type });
-    } catch (err) {
-      toast(err.message || "Export failed", "danger");
-    } finally {
-      setExporting(null);
-    }
-  }
-
   const stats = data?.stats;
   const hasFleet = (stats?.fleet_size ?? 0) > 0;
   const hasBookings = (stats?.active_bookings ?? 0) > 0 || (data?.top_vehicles?.length ?? 0) > 0;
+
+  const alerts = data?.attention ?? [];
+
+  const heat = data?.booking_heatmap ?? [];
+  const byDay = Object.entries(DAY_NAMES).map(([day, label]) => ({
+    label,
+    value: heat.filter((c) => c.day === day).reduce((n, c) => n + c.count, 0),
+  }));
+  const byTime = DAY_PARTS.map(({ label, sub, from, to }) => ({
+    label,
+    sub,
+    value: heat.filter((c) => c.hour >= from && c.hour < to).reduce((n, c) => n + c.count, 0),
+  }));
+  const busiestDay = busiest(byDay);
+  const busiestTime = busiest(byTime);
+
+  const earners = (data?.top_vehicles ?? []).map((v) => ({
+    label: v.name,
+    sub: v.plate,
+    value: v.curr,
+  }));
 
   const kpis = stats
     ? [
@@ -112,6 +129,21 @@ export default function Overview() {
       </div>
       <OnboardingChecklist />
 
+      {/* ---- Document and inspection alerts ---- */}
+      {alerts.length > 0 && (
+        <ul className="ov-alerts" aria-label="Alerts">
+          {alerts.map((a) => (
+            <li className={`ov-alert ${a.kind}`} key={a.title + a.meta}>
+              <span className="ov-alert-icon">{STATUS_ICON[a.kind]}</span>
+              <p>
+                <strong>{a.title}</strong>
+                <span>{a.meta}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {/* ---- KPI row ---- */}
       <div className="stat-grid">
         {kpis.map((k) => (
@@ -123,35 +155,8 @@ export default function Overview() {
         ))}
       </div>
 
-      {/* ---- Charts ---- */}
+      {/* ---- Charts, two by two ---- */}
       <div className="chart-row">
-        <section className="chart-card">
-          <header className="card-head">
-            <h2>Booking rhythm</h2>
-            <p>When bookings are created, by day and time, last 4 weeks</p>
-          </header>
-          {hasBookings ? (
-            <BookingHeatmap data={data.booking_heatmap} />
-          ) : (
-            <EmptyState minimal title="No booking data yet" />
-          )}
-        </section>
-
-        <section className="chart-card">
-          <header className="card-head">
-            <h2>Top earning vehicles</h2>
-            <p>Ranked by earnings this month, with last month marked</p>
-          </header>
-          {(data?.top_vehicles?.length ?? 0) > 0 ? (
-            <RevenueRanking data={data.top_vehicles} />
-          ) : (
-            <EmptyState minimal title="No revenue yet" />
-          )}
-        </section>
-      </div>
-
-      {/* ---- Utilisation trend + side widgets ---- */}
-      <div className="overview-grid">
         <section className="chart-card">
           <header className="card-head">
             <h2>Fleet utilisation</h2>
@@ -164,51 +169,53 @@ export default function Overview() {
           )}
         </section>
 
-        <div className="overview-side">
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Needs attention</h2>
-              <p>Documents and checks</p>
-            </header>
-            {(data?.attention?.length ?? 0) > 0 ? (
-              <ul className="attention-list">
-                {data.attention.map((a) => (
-                  <li key={a.title + a.meta}>
-                    <span className={`attention-icon ${a.kind}`}>{STATUS_ICON[a.kind]}</span>
-                    <div>
-                      <p className="attention-title">{a.title}</p>
-                      <p className="attention-meta">{a.meta}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <EmptyState minimal title="Nothing needs attention" />
-            )}
-          </section>
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>Top earning vehicles</h2>
+            <p>Money each vehicle made this month</p>
+          </header>
+          {earners.length > 0 ? (
+            <SimpleBars
+              rows={earners}
+              format={fmtKES}
+              takeaway={`${earners[0].label} earned the most this month.`}
+            />
+          ) : (
+            <EmptyState minimal title="No revenue yet" />
+          )}
+        </section>
 
-          <section className="panel-card">
-            <header className="card-head">
-              <h2>Export reports</h2>
-              <p>Download as CSV · always up to date</p>
-            </header>
-            <div className="export-list">
-              {EXPORT_TYPES.map(({ value, label }) => (
-                <div className="export-row" key={value}>
-                  <span>{label}</span>
-                  <button
-                    type="button"
-                    className="icon-btn prompt-green"
-                    disabled={exporting === value}
-                    onClick={() => handleExport(value)}
-                  >
-                    {exporting === value ? "Exporting…" : "Export CSV"}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>Busiest days</h2>
+            <p>Bookings made on each day of the week, last 4 weeks</p>
+          </header>
+          {hasBookings && busiestDay ? (
+            <SimpleBars
+              rows={byDay}
+              format={fmtCount}
+              takeaway={`${busiestDay.label} is your busiest day.`}
+            />
+          ) : (
+            <EmptyState minimal title="No booking data yet" />
+          )}
+        </section>
+
+        <section className="chart-card">
+          <header className="card-head">
+            <h2>Busiest time of day</h2>
+            <p>When customers make their bookings, last 4 weeks</p>
+          </header>
+          {hasBookings && busiestTime ? (
+            <SimpleBars
+              rows={byTime}
+              format={fmtCount}
+              takeaway={`Most bookings come in the ${busiestTime.label.toLowerCase()}.`}
+            />
+          ) : (
+            <EmptyState minimal title="No booking data yet" />
+          )}
+        </section>
       </div>
     </>
   );

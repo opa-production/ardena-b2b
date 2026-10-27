@@ -169,25 +169,18 @@ export default function PageSkeleton({ path = "" }) {
   const section = parts[1] || "";
   const sub = parts[2];
 
-  // ---- Overview: KPIs + two charts + wide chart with side widgets
+  // ---- Overview: KPIs + four charts, two by two
   if (!section) {
     return (
       <div aria-hidden="true">
         <StatRow />
         <div className="chart-row">
-          {[0, 1].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <section className="chart-card" key={i}>
               <CardHead />
               <span className="sk sk-block" />
             </section>
           ))}
-        </div>
-        <div className="overview-grid">
-          <section className="chart-card">
-            <CardHead />
-            <span className="sk sk-block" />
-          </section>
-          <SideCards cards={[3, 3]} />
         </div>
       </div>
     );

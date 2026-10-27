@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Dropdown from "../components/Dropdown";
+import Logo from "../components/Logo";
 import usePageTitle from "../hooks/usePageTitle";
 import { requestAccess } from "../lib/api";
 import AuthWaves from "./AuthWaves";
@@ -87,18 +88,72 @@ export default function Signup() {
     );
   }
 
+  /* Two panels in a white frame: the form on a light ground on the left, and
+     a dark panel on the right for people who already have logins. */
   return (
-    <div className="auth">
-      <AuthWaves />
+    <div className="split-auth">
+      <main className="split-form-side">
+        <Logo className="split-logo" />
 
-      <main className="request-split">
-        <div className="request-intro">
+        <div className="split-form-wrap">
           <h1>Request access</h1>
-          <p>
-            For verified rental businesses. We&apos;ll send your logins within
-            24 hours.
+          <p className="split-lede">
+            For verified rental businesses. We&apos;ll send your logins within 24 hours.
           </p>
-          <p className="auth-switch">
+
+          <form className="auth-form split-form" onSubmit={handleSubmit}>
+            <div className="auth-row">
+              <div className="field">
+                <label htmlFor="r-business">Business name</label>
+                <input id="r-business" type="text" placeholder="Acme Car Hire Ltd" autoComplete="organization" value={form.business} onChange={set("business")} required />
+              </div>
+              <div className="field">
+                <label htmlFor="r-fleet">Fleet size</label>
+                <Dropdown
+                  id="r-fleet"
+                  value={fleetSize}
+                  onChange={setFleetSize}
+                  options={FLEET_LABELS}
+                />
+              </div>
+            </div>
+            <div className="auth-row">
+              <div className="field">
+                <label htmlFor="r-town">Town / county</label>
+                <input id="r-town" type="text" placeholder="Nakuru" value={form.town} onChange={set("town")} required />
+              </div>
+              <div className="field">
+                <label htmlFor="r-name">Your name</label>
+                <input id="r-name" type="text" placeholder="Wanjiku Kamau" autoComplete="name" value={form.name} onChange={set("name")} required />
+              </div>
+            </div>
+            <div className="auth-row">
+              <div className="field">
+                <label htmlFor="r-email">Work email</label>
+                <input id="r-email" type="email" placeholder="you@company.co.ke" autoComplete="email" value={form.email} onChange={set("email")} required />
+              </div>
+              <div className="field">
+                <label htmlFor="r-phone">Phone (WhatsApp)</label>
+                <input id="r-phone" type="tel" placeholder="0700 000 000" autoComplete="tel" value={form.phone} onChange={set("phone")} required />
+              </div>
+            </div>
+            <div className="field">
+              <label htmlFor="r-web">Website or Instagram <span className="field-opt">optional</span></label>
+              <input id="r-web" type="text" placeholder="acmecarhire.co.ke" value={form.website} onChange={set("website")} />
+            </div>
+
+            {error && (
+              <p className="auth-error" role="alert">
+                {error}
+              </p>
+            )}
+
+            <button type="submit" className="btn btn-primary" disabled={busy}>
+              {busy ? "Sending…" : "Request access"}
+            </button>
+          </form>
+
+          <p className="split-mobile-switch">
             Already have logins? <Link to="/login">Sign in</Link>
           </p>
           <p className="auth-cancel">
@@ -106,58 +161,25 @@ export default function Signup() {
           </p>
         </div>
 
-        <form className="auth-form request-form" onSubmit={handleSubmit}>
-          <div className="auth-row">
-            <div className="field">
-              <label htmlFor="r-business">Business name</label>
-              <input id="r-business" type="text" placeholder="Acme Car Hire Ltd" autoComplete="organization" value={form.business} onChange={set("business")} required />
-            </div>
-            <div className="field">
-              <label htmlFor="r-fleet">Fleet size</label>
-              <Dropdown
-                id="r-fleet"
-                value={fleetSize}
-                onChange={setFleetSize}
-                options={FLEET_LABELS}
-              />
-            </div>
-          </div>
-          <div className="auth-row">
-            <div className="field">
-              <label htmlFor="r-town">Town / county</label>
-              <input id="r-town" type="text" placeholder="Nakuru" value={form.town} onChange={set("town")} required />
-            </div>
-            <div className="field">
-              <label htmlFor="r-name">Your name</label>
-              <input id="r-name" type="text" placeholder="Wanjiku Kamau" autoComplete="name" value={form.name} onChange={set("name")} required />
-            </div>
-          </div>
-          <div className="auth-row">
-            <div className="field">
-              <label htmlFor="r-email">Work email</label>
-              <input id="r-email" type="email" placeholder="you@company.co.ke" autoComplete="email" value={form.email} onChange={set("email")} required />
-            </div>
-            <div className="field">
-              <label htmlFor="r-phone">Phone (WhatsApp)</label>
-              <input id="r-phone" type="tel" placeholder="0700 000 000" autoComplete="tel" value={form.phone} onChange={set("phone")} required />
-            </div>
-          </div>
-          <div className="field">
-            <label htmlFor="r-web">Website or Instagram <span className="field-opt">optional</span></label>
-            <input id="r-web" type="text" placeholder="acmecarhire.co.ke" value={form.website} onChange={set("website")} />
-          </div>
-
-          {error && (
-            <p className="auth-error" role="alert">
-              {error}
-            </p>
-          )}
-
-          <button type="submit" className="btn btn-primary" disabled={busy}>
-            {busy ? "Sending…" : "Request access"}
-          </button>
-        </form>
+        <p className="split-foot">© {new Date().getFullYear()} Ardena. All rights reserved.</p>
       </main>
+
+      <aside className="split-dark">
+        <div className="split-dark-copy">
+          <h2>
+            Already have
+            <br />
+            your logins?
+          </h2>
+          <p>Sign in to your fleet dashboard.</p>
+          <Link to="/login" className="split-signin">
+            Sign in
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
+      </aside>
     </div>
   );
 }

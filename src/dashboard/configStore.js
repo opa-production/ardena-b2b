@@ -36,8 +36,14 @@ export function hydrateConfig() {
       try {
         const data = await fetchConfig();
         const token = data?.mapbox_token ?? data?.mapboxToken;
-        if (token) {
-          config = { ...config, mapboxToken: token };
+        // Stellar pilot: shillings per USDC, for the booking form's estimate.
+        const rate = Number(data?.kes_per_usdc ?? data?.usdc_kes_rate);
+        if (token || rate > 0) {
+          config = {
+            ...config,
+            ...(token ? { mapboxToken: token } : {}),
+            ...(rate > 0 ? { kesPerUsdc: rate } : {}),
+          };
           emit();
         }
       } catch {

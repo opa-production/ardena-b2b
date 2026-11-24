@@ -57,6 +57,16 @@ export const PERMISSIONS = {
   viewReports: ["Owner", "Manager", "Finance"],
   // Paying for a plan spends the wallet, so it sits with the money roles.
   changePlan: ["Owner", "Finance"],
+
+  // Stellar pilot (stellar.md). The USDC wallet sits with the money roles
+  // that see Account; only Owner/Finance create it or send from it.
+  viewStellarWallet: ["Owner", "Manager", "Finance"],
+  manageStellarWallet: ["Owner", "Finance"],
+  // Damage-waiver claims: anyone operational may file and follow them; only
+  // Owner/Finance approve one on to Ardena (anyone else's waits for them).
+  viewWaiverClaims: ["Owner", "Manager", "Finance", "Booking agent"],
+  fileWaiverClaim: ["Owner", "Manager", "Finance", "Booking agent"],
+  reviewWaiverClaims: ["Owner", "Finance"],
 };
 
 function currentRole() {

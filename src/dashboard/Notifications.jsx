@@ -31,6 +31,12 @@ const KIND_LABEL = {
   fleet: "Fleet",
   staff: "Staff",
   review: "Review",
+  // Stellar pilot (stellar.md §1.6)
+  escrow_locked: "Escrow",
+  escrow_released: "Escrow",
+  escrow_failed: "Escrow",
+  waiver_claim_review: "Damage claim",
+  waiver_claim_decided: "Damage claim",
 };
 
 const KIND_CLASS = {
@@ -40,11 +46,19 @@ const KIND_CLASS = {
   fleet: "amber",
   staff: "gray",
   review: "green",
+  escrow_locked: "blue",
+  escrow_released: "green",
+  escrow_failed: "amber",
+  waiver_claim_review: "amber",
+  waiver_claim_decided: "blue",
 };
+
+// Stellar notifications carry their destination as `link`.
+const linkOf = (n) => n.to || n.link || null;
 
 function relatedLabel(to) {
   if (!to) return "-";
-  const seg = decodeURIComponent(to.split("/").filter(Boolean).pop());
+  const seg = decodeURIComponent(to.split("?")[0].split("/").filter(Boolean).pop());
   const pages = {
     verification: "Verification",
     staff: "Staff & roles",
@@ -52,6 +66,7 @@ function relatedLabel(to) {
     bookings: "Bookings",
     fleet: "Fleet",
     reviews: "Reviews",
+    "damage-claims": "Damage claims",
   };
   return pages[seg] || seg;
 }
@@ -103,7 +118,7 @@ export default function Notifications() {
       case "Unread":
         return notifications.filter((n) => !n.read);
       case "Bookings":
-        return notifications.filter((n) => n.kind === "booking");
+        return notifications.filter((n) => n.kind === "booking" || n.kind?.startsWith("escrow_"));
       case "Payments":
         return notifications.filter((n) => n.kind === "payment");
       default:
@@ -213,13 +228,13 @@ export default function Notifications() {
                     </span>
                   </td>
                   <td>
-                    {n.to ? (
+                    {linkOf(n) ? (
                       <Link
                         className="spec-link"
-                        to={n.to}
+                        to={linkOf(n)}
                         onClick={() => handleMarkRead(n)}
                       >
-                        {relatedLabel(n.to)}
+                        {relatedLabel(linkOf(n))}
                       </Link>
                     ) : (
                       <span className="cell-sub">, </span>

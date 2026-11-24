@@ -51,6 +51,8 @@ import {
 } from "./chauffeursStore";
 import PageSkeleton from "./PageSkeleton";
 import DepositClaimDialog from "./DepositClaimDialog";
+import EscrowCard from "./EscrowCard";
+import WaiverCard from "./WaiverCard";
 import useRole from "../hooks/useRole";
 import "./fleet.css";
 import "./bookings.css";
@@ -155,6 +157,13 @@ export default function BookingDetails() {
   const [inPending, setInPending] = useState([]); // photos staged before check-in
   const [photoBusy, setPhotoBusy] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  // Stellar pilot: the deposit's escrow (null when there is none, or the
+  // backend has no escrow endpoint), a re-read counter for the escrow card
+  // after a deposit action, and the confirm dialog for escrowed deposits.
+  const [escrow, setEscrow] = useState(null);
+  const [escrowTick, setEscrowTick] = useState(0);
+  const [depositAsk, setDepositAsk] = useState(null); // "refund" | "forfeit"
+  const [forfeitAmount, setForfeitAmount] = useState("");
   const [outOpen, setOutOpen] = useState(false); // pickup condition form shown
   const [inOpen, setInOpen] = useState(false); // return form shown
   const [printing, setPrinting] = useState(false);
@@ -517,13 +526,24 @@ export default function BookingDetails() {
     }
   }
 
-  async function handleDeposit(action) {
+  async function handleDeposit(action, keepAmount) {
     if (busy) return;
     setBusy(true);
     try {
-      const updated = await bookingDepositAction(b.ref, action);
+      const updated = await bookingDepositAction(b.ref, action, keepAmount);
       setB(updated);
-      toast(action === "refund" ? "Security deposit refunded." : "Security deposit forfeited.", action === "forfeit" ? "danger" : undefined);
+      if (escrow) {
+        // The chain catches up within a couple of minutes; the card polls.
+        setEscrowTick((n) => n + 1);
+        toast(
+          action === "refund"
+            ? "Deposit released. The USDC returns to your wallet within a few minutes."
+            : "Deposit marked as kept. The USDC returns to your wallet with a record on Stellar.",
+          action === "forfeit" ? "danger" : undefined
+        );
+      } else {
+        toast(action === "refund" ? "Security deposit refunded." : "Security deposit forfeited.", action === "forfeit" ? "danger" : undefined);
+      }
     } catch (err) {
       toast(err.message || "Failed", "danger");
     } finally {
@@ -681,6 +701,73 @@ export default function BookingDetails() {
             toast(`${msg}.`, due > 0 || over > 0 ? "warn" : undefined);
           }}
         />
+      )}
+
+      {/* Escrowed deposits only: what Refund / Forfeit does to the USDC, and
+          how much of the deposit to keep. Everything else settles at once. */}
+      {depositAsk && (
+        <div className="modal-overlay" onMouseDown={() => setDepositAsk(null)}>
+          <form
+            className="modal-card claim-card"
+            role="dialog"
+            aria-modal="true"
+            aria-label={depositAsk === "refund" ? "Refund deposit" : "Keep deposit"}
+            onMouseDown={(e) => e.stopPropagation()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              const action = depositAsk;
+              let keep;
+              if (action === "forfeit") {
+                keep = Number(forfeitAmount);
+                if (!keep || keep < 1 || keep > depositAmt) {
+                  toast(`Keep between KES 1 and KES ${fmtAmount(depositAmt)}.`, "danger");
+                  return;
+                }
+              }
+              setDepositAsk(null);
+              // The whole deposit is the old body exactly; only a part sends the new field.
+              handleDeposit(action, action === "forfeit" && keep < depositAmt ? keep : undefined);
+            }}
+          >
+            <h3 className="modal-title">
+              {depositAsk === "refund" ? "Release the deposit?" : "Keep the deposit?"}
+            </h3>
+            <p className="modal-message">
+              {depositAsk === "refund"
+                ? "The USDC goes back to your wallet within a few minutes. Refund the renter's deposit as usual."
+                : "The deposit is marked as kept. The USDC returns to your wallet with a record on Stellar."}
+            </p>
+            {depositAsk === "forfeit" && (
+              <div className="field claim-form">
+                <label htmlFor="forfeit-amount">Amount to keep (KES)</label>
+                <input
+                  id="forfeit-amount"
+                  type="number"
+                  min={1}
+                  max={depositAmt}
+                  step={100}
+                  value={forfeitAmount}
+                  onChange={(e) => setForfeitAmount(e.target.value)}
+                  autoFocus
+                />
+                <p className="field-note">
+                  Of KES {fmtAmount(depositAmt)}. Anything less releases the rest.
+                </p>
+              </div>
+            )}
+            <div className="modal-actions">
+              <button type="button" className="btn btn-ghost modal-btn" onClick={() => setDepositAsk(null)}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={"btn modal-btn " + (depositAsk === "forfeit" ? "danger-btn" : "btn-primary")}
+              >
+                {depositAsk === "refund" ? "Release deposit" : "Keep deposit"}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
 
       {claimOpen && (
@@ -1227,7 +1314,7 @@ export default function BookingDetails() {
                     type="button"
                     className="icon-btn"
                     disabled={busy}
-                    onClick={() => handleDeposit("refund")}
+                    onClick={() => (escrow ? setDepositAsk("refund") : handleDeposit("refund"))}
                   >
                     Refund deposit
                   </button>
@@ -1235,7 +1322,11 @@ export default function BookingDetails() {
                     type="button"
                     className="icon-btn danger"
                     disabled={busy}
-                    onClick={() => handleDeposit("forfeit")}
+                    onClick={() => {
+                      if (!escrow) return handleDeposit("forfeit");
+                      setForfeitAmount(String(depositAmt || ""));
+                      setDepositAsk("forfeit");
+                    }}
                   >
                     Forfeit
                   </button>
@@ -1414,7 +1505,10 @@ export default function BookingDetails() {
             )}
           </section>
 
-
+          {/* Stellar pilot. Both draw nothing unless this booking has an
+              escrow / a waiver and the backend has the endpoints. */}
+          <EscrowCard bookingRef={b.ref} refreshKey={escrowTick} onLoad={setEscrow} />
+          <WaiverCard booking={b} />
 
           <section className="panel-card">
             <header className="card-head">

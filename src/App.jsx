@@ -10,7 +10,7 @@ import AcceptInvite from "./pages/AcceptInvite";
 import NotFound from "./pages/NotFound";
 import RequireRole from "./dashboard/RequireRole";
 import RequireAppLink from "./dashboard/RequireAppLink";
-import { MARKETPLACE_LISTINGS, REVIEW_REQUESTS } from "./lib/features";
+import { MARKETPLACE_LISTINGS, REVIEW_REQUESTS, STELLAR } from "./lib/features";
 import { SEO_PAGES } from "./pages/seoPagesData";
 
 /* Dashboard screens are code-split, see dashboard/pageLoaders.js for why, and
@@ -42,6 +42,8 @@ const Staff = lazy(load.staff);
 const Usage = lazy(load.usage);
 const Settlements = lazy(load.settlements);
 const Wallet = lazy(load.wallet);
+const StellarWallet = lazy(load.stellarWallet);
+const DamageClaims = lazy(load.damageClaims);
 const Reports = lazy(load.reports);
 const FleetCalendar = lazy(load.fleetCalendar);
 const Marketing = lazy(load.marketing);
@@ -190,6 +192,25 @@ export default function App() {
         <Route
           path="wallet"
           element={<RequireRole capability="manageWallet"><Wallet /></RequireRole>}
+        />
+        {/* Stellar pilot. The pages handle a backend without the endpoints
+            themselves (a quiet "not available" state), so a bookmark never
+            breaks; with the flag off they are plain 404s. */}
+        <Route
+          path="stellar-wallet"
+          element={
+            STELLAR
+              ? <RequireRole capability="viewStellarWallet"><StellarWallet /></RequireRole>
+              : <NotFound />
+          }
+        />
+        <Route
+          path="damage-claims"
+          element={
+            STELLAR
+              ? <RequireRole capability="viewWaiverClaims"><DamageClaims /></RequireRole>
+              : <NotFound />
+          }
         />
         <Route path="support" element={<Support />} />
         <Route path="notifications" element={<Notifications />} />

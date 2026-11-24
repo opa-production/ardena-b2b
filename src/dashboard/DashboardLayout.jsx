@@ -35,6 +35,11 @@ import { hydrateTracking } from "./trackingStore";
 import PageSkeleton from "./PageSkeleton";
 import { preloadCommonPages, preloadNav } from "./pageLoaders";
 import {
+  subscribe as subscribeStellar,
+  getStellar,
+  startStellarPolling,
+} from "./stellarStore";
+import {
   subscribe as subscribeUnread,
   getUnread,
   startUnreadPolling,
@@ -118,10 +123,20 @@ export default function DashboardLayout() {
   const { can } = useRole();
   // Recomputed when the session changes, a role change mid-session (staff page)
   // should reshape the sidebar without a reload.
+  // Stellar pilot: which of its areas the backend has. Until a probe says
+  // so (or with the STELLAR flag off) its nav rows simply aren't there.
+  const stellar = useSyncExternalStore(subscribeStellar, getStellar);
+  const walletPilot = stellar.wallet === "none" || stellar.wallet === "ready";
+  const claimsPilot = stellar.claims === "ready";
   const navSections = useMemo(
-    () => visibleSections(can, business.appLinked),
-    [can, business.appLinked]
+    () => visibleSections(can, business.appLinked, { wallet: walletPilot, claims: claimsPilot }),
+    [can, business.appLinked, walletPilot, claimsPilot]
   );
+  // Counts beside sidebar rows, by nav key.
+  const navBadges = {
+    support: supportUnread,
+    damageClaims: stellar.claimCounts?.awaiting_business || 0,
+  };
   const [linkPrompt, setLinkPrompt] = useState(null);
 
   // Paint the saved theme onto <html> while inside the dashboard; drop it on the
@@ -213,6 +228,20 @@ export default function DashboardLayout() {
     let alive = true;
     whenQuiet().then(() => {
       if (alive) stop = startUnreadPolling();
+    });
+    return () => {
+      alive = false;
+      stop?.();
+    };
+  }, []);
+
+  // Stellar pilot availability and the Damage claims badge. Same wait as the
+  // badges; a no-op when the STELLAR flag is off.
+  useEffect(() => {
+    let stop = null;
+    let alive = true;
+    whenQuiet().then(() => {
+      if (alive) stop = startStellarPolling();
     });
     return () => {
       alive = false;
@@ -315,7 +344,7 @@ export default function DashboardLayout() {
               <p className="nav-group-label">{section.label}</p>
               {section.items.map((item) =>
                 item.children ? (
-                  <NavGroup key={item.key} item={item} />
+                  <NavGroup key={item.key} item={item} badges={navBadges} />
                 ) : (
                   <NavLink
                     key={item.key}
@@ -329,8 +358,8 @@ export default function DashboardLayout() {
                   >
                     {ICONS[item.key]}
                     {item.name}
-                    {item.key === "support" && supportUnread > 0 && (
-                      <span className="nav-badge">{supportUnread}</span>
+                    {navBadges[item.key] > 0 && (
+                      <span className="nav-badge">{navBadges[item.key]}</span>
                     )}
                     {item.soon && <span className="nav-soon">Soon</span>}
                   </NavLink>

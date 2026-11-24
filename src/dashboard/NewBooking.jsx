@@ -26,6 +26,13 @@ import PriceBuilder, { emptyPrice, priceOf } from "./PriceBuilder";
 import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
+import { STELLAR } from "../lib/features";
+import {
+  subscribe as subscribeStellar,
+  getStellar,
+  refreshStellarWallet,
+} from "./stellarStore";
+import { fmtUsdc, kesToUsdcEstimate, usdcUnits, TestnetBadge } from "./stellarUi";
 import "./fleet.css";
 import "./bookings.css";
 
@@ -58,6 +65,11 @@ export default function NewBooking() {
   const [conditionOpen, setConditionOpen] = useState(false);
   const [fuel, setFuel] = useState("Full");
   const [photos, setPhotos] = useState([]);
+  // Stellar pilot: hold the deposit in escrow. Offered only when the backend
+  // has the Stellar wallet (a wallet, or "none yet" to explain the disabled box).
+  const stellar = useSyncExternalStore(subscribeStellar, getStellar);
+  const [depositInput, setDepositInput] = useState("");
+  const [escrowOn, setEscrowOn] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   // The existing client picked from the name suggestions, if any. Their phone
   // and ID number are filled in from the record; both stay editable.
@@ -196,6 +208,21 @@ export default function NewBooking() {
     totalLine = parts.join(" ");
   }
 
+  // Fresh balance for the escrow line; a no-op with the pilot off.
+  useEffect(() => {
+    refreshStellarWallet();
+  }, []);
+
+  const escrowOffered = STELLAR && (stellar.wallet === "ready" || stellar.wallet === "none");
+  const stellarWallet = stellar.wallet === "ready" ? stellar.walletData : null;
+  // An empty field means the policy default, same as the backend.
+  const depositKes = depositInput === "" ? getPolicy().deposit || 0 : Number(depositInput) || 0;
+  const escrowUsdc = kesToUsdcEstimate(depositKes);
+  const escrowDisabled = !stellarWallet || depositKes <= 0;
+  const escrowShort =
+    stellarWallet && usdcUnits(escrowUsdc) > usdcUnits(stellarWallet.balance_usdc);
+  const escrowChecked = escrowOn && !escrowDisabled;
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!datesValid) {
@@ -246,6 +273,8 @@ export default function NewBooking() {
         destination,
         notes: notes || null,
         ...(deposit ? { deposit_amount: Number(deposit) } : {}),
+        // Only sent when ticked, so a backend without escrow sees the same body.
+        ...(escrowChecked ? { deposit_via_escrow: true, deposit_amount: depositKes } : {}),
         ...(checkout ? { checkout } : {}),
       });
     } catch (err) {
@@ -276,6 +305,10 @@ export default function NewBooking() {
           "warn"
         );
       }
+    }
+    // Created, but the escrow didn't happen; any USDC moved is returned.
+    if (booking.deposit_escrow_error) {
+      toast(`Booking created, but the deposit isn't in escrow: ${booking.deposit_escrow_error}`, "warn");
     }
     if (checkout && booking.handover?.out?.odometer == null) {
       toast("Booking created. The odometer and fuel weren't saved, record them from the booking.", "warn");
@@ -439,7 +472,49 @@ export default function NewBooking() {
               min="0"
               step="500"
               placeholder={`${getPolicy().deposit.toLocaleString("en-KE")} (policy default)`}
+              value={depositInput}
+              onChange={(e) => setDepositInput(e.target.value)}
             />
+            {escrowOffered && (
+              <div className="st-escrow-opt">
+                <label className={"st-check" + (escrowDisabled ? " is-disabled" : "")}>
+                  <input
+                    type="checkbox"
+                    checked={escrowChecked}
+                    disabled={escrowDisabled}
+                    onChange={(e) => setEscrowOn(e.target.checked)}
+                  />
+                  Hold this deposit in Stellar escrow
+                  <span
+                    className="st-help"
+                    tabIndex={0}
+                    aria-label="How escrow works"
+                    data-tip="The renter pays the deposit as usual. The same value in USDC moves from your Stellar wallet into escrow and stays locked until the trip ends. On release, or if you keep the deposit, the USDC comes back to your wallet, and you refund the renter's cash as always. The renter gets an SMS link to see it on Stellar."
+                  >
+                    ?
+                  </span>
+                </label>
+                <p className="field-note">
+                  {!stellarWallet ? (
+                    <>
+                      Create your business Stellar wallet first.{" "}
+                      <Link className="spec-link" to="/dashboard/stellar-wallet">Stellar wallet</Link>
+                    </>
+                  ) : depositKes <= 0 ? (
+                    "Add a deposit to hold it in escrow."
+                  ) : (
+                    <>
+                      ≈ {fmtUsdc(escrowUsdc)} USDC from your wallet (balance{" "}
+                      {fmtUsdc(stellarWallet.balance_usdc || "0")} USDC)
+                      <TestnetBadge network={stellarWallet.network} />
+                      {escrowChecked && escrowShort && (
+                        <span className="st-warn"> Not enough, top up or don&apos;t use escrow.</span>
+                      )}
+                    </>
+                  )}
+                </p>
+              </div>
+            )}
           </div>
           <div className="field form-full">
             <label htmlFor="b-notes">Notes · optional</label>

@@ -1,0 +1,486 @@
+/* ---- Stellar pilot: wallet, escrow and waiver cards, Damage claims ----
+   Sharp corners and hairlines like the rest of the dashboard; blue only as the
+   small accent (links, the "locked" pill). */
+
+/* TESTNET marker beside any USDC figure or Stellar link */
+.st-testnet {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--warn);
+  box-shadow: inset 0 0 0 1px currentColor;
+  vertical-align: middle;
+}
+
+.st-usdc {
+  white-space: nowrap;
+}
+
+.st-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--brand);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.st-link:hover {
+  text-decoration: underline;
+}
+
+.st-copy {
+  font-size: 12px;
+}
+
+/* Status pills: colour on the text and the hairline, no fill */
+.st-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.st-pill.grey  { color: var(--ink-mute); }
+.st-pill.blue  { color: var(--brand); }
+.st-pill.amber { color: var(--warn); }
+.st-pill.green { color: var(--ok); }
+.st-pill.red   { color: var(--danger); }
+
+/* ---- Empty / not-available state ---- */
+
+.st-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  max-width: 620px;
+}
+
+.st-empty-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* ---- Wallet page ---- */
+
+.st-wallet-top {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+  .st-wallet-top {
+    grid-template-columns: 1fr;
+  }
+}
+
+.st-balance {
+  margin: 4px 0 20px;
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.st-balance span {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-mute);
+}
+
+.st-address {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.st-key {
+  margin: 0;
+  font-size: 13px;
+  word-break: break-all;
+  color: var(--ink);
+}
+
+.st-address-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.st-topup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.st-qr {
+  padding: 8px;
+  background: #fff;
+  box-shadow: var(--edge);
+  line-height: 0;
+}
+
+.st-stats {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 900px) {
+  .st-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.st-send {
+  margin-bottom: 20px;
+}
+
+.st-send-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.st-send-form > .form-error,
+.st-send-form > .st-send-actions,
+.st-send-form > .st-send-summary {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 800px) {
+  .st-send-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+.st-send-summary {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.st-send-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.st-send-result {
+  margin-top: 12px;
+}
+
+.st-pad {
+  padding: 16px 0;
+}
+
+/* ---- Booking cards: escrow and waiver ---- */
+
+.st-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.st-card .card-head h2 {
+  display: flex;
+  align-items: center;
+}
+
+.st-amount {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.st-amount .cell-sub {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.st-retry {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.st-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.st-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.st-renter-view {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+}
+
+.st-renter-view a {
+  word-break: break-all;
+}
+
+.st-claim-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  box-shadow: var(--edge-in);
+}
+
+.st-claim-box .pay-row {
+  margin: 0;
+}
+
+/* Vertical transaction timeline */
+.st-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.st-timeline li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  padding-bottom: 12px;
+}
+
+.st-timeline li p {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* the rail between dots */
+.st-timeline li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 12px;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.st-dot {
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  background: var(--ink);
+}
+
+.st-timeline li:last-child .st-dot {
+  background: var(--brand);
+}
+
+/* ---- Booking form: escrow option ---- */
+
+.st-escrow-opt {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.st-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.st-check.is-disabled {
+  color: var(--ink-mute);
+  cursor: not-allowed;
+}
+
+.st-escrow-opt .field-note {
+  margin: 0 0 0 24px;
+}
+
+.st-warn {
+  color: var(--danger);
+}
+
+.st-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-mute);
+  box-shadow: inset 0 0 0 1px currentColor;
+  cursor: help;
+}
+
+.st-help:hover::after,
+.st-help:focus::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  width: 300px;
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #fff;
+  background: var(--sidebar);
+  white-space: normal;
+}
+
+/* ---- Damage claims drawer ---- */
+
+.st-drawer-back {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.st-drawer {
+  width: min(520px, 100%);
+  height: 100%;
+  overflow-y: auto;
+  background: var(--panel);
+  box-shadow: var(--edge);
+  animation: st-slide 0.2s var(--ease);
+}
+
+@keyframes st-slide {
+  from { transform: translateX(24px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+.st-drawer-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 22px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.st-drawer-head h2 {
+  margin: 0 0 2px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.st-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px 28px;
+}
+
+.st-drawer-body .pay-row {
+  margin: 0;
+}
+
+.st-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 16px;
+  margin: 0;
+}
+
+.st-facts dt {
+  font-size: 12px;
+  color: var(--ink-mute);
+}
+
+.st-facts dd {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.st-desc {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  white-space: pre-wrap;
+}
+
+.st-evidence {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.st-evidence img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  box-shadow: var(--edge);
+}
+
+.st-paid {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ok);
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.st-review {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  box-shadow: var(--edge-in);
+}
+
+.st-review textarea {
+  resize: vertical;
+  font-family: inherit;
+}

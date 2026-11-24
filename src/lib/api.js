@@ -13,6 +13,7 @@ import { resetChauffeurs } from "../dashboard/chauffeursStore";
 import { resetTracking } from "../dashboard/trackingStore";
 import { resetPlan } from "../dashboard/planStore";
 import { resetSeeds } from "../dashboard/recordSeeds";
+import { resetStellar } from "../dashboard/stellarStore";
 
 // locally cached per-account state, wiped whenever the session changes hands
 function resetLocalCaches() {
@@ -25,6 +26,7 @@ function resetLocalCaches() {
   resetChauffeurs();
   resetTracking();
   resetPlan();
+  resetStellar();
 }
 
 const BASE =
@@ -692,10 +694,94 @@ export function recordHandoverIn(ref, payload) {
 }
 
 // { action: "refund" | "forfeit" }
-export function bookingDepositAction(ref, action) {
+/* { action: "refund" | "forfeit", forfeit_amount? }. `forfeitAmount` keeps
+   part of the deposit and releases the rest; only sent when it is given, so a
+   backend without partial forfeits sees the same body as before. */
+export function bookingDepositAction(ref, action, forfeitAmount) {
   return request(`/bookings/${encodeURIComponent(ref)}/deposit`, {
     method: "POST",
-    body: { action },
+    body: forfeitAmount ? { action, forfeit_amount: forfeitAmount } : { action },
+  });
+}
+
+/* ---- Stellar pilot (stellar.md, Part 1) ----
+   USDC amounts are decimal strings; never parse them for maths. Everything
+   here is behind the STELLAR flag and stellarStore's availability check. */
+
+const qsOf = (params) =>
+  new URLSearchParams(
+    Object.entries(params).filter(([, v]) => v != null && v !== "")
+  ).toString();
+
+// -> { public_key, network, balance_usdc, balance_xlm, balance_updated_at,
+//      explorer_url, created_at }. 404 = no wallet yet.
+export function fetchStellarWallet() {
+  return request("/stellar-wallet");
+}
+
+export function createStellarWallet() {
+  return request("/stellar-wallet", { method: "POST" });
+}
+
+// { destination, amount_usdc, memo, memo_type } -> { message, phone_hint, email_hint }
+export function requestStellarWithdrawCode(payload) {
+  return request("/stellar-wallet/withdraw/code", { method: "POST", body: payload });
+}
+
+// Same body plus { otp } -> withdrawal { status: success | pending | failed, ... }
+export function sendStellarWithdraw(payload) {
+  return request("/stellar-wallet/withdraw", { method: "POST", body: payload });
+}
+
+export function fetchStellarWithdrawals(params = {}) {
+  const qs = qsOf(params);
+  return request(`/stellar-wallet/withdrawals${qs ? `?${qs}` : ""}`);
+}
+
+// { kind: all|escrow|waiver|withdrawal, page, limit } -> { summary, items, total, page, limit }
+export function fetchStellarActivity(params = {}) {
+  const qs = qsOf(params);
+  return request(`/stellar-wallet/activity${qs ? `?${qs}` : ""}`);
+}
+
+// Testnet only. -> { tx_hash, url, amount_usdc }
+export function claimTestnetUsdc() {
+  return request("/stellar-wallet/testnet-usdc", { method: "POST" });
+}
+
+// -> escrow object, or null when the booking has none.
+export function fetchBookingEscrow(ref) {
+  return request(`/bookings/${encodeURIComponent(ref)}/escrow`);
+}
+
+// -> waiver object (with claim and transactions), or null / 404 when none.
+export function fetchBookingWaiver(ref) {
+  return request(`/bookings/${encodeURIComponent(ref)}/waiver`);
+}
+
+// { requested_amount, description, evidence_urls } -> waiver with claim
+export function fileWaiverClaim(ref, payload) {
+  return request(`/bookings/${encodeURIComponent(ref)}/waiver/claim`, {
+    method: "POST",
+    body: payload,
+  });
+}
+
+// { status, page, limit } -> { items, total, page, limit, counts }
+export function fetchWaiverClaims(params = {}) {
+  const qs = qsOf(params);
+  return request(`/waiver-claims${qs ? `?${qs}` : ""}`);
+}
+
+export function fetchWaiverClaim(id) {
+  return request(`/waiver-claims/${encodeURIComponent(id)}`);
+}
+
+// { decision: "approve" | "reject", amount_kes?, note? }
+export function reviewWaiverClaim(id, payload) {
+  return request(`/waiver-claims/${encodeURIComponent(id)}/review`, {
+    method: "POST",
+    body: payload,
   });
 }
 

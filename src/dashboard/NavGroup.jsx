@@ -12,7 +12,7 @@ import { preloadNav } from "./pageLoaders";
  *
  * Open state is deliberately local and unpersisted: the only thing that should
  * force it open is being inside it. */
-export default function NavGroup({ item }) {
+export default function NavGroup({ item, badges = {} }) {
   const { pathname } = useLocation();
   const hasActiveChild = item.children.some(
     (c) => pathname === c.to || pathname.startsWith(`${c.to}/`)
@@ -26,6 +26,7 @@ export default function NavGroup({ item }) {
   }, [hasActiveChild]);
 
   const panelId = `nav-group-${item.key}`;
+  const childBadges = item.children.reduce((n, c) => n + (badges[c.key] || 0), 0);
 
   return (
     <div className={"nav-parent" + (open ? " is-open" : "")}>
@@ -38,6 +39,8 @@ export default function NavGroup({ item }) {
       >
         {ICONS[item.key]}
         {item.name}
+        {/* Collapsed, the group carries its children's counts. */}
+        {!open && childBadges > 0 && <span className="nav-badge">{childBadges}</span>}
         <svg
           className="nav-chevron"
           width="14"
@@ -65,6 +68,7 @@ export default function NavGroup({ item }) {
             className={({ isActive }) => "nav-item nav-sub-item" + (isActive ? " active" : "")}
           >
             {child.name}
+            {badges[child.key] > 0 && <span className="nav-badge">{badges[child.key]}</span>}
           </NavLink>
         ))}
       </div>

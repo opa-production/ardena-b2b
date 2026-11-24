@@ -9,7 +9,7 @@
 // linked an Ardena consumer-app account. Until it does, these are hidden
 // entirely rather than shown empty, a business doing direct bookings should
 // not be navigating pages that can only ever be blank.
-import { B2C_MARKETPLACE, MARKETING, VEHICLE_TRACKING } from "../lib/features";
+import { B2C_MARKETPLACE, MARKETING, STELLAR, VEHICLE_TRACKING } from "../lib/features";
 
 export const NAV_SECTIONS = [
   {
@@ -40,6 +40,15 @@ export const NAV_SECTIONS = [
             name: "Direct messages",
             requires: "renterInbox",
             appOnly: true,
+          },
+          // Stellar pilot: damage-waiver claims and their approval queue.
+          // `pilot` hides it until the backend says the console exists.
+          {
+            to: "/dashboard/damage-claims",
+            key: "damageClaims",
+            name: "Damage claims",
+            requires: "viewWaiverClaims",
+            pilot: "claims",
           },
         ],
       },
@@ -94,6 +103,15 @@ export const NAV_SECTIONS = [
           { to: "/dashboard/settlements", key: "settlements", name: "Settlements" },
           // One prepaid balance for ID checks and SMS (subscriptions later).
           { to: "/dashboard/wallet", key: "wallet", name: "Wallet", requires: "manageWallet" },
+          // Stellar pilot: the business's USDC wallet. Shown once the backend
+          // answers for it (a wallet or "none yet"), see stellarStore.
+          {
+            to: "/dashboard/stellar-wallet",
+            key: "stellarWallet",
+            name: "Stellar wallet",
+            requires: "viewStellarWallet",
+            pilot: "wallet",
+          },
         ],
       },
       // Last in the section, under the Account group: reaching clients is the
@@ -118,22 +136,25 @@ export const NAV_SECTIONS = [
   },
 ];
 
-const allowed = (item, can, appLinked) =>
+// `pilot` names an area of the Stellar pilot ("wallet" | "claims"); the item
+// shows only when `pilots[area]` is true, i.e. the backend has it.
+const allowed = (item, can, appLinked, pilots) =>
   (!item.requires || can(item.requires)) &&
-  (!item.appOnly || (appLinked && B2C_MARKETPLACE));
+  (!item.appOnly || (appLinked && B2C_MARKETPLACE)) &&
+  (!item.pilot || (STELLAR && Boolean(pilots?.[item.pilot])));
 
 /** NAV_SECTIONS with items the signed-in role can't reach removed, app-only
  *  destinations dropped when no Ardena app account is linked, and any section
  *  that empties out dropped with them. Grouped items are filtered a level
  *  deeper, and a group left with no children is dropped like any other item. */
-export function visibleSections(can, appLinked = false) {
+export function visibleSections(can, appLinked = false, pilots = {}) {
   return NAV_SECTIONS.map((section) => ({
     ...section,
     items: section.items
-      .filter((item) => allowed(item, can, appLinked))
+      .filter((item) => allowed(item, can, appLinked, pilots))
       .map((item) =>
         item.children
-          ? { ...item, children: item.children.filter((c) => allowed(c, can, appLinked)) }
+          ? { ...item, children: item.children.filter((c) => allowed(c, can, appLinked, pilots)) }
           : item
       )
       .filter((item) => !item.children || item.children.length > 0)
@@ -161,6 +182,8 @@ export const SECTION_TITLES = {
   usage: "Usage & billing",
   settlements: "Settlements",
   wallet: "Wallet",
+  "stellar-wallet": "Stellar wallet",
+  "damage-claims": "Damage claims",
   reports: "Reports",
   staff: "Staff & roles",
   marketing: "Marketing",

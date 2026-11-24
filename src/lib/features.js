@@ -79,3 +79,18 @@ export const MARKETING = false;
  * the link resolves to the 404 page); nothing else needs changing.
  */
 export const REVIEW_REQUESTS = true;
+
+/**
+ * Stellar pilot (Instawards round 2, see stellar.md): the business's USDC
+ * wallet, deposits held in Stellar escrow, damage-waiver claims and their
+ * approval console.
+ *
+ * Still piloting, so it is built to be absent. With this `true`, every piece
+ * also checks the backend first (stellarStore): a server without the
+ * endpoints, or one where they fail, leaves the dashboard exactly as it was,
+ * no nav rows, no booking-form checkbox, no booking cards. With it `false`
+ * nothing is asked of the backend at all.
+ *
+ * Flip to `false` to hide the whole pilot; nothing else needs changing.
+ */
+export const STELLAR = true;

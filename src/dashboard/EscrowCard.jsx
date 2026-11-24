@@ -11,7 +11,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchBookingEscrow } from "../lib/api";
-import { STELLAR } from "../lib/features";
+import { STELLAR_BOOKINGS as STELLAR } from "./stellarStore";
 import {
   CopyButton,
   StellarLink,

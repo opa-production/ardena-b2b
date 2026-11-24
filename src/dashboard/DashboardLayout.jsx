@@ -34,6 +34,7 @@ import { hydrateChauffeurs } from "./chauffeursStore";
 import { hydrateTracking } from "./trackingStore";
 import PageSkeleton from "./PageSkeleton";
 import { preloadCommonPages, preloadNav } from "./pageLoaders";
+import { StellarPilotNotice } from "./StellarPilot";
 import {
   subscribe as subscribeStellar,
   getStellar,
@@ -126,8 +127,10 @@ export default function DashboardLayout() {
   // Stellar pilot: which of its areas the backend has. Until a probe says
   // so (or with the STELLAR flag off) its nav rows simply aren't there.
   const stellar = useSyncExternalStore(subscribeStellar, getStellar);
-  const walletPilot = stellar.wallet === "none" || stellar.wallet === "ready";
-  const claimsPilot = stellar.claims === "ready";
+  // On a separate pilot backend the pages are always listed (they ask for
+  // the pilot sign-in); on the same backend only once the probe finds them.
+  const walletPilot = stellar.split || stellar.wallet === "none" || stellar.wallet === "ready";
+  const claimsPilot = stellar.split || stellar.claims === "ready";
   const navSections = useMemo(
     () => visibleSections(can, business.appLinked, { wallet: walletPilot, claims: claimsPilot }),
     [can, business.appLinked, walletPilot, claimsPilot]
@@ -491,6 +494,7 @@ export default function DashboardLayout() {
         </header>
 
         <main className="dash-content">
+          <StellarPilotNotice />
           {gate?.gated && !onBillingPage ? (
             <PaymentWall gate={gate} />
           ) : (

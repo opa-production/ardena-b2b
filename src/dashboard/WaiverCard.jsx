@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchBookingWaiver, fileWaiverClaim } from "../lib/api";
-import { STELLAR } from "../lib/features";
+import { STELLAR_BOOKINGS as STELLAR } from "./stellarStore";
 import useRole from "../hooks/useRole";
 import { toast } from "./toastStore";
 import { refreshStellar } from "./stellarStore";

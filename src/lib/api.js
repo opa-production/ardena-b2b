@@ -13,7 +13,15 @@ import { resetChauffeurs } from "../dashboard/chauffeursStore";
 import { resetTracking } from "../dashboard/trackingStore";
 import { resetPlan } from "../dashboard/planStore";
 import { resetSeeds } from "../dashboard/recordSeeds";
-import { resetStellar } from "../dashboard/stellarStore";
+import {
+  resetStellar,
+  getPilotSession,
+  setPilotSession,
+  clearPilotSession,
+} from "../dashboard/stellarStore";
+import { STELLAR_BASE, STELLAR_SPLIT } from "./stellarConfig";
+
+export { STELLAR_BASE, STELLAR_SPLIT };
 
 // locally cached per-account state, wiped whenever the session changes hands
 function resetLocalCaches() {
@@ -706,7 +714,96 @@ export function bookingDepositAction(ref, action, forfeitAmount) {
 
 /* ---- Stellar pilot (stellar.md, Part 1) ----
    USDC amounts are decimal strings; never parse them for maths. Everything
-   here is behind the STELLAR flag and stellarStore's availability check. */
+   here is behind the STELLAR flag and stellarStore's availability check.
+
+   The pilot can run on a different backend from the rest of the dashboard
+   (VITE_STELLAR_API_BASE_URL, staging while piloting). That backend has its
+   own database and its own signing key, so a production token means nothing
+   there: Stellar calls carry a separate pilot session (stellarStore), and a
+   401 from it only signs the user out of the pilot, never out of the
+   dashboard. When both URLs are the same, the normal session is used. */
+
+let pilotRefreshing = null;
+
+function refreshPilotSession() {
+  if (!pilotRefreshing) {
+    pilotRefreshing = (async () => {
+      const { refreshToken } = getPilotSession() || {};
+      if (!refreshToken) return false;
+      try {
+        const res = await fetch(`${STELLAR_BASE}/auth/refresh`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        setPilotSession({
+          token: data.access_token || data.token,
+          refreshToken: data.refresh_token || refreshToken,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    })().finally(() => {
+      pilotRefreshing = null;
+    });
+  }
+  return pilotRefreshing;
+}
+
+async function stellarRequest(path, opts = {}, retried = false) {
+  if (!STELLAR_SPLIT) return request(path, opts);
+  const { method = "GET", body, auth = true } = opts;
+  const pilot = getPilotSession();
+  if (auth && !pilot?.token) throw new ApiError("Sign in to the Stellar pilot first.", 401, { pilot_signin: true });
+  const headers = {};
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  if (auth) headers.Authorization = `Bearer ${pilot.token}`;
+  let res;
+  try {
+    res = await fetch(`${STELLAR_BASE}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    throw new ApiError("Can't reach the Stellar pilot right now. Try again in a minute.", 0, null);
+  }
+  if (res.status === 401 && auth) {
+    if (!retried && (await refreshPilotSession())) return stellarRequest(path, opts, true);
+    clearPilotSession(); // the pilot only; the dashboard session is untouched
+    throw new ApiError("Your Stellar pilot sign-in has ended. Sign in again.", 401, { pilot_signin: true });
+  }
+  const data = res.status === 204 ? null : await res.json().catch(() => null);
+  if (!res.ok) throw new ApiError(messageFrom(data, res.status), res.status, data);
+  return data;
+}
+
+/* Sign in to the pilot backend. -> { user } once signed in, or
+   { two_factor_required, challenge, sent_to } to finish with pilotVerifyCode. */
+export async function pilotLogin(email, password) {
+  const data = await stellarRequest("/auth/login", { method: "POST", body: { email, password }, auth: false });
+  if (data?.two_factor_required) return data;
+  startPilotSession(data);
+  return data;
+}
+
+export async function pilotVerifyCode(challenge, code) {
+  const data = await stellarRequest("/auth/login/2fa", { method: "POST", body: { challenge, code }, auth: false });
+  startPilotSession(data);
+  return data;
+}
+
+function startPilotSession(data) {
+  setPilotSession({
+    token: data.access_token || data.token,
+    refreshToken: data.refresh_token || null,
+    user: data.user || null,
+    business: data.business || null,
+  });
+}
 
 const qsOf = (params) =>
   new URLSearchParams(
@@ -716,52 +813,52 @@ const qsOf = (params) =>
 // -> { public_key, network, balance_usdc, balance_xlm, balance_updated_at,
 //      explorer_url, created_at }. 404 = no wallet yet.
 export function fetchStellarWallet() {
-  return request("/stellar-wallet");
+  return stellarRequest("/stellar-wallet");
 }
 
 export function createStellarWallet() {
-  return request("/stellar-wallet", { method: "POST" });
+  return stellarRequest("/stellar-wallet", { method: "POST" });
 }
 
 // { destination, amount_usdc, memo, memo_type } -> { message, phone_hint, email_hint }
 export function requestStellarWithdrawCode(payload) {
-  return request("/stellar-wallet/withdraw/code", { method: "POST", body: payload });
+  return stellarRequest("/stellar-wallet/withdraw/code", { method: "POST", body: payload });
 }
 
 // Same body plus { otp } -> withdrawal { status: success | pending | failed, ... }
 export function sendStellarWithdraw(payload) {
-  return request("/stellar-wallet/withdraw", { method: "POST", body: payload });
+  return stellarRequest("/stellar-wallet/withdraw", { method: "POST", body: payload });
 }
 
 export function fetchStellarWithdrawals(params = {}) {
   const qs = qsOf(params);
-  return request(`/stellar-wallet/withdrawals${qs ? `?${qs}` : ""}`);
+  return stellarRequest(`/stellar-wallet/withdrawals${qs ? `?${qs}` : ""}`);
 }
 
 // { kind: all|escrow|waiver|withdrawal, page, limit } -> { summary, items, total, page, limit }
 export function fetchStellarActivity(params = {}) {
   const qs = qsOf(params);
-  return request(`/stellar-wallet/activity${qs ? `?${qs}` : ""}`);
+  return stellarRequest(`/stellar-wallet/activity${qs ? `?${qs}` : ""}`);
 }
 
 // Testnet only. -> { tx_hash, url, amount_usdc }
 export function claimTestnetUsdc() {
-  return request("/stellar-wallet/testnet-usdc", { method: "POST" });
+  return stellarRequest("/stellar-wallet/testnet-usdc", { method: "POST" });
 }
 
 // -> escrow object, or null when the booking has none.
 export function fetchBookingEscrow(ref) {
-  return request(`/bookings/${encodeURIComponent(ref)}/escrow`);
+  return stellarRequest(`/bookings/${encodeURIComponent(ref)}/escrow`);
 }
 
 // -> waiver object (with claim and transactions), or null / 404 when none.
 export function fetchBookingWaiver(ref) {
-  return request(`/bookings/${encodeURIComponent(ref)}/waiver`);
+  return stellarRequest(`/bookings/${encodeURIComponent(ref)}/waiver`);
 }
 
 // { requested_amount, description, evidence_urls } -> waiver with claim
 export function fileWaiverClaim(ref, payload) {
-  return request(`/bookings/${encodeURIComponent(ref)}/waiver/claim`, {
+  return stellarRequest(`/bookings/${encodeURIComponent(ref)}/waiver/claim`, {
     method: "POST",
     body: payload,
   });
@@ -770,16 +867,16 @@ export function fileWaiverClaim(ref, payload) {
 // { status, page, limit } -> { items, total, page, limit, counts }
 export function fetchWaiverClaims(params = {}) {
   const qs = qsOf(params);
-  return request(`/waiver-claims${qs ? `?${qs}` : ""}`);
+  return stellarRequest(`/waiver-claims${qs ? `?${qs}` : ""}`);
 }
 
 export function fetchWaiverClaim(id) {
-  return request(`/waiver-claims/${encodeURIComponent(id)}`);
+  return stellarRequest(`/waiver-claims/${encodeURIComponent(id)}`);
 }
 
 // { decision: "approve" | "reject", amount_kes?, note? }
 export function reviewWaiverClaim(id, payload) {
-  return request(`/waiver-claims/${encodeURIComponent(id)}/review`, {
+  return stellarRequest(`/waiver-claims/${encodeURIComponent(id)}/review`, {
     method: "POST",
     body: payload,
   });

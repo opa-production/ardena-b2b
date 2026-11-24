@@ -1,28 +1,73 @@
-/* Stellar pilot: is it here, and what does the business have?
+/* Stellar pilot: is it here, who is signed in to it, and what does the
+ * business have?
  *
- * The pilot ships to some backends before others, so the dashboard asks
- * rather than assumes. One probe per area:
+ * Two ways the pilot runs (see STELLAR_SPLIT in lib/api.js):
  *
+ *   Same backend   the Stellar endpoints sit on the dashboard's own API. The
+ *                  pages only show once a probe finds them, so a backend
+ *                  without them looks exactly as before.
+ *
+ *   Pilot backend  the endpoints live on a separate pilot API (staging). It
+ *                  has its own accounts, so the pages are always in the nav
+ *                  and ask for a pilot sign-in first. Per-booking pieces
+ *                  (the escrow checkbox, escrow and waiver cards) stay off:
+ *                  a booking made here doesn't exist on the pilot backend.
+ *
+ * Probes, once signed in (or always, on the same backend):
  *   wallet  GET /stellar-wallet   200 = a wallet, a 404 that names the wallet
- *                                 = none yet, FastAPI's bare "Not Found" = the
- *                                 route isn't deployed here
- *   claims  GET /waiver-claims    200 = the console exists (and its counts
- *                                 feed the sidebar badge)
- *
- * Anything that doesn't come back as one of those, an unknown route, a 5xx, a
- * network failure, reads as "not available" and the matching UI stays hidden.
- * The dashboard then looks exactly as it did before the pilot. A later poll
- * that succeeds brings it in without a reload.
- *
- * Same shape as the other stores: module state, a listener set, and
- * useSyncExternalStore on the components.
+ *                                 = none yet, bare "Not Found" = no route
+ *   claims  GET /waiver-claims    200 = the console exists (+ badge counts)
  */
 import { fetchStellarWallet, fetchWaiverClaims } from "../lib/api";
+import { STELLAR_SPLIT } from "../lib/stellarConfig";
 import { STELLAR } from "../lib/features";
+import { roleCan } from "../hooks/useRole";
+import { getSession } from "../lib/authStore";
 
 const POLL_MS = 60_000;
+const PILOT_KEY = "ardena-stellar-pilot";
+
+/* ---- The pilot session (pilot backend only) ---- */
+
+function readPilot() {
+  try {
+    return JSON.parse(localStorage.getItem(PILOT_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+let pilot = readPilot();
+
+export function getPilotSession() {
+  return pilot;
+}
+
+export function setPilotSession(patch) {
+  pilot = { ...(pilot || {}), ...patch };
+  try {
+    localStorage.setItem(PILOT_KEY, JSON.stringify(pilot));
+  } catch {
+    /* storage blocked: the session lasts this tab */
+  }
+  set({ signedIn: Boolean(pilot?.token) });
+}
+
+export function clearPilotSession() {
+  pilot = null;
+  try {
+    localStorage.removeItem(PILOT_KEY);
+  } catch {
+    /* ignore */
+  }
+  set({ signedIn: false, wallet: "unknown", walletData: null, claimCounts: null });
+}
+
+/* ---- State ---- */
 
 const EMPTY = {
+  split: STELLAR_SPLIT,
+  signedIn: !STELLAR_SPLIT || Boolean(pilot?.token),
   // "unknown" until the first probe lands, then "off" | "none" | "ready"
   wallet: "unknown",
   walletData: null,
@@ -49,10 +94,29 @@ export function getStellar() {
   return state;
 }
 
+/** The dashboard session changed hands: forget the pilot sign-in too, so the
+ *  next person on this browser never inherits it. */
 export function resetStellar() {
-  state = EMPTY;
+  pilot = null;
+  try {
+    localStorage.removeItem(PILOT_KEY);
+  } catch {
+    /* ignore */
+  }
+  state = { ...EMPTY, signedIn: !STELLAR_SPLIT };
   listeners.forEach((fn) => fn());
 }
+
+/** Role checks for Stellar actions. On the pilot backend the pilot account's
+ *  role is the one that counts, since that backend enforces it. */
+export function stellarCan(capability) {
+  const role = STELLAR_SPLIT ? pilot?.user?.role : getSession().user?.role;
+  return roleCan(role, capability);
+}
+
+/** Booking-level pilot pieces (escrow checkbox, escrow/waiver cards) only
+ *  make sense when bookings and Stellar share one backend. */
+export const STELLAR_BOOKINGS = STELLAR && !STELLAR_SPLIT;
 
 /** FastAPI's own 404 for a path it has no route for, as opposed to a 404 an
  *  endpoint raises on purpose ("No Stellar wallet yet"). */
@@ -65,13 +129,17 @@ export function isUnavailable(err) {
   return isMissingRoute(err) || err?.status === 0 || err?.status >= 500 || !err?.status;
 }
 
+/** A 401 from the pilot backend: show the pilot sign-in. */
+export function needsPilotSignIn(err) {
+  return STELLAR_SPLIT && err?.status === 401;
+}
+
 async function probeWallet() {
   try {
     const w = await fetchStellarWallet();
     set({ wallet: w ? "ready" : "none", walletData: w || null });
   } catch (err) {
     if (err?.status === 404 && !isMissingRoute(err)) set({ wallet: "none", walletData: null });
-    // A 403 means the role can't see it; anything else, not available here.
     else set({ wallet: "off", walletData: null });
   }
 }
@@ -81,14 +149,13 @@ async function probeClaims() {
     const res = await fetchWaiverClaims({ page: 1, limit: 1 });
     set({ claims: "ready", claimCounts: res?.counts || null });
   } catch (err) {
-    // A role that can't list them still has the feature; it just has no badge.
     set({ claims: err?.status === 403 ? "ready" : "off", claimCounts: null });
   }
 }
 
 /** Probe both areas once. Overlapping calls share the one in flight. */
 export function refreshStellar() {
-  if (!STELLAR) return Promise.resolve();
+  if (!STELLAR || (STELLAR_SPLIT && !pilot?.token)) return Promise.resolve();
   if (!inFlight) {
     inFlight = Promise.allSettled([probeWallet(), probeClaims()]).finally(() => {
       inFlight = null;
@@ -99,7 +166,7 @@ export function refreshStellar() {
 
 /** Just the wallet, after creating it, sending, or topping up. */
 export function refreshStellarWallet() {
-  if (!STELLAR) return Promise.resolve();
+  if (!STELLAR || (STELLAR_SPLIT && !pilot?.token)) return Promise.resolve();
   return probeWallet();
 }
 

@@ -26,11 +26,11 @@ import PriceBuilder, { emptyPrice, priceOf } from "./PriceBuilder";
 import ClientNameField from "./ClientNameField";
 import Dropdown from "../components/Dropdown";
 import { toast } from "./toastStore";
-import { STELLAR } from "../lib/features";
 import {
   subscribe as subscribeStellar,
   getStellar,
   refreshStellarWallet,
+  STELLAR_BOOKINGS,
 } from "./stellarStore";
 import { fmtUsdc, kesToUsdcEstimate, usdcUnits, TestnetBadge } from "./stellarUi";
 import "./fleet.css";
@@ -213,7 +213,9 @@ export default function NewBooking() {
     refreshStellarWallet();
   }, []);
 
-  const escrowOffered = STELLAR && (stellar.wallet === "ready" || stellar.wallet === "none");
+  // Off while the pilot runs on its own backend: this booking is created
+  // here, and the pilot backend couldn't escrow a booking it doesn't have.
+  const escrowOffered = STELLAR_BOOKINGS && (stellar.wallet === "ready" || stellar.wallet === "none");
   const stellarWallet = stellar.wallet === "ready" ? stellar.walletData : null;
   // An empty field means the policy default, same as the backend.
   const depositKes = depositInput === "" ? getPolicy().deposit || 0 : Number(depositInput) || 0;

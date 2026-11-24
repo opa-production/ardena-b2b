@@ -17,11 +17,11 @@ import FilterDropdown from "../components/FilterDropdown";
 import RefreshButton from "../components/RefreshButton";
 import ConfirmDialog from "../components/ConfirmDialog";
 import { fetchWaiverClaim, fetchWaiverClaims, reviewWaiverClaim } from "../lib/api";
-import { isUnavailable, refreshStellar } from "./stellarStore";
+import { isUnavailable, needsPilotSignIn, refreshStellar, stellarCan } from "./stellarStore";
+import { PilotGate } from "./StellarPilot";
 import { StellarLink, TestnetBadge, TxTimeline, fmtKes, fmtUsdc, fmtWhen, kesToUsdcEstimate } from "./stellarUi";
 import { CLAIM_STATUS_LABEL, CLAIM_STATUS_PILL, WAIVER_STATUS_LABEL, decidedByLabel } from "./waiverClaims";
 import { toast } from "./toastStore";
-import useRole from "../hooks/useRole";
 import usePageTitle from "../hooks/usePageTitle";
 import "./fleet.css";
 import "./bookings.css";
@@ -34,6 +34,14 @@ const LIMIT = 20;
 
 export default function DamageClaims() {
   usePageTitle("Damage claims");
+  return (
+    <PilotGate title="Damage claims">
+      <DamageClaimsPage />
+    </PilotGate>
+  );
+}
+
+function DamageClaimsPage() {
   const { pathname } = useLocation();
   const [params, setParams] = useSearchParams();
   const openId = params.get("open");
@@ -56,6 +64,7 @@ export default function DamageClaims() {
       setPage(1);
       setState("ready");
     } catch (err) {
+      if (needsPilotSignIn(err)) return; // the gate shows the pilot sign-in
       if (isUnavailable(err)) setState("off");
       else {
         setState("ready");
@@ -222,8 +231,7 @@ export default function DamageClaims() {
 /* ---- One claim ---- */
 
 function ClaimDrawer({ id, onClose, onReviewed }) {
-  const { can } = useRole();
-  const canReview = can("reviewWaiverClaims");
+  const canReview = stellarCan("reviewWaiverClaims");
   const [claim, setClaim] = useState(null);
   const [error, setError] = useState("");
   const [amount, setAmount] = useState("");

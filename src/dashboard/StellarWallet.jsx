@@ -24,7 +24,8 @@ import {
   requestStellarWithdrawCode,
   sendStellarWithdraw,
 } from "../lib/api";
-import { isMissingRoute, isUnavailable, refreshStellarWallet } from "./stellarStore";
+import { isMissingRoute, isUnavailable, needsPilotSignIn, refreshStellarWallet, stellarCan } from "./stellarStore";
+import { PilotGate } from "./StellarPilot";
 import {
   CopyButton,
   StellarLink,
@@ -37,7 +38,6 @@ import {
   usdcUnits,
 } from "./stellarUi";
 import { toast } from "./toastStore";
-import useRole from "../hooks/useRole";
 import usePageTitle from "../hooks/usePageTitle";
 import "./fleet.css";
 import "./bookings.css";
@@ -62,9 +62,17 @@ const STELLAR_ADDRESS = /^G[A-Z2-7]{55}$/;
 
 export default function StellarWallet() {
   usePageTitle("Stellar wallet");
+  return (
+    <PilotGate title="Stellar wallet">
+      <StellarWalletPage />
+    </PilotGate>
+  );
+}
+
+function StellarWalletPage() {
   const { pathname } = useLocation();
-  const { can } = useRole();
-  const canManage = can("manageStellarWallet");
+  // On the pilot backend, the pilot account's role decides (it is enforced there).
+  const canManage = stellarCan("manageStellarWallet");
 
   // "loading" | "off" | "none" | "ready" | "error"
   const [state, setState] = useState("loading");
@@ -78,6 +86,7 @@ export default function StellarWallet() {
       setWallet(w);
       setState(w ? "ready" : "none");
     } catch (err) {
+      if (needsPilotSignIn(err)) return; // the gate shows the pilot sign-in
       if (err.status === 404 && !isMissingRoute(err)) setState("none");
       else if (isUnavailable(err)) setState("off");
       else {
